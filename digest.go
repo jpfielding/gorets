@@ -6,7 +6,6 @@ package gorets
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"strings"
 	"strconv"
@@ -65,7 +64,6 @@ func parseChallenge(challenge string) (string,map[string]string) {
 		parts["algorithm"] = "MD5"
 	}
 
-	fmt.Println("MAP: ",parts)
 	return cType, parts
 }
 
@@ -78,13 +76,11 @@ func digest(challenge map[string]string, username, password, method, uri string)
 	var cnonce string
 
 	a1 := username +":"+ realm +":"+ password
-	fmt.Println("A1:",a1)
 
 	hasher := md5.New()
 
 	io.WriteString(hasher, a1)
 	ha1 := hex.EncodeToString(hasher.Sum(nil))
-	fmt.Println("HASH A1:",ha1)
 
 	// md5-sess:
 	// ha1 = md5(a1) = md5(md5(username:realm:password):nonce:cnonce)
@@ -98,19 +94,15 @@ func digest(challenge map[string]string, username, password, method, uri string)
 
 	// TODO QOP VARIANTS
 	a2 := method +":"+ uri
-	fmt.Println("A2:",a2)
 
 	hasher.Reset()
 	io.WriteString(hasher, a2)
 	ha2 := hex.EncodeToString(hasher.Sum(nil))
-	fmt.Println("HASH A2:",ha2)
 
 	response := ha1 +":"+ nonce +":"+ ha2
-	fmt.Println("RESPONSE:",response)
 
 	hasher.Reset()
 	io.WriteString(hasher, response)
 	digest := hex.EncodeToString(hasher.Sum(nil))
-	fmt.Println("DIGEST:",digest)
 	return digest
 }

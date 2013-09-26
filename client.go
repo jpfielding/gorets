@@ -3,6 +3,8 @@
 package gorets
 
 import (
+	"bytes"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -71,6 +73,27 @@ type CapabilityUrls struct {
 	Login,Action,Search,Get,GetObject,Logout,GetMetadata,ChangePassword string
 }
 
+func (c *CapabilityUrls) parse(response []byte) (error){
+	type Rets struct {
+		XMLName xml.Name `xml:"RETS"`
+		ReplyCode int `xml:"ReplyCode,attr"`
+		ReplyText string `xml:"ReplyText,attr"`
+		Response string `xml:"RETS-RESPONSE"`
+	}
+
+	rets := Rets{}
+	decoder := xml.NewDecoder(bytes.NewBuffer(response))
+	decoder.Strict = false
+	decoder.AutoClose = append(decoder.AutoClose,"RETS")
+	err := decoder.Decode(&rets)
+	if err != nil {
+		return err
+	}
+	// TODO set the values that we parse from the body
+	fmt.Println(rets.ReplyCode, rets.ReplyText, rets.Response)
+	return nil
+}
+
 func (s *Session) Login(loginUrl string) (*CapabilityUrls, error) {
 	req, err := http.NewRequest(s.HttpMethod, loginUrl, nil)
 
@@ -84,15 +107,11 @@ func (s *Session) Login(loginUrl string) (*CapabilityUrls, error) {
 	req.Header.Add(RETS_VERSION, s.Version)
 	req.Header.Add(ACCEPT, s.Accept)
 
-	fmt.Println("REQUEST:", req)
-
 	resp, err := s.Client.Do(req)
 
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("RESPONSE:",resp.Header)
 
 	// TODO set digest auth up as a handler
 	if resp.StatusCode == 401 {
@@ -108,11 +127,10 @@ func (s *Session) Login(loginUrl string) (*CapabilityUrls, error) {
 		if resp.StatusCode == 401 {
 			return nil, errors.New("authentication failed: "+s.Username)
 		}
-		fmt.Println("RESPONSE (AUTH):",req)
 	}
 	if s.UserAgentPassword != "" {
 		requestId := resp.Header.Get(RETS_REQUEST_ID)
-		sessionId := ""// resp.Cookies().Get(RETS_SESSION_ID)
+		sessionId := ""// TODO resp.Cookies().Get(RETS_SESSION_ID)
 		uaAuthHeader := CalculateUaAuthHeader(s.UserAgent, s.UserAgentPassword, requestId, sessionId, s.Version)
 		req.Header.Add(RETS_UA_AUTH_HEADER, uaAuthHeader)
 	}
@@ -122,30 +140,13 @@ func (s *Session) Login(loginUrl string) (*CapabilityUrls, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(capabilities))
-
 
 	var urls = &CapabilityUrls{}
-	/*
-		<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
-		<RETS-RESPONSE>
-		MemberName=Threewide Corporation
-		User=2006973, Association Member Primary:Login:Media Restrictions:Office:RETS:RETS Advanced:RETS Customer:System-MRIS:MDS Access Common:MDS Application Login, 90, TWD1
-		Broker=TWD,1
-		MetadataVersion=1.12.30
-		MinMetadataVersion=1.1.1
-		OfficeList=TWD;1
-		TimeoutSeconds=1800
-		Login=http://cornerstone.mris.com:6103/platinum/login
-		Action=http://cornerstone.mris.com:6103/platinum/get?Command=Message
-		Search=http://cornerstone.mris.com:6103/platinum/search
-		Get=http://cornerstone.mris.com:6103/platinum/get
-		GetObject=http://cornerstone.mris.com:6103/platinum/getobject
-		Logout=http://cornerstone.mris.com:6103/platinum/logout
-		GetMetadata=http://cornerstone.mris.com:6103/platinum/getmetadata
-		ChangePassword=http://cornerstone.mris.com:6103/platinum/changepassword
-		</RETS-RESPONSE>
-	 */
+	err = urls.parse(capabilities)
+	if err != nil {
+		return nil, errors.New("unable to parse capabilites response: "+string(capabilities))
+	}
+	// TODO do i really want to return _and_ set this value on myself?
 	s.Urls = urls
 	return urls, nil
 }
