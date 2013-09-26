@@ -3,13 +3,16 @@
 package gorets
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"strconv"
 )
 
 const DEFAULT_TIMEOUT int = 300000
@@ -68,7 +71,7 @@ type CapabilityUrls struct {
 
 	MemberName, User, Broker, MetadataVersion, MinMetadataVersion string
 	OfficeList []string
-	TimeoutSeconds int
+	TimeoutSeconds int64
 	/** urls for web calls */
 	Login,Action,Search,Get,GetObject,Logout,GetMetadata,ChangePassword string
 }
@@ -84,13 +87,51 @@ func (c *CapabilityUrls) parse(response []byte) (error){
 	rets := Rets{}
 	decoder := xml.NewDecoder(bytes.NewBuffer(response))
 	decoder.Strict = false
-	decoder.AutoClose = append(decoder.AutoClose,"RETS")
+	//decoder.AutoClose = append(decoder.AutoClose,"RETS")
 	err := decoder.Decode(&rets)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return err
 	}
-	// TODO set the values that we parse from the body
-	fmt.Println(rets.ReplyCode, rets.ReplyText, rets.Response)
+	if rets.Response == "" {
+		return errors.New("failed to read urls")
+	}
+
+	reader := bufio.NewReader(strings.NewReader(rets.Response))
+	scanner := bufio.NewScanner(reader)
+
+	values := map[string]string{}
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		kv := strings.Split(line, "=")
+		// force it to lower case so we can find them in the map
+		key := strings.ToLower(strings.TrimSpace(kv[0]))
+		value := strings.TrimSpace(kv[1])
+		values[key] = value
+	}
+
+	c.Login = values["login"]
+	c.Action = values["action"]
+	c.Search = values["search"]
+	c.Get = values["get"]
+	c.GetObject = values["getobject"]
+	c.Logout = values["logout"]
+	c.GetMetadata = values["getmetadata"]
+	c.ChangePassword = values["changepassword"]
+
+	c.TimeoutSeconds,_= strconv.ParseInt(values["timeoutseconds"],10,strconv.IntSize)
+	c.Response.ReplyCode = rets.ReplyCode
+	c.Response.ReplyText = rets.ReplyText
+
+	c.MemberName = values["membername"]
+	c.User = values["user"]
+	c.Broker = values["broker"]
+	c.MetadataVersion = values["metadataversion"]
+	c.MinMetadataVersion = values["minmetadataversion"]
+	c.OfficeList = strings.Split(values["officelist"],",")
+
 	return nil
 }
 

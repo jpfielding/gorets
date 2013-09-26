@@ -45,11 +45,20 @@ func TestParseCapabilities(t *testing.T) {
 	Logout=http://cornerstone.mris.com:6103/platinum/logout
 	GetMetadata=http://cornerstone.mris.com:6103/platinum/getmetadata
 	ChangePassword=http://cornerstone.mris.com:6103/platinum/changepassword
-	</RETS-RESPONSE>
-	`
+	</RETS-RESPONSE>`
 	urls := CapabilityUrls{}
 	err := urls.parse([]byte(body))
 	if err != nil {
-		t.Errorf("error parsing body", err)
+		t.Error("error parsing body: "+ err.Error())
+	}
+
+	if urls.Response.ReplyText != "V2.7.0 2315: Success" {
+		t.Errorf("wrong reply code: %s ", urls.Response.ReplyCode)
+	}
+	if urls.Response.ReplyCode != 0 {
+		t.Errorf("wrong reply code: %s ", urls.Response.ReplyCode)
+	}
+	if urls.Login != "http://cornerstone.mris.com:6103/platinum/login" {
+		t.Errorf("login urls mismatch: %s ", urls.Login)
 	}
 }

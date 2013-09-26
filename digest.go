@@ -53,7 +53,7 @@ func createCnonce() string {
 // TODO convert this into a Digest struct
 func parseChallenge(challenge string) (string,map[string]string) {
 	pieces := strings.SplitAfterN(challenge, " ", 2)
-	cType, challenge := strings.Trim(pieces[0]," "), pieces[1]
+	cType, challenge := strings.TrimSpace(pieces[0]), pieces[1]
 	parts := map[string]string{}
 	for _,part := range strings.Split(challenge, ", ") {
 		split := strings.Split(part,"=")
