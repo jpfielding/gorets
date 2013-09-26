@@ -1,7 +1,7 @@
 /**
 	provides the basic mechanism for User Agent authentication for rets
  */
-package auth
+package gorets
 
 
 import (

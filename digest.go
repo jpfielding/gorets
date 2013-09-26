@@ -1,7 +1,7 @@
 /**
 	http://en.wikipedia.org/wiki/Digest_access_authentication
  */
-package auth
+package gorets
 
 import (
 	"crypto/md5"
