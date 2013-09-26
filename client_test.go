@@ -45,7 +45,8 @@ func TestParseCapabilities(t *testing.T) {
 	Logout=http://cornerstone.mris.com:6103/platinum/logout
 	GetMetadata=http://cornerstone.mris.com:6103/platinum/getmetadata
 	ChangePassword=http://cornerstone.mris.com:6103/platinum/changepassword
-	</RETS-RESPONSE>`
+	</RETS-RESPONSE>
+	</RETS>`
 	urls := CapabilityUrls{}
 	err := urls.parse([]byte(body))
 	if err != nil {
