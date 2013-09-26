@@ -61,4 +61,7 @@ func TestParseCapabilities(t *testing.T) {
 	if urls.Login != "http://cornerstone.mris.com:6103/platinum/login" {
 		t.Errorf("login urls mismatch: %s ", urls.Login)
 	}
+	if urls.GetMetadata != "http://cornerstone.mris.com:6103/platinum/getmetadata" {
+		t.Errorf("login urls mismatch: %s ", urls.Login)
+	}
 }
