@@ -5,7 +5,7 @@
  * Time: 11:57 AM
  * To change this template use File | Settings | File Templates.
  */
-package main
+package gorets
 
 import (
 	"fmt"
