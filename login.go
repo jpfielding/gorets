@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"net/http"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -25,33 +26,14 @@ type CapabilityUrls struct {
 }
 
 func (s *Session) Login(url string) (*CapabilityUrls, error) {
-	req, err := s.createRequest(url)
-
-	resp, err := s.Client.Do(req)
+	req, err := http.NewRequest(s.HttpMethod, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO set digest auth up as a handler
-	if resp.StatusCode == 401 {
-		challenge := resp.Header.Get(WWW_AUTH)
-		if !strings.HasPrefix(strings.ToLower(challenge), "digest") {
-			return nil, errors.New("unknown authentication challenge: "+challenge)
-		}
-		req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, s.Username, s.Password, req.Method, req.URL.Path))
-		resp, err = s.Client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		if resp.StatusCode == 401 {
-			return nil, errors.New("authentication failed: "+s.Username)
-		}
-	}
-	if s.UserAgentPassword != "" {
-		requestId := resp.Header.Get(RETS_REQUEST_ID)
-		sessionId := ""// TODO resp.Cookies().Get(RETS_SESSION_ID)
-		uaAuthHeader := CalculateUaAuthHeader(s.UserAgent, s.UserAgentPassword, requestId, sessionId, s.Version)
-		req.Header.Add(RETS_UA_AUTH_HEADER, uaAuthHeader)
+	resp, err := s.Client.Do(req)
+	if err != nil {
+		return nil, err
 	}
 
 	capabilities, err := ioutil.ReadAll(resp.Body)

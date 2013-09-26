@@ -3,7 +3,9 @@
 package gorets
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 )
 
 const DEFAULT_TIMEOUT int = 300000
@@ -25,6 +27,30 @@ const (
 
 )
 
+type Session struct {
+	Username,Password string
+
+	UserAgent, UserAgentPassword string
+	HttpMethod string
+
+	Version string // "Threewide/1.5"
+
+	Accept string
+
+	Client *http.Client
+
+}
+
+type RetsTransport struct {
+	transport http.RoundTripper
+	session *Session
+}
+
+type RetsResponse struct {
+	ReplyCode int
+	ReplyText string
+}
+
 func NewSession(user, pw, userAgent, userAgentPw string) *Session {
 	var session Session
 	session.Username = user
@@ -33,40 +59,46 @@ func NewSession(user, pw, userAgent, userAgentPw string) *Session {
 	session.UserAgent = userAgent
 	session.HttpMethod = "GET"
 	session.Accept = "*/*"
-	session.Client = &http.Client{}
+
+
+	session.Client = &http.Client{
+		Transport: &RetsTransport{session: &session},
+	}
 	return &session
 }
 
-func (s *Session) createRequest(url string) (*http.Request, error) {
-	req, err := http.NewRequest(s.HttpMethod, url, nil)
-	if err != nil {
-		return nil, err
+func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+	req.Header.Add(USER_AGENT, t.session.UserAgent)
+	req.Header.Add(RETS_VERSION, t.session.Version)
+	req.Header.Add(ACCEPT, t.session.Accept)
+
+	if t.session.UserAgentPassword != "" {
+		requestId := resp.Header.Get(RETS_REQUEST_ID)
+		sessionId,err := req.Cookie(RETS_SESSION_ID)
+		if err != nil {
+			return nil, err
+		}
+		uaAuthHeader := CalculateUaAuthHeader(
+			t.session.UserAgent,
+			t.session.UserAgentPassword,
+			requestId,
+			sessionId.Value,
+			t.session.Version,
+		)
+		req.Header.Add(RETS_UA_AUTH_HEADER, uaAuthHeader)
 	}
 
+	res, err := t.transport.RoundTrip(req)
+	if res.StatusCode == 401 {
+		challenge := resp.Header.Get(WWW_AUTH)
+		if !strings.HasPrefix(strings.ToLower(challenge), "digest") {
+			return nil, errors.New("unknown authentication challenge: "+challenge)
+		}
+		req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
+	}
 
-	// TODO do all of this per request
-	req.Header.Add(USER_AGENT, s.UserAgent)
-	req.Header.Add(RETS_VERSION, s.Version)
-	req.Header.Add(ACCEPT, s.Accept)
-
-	return req, nil
+	return t.transport.RoundTrip(req)
 }
 
-type Session struct {
-	Username,Password string
-	UserAgentPassword string
-	HttpMethod string
-	Version string // "Threewide/1.5"
 
-	Accept string
-	UserAgent string
-
-	Client *http.Client
-
-}
-
-type RetsResponse struct {
-	ReplyCode int
-	ReplyText string
-}
 
