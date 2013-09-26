@@ -37,6 +37,21 @@ func NewSession(user, pw, userAgent, userAgentPw string) *Session {
 	return &session
 }
 
+func (s *Session) createRequest(url string) (*http.Request, error) {
+	req, err := http.NewRequest(s.HttpMethod, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+
+	// TODO do all of this per request
+	req.Header.Add(USER_AGENT, s.UserAgent)
+	req.Header.Add(RETS_VERSION, s.Version)
+	req.Header.Add(ACCEPT, s.Accept)
+
+	return req, nil
+}
+
 type Session struct {
 	Username,Password string
 	UserAgentPassword string
