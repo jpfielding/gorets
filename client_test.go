@@ -47,8 +47,7 @@ func TestParseCapabilities(t *testing.T) {
 	ChangePassword=http://cornerstone.mris.com:6103/platinum/changepassword
 	</RETS-RESPONSE>
 	</RETS>`
-	urls := CapabilityUrls{}
-	err := urls.parse([]byte(body))
+	urls, err := parse([]byte(body))
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
