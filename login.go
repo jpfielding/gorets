@@ -42,8 +42,7 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 		return nil, err
 	}
 
-	var urls = &CapabilityUrls{}
-	err = urls.parse(capabilities)
+	urls, err := parse(capabilities)
 	if err != nil {
 		return nil, errors.New("unable to parse capabilites response: "+string(capabilities))
 	}
@@ -52,7 +51,7 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 
 
 
-func (c *CapabilityUrls) parse(response []byte) (error){
+func parse(response []byte) (*CapabilityUrls, error){
 	type Rets struct {
 		XMLName xml.Name `xml:"RETS"`
 		ReplyCode int `xml:"ReplyCode,attr"`
@@ -66,10 +65,10 @@ func (c *CapabilityUrls) parse(response []byte) (error){
 	//decoder.AutoClose = append(decoder.AutoClose,"RETS")
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
-		return err
+		return nil, err
 	}
 	if rets.Response == "" {
-		return errors.New("failed to read urls")
+		return nil, errors.New("failed to read urls")
 	}
 
 	reader := bufio.NewReader(strings.NewReader(rets.Response))
@@ -88,6 +87,7 @@ func (c *CapabilityUrls) parse(response []byte) (error){
 		values[key] = value
 	}
 
+	c := CapabilityUrls{}
 	c.Login = values["login"]
 	c.Action = values["action"]
 	c.Search = values["search"]
@@ -108,6 +108,6 @@ func (c *CapabilityUrls) parse(response []byte) (error){
 	c.MinMetadataVersion = values["minmetadataversion"]
 	c.OfficeList = strings.Split(values["officelist"],",")
 
-	return nil
+	return &c, nil
 }
 
