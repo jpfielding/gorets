@@ -35,11 +35,11 @@ func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) 
 	defer resp.Body.Close()
 
 	body,err := ioutil.ReadAll(resp.Body)
-	fmt.Println(string(body))
-
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(string(body))
 
 	metadata := &Metadata{}
 	return metadata, nil
