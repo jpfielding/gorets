@@ -7,6 +7,7 @@ package gorets
 import (
 	"errors"
 	"net/http"
+	"net/http/cookiejar"
 	"strings"
 )
 
@@ -59,7 +60,7 @@ type RetsResponse struct {
 	ReplyText string
 }
 
-func NewSession(user, pw, userAgent, userAgentPw string) *Session {
+func NewSession(user, pw, userAgent, userAgentPw string) (*Session, error) {
 	var session Session
 	session.Username = user
 	session.Password = pw
@@ -68,13 +69,19 @@ func NewSession(user, pw, userAgent, userAgentPw string) *Session {
 	session.HttpMethod = "GET"
 	session.Accept = "*/*"
 
-	session.Client = http.Client{
-		Transport: &RetsTransport{
-			transport: http.DefaultTransport,
-			session: session,
-		},
+	transport := RetsTransport{
+		transport: http.DefaultTransport,
+		session: session,
 	}
-	return &session
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, err
+	}
+	session.Client = http.Client{
+		Transport: &transport,
+		Jar: jar,
+	}
+	return &session, nil
 }
 
 func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -99,18 +106,19 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	}
 
 	res, err := t.transport.RoundTrip(req)
-	if res.StatusCode == http.StatusUnauthorized {
-		if err = res.Body.Close(); err != nil {
-
-		}
-		challenge := res.Header.Get(WWW_AUTH)
-		if !strings.HasPrefix(strings.ToLower(challenge), "digest") {
-			return nil, errors.New("unknown authentication challenge: "+challenge)
-		}
-		req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
+	if res.StatusCode != http.StatusUnauthorized {
+		return res, err
 	}
-
+	if err = res.Body.Close(); err != nil {
+		return res, nil
+	}
+	challenge := res.Header.Get(WWW_AUTH)
+	if !strings.HasPrefix(strings.ToLower(challenge), "digest") {
+		return nil, errors.New("unknown authentication challenge: "+challenge)
+	}
+	req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
 	return t.transport.RoundTrip(req)
+
 }
 
 
