@@ -62,7 +62,6 @@ func parse(response []byte) (*CapabilityUrls, error){
 	rets := Rets{}
 	decoder := xml.NewDecoder(bytes.NewBuffer(response))
 	decoder.Strict = false
-	//decoder.AutoClose = append(decoder.AutoClose,"RETS")
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
 		return nil, err

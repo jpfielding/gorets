@@ -1,4 +1,6 @@
 /**
+	provides a wrapper and built in auth at the transport
+	layer.
  */
 package gorets
 
@@ -10,42 +12,48 @@ import (
 
 const DEFAULT_TIMEOUT int = 300000
 
-/** header values */
+/* standard http header names */
+const (
+	USER_AGENT string = "User-Agent"
+	ACCEPT string = "Accept"
+	CONTENT_TYPE string = "Content-Type"
+	WWW_AUTH string = "Www-Authenticate"
+	WWW_AUTH_RESP string = "Authorization"
+)
+/* standard http gzip header names */
+const (
+	ACCEPT_ENCODING string = "Accept-Encoding"
+	CONTENT_ENCODING string = "Content-Encoding"
+	DEFLATE_ENCODINGS string = "gzip,deflate"
+)
+/* rets http header names */
 const (
 	RETS_VERSION string = "RETS-Version"
 	RETS_SESSION_ID string = "RETS-Session-ID"
 	RETS_REQUEST_ID string = "RETS-Request-ID"
-	USER_AGENT string = "User-Agent"
 	RETS_UA_AUTH_HEADER string = "RETS-UA-Authorization"
-	ACCEPT string = "Accept"
-	ACCEPT_ENCODING string = "Accept-Encoding"
-	CONTENT_ENCODING string = "Content-Encoding"
-	DEFLATE_ENCODINGS string = "gzip,deflate"
-	CONTENT_TYPE string = "Content-Type"
-	WWW_AUTH string = "Www-Authenticate"
-	WWW_AUTH_RESP string = "Authorization"
-
 )
 
+/* holds the state of the server interaction */
 type Session struct {
 	Username,Password string
 
 	UserAgent, UserAgentPassword string
 	HttpMethod string
 
-	Version string // "Threewide/1.5"
-
+	Version string
 	Accept string
 
 	Client http.Client
-
 }
 
+/* wrapper to intercept each http call */
 type RetsTransport struct {
 	transport http.RoundTripper
 	session Session
 }
 
+/* the common wrapper details for each response */
 type RetsResponse struct {
 	ReplyCode int
 	ReplyText string
@@ -91,7 +99,10 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	}
 
 	res, err := t.transport.RoundTrip(req)
-	if res.StatusCode == 401 {
+	if res.StatusCode == http.StatusUnauthorized {
+		if err = res.Body.Close(); err != nil {
+
+		}
 		challenge := res.Header.Get(WWW_AUTH)
 		if !strings.HasPrefix(strings.ToLower(challenge), "digest") {
 			return nil, errors.New("unknown authentication challenge: "+challenge)
