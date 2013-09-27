@@ -28,3 +28,4 @@ func (s *Session) Get(url string) (error) {
 
 	return nil
 }
+

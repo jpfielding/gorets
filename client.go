@@ -48,12 +48,6 @@ type Session struct {
 	Client http.Client
 }
 
-/* wrapper to intercept each http call */
-type RetsTransport struct {
-	transport http.RoundTripper
-	session Session
-}
-
 /* the common wrapper details for each response */
 type RetsResponse struct {
 	ReplyCode int
@@ -84,6 +78,12 @@ func NewSession(user, pw, userAgent, userAgentPw string) (*Session, error) {
 	return &session, nil
 }
 
+/* wrapper to intercept each http call */
+type RetsTransport struct {
+	transport http.RoundTripper
+	session Session
+}
+
 func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	req.Header.Add(USER_AGENT, t.session.UserAgent)
 	req.Header.Add(RETS_VERSION, t.session.Version)
@@ -109,6 +109,7 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	if res.StatusCode != http.StatusUnauthorized {
 		return res, err
 	}
+	// TODO check to see if im going to do anything different, if not, just return
 	if err = res.Body.Close(); err != nil {
 		return res, nil
 	}
@@ -118,7 +119,6 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	}
 	req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
 	return t.transport.RoundTrip(req)
-
 }
 
 

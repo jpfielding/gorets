@@ -24,8 +24,6 @@ func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) 
 		qs = qs +"&"+ fmt.Sprintf("Type=%s",mtype)
 	}
 
-	// TODO setup request
-
 	req, err := http.NewRequest(s.HttpMethod, url+"?"+qs, nil)
 	if err != nil {
 		return nil, err
