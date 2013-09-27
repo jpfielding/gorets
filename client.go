@@ -37,13 +37,13 @@ type Session struct {
 
 	Accept string
 
-	Client *http.Client
+	Client http.Client
 
 }
 
 type RetsTransport struct {
 	transport http.RoundTripper
-	session *Session
+	session Session
 }
 
 type RetsResponse struct {
@@ -60,9 +60,11 @@ func NewSession(user, pw, userAgent, userAgentPw string) *Session {
 	session.HttpMethod = "GET"
 	session.Accept = "*/*"
 
-
-	session.Client = &http.Client{
-		Transport: &RetsTransport{session: &session},
+	session.Client = http.Client{
+		Transport: &RetsTransport{
+			transport: http.DefaultTransport,
+			session: session,
+		},
 	}
 	return &session
 }
@@ -90,7 +92,7 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 
 	res, err := t.transport.RoundTrip(req)
 	if res.StatusCode == 401 {
-		challenge := resp.Header.Get(WWW_AUTH)
+		challenge := res.Header.Get(WWW_AUTH)
 		if !strings.HasPrefix(strings.ToLower(challenge), "digest") {
 			return nil, errors.New("unknown authentication challenge: "+challenge)
 		}
