@@ -42,7 +42,7 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 		return nil, err
 	}
 
-	urls, err := parse(capabilities)
+	urls, err := parseCapability(capabilities)
 	if err != nil {
 		return nil, errors.New("unable to parse capabilites response: "+string(capabilities))
 	}
@@ -51,7 +51,7 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 
 
 
-func parse(response []byte) (*CapabilityUrls, error){
+func parseCapability(response []byte) (*CapabilityUrls, error){
 	type Rets struct {
 		XMLName xml.Name `xml:"RETS"`
 		ReplyCode int `xml:"ReplyCode,attr"`

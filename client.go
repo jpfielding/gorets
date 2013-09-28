@@ -111,7 +111,7 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	}
 	// TODO check to see if im going to do anything different, if not, just return
 	if err = res.Body.Close(); err != nil {
-		return res, nil
+		return res, err
 	}
 	challenge := res.Header.Get(WWW_AUTH)
 	if !strings.HasPrefix(strings.ToLower(challenge), "digest") {

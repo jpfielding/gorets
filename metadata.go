@@ -1,5 +1,5 @@
 /**
-
+	extraction of the data pieces describing a RETS system
  */
 package gorets
 
@@ -32,6 +32,11 @@ func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) 
 	resp, err := s.Client.Do(req)
 	defer resp.Body.Close()
 
+	switch mtype {
+	case "METADATA-SYSTEM":
+	case "METADATA-RESOURCE":
+
+	}
 	body,err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
