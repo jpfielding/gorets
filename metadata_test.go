@@ -48,14 +48,14 @@ func TestParseResources(t *testing.T) {
 	if ms.Version != "1.12.30" {
 		t.Errorf("wrong version: %s ", ms.Version)
 	}
-	if len(ms.MResources) != 2 {
-		t.Errorf("wrong number of resources: %s ", len(ms.MResources))
+	if len(ms.Fields) != 2 {
+		t.Errorf("wrong number of resources: %s ", len(ms.Fields))
 	}
-	if ms.MResources[0].Fields["ResourceID"] != "ActiveAgent" {
-		t.Errorf("wrong field value: %s ", ms.MResources[0].Fields["ResourceID"])
+	if ms.Fields[0]["ResourceID"] != "ActiveAgent" {
+		t.Errorf("wrong field value: %s ", ms.Fields[0]["ResourceID"])
 	}
-	if ms.MResources[1].Fields["ValidationExternalDate"] != "Tue, 3 Sep 2013 00:00:00 GMT" {
-		t.Errorf("wrong field value: %s ", ms.MResources[1].Fields["ValidationExternalDate"])
+	if ms.Fields[1]["ValidationExternalDate"] != "Tue, 3 Sep 2013 00:00:00 GMT" {
+		t.Errorf("wrong field value: %s ", ms.Fields[1]["ValidationExternalDate"])
 	}
 }
 
@@ -77,17 +77,17 @@ func TestParseClass(t *testing.T) {
 	if ms.Version != "1.12.29" {
 		t.Errorf("wrong version: %s ", ms.Version)
 	}
-	if len(ms.MClasses) != 1 {
-		t.Errorf("wrong number of resources: %s ", len(ms.MClasses))
+	if len(ms.Fields) != 1 {
+		t.Errorf("wrong number of resources: %s ", len(ms.Fields))
 	}
-	if ms.MClasses[0].Fields["ClassName"] != "ActiveAgent" {
-		t.Errorf("wrong field value: %s ", ms.MClasses[0].Fields["ClassName"])
+	if ms.Fields[0]["ClassName"] != "ActiveAgent" {
+		t.Errorf("wrong field value: %s ", ms.Fields[0]["ClassName"])
 	}
-	if ms.MClasses[0].Fields["TableDate"] != "Tue, 3 Sep 2013 00:00:00 GMT" {
-		t.Errorf("wrong field value: %s ", ms.MClasses[0].Fields["TableDate"])
+	if ms.Fields[0]["TableDate"] != "Tue, 3 Sep 2013 00:00:00 GMT" {
+		t.Errorf("wrong field value: %s ", ms.Fields[0]["TableDate"])
 	}
-	if ms.MClasses[0].Fields["UpdateDate"] != "" {
-		t.Errorf("wrong field value: %s ", ms.MClasses[0].Fields["UpdateDate"])
+	if ms.Fields[0]["UpdateDate"] != "" {
+		t.Errorf("wrong field value: %s ", ms.Fields[0]["UpdateDate"])
 	}
 }
 

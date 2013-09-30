@@ -103,14 +103,28 @@ func parseMSystem(response []byte) (*MSystem, error) {
 	}, nil
 }
 
-type MResource struct {
-	Version, Date string
-	Fields map[string]string
+
+const delim = "	"
+
+/** extract a map of fields from columns and rows */
+func extractMap(cols string, rows []string) ([]map[string]string) {
+	// remove the first and last chars
+	headers := strings.Split(strings.Trim(cols,delim),delim)
+	fields := make([]map[string]string, len(rows))
+	// create each
+	for i,line := range rows {
+		row := strings.Split(strings.Trim(line,delim),delim)
+		fields[i] = make(map[string]string)
+		for j, val := range row {
+			fields[i][headers[j]] = val
+		}
+	}
+	return fields
 }
 
 type MResources struct {
 	Version, Date string
-	MResources []MResource
+	Fields []map[string]string
 }
 
 func parseMResources(response []byte) (*MResources, error) {
@@ -136,35 +150,20 @@ func parseMResources(response []byte) (*MResources, error) {
 		return nil, err
 	}
 
-	tab := "	"
 	// remove the first and last chars
-	headers := strings.Split(strings.Trim(xms.ResourceInfo.Columns,tab),tab)
-	resources := make([]MResource, len(xms.ResourceInfo.Data))
-	// create each
-	for i,line := range xms.ResourceInfo.Data {
-		row := strings.Split(strings.Trim(line,tab),tab)
-		resources[i].Fields = make(map[string]string)
-		for j, val := range row {
-			resources[i].Fields[headers[j]] = val
-		}
-	}
+	rows := extractMap(xms.ResourceInfo.Columns, xms.ResourceInfo.Data)
 
 	// transfer the contents to the public struct
 	return &MResources{
 		Version: xms.ResourceInfo.Version,
 		Date: xms.ResourceInfo.Date,
-		MResources: resources,
+		Fields: rows,
 	}, nil
-}
-
-type MClass struct {
-	Version, Date string
-	Fields map[string]string
 }
 
 type MClasses struct {
 	Version, Date string
-	MClasses []MClass
+	Fields []map[string]string
 }
 
 func parseMClasses(response []byte) (*MClasses, error) {
@@ -191,24 +190,14 @@ func parseMClasses(response []byte) (*MClasses, error) {
 		return nil, err
 	}
 
-	tab := "	"
 	// remove the first and last chars
-	headers := strings.Split(strings.Trim(xms.ClassInfo.Columns,tab),tab)
-	classes := make([]MClass, len(xms.ClassInfo.Data))
-	// create each
-	for i,line := range xms.ClassInfo.Data {
-		row := strings.Split(strings.Trim(line,tab),tab)
-		classes[i].Fields = make(map[string]string)
-		for j, val := range row {
-			classes[i].Fields[headers[j]] = val
-		}
-	}
+	rows := extractMap(xms.ClassInfo.Columns, xms.ClassInfo.Data)
 
 	// transfer the contents to the public struct
 	return &MClasses{
 		Version: xms.ClassInfo.Version,
 		Date: xms.ClassInfo.Date,
-		MClasses: classes,
+		Fields: rows,
 	}, nil
 }
 
