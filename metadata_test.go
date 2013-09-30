@@ -70,6 +70,25 @@ var class string =
 `
 
 func TestParseClass(t *testing.T) {
+	ms, err := parseMClasses([]byte(class))
+	if err != nil {
+		t.Error("error parsing body: "+ err.Error())
+	}
+	if ms.Version != "1.12.29" {
+		t.Errorf("wrong version: %s ", ms.Version)
+	}
+	if len(ms.MClasses) != 1 {
+		t.Errorf("wrong number of resources: %s ", len(ms.MClasses))
+	}
+	if ms.MClasses[0].Fields["ClassName"] != "ActiveAgent" {
+		t.Errorf("wrong field value: %s ", ms.MClasses[0].Fields["ClassName"])
+	}
+	if ms.MClasses[0].Fields["TableDate"] != "Tue, 3 Sep 2013 00:00:00 GMT" {
+		t.Errorf("wrong field value: %s ", ms.MClasses[0].Fields["TableDate"])
+	}
+	if ms.MClasses[0].Fields["UpdateDate"] != "" {
+		t.Errorf("wrong field value: %s ", ms.MClasses[0].Fields["UpdateDate"])
+	}
 }
 
 var table string =

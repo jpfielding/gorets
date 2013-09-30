@@ -157,3 +157,58 @@ func parseMResources(response []byte) (*MResources, error) {
 	}, nil
 }
 
+type MClass struct {
+	Version, Date string
+	Fields map[string]string
+}
+
+type MClasses struct {
+	Version, Date string
+	MClasses []MClass
+}
+
+func parseMClasses(response []byte) (*MClasses, error) {
+	type XmlClass struct {
+		Resource string `xml:"Resource,attr"`
+		Version string `xml:"Version,attr"`
+		Date string `xml:"Date,attr"`
+		Columns string `xml:"COLUMNS"`
+		Data []string `xml:"DATA"`
+	}
+	type XmlData struct {
+		XMLName xml.Name `xml:"RETS"`
+		ReplyCode int `xml:"ReplyCode,attr"`
+		ReplyText string `xml:"ReplyText,attr"`
+		ClassInfo XmlClass `xml:"METADATA-CLASS"`
+	}
+
+	decoder := xml.NewDecoder(bytes.NewBuffer(response))
+	decoder.Strict = false
+
+	xms := XmlData{}
+	err := decoder.Decode(&xms)
+	if err != nil {
+		return nil, err
+	}
+
+	tab := "	"
+	// remove the first and last chars
+	headers := strings.Split(strings.Trim(xms.ClassInfo.Columns,tab),tab)
+	classes := make([]MClass, len(xms.ClassInfo.Data))
+	// create each
+	for i,line := range xms.ClassInfo.Data {
+		row := strings.Split(strings.Trim(line,tab),tab)
+		classes[i].Fields = make(map[string]string)
+		for j, val := range row {
+			classes[i].Fields[headers[j]] = val
+		}
+	}
+
+	// transfer the contents to the public struct
+	return &MClasses{
+		Version: xms.ClassInfo.Version,
+		Date: xms.ClassInfo.Date,
+		MClasses: classes,
+	}, nil
+}
+
