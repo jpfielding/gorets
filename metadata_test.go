@@ -40,6 +40,26 @@ var resource string =
 	</RETS>
 	`
 
+func TestParseResources(t *testing.T) {
+	ms, err := parseMResources([]byte(resource))
+	if err != nil {
+		t.Error("error parsing body: "+ err.Error())
+	}
+	if ms.Version != "1.12.30" {
+		t.Errorf("wrong version: %s ", ms.Version)
+	}
+	if len(ms.MResources) != 2 {
+		t.Errorf("wrong number of resources: %s ", len(ms.MResources))
+	}
+	if ms.MResources[0].Fields["ResourceID"] != "ActiveAgent" {
+		t.Errorf("wrong field value: %s ", ms.MResources[0].Fields["ResourceID"])
+	}
+	if ms.MResources[1].Fields["ValidationExternalDate"] != "Tue, 3 Sep 2013 00:00:00 GMT" {
+		t.Errorf("wrong field value: %s ", ms.MResources[1].Fields["ValidationExternalDate"])
+	}
+}
+
+
 func TestParseResource(t *testing.T) {
 }
 
