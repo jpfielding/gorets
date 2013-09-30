@@ -24,5 +24,8 @@ var compactDecoded string =
 </RETS>
 `
 
-func TestParseCompactDecoded(t *testing.T) {
+func TestParseCompact(t *testing.T) {
+}
+
+func TestParseStandardXml(t *testing.T) {
 }

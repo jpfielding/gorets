@@ -4,7 +4,10 @@
 package gorets
 
 import (
-	"errors"
+	"encoding/xml"
+//	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 //	"strings"
@@ -35,24 +38,37 @@ func (s *Session) Search(url, klass, format, query, qType, sType string, limit, 
 	if err != nil {
 		return nil, err
 	}
-
-	result, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
+	defer resp.Body.Close()
 
 	switch format {
 	case "COMPACT-DECODED":
-		return parseCompactResult(result)
+		return parseCompactResult(&resp.Body)
+	case "COMPACT":
+		return parseCompactResult(&resp.Body)
 	case "STANDARD-XML":
-	default:
-		return nil, errors.New("unable to parse result: "+string(result))
+		return parseCompactResult(&resp.Body)
 	}
 	return nil, nil
 }
 
 
-func parseCompactResult(response []byte) (*SearchResult,error) {
+func parseCompactResult(body *io.ReadCloser) (*SearchResult,error) {
+	type Rets struct {
+		XMLName xml.Name `xml:"RETS"`
+		ReplyCode int `xml:"ReplyCode,attr"`
+		ReplyText string `xml:"ReplyText,attr"`
+		Count int `xml:"COUNT>Records,attr"`
+		Delimiter string `xml:"DELIMITER>value,attr"`
+	}
+
+	result,err := ioutil.ReadAll(*body)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(result)
+	return nil, nil
+}
+
+func parseStandardXml(body *io.ReadCloser) (*SearchResult,error) {
 	return nil, nil
 }

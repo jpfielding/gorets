@@ -106,6 +106,9 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	}
 
 	res, err := t.transport.RoundTrip(req)
+	if err != nil {
+		return nil, err
+	}
 	if res.StatusCode != http.StatusUnauthorized {
 		return res, err
 	}
