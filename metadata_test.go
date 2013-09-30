@@ -18,13 +18,15 @@ The System is provided to you by Systems.
 </RETS>`
 
 func TestParseSystem(t *testing.T) {
-	system, err := parseMSystem([]byte(metadataSystem))
+	ms, err := parseMSystem([]byte(metadataSystem))
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
-	ms := system.MSystem
 	if ms.Version != "1.12.30" {
 		t.Errorf("wrong version: %s ", ms.Version)
+	}
+	if ms.Comments != "The System is provided to you by Systems." {
+		t.Errorf("wrong comments: %s ", ms.Comments)
 	}
 }
 

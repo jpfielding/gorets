@@ -98,7 +98,7 @@ func parseMSystem(response []byte) (*MSystem, error) {
 	return &MSystem{
 		Version: xms.MSystem.Version,
 		Date: xms.MSystem.Date,
-		Comments: xms.MSystem.Comments,
+		Comments: strings.TrimSpace(xms.MSystem.Comments),
 		Id: xms.System.SystemId,
 		Description: xms.System.Description,
 	}, nil
