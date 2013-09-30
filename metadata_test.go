@@ -60,9 +60,6 @@ func TestParseResources(t *testing.T) {
 }
 
 
-func TestParseResource(t *testing.T) {
-}
-
 var class string =
 	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 <METADATA-CLASS Resource="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
