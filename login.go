@@ -52,14 +52,14 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 
 
 func parseCapability(response []byte) (*CapabilityUrls, error){
-	type Rets struct {
+	type XmlRets struct {
 		XMLName xml.Name `xml:"RETS"`
 		ReplyCode int `xml:"ReplyCode,attr"`
 		ReplyText string `xml:"ReplyText,attr"`
 		Response string `xml:"RETS-RESPONSE"`
 	}
 
-	rets := Rets{}
+	rets := XmlRets{}
 	decoder := xml.NewDecoder(bytes.NewBuffer(response))
 	decoder.Strict = false
 	err := decoder.Decode(&rets)
