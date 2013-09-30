@@ -5,12 +5,16 @@ package gorets
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"encoding/xml"
+	"strings"
 )
+
+type Metadata struct {
+	MSystem MSystem
+}
 
 type MSystem struct {
 	Version, Date string
@@ -18,18 +22,16 @@ type MSystem struct {
 	Comments string
 }
 
-type Metadata struct {
-	MSystem MSystem
+type MResource struct {
+	Resource, Version, Date string
+	Id, Description string
+	Comments string
 }
 
 func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) {
 	qs := fmt.Sprintf("Format=%s",format)
-	if id != "" {
-		qs = qs +"&"+ fmt.Sprintf("ID=%s",id)
-	}
-	if mtype != "" {
-		qs = qs +"&"+ fmt.Sprintf("Type=%s",mtype)
-	}
+	qs = qs +"&"+ fmt.Sprintf("Type=%s",mtype)
+	qs = qs +"&"+ fmt.Sprintf("ID=%s",id)
 
 	req, err := http.NewRequest(s.HttpMethod, url+"?"+qs, nil)
 	if err != nil {
@@ -44,21 +46,28 @@ func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) 
 	}
 	resp.Body.Close()
 
-	switch mtype {
+	metadata := Metadata{}
+
+	switch strings.ToUpper(mtype) {
 	case "METADATA-SYSTEM":
-		return parseMSystem(body)
+		tmp, err := parseMSystem(body)
+		if err != nil {
+			return nil, err
+		}
+		metadata.MSystem = *tmp
 	case "METADATA-RESOURCE":
 	case "METADATA-CLASS":
 	case "METADATA-TABLE":
 	case "METADATA-LOOKUP":
 	case "METADATA-LOOKUP_TYPE":
 	}
-	metadata := &Metadata{}
-	return metadata, nil
+
+
+	return &metadata, nil
 }
 
 
-func parseMSystem(response []byte) (*Metadata, error) {
+func parseMSystem(response []byte) (*MSystem, error) {
 	type XmlMSys struct {
 		Version string `xml:"Version,attr"`
 		Date string `xml:"Date,attr"`
@@ -81,20 +90,16 @@ func parseMSystem(response []byte) (*Metadata, error) {
 
 	xms := XmlMSystem{}
 	err := decoder.Decode(&xms)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		return nil, err
 	}
 
 	// transfer the contents to the public struct
-	mSystem := MSystem{
+	return &MSystem{
 		Version: xms.MSystem.Version,
 		Date: xms.MSystem.Date,
 		Comments: xms.MSystem.Comments,
 		Id: xms.System.SystemId,
 		Description: xms.System.Description,
-	}
-
-	return &Metadata{
-		MSystem: mSystem,
 	}, nil
 }
