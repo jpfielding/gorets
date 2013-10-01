@@ -1,5 +1,7 @@
 /**
 	extraction of the data pieces describing a RETS system
+
+	TODO - this class is ripe for removing redundancy
  */
 package gorets
 
