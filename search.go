@@ -72,3 +72,45 @@ func parseCompactResult(body *io.ReadCloser) (*SearchResult,error) {
 func parseStandardXml(body *io.ReadCloser) (*SearchResult,error) {
 	return nil, nil
 }
+
+func exampleXmlParse(r *io.ReadCloser) {
+	parser := xml.NewDecoder(*r)
+	depth := 0
+	for {
+		token, err := parser.Token()
+		if err != nil {
+			break
+		}
+		switch t := token.(type) {
+		case xml.StartElement:
+			elmt := xml.StartElement(t)
+			name := elmt.Name.Local
+			printElmt(name, depth)
+			depth++
+		case xml.EndElement:
+			depth--
+			elmt := xml.EndElement(t)
+			name := elmt.Name.Local
+			printElmt(name, depth)
+		case xml.CharData:
+			bytes := xml.CharData(t)
+			printElmt("\""+string([]byte(bytes))+"\"", depth)
+		case xml.Comment:
+			printElmt("Comment", depth)
+		case xml.ProcInst:
+			printElmt("ProcInst", depth)
+		case xml.Directive:
+			printElmt("Directive", depth)
+		default:
+			fmt.Println("Unknown")
+		}
+	}
+
+}
+
+func printElmt(s string, depth int) {
+	for n := 0; n < depth; n++ {
+		fmt.Print("  ")
+	}
+	fmt.Println(s)
+}
