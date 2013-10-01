@@ -15,6 +15,8 @@ import (
 type Metadata struct {
 	MSystem MSystem
 	MResources MResources
+	MClasses MClasses
+	MTables MTables
 }
 
 func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) {
@@ -37,6 +39,7 @@ func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) 
 
 	metadata := Metadata{}
 
+	// TOOD remove the needless repetition
 	switch strings.ToUpper(mtype) {
 	case "METADATA-SYSTEM":
 		tmp, err := parseMSystem(body)
@@ -51,7 +54,17 @@ func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) 
 		}
 		metadata.MResources = *tmp
 	case "METADATA-CLASS":
+		tmp, err := parseMClasses(body)
+		if err != nil {
+			return nil, err
+		}
+		metadata.MClasses = *tmp
 	case "METADATA-TABLE":
+		tmp, err := parseMTables(body)
+		if err != nil {
+			return nil, err
+		}
+		metadata.MTables = *tmp
 	case "METADATA-LOOKUP":
 	case "METADATA-LOOKUP_TYPE":
 	}
