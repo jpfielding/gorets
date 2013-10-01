@@ -121,25 +121,41 @@ func parseMSystem(response []byte) (*MSystem, error) {
 
 const delim = "	"
 
+/* the common structure */
+type MData struct {
+	Version, Date string
+	Columns []string
+	Rows [][]string
+}
+
+/** cached lookup */
+type Indexer func(col string, row int) string
+/** create the cache */
+func (m *MData) Indexer() Indexer {
+	index := make(map[string]int)
+	for i, c := range m.Columns {
+		index[c] = i
+	}
+	return func(col string, row int) string {
+		return m.Rows[row][index[col]]
+	}
+}
+
 /** extract a map of fields from columns and rows */
-func extractMap(cols string, rows []string) ([]map[string]string) {
+func extractMap(cols string, rows []string) (*MData) {
+	data := MData{}
 	// remove the first and last chars
-	headers := strings.Split(strings.Trim(cols,delim),delim)
-	fields := make([]map[string]string, len(rows))
+	data.Columns = strings.Split(strings.Trim(cols,delim),delim)
+	data.Rows = make([][]string, len(rows))
 	// create each
 	for i,line := range rows {
-		row := strings.Split(strings.Trim(line,delim),delim)
-		fields[i] = make(map[string]string)
-		for j, val := range row {
-			fields[i][headers[j]] = val
-		}
+		data.Rows[i] = strings.Split(strings.Trim(line,delim),delim)
 	}
-	return fields
+	return &data
 }
 
 type MResources struct {
-	Version, Date string
-	Fields []map[string]string
+	MData MData
 }
 
 func parseMResources(response []byte) (*MResources, error) {
@@ -166,19 +182,18 @@ func parseMResources(response []byte) (*MResources, error) {
 	}
 
 	// remove the first and last chars
-	rows := extractMap(xms.Info.Columns, xms.Info.Data)
+	data := extractMap(xms.Info.Columns, xms.Info.Data)
+	data.Date = xms.Info.Date
+	data.Version = xms.Info.Version
 
 	// transfer the contents to the public struct
 	return &MResources{
-		Version: xms.Info.Version,
-		Date: xms.Info.Date,
-		Fields: rows,
+		MData: *data,
 	}, nil
 }
 
 type MClasses struct {
-	Version, Date string
-	Fields []map[string]string
+	MData MData
 }
 
 func parseMClasses(response []byte) (*MClasses, error) {
@@ -206,19 +221,18 @@ func parseMClasses(response []byte) (*MClasses, error) {
 	}
 
 	// remove the first and last chars
-	rows := extractMap(xms.Info.Columns, xms.Info.Data)
+	data := extractMap(xms.Info.Columns, xms.Info.Data)
+	data.Date = xms.Info.Date
+	data.Version = xms.Info.Version
 
 	// transfer the contents to the public struct
 	return &MClasses{
-		Version: xms.Info.Version,
-		Date: xms.Info.Date,
-		Fields: rows,
+		MData: *data,
 	}, nil
 }
 
 type MTables struct {
-	Version, Date string
-	Fields []map[string]string
+	MData MData
 }
 
 func parseMTables(response []byte) (*MTables, error) {
@@ -246,12 +260,12 @@ func parseMTables(response []byte) (*MTables, error) {
 	}
 
 	// remove the first and last chars
-	rows := extractMap(xms.Info.Columns, xms.Info.Data)
+	data := extractMap(xms.Info.Columns, xms.Info.Data)
+	data.Date = xms.Info.Date
+	data.Version = xms.Info.Version
 
 	// transfer the contents to the public struct
 	return &MTables{
-		Version: xms.Info.Version,
-		Date: xms.Info.Date,
-		Fields: rows,
+		MData: *data,
 	}, nil
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+
 var metadataSystem string =
 	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 <METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -22,12 +23,8 @@ func TestParseSystem(t *testing.T) {
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
-	if ms.Version != "1.12.30" {
-		t.Errorf("wrong version: %s ", ms.Version)
-	}
-	if ms.Comments != "The System is provided to you by Systems." {
-		t.Errorf("wrong comments: %s ", ms.Comments)
-	}
+	AssertEquals(t, "bad version", ms.Version, "1.12.30")
+	AssertEquals(t, "bad comments", ms.Comments, "The System is provided to you by Systems.")
 }
 
 var resource string =
@@ -45,28 +42,30 @@ func TestParseResources(t *testing.T) {
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
-	if ms.Version != "1.12.30" {
-		t.Errorf("wrong version: %s ", ms.Version)
-	}
-	if len(ms.Fields) != 2 {
-		t.Errorf("wrong number of resources: %s ", len(ms.Fields))
-	}
-	if ms.Fields[0]["ResourceID"] != "ActiveAgent" {
-		t.Errorf("wrong field value: %s ", ms.Fields[0]["ResourceID"])
-	}
-	if ms.Fields[1]["ValidationExternalDate"] != "Tue, 3 Sep 2013 00:00:00 GMT" {
-		t.Errorf("wrong field value: %s ", ms.Fields[1]["ValidationExternalDate"])
-	}
+
+	AssertEquals(t, "bad version", "1.12.30", ms.MData.Version)
+	AssertEqualsInt(t, "wrong number of resources", len(ms.MData.Rows), 2)
+
+	indexer := ms.MData.Indexer()
+
+	AssertEquals(t, "bad value", "ActiveAgent", indexer("ResourceID",0))
+	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate",1))
 }
 
 
 var class string =
 	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
-<METADATA-CLASS Resource="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	ClassName	StandardName	VisibleName	Description	TableVersion	TableDate	UpdateVersion	UpdateDate	</COLUMNS>
-<DATA>	ActiveAgent	MRIS Active Agents	MRIS Active Agents	MRIS_ActiveAgent	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
+<DATA>	COM	MRIS Commercial	MRIS Commercial	MRIS_COM	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
+<DATA>	LOT	MRIS Lot Land	MRIS Lot Land	MRIS_LOT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
+<DATA>	MF	MRIS Multi-Family	MRIS Multi-Family	MRIS_MF	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
+<DATA>	RES	MRIS Residential	MRIS Residential	MRIS_RES	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
+<DATA>	ALL	MRIS All	MRIS All	MRIS_ALL	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
+<DATA>	RESO_PROP_2012_05	RESO Prop 2012 05	RESO Prop 2012 05	Copyright 2012 RESO.  This software product includes software or other works developed by RESO and some of its contributors, subject to the RESO End User License published at www.reso.org	0.0.4	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
 </METADATA-CLASS>
 </RETS>
+
 `
 
 func TestParseClass(t *testing.T) {
@@ -74,21 +73,14 @@ func TestParseClass(t *testing.T) {
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
-	if ms.Version != "1.12.29" {
-		t.Errorf("wrong version: %s ", ms.Version)
-	}
-	if len(ms.Fields) != 1 {
-		t.Errorf("wrong number of resources: %s ", len(ms.Fields))
-	}
-	if ms.Fields[0]["ClassName"] != "ActiveAgent" {
-		t.Errorf("wrong field value: %s ", ms.Fields[0]["ClassName"])
-	}
-	if ms.Fields[0]["TableDate"] != "Tue, 3 Sep 2013 00:00:00 GMT" {
-		t.Errorf("wrong field value: %s ", ms.Fields[0]["TableDate"])
-	}
-	if ms.Fields[0]["UpdateDate"] != "" {
-		t.Errorf("wrong field value: %s ", ms.Fields[0]["UpdateDate"])
-	}
+	AssertEquals(t, "bad version", ms.MData.Version, "1.12.29")
+	AssertEqualsInt(t, "wrong number of resources", len(ms.MData.Rows), 6)
+
+	indexer := ms.MData.Indexer()
+
+	AssertEquals(t, "bad value", "RESO_PROP_2012_05", indexer("ClassName",5))
+	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate",0))
+	AssertEquals(t, "bad value", "MRIS Multi-Family", indexer("VisibleName",2))
 }
 
 var table string =
@@ -108,18 +100,13 @@ func TestParseTable(t *testing.T) {
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
-	if ms.Version != "1.12.29" {
-		t.Errorf("wrong version: %s ", ms.Version)
-	}
-	if len(ms.Fields) != 4 {
-		t.Errorf("wrong number of tables: %s ", len(ms.Fields))
-	}
-	if ms.Fields[0]["SystemName"] != "AgentListingServiceName" {
-		t.Errorf("wrong field value: %s ", ms.Fields[0]["SystemName"])
-	}
-	if ms.Fields[3]["Unique"] != "0" {
-		t.Errorf("wrong field value: %s ", ms.Fields[3]["Unique"])
-	}
+	AssertEquals(t, "bad version", "1.12.29", ms.MData.Version)
+	AssertEqualsInt(t, "wrong number of resources", len(ms.MData.Rows), 4)
+
+	indexer := ms.MData.Indexer()
+
+	AssertEquals(t, "bad value", "AgentListingServiceName", indexer("SystemName",0))
+	AssertEquals(t, "bad value", "0", indexer("Unique",3))
 }
 
 var lookup string =
