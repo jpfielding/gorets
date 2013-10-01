@@ -122,6 +122,17 @@ var lookup string =
 `
 
 func TestParseLookup(t *testing.T) {
+	ms, err := parseMLookups([]byte(lookup))
+	if err != nil {
+		t.Error("error parsing body: "+ err.Error())
+	}
+	AssertEquals(t, "bad version", "1.12.29", ms.MData.Version)
+	AssertEqualsInt(t, "wrong number of resources", len(ms.MData.Rows), 4)
+
+	indexer := ms.MData.Indexer()
+
+	AssertEquals(t, "bad value", "COUNTIES_OR_REGIONS", indexer("LookupName",0))
+	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date",3))
 }
 
 var lookupType string =
@@ -137,6 +148,17 @@ var lookupType string =
 `
 
 func TestParseLookupType(t *testing.T) {
+	ms, err := parseMLookupTypes([]byte(lookupType))
+	if err != nil {
+		t.Error("error parsing body: "+ err.Error())
+	}
+	AssertEquals(t, "bad version", "1.12.29", ms.MData.Version)
+	AssertEqualsInt(t, "wrong number of resources", len(ms.MData.Rows), 4)
+
+	indexer := ms.MData.Indexer()
+
+	AssertEquals(t, "bad value", "BROOMFIELD-CO", indexer("LongValue",2))
+	AssertEquals(t, "bad value", "CLARK", indexer("ShortValue",3))
 }
 
 

@@ -269,3 +269,81 @@ func parseMTables(response []byte) (*MTables, error) {
 		MData: *data,
 	}, nil
 }
+
+type MLookups struct {
+	MData MData
+}
+
+func parseMLookups(response []byte) (*MLookups, error) {
+	type XmlTable struct {
+		Resource string `xml:"Resource,attr"`
+		Version string `xml:"Version,attr"`
+		Date string `xml:"Date,attr"`
+		Columns string `xml:"COLUMNS"`
+		Data []string `xml:"DATA"`
+	}
+	type XmlData struct {
+		XMLName xml.Name `xml:"RETS"`
+		ReplyCode int `xml:"ReplyCode,attr"`
+		ReplyText string `xml:"ReplyText,attr"`
+		Info XmlTable `xml:"METADATA-LOOKUP"`
+	}
+
+	decoder := xml.NewDecoder(bytes.NewBuffer(response))
+	decoder.Strict = false
+
+	xms := XmlData{}
+	err := decoder.Decode(&xms)
+	if err != nil {
+		return nil, err
+	}
+
+	// remove the first and last chars
+	data := extractMap(xms.Info.Columns, xms.Info.Data)
+	data.Date = xms.Info.Date
+	data.Version = xms.Info.Version
+
+	// transfer the contents to the public struct
+	return &MLookups{
+		MData: *data,
+	}, nil
+}
+
+type MLookupTypes struct {
+	MData MData
+}
+
+func parseMLookupTypes(response []byte) (*MLookupTypes, error) {
+	type XmlTable struct {
+		Resource string `xml:"Resource,attr"`
+		Version string `xml:"Version,attr"`
+		Date string `xml:"Date,attr"`
+		Columns string `xml:"COLUMNS"`
+		Data []string `xml:"DATA"`
+	}
+	type XmlData struct {
+		XMLName xml.Name `xml:"RETS"`
+		ReplyCode int `xml:"ReplyCode,attr"`
+		ReplyText string `xml:"ReplyText,attr"`
+		Info XmlTable `xml:"METADATA-LOOKUP_TYPE"`
+	}
+
+	decoder := xml.NewDecoder(bytes.NewBuffer(response))
+	decoder.Strict = false
+
+	xms := XmlData{}
+	err := decoder.Decode(&xms)
+	if err != nil {
+		return nil, err
+	}
+
+	// remove the first and last chars
+	data := extractMap(xms.Info.Columns, xms.Info.Data)
+	data.Date = xms.Info.Date
+	data.Version = xms.Info.Version
+
+	// transfer the contents to the public struct
+	return &MLookupTypes{
+		MData: *data,
+	}, nil
+}
