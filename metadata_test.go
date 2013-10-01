@@ -104,6 +104,22 @@ var table string =
 `
 
 func TestParseTable(t *testing.T) {
+	ms, err := parseMTables([]byte(table))
+	if err != nil {
+		t.Error("error parsing body: "+ err.Error())
+	}
+	if ms.Version != "1.12.29" {
+		t.Errorf("wrong version: %s ", ms.Version)
+	}
+	if len(ms.Fields) != 4 {
+		t.Errorf("wrong number of tables: %s ", len(ms.Fields))
+	}
+	if ms.Fields[0]["SystemName"] != "AgentListingServiceName" {
+		t.Errorf("wrong field value: %s ", ms.Fields[0]["SystemName"])
+	}
+	if ms.Fields[3]["Unique"] != "0" {
+		t.Errorf("wrong field value: %s ", ms.Fields[3]["Unique"])
+	}
 }
 
 var lookup string =

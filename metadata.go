@@ -138,7 +138,7 @@ func parseMResources(response []byte) (*MResources, error) {
 		XMLName xml.Name `xml:"RETS"`
 		ReplyCode int `xml:"ReplyCode,attr"`
 		ReplyText string `xml:"ReplyText,attr"`
-		ResourceInfo XmlResource `xml:"METADATA-RESOURCE"`
+		Info XmlResource `xml:"METADATA-RESOURCE"`
 	}
 
 	decoder := xml.NewDecoder(bytes.NewBuffer(response))
@@ -151,12 +151,12 @@ func parseMResources(response []byte) (*MResources, error) {
 	}
 
 	// remove the first and last chars
-	rows := extractMap(xms.ResourceInfo.Columns, xms.ResourceInfo.Data)
+	rows := extractMap(xms.Info.Columns, xms.Info.Data)
 
 	// transfer the contents to the public struct
 	return &MResources{
-		Version: xms.ResourceInfo.Version,
-		Date: xms.ResourceInfo.Date,
+		Version: xms.Info.Version,
+		Date: xms.Info.Date,
 		Fields: rows,
 	}, nil
 }
@@ -178,7 +178,7 @@ func parseMClasses(response []byte) (*MClasses, error) {
 		XMLName xml.Name `xml:"RETS"`
 		ReplyCode int `xml:"ReplyCode,attr"`
 		ReplyText string `xml:"ReplyText,attr"`
-		ClassInfo XmlClass `xml:"METADATA-CLASS"`
+		Info XmlClass `xml:"METADATA-CLASS"`
 	}
 
 	decoder := xml.NewDecoder(bytes.NewBuffer(response))
@@ -191,13 +191,52 @@ func parseMClasses(response []byte) (*MClasses, error) {
 	}
 
 	// remove the first and last chars
-	rows := extractMap(xms.ClassInfo.Columns, xms.ClassInfo.Data)
+	rows := extractMap(xms.Info.Columns, xms.Info.Data)
 
 	// transfer the contents to the public struct
 	return &MClasses{
-		Version: xms.ClassInfo.Version,
-		Date: xms.ClassInfo.Date,
+		Version: xms.Info.Version,
+		Date: xms.Info.Date,
 		Fields: rows,
 	}, nil
 }
 
+type MTables struct {
+	Version, Date string
+	Fields []map[string]string
+}
+
+func parseMTables(response []byte) (*MTables, error) {
+	type XmlTable struct {
+		Resource string `xml:"Resource,attr"`
+		Version string `xml:"Version,attr"`
+		Date string `xml:"Date,attr"`
+		Columns string `xml:"COLUMNS"`
+		Data []string `xml:"DATA"`
+	}
+	type XmlData struct {
+		XMLName xml.Name `xml:"RETS"`
+		ReplyCode int `xml:"ReplyCode,attr"`
+		ReplyText string `xml:"ReplyText,attr"`
+		Info XmlTable `xml:"METADATA-TABLE"`
+	}
+
+	decoder := xml.NewDecoder(bytes.NewBuffer(response))
+	decoder.Strict = false
+
+	xms := XmlData{}
+	err := decoder.Decode(&xms)
+	if err != nil {
+		return nil, err
+	}
+
+	// remove the first and last chars
+	rows := extractMap(xms.Info.Columns, xms.Info.Data)
+
+	// transfer the contents to the public struct
+	return &MTables{
+		Version: xms.Info.Version,
+		Date: xms.Info.Date,
+		Fields: rows,
+	}, nil
+}
