@@ -120,7 +120,6 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	optionalInt("Offset", r.Offset)
 
 	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s",r.Url,values.Encode()), nil)
-	fmt.Println(req)
 	if err != nil {
 		return nil, err
 	}
@@ -131,12 +130,10 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	}
 
 	switch r.Format {
-	case "COMPACT-DECODED":
-		return parseCompactResult(resp.Body)
-	case "COMPACT":
+	case "COMPACT-DECODED", "COMPACT":
 		return parseCompactResult(resp.Body)
 	case "STANDARD-XML":
-		return parseCompactResult(resp.Body)
+		panic("not yet supported!")
 	}
 	return nil, nil
 }

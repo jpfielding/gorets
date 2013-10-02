@@ -19,12 +19,11 @@ func (s *Session) Get(url string) (error) {
 	}
 
 	resp, err := s.Client.Do(req)
-	body,err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	_,err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(string(body))
 
 	return nil
 }
