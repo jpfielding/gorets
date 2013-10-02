@@ -161,7 +161,6 @@ func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
 					data <- strings.Split(strings.Trim(buf.String(), delim), delim)
 				case "RETS":
 					close(data)
-					// TODO need to close here, but having trouble with io.ReadCloser
 					body.Close()
 					return
 				}
@@ -212,7 +211,6 @@ func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
 		case xml.EndElement:
 			elmt := xml.EndElement(t)
 			name := elmt.Name.Local
-			fmt.Println(elmt)
 			switch name {
 			case "COLUMNS":
 				result.Columns = strings.Split(strings.Trim(buf.String(), result.Delimiter), result.Delimiter)
@@ -225,10 +223,7 @@ func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
 		}
 	}
 
-	fmt.Println("FINISHED RESULT")
-
-
-	return nil, errors.New("BANG!")
+	return nil, errors.New("failed to parse rets response")
 }
 
 func parseStandardXml(body *io.ReadCloser) (*SearchResult,error) {

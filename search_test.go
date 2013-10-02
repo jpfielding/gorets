@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"testing"
 )
 
@@ -37,11 +38,19 @@ func TestParseCompact(t *testing.T) {
 	AssertEqualsInt(t, "bad code", 0, cr.RetsResponse.ReplyCode)
 	AssertEquals(t, "bad text", "V2.7.0 2315: Success", cr.RetsResponse.ReplyText)
 
-	AssertEqualsInt(t, "bad count", 6, len(cr.Columns))
+	AssertEqualsInt(t, "bad count", 10, int(cr.Count))
+	AssertEqualsInt(t, "bad header count", 6, len(cr.Columns))
 
+	counter := 0
 	for row := range cr.Data {
-		fmt.Println(row)
+		if strings.Join(row,",") != "1,2,3,4,5,6" {
+			t.Errorf("bad row %s: %s", counter, row)
+		}
+		counter = counter + 1
 	}
+
+	AssertEqualsInt(t, "bad count", 8, counter)
+	AssertEqualsTrue(t, "bad max rows", cr.MaxRows)
 }
 
 func TestParseStandardXml(t *testing.T) {

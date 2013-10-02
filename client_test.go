@@ -13,6 +13,11 @@ func AssertEquals(t *testing.T, msg, expected, actual string) {
 		t.Errorf("%s: %s != %s", msg, expected, actual)
 	}
 }
+func AssertEqualsTrue(t *testing.T, msg string, expected bool) {
+	if !expected {
+		t.Errorf("%s", msg)
+	}
+}
 func AssertEqualsInt(t *testing.T, msg string, expected, actual int) {
 	if actual != expected {
 		t.Errorf("%s: %d != %d", msg, expected, actual)
