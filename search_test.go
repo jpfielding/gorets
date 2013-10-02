@@ -5,7 +5,6 @@ package gorets
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -40,6 +39,8 @@ func TestParseCompact(t *testing.T) {
 
 	AssertEqualsInt(t, "bad count", 10, int(cr.Count))
 	AssertEqualsInt(t, "bad header count", 6, len(cr.Columns))
+
+	AssertEquals(t, "bad headers", "A,B,C,D,E,F", strings.Join(cr.Columns,","))
 
 	counter := 0
 	for row := range cr.Data {
