@@ -19,9 +19,11 @@ type Metadata struct {
 	MResources MResources
 	MClasses MClasses
 	MTables MTables
+	MLookups MLookups
+	MLookupTypes MLookupTypes
 }
 
-func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) {
+func (s *Session) GetMetadata(url, format, mtype, id string) (*Metadata, error) {
 	qs := fmt.Sprintf("Format=%s",format)
 	qs = qs +"&"+ fmt.Sprintf("Type=%s",mtype)
 	qs = qs +"&"+ fmt.Sprintf("ID=%s",id)
@@ -68,7 +70,17 @@ func (s *Session) GetMetadata(url, format, id, mtype string) (*Metadata, error) 
 		}
 		metadata.MTables = *tmp
 	case "METADATA-LOOKUP":
+		tmp, err := parseMLookups(body)
+		if err != nil {
+			return nil, err
+		}
+		metadata.MLookups = *tmp
 	case "METADATA-LOOKUP_TYPE":
+		tmp, err := parseMLookupTypes(body)
+		if err != nil {
+			return nil, err
+		}
+		metadata.MLookupTypes = *tmp
 	}
 
 
