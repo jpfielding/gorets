@@ -42,16 +42,23 @@ func TestParseCompact(t *testing.T) {
 
 	AssertEquals(t, "bad headers", "A,B,C,D,E,F", strings.Join(cr.Columns,","))
 
+	filterTo := cr.FilterTo([]string{"A","C","E"})
+
 	counter := 0
 	for row := range cr.Data {
 		if strings.Join(row,",") != "1,2,3,4,5,6" {
-			t.Errorf("bad row %s: %s", counter, row)
+			t.Errorf("bad row %d: %s", counter, row)
+		}
+		filtered := filterTo(row)
+		if strings.Join(filtered,",") != "1,3,5" {
+			t.Errorf("bad filtered row %d: %s", counter, filtered)
 		}
 		counter = counter + 1
 	}
 
 	AssertEqualsInt(t, "bad count", 8, counter)
 	AssertEqualsTrue(t, "bad max rows", cr.MaxRows)
+
 }
 
 func TestParseStandardXml(t *testing.T) {

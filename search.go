@@ -42,6 +42,28 @@ type SearchResult struct {
 	ProcessingFailure error
 }
 
+func (m *SearchResult) Index() (map[string]int) {
+	index := make(map[string]int)
+	for i, c := range m.Columns {
+		index[c] = i
+	}
+	return index
+}
+/** cached filtering */
+type ColumnFilter func(row []string) (filtered []string)
+/** create the cache */
+func (m *SearchResult) FilterTo(cols []string) ColumnFilter {
+	index := m.Index()
+	return func(row []string) (filtered []string){
+		tmp := make([]string, len(cols))
+		for i,c := range cols {
+			tmp[i] = row[index[c]]
+		}
+		return tmp
+	}
+}
+
+
 type SearchRequest struct {
 	Url,
 	Class,
