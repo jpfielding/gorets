@@ -2,6 +2,8 @@
 	extraction of the data pieces describing a RETS system
 
 	TODO - this class is ripe for removing redundancy
+
+	TODO - total rewrite as a sax style parser, to deal with redundant code and * requests
  */
 package gorets
 
