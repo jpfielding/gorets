@@ -24,6 +24,10 @@ type Metadata struct {
 }
 
 func (s *Session) GetMetadata(url, format, mtype, id string) (*Metadata, error) {
+	if mtype == "*" {
+		panic("not yet supported!")
+	}
+
 	qs := fmt.Sprintf("Format=%s",format)
 	qs = qs +"&"+ fmt.Sprintf("Type=%s",mtype)
 	qs = qs +"&"+ fmt.Sprintf("ID=%s",id)
