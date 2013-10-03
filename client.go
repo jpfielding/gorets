@@ -48,6 +48,7 @@ type Session struct {
 	Client http.Client
 }
 
+
 /* the common wrapper details for each response */
 type RetsResponse struct {
 	ReplyCode int

@@ -4,7 +4,6 @@
 package gorets
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -20,7 +19,7 @@ func (s *Session) Get(url string) (error) {
 
 	resp, err := s.Client.Do(req)
 	defer resp.Body.Close()
-	_,err := ioutil.ReadAll(resp.Body)
+	_,err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
