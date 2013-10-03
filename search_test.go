@@ -53,6 +53,11 @@ func TestParseCompact(t *testing.T) {
 		if strings.Join(filtered,",") != "1,3,5" {
 			t.Errorf("bad filtered row %d: %s", counter, filtered)
 		}
+
+		if cr.ProcessingFailure != nil {
+			t.Errorf("error parsing body at row %d: %s", counter, err.Error())
+		}
+
 		counter = counter + 1
 	}
 

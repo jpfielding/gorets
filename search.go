@@ -139,9 +139,9 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 }
 
 
-/** TODO redo this minidom style */
 func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
-	data := make(chan []string)
+	// TODO parameterize this buffer size
+	data := make(chan []string,100)
 	rets := RetsResponse{}
 	result := SearchResult{
 		Data: data,
@@ -153,8 +153,13 @@ func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
 	var buf bytes.Buffer
 
 	// backgroundable processing of the data into our buffer
-	processing := func() {
+	dataProcessing := func() {
 		delim := result.Delimiter
+		// this channel needs to be closed or the caller can infinite loop
+		defer close(data)
+		// this is the web socket that needs addressed
+		defer body.Close()
+		// extract the data
 		for {
 			// TODO figure out a kill switch for this
 			token, err := parser.Token()
@@ -179,8 +184,6 @@ func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
 				case "DATA":
 					data <- strings.Split(strings.Trim(buf.String(), delim), delim)
 				case "RETS":
-					close(data)
-					body.Close()
 					return
 				}
 			case xml.CharData:
@@ -233,7 +236,7 @@ func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
 			switch name {
 			case "COLUMNS":
 				result.Columns = strings.Split(strings.Trim(buf.String(), result.Delimiter), result.Delimiter)
-				go processing()
+				go dataProcessing()
 				return &result, nil
 			}
 		case xml.CharData:
