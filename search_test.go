@@ -30,7 +30,7 @@ var compactDecoded string =
 func TestParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
-	cr, err := parseCompactResult(body)
+	cr, err := parseCompactResult(body,1)
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}

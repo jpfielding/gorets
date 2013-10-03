@@ -131,7 +131,7 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 
 	switch r.Format {
 	case "COMPACT-DECODED", "COMPACT":
-		return parseCompactResult(resp.Body)
+		return parseCompactResult(resp.Body, 100)
 	case "STANDARD-XML":
 		panic("not yet supported!")
 	}
@@ -139,9 +139,8 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 }
 
 
-func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
-	// TODO parameterize this buffer size
-	data := make(chan []string,100)
+func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchResult,error) {
+	data := make(chan []string,processingBufferSize)
 	rets := RetsResponse{}
 	result := SearchResult{
 		Data: data,
@@ -211,7 +210,6 @@ func parseCompactResult(body io.ReadCloser) (*SearchResult,error) {
 				for _,v := range elmt.Attr {
 					attrs[strings.ToLower(v.Name.Local)] = v.Value
 				}
-				// TODO dont rely on position, search by name
 				code,err := strconv.ParseInt(attrs["replycode"],10,16)
 				if err != nil {
 					return nil, err

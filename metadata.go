@@ -8,9 +8,9 @@ package gorets
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -23,16 +23,22 @@ type Metadata struct {
 	MLookupTypes MLookupTypes
 }
 
-func (s *Session) GetMetadata(url, format, mtype, id string) (*Metadata, error) {
-	if mtype == "*" {
+type MetadataRequest struct {
+	Url, Format, MType, Id string
+}
+
+func (s *Session) GetMetadata(r MetadataRequest) (*Metadata, error) {
+	if r.MType == "*" {
 		panic("not yet supported!")
 	}
 
-	qs := fmt.Sprintf("Format=%s",format)
-	qs = qs +"&"+ fmt.Sprintf("Type=%s",mtype)
-	qs = qs +"&"+ fmt.Sprintf("ID=%s",id)
+	// required
+	values := url.Values{}
+	values.Add("Format", r.Format)
+	values.Add("Type", r.MType)
+	values.Add("ID", r.Id)
 
-	req, err := http.NewRequest(s.HttpMethod, url+"?"+qs, nil)
+	req, err := http.NewRequest(s.HttpMethod, r.Url+"?"+values.Encode(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +54,7 @@ func (s *Session) GetMetadata(url, format, mtype, id string) (*Metadata, error) 
 	metadata := Metadata{}
 
 	// TOOD remove the needless repetition
-	switch strings.ToUpper(mtype) {
+	switch strings.ToUpper(r.Url) {
 	case "METADATA-SYSTEM":
 		tmp, err := parseMSystem(body)
 		if err != nil {
