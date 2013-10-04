@@ -18,12 +18,13 @@ import (
 
 /* 5.5 spec */
 type GetObject struct {
-	/** required-ish */
-	Uid,
+	/** required */
 	ContentId,
 	ContentType string
 	/* 5.5.2 this is probably a bad idea, though its solid with the spec */
 	ObjectId int
+	/** optional-ish _must_ return if the request used this field */
+	Uid string
 	/** optional */
 	Description,
 	SubDescription,
@@ -64,7 +65,6 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	values := url.Values{}
 	values.Add("Resource", r.Resource)
 	values.Add("Type", r.Type)
-	values.Add("object-id", r.ObjectId)
 
 	// optional
 	optionalString := func (name, value string) {
@@ -74,9 +74,11 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	}
 
 	// one or the other _MUST_ be present
-	optionalString("ObjectData", strings.Join(r.ObjectData,","))
 	optionalString("ID", r.Id)
 	optionalString("UID", r.Uid)
+	// truly optional
+	optionalString("ObjectData", strings.Join(r.ObjectData,","))
+	optionalString("Content-Id", r.ObjectId)
 
 	optionalInt := func (name string, value int) {
 		if value >= 0 {
@@ -96,7 +98,11 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	}
 
 	contentType := resp.Header.Get("Content-type")
+fmt.Println("CONTENT-TYPE: ", contentType)
 	boundary := extractBoundary(contentType)
+fmt.Println("RESP: ", resp)
+tmp, err := ioutil.ReadAll(resp.Body)
+fmt.Println("BODY: ", string(tmp))
 	if boundary == "" {
 		return parseGetObjectResult(resp.Header, resp.Body), nil
 	}
@@ -149,7 +155,7 @@ func extractBoundary(header string) (string) {
 }
 
 func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (GetObjectResult) {
-	objectId, err := strconv.ParseInt(header.Get("object-id"),10, 64)
+	objectId, err := strconv.ParseInt(header.Get("Object-Id"),10, 64)
 	if err != nil {
 		return GetObjectResult{nil, err}
 	}
@@ -188,10 +194,12 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 	}
 
 	object := GetObject{
-		Uid: header.Get("UID"),
-		ContentId: header.Get("Content-ID"),
-		ContentType: header.Get("Content-Type"),
+		// required
 		ObjectId: int(objectId),
+		ContentId: header.Get("Content-Id"),
+		ContentType: header.Get("Content-Type"),
+		// optional
+		Uid: header.Get("UID"),
 		Description: header.Get("Description"),
 		SubDescription: header.Get("Sub-Description"),
 		Location: header.Get("Location"),
