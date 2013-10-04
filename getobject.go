@@ -34,7 +34,7 @@ type GetObject struct {
 	Preferred bool
 	/* 5.6.5 */
 	ObjectData map[string]string
-
+	/** it may be wiser to convert this to a readcloser with a content-length */
 	Blob []byte
 }
 
@@ -166,7 +166,10 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 		preferred = false
 	}
 	objectData := make(map[string]string)
-	// TODO extract object data header values
+	for _,v := range header[textproto.CanonicalMIMEHeaderKey("ObjectData")] {
+		kv := strings.Split(v,"=")
+		objectData[kv[0]] = kv[1]
+	}
 	blob, err := ioutil.ReadAll(body)
 	if err != nil {
 		return GetObjectResult{nil, err}

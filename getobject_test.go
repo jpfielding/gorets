@@ -59,6 +59,8 @@ Content-Type: image/jpeg
 Content-ID: 123456
 Object-ID: 1
 Preferred: 1
+ObjectData: ListingKey=123456
+ObjectData: ListDate=2013-05-01T12:34:34.8-0500
 
 <binary data 1>
 --simple boundary
@@ -122,6 +124,8 @@ func TestGetObjects(t *testing.T) {
 	AssertEquals(t, "bad value", "123456", o1.ContentId)
 	AssertEqualsInt(t, "bad value", 1, o1.ObjectId)
 	AssertEquals(t, "bad value", "<binary data 1>", string(o1.Blob))
+	AssertEquals(t, "bad value", "123456", o1.ObjectData["ListingKey"])
+	AssertEquals(t, "bad value", "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
 
 	r2 := <- results
 	if r2.Err != nil {
