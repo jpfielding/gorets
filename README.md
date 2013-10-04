@@ -16,6 +16,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jpfielding/gorets"
+	"strconv"
 )
 
 func main () {
@@ -77,6 +78,22 @@ func main () {
 	for row := range result.Data {
 		fmt.Println(filter(row))
 	}
+
+	all,err := session.GetObject(gorets.GetObjectRequest{
+		Url: capability.GetObject,
+		Resource: "Property",
+		Type: "Thumbnail",
+		Id: "10385491290",
+		ObjectId: "*",
+	})
+	if err != nil {
+		panic(err)
+	}
+	for r := range all {
+		o := r.Object
+		fmt.Println(o.ContentType, o.ContentId, strconv.Itoa(o.ObjectId), len(o.Blob))
+	}
+
 
 	session.Logout(capability.Logout)
 }
