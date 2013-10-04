@@ -5,9 +5,48 @@ package gorets
 
 import (
 	"bytes"
+	"net/http"
 	"io/ioutil"
 	"testing"
+	"net/textproto"
 )
+
+func TestGetObject(t *testing.T) {
+	header := http.Header{}
+	textproto.MIMEHeader(header).Add("Content-Type","image/jpeg")
+	textproto.MIMEHeader(header).Add("Content-ID", "123456")
+	textproto.MIMEHeader(header).Add("Object-ID","1")
+	textproto.MIMEHeader(header).Add("Preferred", "1")
+	textproto.MIMEHeader(header).Add("UID", "1a234234234")
+	textproto.MIMEHeader(header).Add("Description", "Outhouse")
+	textproto.MIMEHeader(header).Add("Sub-Description", "The urinal")
+	textproto.MIMEHeader(header).Add("Location", "http://www.simpleboundary.com/image-5.jpg")
+
+	var body string = `<binary data 1>`
+	reader := ioutil.NopCloser(bytes.NewReader([]byte(body)))
+
+	objects, err := parseGetObjectResult(header, reader)
+	if err != nil {
+		t.Error("error parsing multipart: "+ err.Error())
+	}
+
+	counter := 0
+	o := <- objects.Objects
+	if !o.Preferred {
+		t.Errorf("error parsing preferred at object %d", counter)
+	}
+	AssertEquals(t, "bad value", "image/jpeg", o.ContentType)
+	AssertEquals(t, "bad value", "123456", o.ContentId)
+	AssertEqualsInt(t, "bad value", 1, o.ObjectId)
+	AssertEquals(t, "bad uid", "1a234234234", o.Uid)
+	AssertEquals(t, "bad value", "Outhouse", o.Description)
+	AssertEquals(t, "bad value", "The urinal", o.SubDescription)
+	AssertEquals(t, "bad value", "<binary data 1>", string(o.Blob))
+	AssertEquals(t, "bad value", "http://www.simpleboundary.com/image-5.jpg", o.Location)
+	if o.RetsError {
+		t.Errorf("error parsing rets error at object %d", counter)
+	}
+}
 
 var boundary string = "simple boundary"
 
