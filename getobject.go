@@ -167,7 +167,7 @@ func extractBoundary(header string) (string) {
 	for _,part := range strings.Split(header,";") {
 		part = strings.TrimSpace(part)
 		if strings.HasPrefix(part, "boundary=") {
-			val := strings.Split(part, "=")[1]
+			val := strings.SplitAfterN(part, "=", 2)[1]
 			return strings.Trim(val,"\"")
 		}
 	}
