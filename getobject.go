@@ -53,7 +53,6 @@ type GetObjectRequest struct {
 	Id,
 	/** '*' or a ':' separated list of #s */
 	ObjectId string
-	/* TODO support extracting these fields back from the server 5.4.2 */
 	ObjectData []string
 	/* 5.4.1 */
 	Location int
