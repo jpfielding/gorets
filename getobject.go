@@ -57,17 +57,7 @@ type GetObjectRequest struct {
 	Location int
 }
 
-/*
-	GET /platinum/search?
-	Class=ALL&
-	Count=1&
-	Format=COMPACT-DECODED&
-	Limit=10&
-	Offset=50&
-	Query=%28%28LocaleListingStatus%3D%7CACTIVE-CORE%2CCNTG%2FKO-CORE%2CCNTG%2FNO+KO-CORE%2CAPP+REG-CORE%29%2C%7E%28VOWList%3D0%29%29&
-	QueryType=DMQL2&
-	SearchType=Property
- */
+/* */
 func (s *Session) GetObject(r GetObjectRequest) (*GetObjectResult, error) {
 	// required
 	values := url.Values{}
