@@ -13,6 +13,7 @@ import (
 	"mime/multipart"
 	"strconv"
 	"strings"
+	"encoding/xml"
 )
 
 /* 5.5 spec */
@@ -153,14 +154,6 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 	if err != nil {
 		return GetObjectResult{nil, err}
 	}
-	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
-	retsErrorMsg := RetsResponse{}
-	switch {
-	case err != nil:
-		retsError = false
-	case retsError:
-		// TODO deal with rets error content
-	}
 	preferred, err := strconv.ParseBool(header.Get("Preferred"))
 	if err != nil {
 		preferred = false
@@ -173,6 +166,26 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 	blob, err := ioutil.ReadAll(body)
 	if err != nil {
 		return GetObjectResult{nil, err}
+	}
+
+	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
+	retsErrorMsg := RetsResponse{}
+	switch {
+	case err != nil:
+		retsError = false
+	case retsError:
+		type Rets struct {
+			XMLName xml.Name `xml:"RETS"`
+			ReplyCode int `xml:"ReplyCode,attr"`
+			ReplyText string `xml:"ReplyText,attr"`
+		}
+		response := Rets{}
+		err = xml.Unmarshal(blob, &response)
+		if err != nil {
+			return GetObjectResult{nil, err}
+		}
+		retsErrorMsg.ReplyCode = response.ReplyCode
+		retsErrorMsg.ReplyText = response.ReplyText
 	}
 
 	object := GetObject{

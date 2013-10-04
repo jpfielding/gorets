@@ -84,8 +84,7 @@ Content-ID: 123457
 Object-ID: 4
 RETS-Error: 1
 
-<RETS ReplyCode="20403" ReplyText="There is no object with that
-Object-ID"/>
+<RETS ReplyCode="20403" ReplyText="There is no object with that Object-ID"/>
 
 --simple boundary
 Content-Type: image/jpeg
@@ -153,6 +152,8 @@ func TestGetObjects(t *testing.T) {
 		t.Errorf("error parsing error at object %d", counter)
 	}
 	AssertEquals(t, "bad value", "text/xml", o4.ContentType)
+	AssertEquals(t, "bad value", "There is no object with that Object-ID", o4.RetsErrorMessage.ReplyText)
+	AssertEqualsInt(t, "bad value", 20403, o4.RetsErrorMessage.ReplyCode)
 
 	r5 := <- results
 	if r5.Err != nil {
