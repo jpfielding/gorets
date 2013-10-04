@@ -98,11 +98,7 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	}
 
 	contentType := resp.Header.Get("Content-type")
-fmt.Println("CONTENT-TYPE: ", contentType)
 	boundary := extractBoundary(contentType)
-fmt.Println("RESP: ", resp)
-tmp, err := ioutil.ReadAll(resp.Body)
-fmt.Println("BODY: ", string(tmp))
 	if boundary == "" {
 		return parseGetObjectResult(resp.Header, resp.Body), nil
 	}
