@@ -169,7 +169,7 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 	}
 
 	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
-	retsErrorMsg := RetsResponse{}
+	retsErrorMsg := RetsResponse{0, "Success"}
 	switch {
 	case err != nil:
 		retsError = false
