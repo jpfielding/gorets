@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"net/textproto"
 	"mime/multipart"
 	"strconv"
 	"strings"
@@ -106,10 +107,59 @@ func (s *Session) GetObject(r GetObjectRequest) (*GetObjectResult, error) {
 	contentType := resp.Header.Get("Content-type")
 	boundary := extractBoundary(contentType)
 	if boundary == "" {
-		return parseGetObjectResult(resp.Body)
+		return parseGetObjectResult(resp.Header, resp.Body)
 	}
 
 	return parseGetObjectsResult(boundary, resp.Body)
+}
+
+func parseGetObjectResult(header http.Header, body io.ReadCloser) (*GetObjectResult,error) {
+	data := make(chan GetObject)
+	result := GetObjectResult{
+		Objects: data,
+	}
+	go func() {
+		defer body.Close()
+		defer close(data)
+		object, err := parseHeadersAndStream(textproto.MIMEHeader(header), body)
+		if err != nil {
+			result.ProcessingFailure = err
+			return
+		}
+		data <- *object
+	}()
+	return &result, nil
+}
+
+func parseGetObjectsResult(boundary string, body io.ReadCloser) (*GetObjectResult,error) {
+	data := make(chan GetObject)
+	result := GetObjectResult{
+		 Objects: data,
+	}
+	go func() {
+		defer body.Close()
+		defer close(data)
+		partsReader := multipart.NewReader(body, boundary)
+		for {
+			part, err := partsReader.NextPart()
+			switch {
+			case err == io.EOF:
+				return
+			case err != nil:
+				result.ProcessingFailure = err
+				return
+			}
+			object, err := parseHeadersAndStream(part.Header, part)
+			if err != nil {
+				result.ProcessingFailure = err
+				return
+			}
+
+			data <- *object
+		}
+	} ()
+
+	return &result, nil
 }
 
 /** TODO - this is the lazy mans version, this needs to be addressed properly */
@@ -124,70 +174,44 @@ func extractBoundary(header string) (string) {
 	return ""
 }
 
-func parseGetObjectResult(body io.ReadCloser) (*GetObjectResult,error) {
-//	data := make(chan []string)
-//	_ <- data
-
-	return nil, nil
-}
-
-func parseGetObjectsResult(boundary string, body io.ReadCloser) (*GetObjectResult,error) {
-	data := make(chan GetObject)
-	result := GetObjectResult{
-		 Objects: data,
+func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (*GetObject, error) {
+	objectId, err := strconv.ParseInt(header.Get("object-id"),10, 64)
+	if err != nil {
+		return nil, err
 	}
-	go func() {
-		partsReader := multipart.NewReader(body, boundary)
-		defer body.Close()
-		defer close(data)
-		for {
-			part, err := partsReader.NextPart()
-			if err != nil {
-				result.ProcessingFailure = err
-				return
-			}
-			objectId, err := strconv.ParseInt(part.Header.Get("object-id"),10, 64)
-			if err != nil {
-				result.ProcessingFailure = err
-				return
-			}
-			retsError, err := strconv.ParseBool(part.Header.Get("RETS-Error"))
-			retsErrorMsg := RetsResponse{}
-			switch {
-			case err != nil:
-					retsError = false
-			case retsError:
-				// TODO deal with rets error content
-			}
-			preferred, err := strconv.ParseBool(part.Header.Get("Preferred"))
-			if err != nil {
-				preferred = false
-			}
-			objectData := make(map[string]string)
-			// TODO extract object data header values
-			blob, err := ioutil.ReadAll(part)
-			if err != nil {
-				result.ProcessingFailure = err
-				return
-			}
+	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
+	retsErrorMsg := RetsResponse{}
+	switch {
+	case err != nil:
+		retsError = false
+	case retsError:
+		// TODO deal with rets error content
+	}
+	preferred, err := strconv.ParseBool(header.Get("Preferred"))
+	if err != nil {
+		preferred = false
+	}
+	objectData := make(map[string]string)
+	// TODO extract object data header values
+	blob, err := ioutil.ReadAll(body)
+	if err != nil {
+		return nil, err
+	}
 
-			object := GetObject{
-				Uid: part.Header.Get("UID"),
-				ContentId: part.Header.Get("Content-ID"),
-				ContentType: part.Header.Get("Content-Type"),
-				ObjectId: int(objectId),
-				Description: part.Header.Get("Description"),
-				SubDescription: part.Header.Get("Sub-Description"),
-				Location: part.Header.Get("Location"),
-				RetsError: retsError,
-				RetsErrorMessage: retsErrorMsg,
-				Preferred: preferred,
-				ObjectData: objectData,
-				Blob: blob,
-			}
-			data <- object
-		}
-	} ()
+	object := GetObject{
+		Uid: header.Get("UID"),
+		ContentId: header.Get("Content-ID"),
+		ContentType: header.Get("Content-Type"),
+		ObjectId: int(objectId),
+		Description: header.Get("Description"),
+		SubDescription: header.Get("Sub-Description"),
+		Location: header.Get("Location"),
+		RetsError: retsError,
+		RetsErrorMessage: retsErrorMsg,
+		Preferred: preferred,
+		ObjectData: objectData,
+		Blob: blob,
+	}
 
-	return &result, nil
+	return &object, nil
 }

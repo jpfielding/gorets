@@ -108,4 +108,8 @@ func TestGetObjects(t *testing.T) {
 	AssertEqualsInt(t, "bad value", 5, o5.ObjectId)
 	AssertEquals(t, "bad value", "<binary data 5>", string(o5.Blob))
 
+	if objects.ProcessingFailure != nil {
+		t.Errorf("error parsing body at object %d: %s", counter, objects.ProcessingFailure.Error())
+	}
+
 }
