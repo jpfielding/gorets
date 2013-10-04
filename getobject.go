@@ -63,7 +63,6 @@ func (s *Session) GetObject(r GetObjectRequest) (*GetObjectResult, error) {
 	values := url.Values{}
 	values.Add("Resource", r.Resource)
 	values.Add("Type", r.Type)
-	values.Add("UID", r.Uid)
 	values.Add("object-id", r.ObjectId)
 
 	// optional
