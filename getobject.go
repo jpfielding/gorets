@@ -50,9 +50,10 @@ type GetObjectRequest struct {
 	Type,
 	Uid,
 	Id,
-	ObjectId,
+	/** '*' or a ':' separated list of #s */
+	ObjectId string
 	/* TODO support extracting these fields back from the server 5.4.2 */
-	ObjectData string
+	ObjectData []string
 	/* 5.4.1 */
 	Location int
 }
@@ -73,6 +74,7 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	}
 
 	// one or the other _MUST_ be present
+	optionalString("ObjectData", strings.Join(r.ObjectData,","))
 	optionalString("ID", r.Id)
 	optionalString("UID", r.Uid)
 
