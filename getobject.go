@@ -39,8 +39,8 @@ type GetObject struct {
 }
 
 type GetObjectResult struct {
-	Objects <-chan GetObject
-	ProcessingFailure error
+	Object *GetObject
+	Err error
 }
 
 type GetObjectRequest struct {
@@ -58,7 +58,7 @@ type GetObjectRequest struct {
 }
 
 /* */
-func (s *Session) GetObject(r GetObjectRequest) (*GetObjectResult, error) {
+func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) {
 	// required
 	values := url.Values{}
 	values.Add("Resource", r.Resource)
@@ -96,35 +96,24 @@ func (s *Session) GetObject(r GetObjectRequest) (*GetObjectResult, error) {
 	contentType := resp.Header.Get("Content-type")
 	boundary := extractBoundary(contentType)
 	if boundary == "" {
-		return parseGetObjectResult(resp.Header, resp.Body)
+		return parseGetObjectResult(resp.Header, resp.Body), nil
 	}
 
-	return parseGetObjectsResult(boundary, resp.Body)
+	return parseGetObjectsResult(boundary, resp.Body), nil
 }
 
-func parseGetObjectResult(header http.Header, body io.ReadCloser) (*GetObjectResult,error) {
-	data := make(chan GetObject)
-	result := GetObjectResult{
-		Objects: data,
-	}
+func parseGetObjectResult(header http.Header, body io.ReadCloser) (<-chan GetObjectResult) {
+	data := make(chan GetObjectResult)
 	go func() {
 		defer body.Close()
 		defer close(data)
-		object, err := parseHeadersAndStream(textproto.MIMEHeader(header), body)
-		if err != nil {
-			result.ProcessingFailure = err
-			return
-		}
-		data <- *object
+		data <- parseHeadersAndStream(textproto.MIMEHeader(header), body)
 	}()
-	return &result, nil
+	return data
 }
 
-func parseGetObjectsResult(boundary string, body io.ReadCloser) (*GetObjectResult,error) {
-	data := make(chan GetObject)
-	result := GetObjectResult{
-		 Objects: data,
-	}
+func parseGetObjectsResult(boundary string, body io.ReadCloser) (<-chan GetObjectResult) {
+	data := make(chan GetObjectResult)
 	go func() {
 		defer body.Close()
 		defer close(data)
@@ -135,20 +124,14 @@ func parseGetObjectsResult(boundary string, body io.ReadCloser) (*GetObjectResul
 			case err == io.EOF:
 				return
 			case err != nil:
-				result.ProcessingFailure = err
+				data <- GetObjectResult{nil,err}
 				return
 			}
-			object, err := parseHeadersAndStream(part.Header, part)
-			if err != nil {
-				result.ProcessingFailure = err
-				return
-			}
-
-			data <- *object
+			data <- parseHeadersAndStream(part.Header, part)
 		}
 	} ()
 
-	return &result, nil
+	return data
 }
 
 /** TODO - this is the lazy mans version, this needs to be addressed properly */
@@ -163,10 +146,10 @@ func extractBoundary(header string) (string) {
 	return ""
 }
 
-func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (*GetObject, error) {
+func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (GetObjectResult) {
 	objectId, err := strconv.ParseInt(header.Get("object-id"),10, 64)
 	if err != nil {
-		return nil, err
+		return GetObjectResult{nil, err}
 	}
 	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
 	retsErrorMsg := RetsResponse{}
@@ -184,7 +167,7 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (*Ge
 	// TODO extract object data header values
 	blob, err := ioutil.ReadAll(body)
 	if err != nil {
-		return nil, err
+		return GetObjectResult{nil, err}
 	}
 
 	object := GetObject{
@@ -202,5 +185,5 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (*Ge
 		Blob: blob,
 	}
 
-	return &object, nil
+	return GetObjectResult{&object, nil}
 }

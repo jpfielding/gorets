@@ -25,13 +25,14 @@ func TestGetObject(t *testing.T) {
 	var body string = `<binary data 1>`
 	reader := ioutil.NopCloser(bytes.NewReader([]byte(body)))
 
-	objects, err := parseGetObjectResult(header, reader)
-	if err != nil {
-		t.Error("error parsing multipart: "+ err.Error())
-	}
+	results := parseGetObjectResult(header, reader)
+	result := <- results
 
 	counter := 0
-	o := <- objects.Objects
+	o := result.Object
+	if result.Err != nil {
+		t.Error("error parsing multipart: "+ result.Err.Error())
+	}
 	if !o.Preferred {
 		t.Errorf("error parsing preferred at object %d", counter)
 	}
@@ -106,13 +107,11 @@ func TestGetObjects(t *testing.T) {
 
 	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
 
-	objects, err := parseGetObjectsResult(extracted, body)
-	if err != nil {
-		t.Error("error parsing multipart: "+ err.Error())
-	}
+	results := parseGetObjectsResult(extracted, body)
 
 	counter := 0
-	o1 := <- objects.Objects
+	r1 := <- results
+	o1 := r1.Object
 	if !o1.Preferred {
 		t.Errorf("error parsing preferred at object %d", counter)
 	}
@@ -121,34 +120,50 @@ func TestGetObjects(t *testing.T) {
 	AssertEqualsInt(t, "bad value", 1, o1.ObjectId)
 	AssertEquals(t, "bad value", "<binary data 1>", string(o1.Blob))
 
-	o2 := <- objects.Objects
+	if r1.Err != nil {
+		t.Errorf("error parsing body at object %d: %s", counter, r1.Err.Error())
+	}
+
+	r2 := <- results
+	o2 := r2.Object
 	AssertEqualsInt(t, "bad value", 2, o2.ObjectId)
 	AssertEquals(t, "bad uid", "1a234234234", o2.Uid)
 
-	o3 := <- objects.Objects
+	if r2.Err != nil {
+		t.Errorf("error parsing body at object %d: %s", counter, r2.Err.Error())
+	}
+
+	r3 := <- results
+	o3 := r3.Object
 	AssertEqualsInt(t, "bad value", 3, o3.ObjectId)
 	AssertEquals(t, "bad value", "Outhouse", o3.Description)
 	AssertEquals(t, "bad value", "The urinal", o3.SubDescription)
 
-	o4 := <- objects.Objects
+	if r3.Err != nil {
+		t.Errorf("error parsing body at object %d: %s", counter, r3.Err.Error())
+	}
+
+	r4 := <- results
+	o4 := r4.Object
 	if !o4.RetsError {
 		t.Errorf("error parsing error at object %d", counter)
 	}
 	AssertEquals(t, "bad value", "text/xml", o4.ContentType)
 
-	if objects.ProcessingFailure != nil {
-		t.Errorf("error parsing body at object %d: %s", counter, objects.ProcessingFailure.Error())
+	if r4.Err != nil {
+		t.Errorf("error parsing body at object %d: %s", counter, r4.Err.Error())
 	}
 
-	o5 := <- objects.Objects
+	r5 := <- results
+	o5 := r5.Object
 	AssertEquals(t, "bad value", "http://www.simpleboundary.com/image-5.jpg", o5.Location)
 	AssertEquals(t, "bad value", "image/jpeg", o5.ContentType)
 	AssertEquals(t, "bad value", "123456", o5.ContentId)
 	AssertEqualsInt(t, "bad value", 5, o5.ObjectId)
 	AssertEquals(t, "bad value", "<binary data 5>", string(o5.Blob))
 
-	if objects.ProcessingFailure != nil {
-		t.Errorf("error parsing body at object %d: %s", counter, objects.ProcessingFailure.Error())
+	if r5.Err != nil {
+		t.Errorf("error parsing body at object %d: %s", counter, r5.Err.Error())
 	}
 
 }
