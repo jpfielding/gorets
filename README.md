@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/jpfielding/gorets"
+	"io"
 )
 
 func main () {
@@ -25,13 +26,17 @@ func main () {
 	loginUrl := flag.String("login-url", "", "Login URL for the RETS server")
 	userAgent := flag.String("user-agent","Threewide/1.0","User agent for the RETS client")
 	userAgentPw := flag.String("user-agent-pw","","User agent authentication")
+	logFile := flag.String("log-file","","")
 
 	flag.Parse()
 
-	logger,err := os.Create("/Users/jp/Desktop/wire.log")
-	defer logger.Close()
-	if err != nil {
-		panic(err)
+	var logger io.WriteCloser = nil
+	if *logFile != "" {
+		logger,err := os.Create(*logFile)
+		if err != nil {
+			panic(err)
+		}
+		defer logger.Close()
 	}
 	// should we throw an err here too?
 	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, logger)
@@ -125,5 +130,4 @@ func main () {
 
 	session.Logout(capability.Logout)
 }
-
 ```
