@@ -15,20 +15,26 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"github.com/jpfielding/gorets"
-	"strconv"
 )
 
 func main () {
 	username := flag.String("username", "", "Username for the RETS server")
 	password := flag.String("password", "", "Password for the RETS server")
 	loginUrl := flag.String("login-url", "", "Login URL for the RETS server")
-	userAgent := flag.String("user-agent","Threewide/1.5","User agent for the RETS client")
+	userAgent := flag.String("user-agent","Threewide/1.0","User agent for the RETS client")
+	userAgentPw := flag.String("user-agent-pw","","User agent authentication")
 
 	flag.Parse()
 
+	logger,err := os.Create("/Users/jp/Desktop/wire.log")
+	defer logger.Close()
+	if err != nil {
+		panic(err)
+	}
 	// should we throw an err here too?
-	session, err := gorets.NewSession(*username, *password, *userAgent, "")
+	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, logger)
 	if err != nil {
 		panic(err)
 	}
@@ -37,7 +43,10 @@ func main () {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(capability)
+	fmt.Println("Login: ", capability.Login)
+	fmt.Println("Metadata: ", capability.GetMetadata)
+	fmt.Println("Search: ", capability.Search)
+	fmt.Println("GetObject: ", capability.GetObject)
 
 	err = session.Get(capability.Get)
 	if err != nil {
@@ -47,13 +56,13 @@ func main () {
 	mUrl := capability.GetMetadata
 	format := "COMPACT"
 	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-SYSTEM", "0"})
-	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
-	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
-	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})
+//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
+//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
+//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})
 
 	req := gorets.SearchRequest{
 		Url: capability.Search,
-		Query: "((LocaleListingStatus=|ACTIVE-CORE),~(VOWList=0))",
+		Query: "((LocaleListingStatus=|ACTIVE-CORE))",
 		SearchType: "Property",
 		Class: "ALL",
 		Format: "COMPACT-DECODED",
@@ -79,7 +88,7 @@ func main () {
 		fmt.Println(filter(row))
 	}
 
-	all,err := session.GetObject(gorets.GetObjectRequest{
+	one,err := session.GetObject(gorets.GetObjectRequest{
 		Url: capability.GetObject,
 		Resource: "Property",
 		Type: "Thumbnail",
@@ -89,12 +98,32 @@ func main () {
 	if err != nil {
 		panic(err)
 	}
-	for r := range all {
+	for r := range one {
+		if err != nil {
+			panic(err)
+		}
 		o := r.Object
-		fmt.Println(o.ContentType, o.ContentId, strconv.Itoa(o.ObjectId), len(o.Blob))
+		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
-
+	all,err := session.GetObject(gorets.GetObjectRequest{
+		Url: capability.GetObject,
+		Resource: "Property",
+		Type: "Thumbnail",
+		Id: "10388845716",
+		ObjectId: "*",
+	})
+	if err != nil {
+		panic(err)
+	}
+	for r := range all {
+		if err != nil {
+			panic(err)
+		}
+		o := r.Object
+		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
+	}
 
 	session.Logout(capability.Logout)
 }
+
 ```
