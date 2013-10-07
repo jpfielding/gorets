@@ -15,3 +15,4 @@ func TestUaAuth(t *testing.T) {
 	uauth2 := CalculateUaAuthHeader("user-agent","user-agent-pw", "","","rets-version")
 	AssertEquals(t, "bad auth", "Digest 73cc7ccfe417292b1155c5ccee7fbdab", uauth2)
 }
+

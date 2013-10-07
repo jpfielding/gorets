@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
+	"io"
 )
 
 const DEFAULT_TIMEOUT int = 300000
@@ -55,17 +56,26 @@ type RetsResponse struct {
 	ReplyText string
 }
 
-func NewSession(user, pw, userAgent, userAgentPw string) (*Session, error) {
+func NewSession(user, pw, userAgent, userAgentPw string, logger io.WriteCloser) (*Session, error) {
 	var session Session
 	session.Username = user
 	session.Password = pw
 	session.Version = "RETS/1.5"
 	session.UserAgent = userAgent
+	session.UserAgentPassword = userAgentPw
 	session.HttpMethod = "GET"
 	session.Accept = "*/*"
 
-	transport := RetsTransport{
-		transport: http.DefaultTransport,
+	transport := http.DefaultTransport
+	if logger != nil {
+		dial := WireLog(logger)
+		transport = &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			Dial: dial,
+		}
+	}
+	retsTransport := RetsTransport{
+		transport: transport,
 		session: session,
 	}
 	jar, err := cookiejar.New(nil)
@@ -73,7 +83,7 @@ func NewSession(user, pw, userAgent, userAgentPw string) (*Session, error) {
 		return nil, err
 	}
 	session.Client = http.Client{
-		Transport: &transport,
+		Transport: &retsTransport,
 		Jar: jar,
 	}
 	return &session, nil
@@ -91,16 +101,16 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	req.Header.Add(ACCEPT, t.session.Accept)
 
 	if t.session.UserAgentPassword != "" {
-		requestId := resp.Header.Get(RETS_REQUEST_ID)
-		sessionId,err := req.Cookie(RETS_SESSION_ID)
-		if err != nil {
-			return nil, err
+		requestId := req.Header.Get(RETS_REQUEST_ID)
+		sessionId := ""
+		if h,err := req.Cookie(RETS_SESSION_ID); err == nil {
+			sessionId = h.Value
 		}
 		uaAuthHeader := CalculateUaAuthHeader(
 			t.session.UserAgent,
 			t.session.UserAgentPassword,
 			requestId,
-			sessionId.Value,
+			sessionId,
 			t.session.Version,
 		)
 		req.Header.Add(RETS_UA_AUTH_HEADER, uaAuthHeader)

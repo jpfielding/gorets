@@ -18,7 +18,7 @@ func CalculateUaAuthHeader(userAgent, userAgentPw, requestId, sessionId, retsVer
 	io.WriteString(hasher, userAgent +":"+ userAgentPw)
 	secretHash := hex.EncodeToString(hasher.Sum(nil))
 
-	pieces := secretHash+":"+strings.TrimSpace(requestId)+":"+strings.TrimSpace(sessionId)+":"+retsVersion;
+	pieces := strings.Join([]string{secretHash,requestId,sessionId,retsVersion},":");
 
 	hasher.Reset()
 	io.WriteString(hasher, pieces)
