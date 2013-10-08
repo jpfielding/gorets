@@ -18,6 +18,9 @@ func (s *Session) Get(url string) (error) {
 	}
 
 	resp, err := s.Client.Do(req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 	_,err = ioutil.ReadAll(resp.Body)
 	if err != nil {

@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"strconv"
+	"net/url"
 )
 
 type CapabilityUrls struct {
@@ -42,7 +43,7 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 		return nil, err
 	}
 
-	urls, err := parseCapability(capabilities)
+	urls, err := parseCapability(url, capabilities)
 	if err != nil {
 		return nil, errors.New("unable to parse capabilites response: "+string(capabilities))
 	}
@@ -51,7 +52,7 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 
 
 
-func parseCapability(response []byte) (*CapabilityUrls, error){
+func parseCapability(url string, response []byte) (*CapabilityUrls, error){
 	type XmlRets struct {
 		XMLName xml.Name `xml:"RETS"`
 		ReplyCode int `xml:"ReplyCode,attr"`
@@ -86,15 +87,16 @@ func parseCapability(response []byte) (*CapabilityUrls, error){
 		values[key] = value
 	}
 
+
 	c := CapabilityUrls{}
-	c.Login = values["login"]
-	c.Action = values["action"]
-	c.Search = values["search"]
-	c.Get = values["get"]
-	c.GetObject = values["getobject"]
-	c.Logout = values["logout"]
-	c.GetMetadata = values["getmetadata"]
-	c.ChangePassword = values["changepassword"]
+	c.Login = prependHost(url, values["login"])
+	c.Action = prependHost(url, values["action"])
+	c.Search = prependHost(url, values["search"])
+	c.Get = prependHost(url, values["get"])
+	c.GetObject = prependHost(url, values["getobject"])
+	c.Logout = prependHost(url, values["logout"])
+	c.GetMetadata = prependHost(url, values["getmetadata"])
+	c.ChangePassword = prependHost(url, values["changepassword"])
 
 	c.TimeoutSeconds,_= strconv.ParseInt(values["timeoutseconds"],10,strconv.IntSize)
 	c.Response.ReplyCode = rets.ReplyCode
@@ -110,3 +112,18 @@ func parseCapability(response []byte) (*CapabilityUrls, error){
 	return &c, nil
 }
 
+func prependHost(login, other string) string {
+	otherUrl, err := url.Parse(other)
+	// todo do something with this err or kill it
+	if err != nil {
+		 return other
+	}
+	if otherUrl.Host != "" {
+		return other
+	}
+
+	loginUrl, err := url.Parse(login)
+	loginUrl.Path = otherUrl.Path
+
+	return loginUrl.String()
+}
