@@ -17,7 +17,7 @@ type WireLogConn struct {
 
 func (w *WireLogConn) Read(b []byte) (n int, err error) {
 	read, err := w.conn.Read(b)
-	w.Write(b[0:read])
+	w.log.Write(b[0:read])
 	return read, err
 }
 func (w *WireLogConn) Write(b []byte) (n int, err error) {
