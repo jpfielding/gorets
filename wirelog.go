@@ -8,11 +8,25 @@ import (
 	"net"
 	"time"
 )
+/** this just makes the return type for the Dialer function reasonable */
+type Dialer func(network, addr string) (net.Conn, error)
 
+/** create a net.Dial function based on this log */
+func WireLog(log io.WriteCloser) Dialer {
+	return func(network, addr string) (net.Conn, error) {
+		conn, err := net.Dial(network, addr)
+		wire := WireLogConn{
+			log: log,
+			conn: conn,
+		}
+		return &wire, err
+	}
+}
+
+/** channels might make this perform better, though we'ld have to copy the []byte to do that */
 type WireLogConn struct {
 	log io.WriteCloser
 	conn net.Conn
-	// TODO make use of channels to make this perform well
 }
 
 func (w *WireLogConn) Read(b []byte) (n int, err error) {
@@ -42,18 +56,5 @@ func (w *WireLogConn) SetReadDeadline(t time.Time) error {
 }
 func (w *WireLogConn) SetWriteDeadline(t time.Time) error {
 	return w.conn.SetWriteDeadline(t)
-}
-
-type Dialer func(network, addr string) (net.Conn, error)
-
-func WireLog(log io.WriteCloser) Dialer {
-	return func(network, addr string) (net.Conn, error) {
-		conn, err := net.Dial(network, addr)
-		wire := WireLogConn{
-			log: log,
-			conn: conn,
-		}
-		return &wire, err
-	}
 }
 
