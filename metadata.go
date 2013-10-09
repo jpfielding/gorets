@@ -1,31 +1,57 @@
 /**
 	extraction of the data pieces describing a RETS system
-
-	TODO - this class is ripe for removing redundancy
-
-	TODO - total rewrite as a sax style parser, to deal with redundant code and * requests
  */
 package gorets
 
 import (
-	"bytes"
 	"encoding/xml"
-	"io/ioutil"
+	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"strconv"
 )
 
 type Metadata struct {
-	MSystem MSystem
-	MResources MResources
-	MClasses MClasses
-	MTables MTables
-	MLookups MLookups
-	MLookupTypes MLookupTypes
+	Rets RetsResponse
+	System MSystem
+	Resources MData
+	Classes map[string]MData
+	Tables map[string]MData
+	Lookups map[string]MData
+	LookupTypes map[string]MData
+}
+
+type MSystem struct {
+	Date, Version string
+	Id, Description string
+	Comments string
+}
+
+/* the common structure */
+type MData struct {
+	Id, Date, Version string
+	Columns []string
+	Rows [][]string
+}
+
+/** cached lookup */
+type Indexer func(col string, row int) string
+/** create the cache */
+func (m *MData) Indexer() Indexer {
+	index := make(map[string]int)
+	for i, c := range m.Columns {
+		index[c] = i
+	}
+	return func(col string, row int) string {
+		return m.Rows[row][index[col]]
+	}
 }
 
 type MetadataRequest struct {
+	/* RETS request options */
 	Url, Format, MType, Id string
 }
 
@@ -46,125 +72,122 @@ func (s *Session) GetMetadata(r MetadataRequest) (*Metadata, error) {
 	}
 
 	resp, err := s.Client.Do(req)
-
-	body,err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
-	metadata := Metadata{}
-
-	// TOOD remove the needless repetition
-	switch strings.ToUpper(r.Url) {
-	case "METADATA-SYSTEM":
-		tmp, err := parseMSystem(body)
-		if err != nil {
-			return nil, err
-		}
-		metadata.MSystem = *tmp
-	case "METADATA-RESOURCE":
-		tmp, err := parseMResources(body)
-		if err != nil {
-			return nil, err
-		}
-		metadata.MResources = *tmp
-	case "METADATA-CLASS":
-		tmp, err := parseMClasses(body)
-		if err != nil {
-			return nil, err
-		}
-		metadata.MClasses = *tmp
-	case "METADATA-TABLE":
-		tmp, err := parseMTables(body)
-		if err != nil {
-			return nil, err
-		}
-		metadata.MTables = *tmp
-	case "METADATA-LOOKUP":
-		tmp, err := parseMLookups(body)
-		if err != nil {
-			return nil, err
-		}
-		metadata.MLookups = *tmp
-	case "METADATA-LOOKUP_TYPE":
-		tmp, err := parseMLookupTypes(body)
-		if err != nil {
-			return nil, err
-		}
-		metadata.MLookupTypes = *tmp
+	switch r.Format {
+	case "COMPACT":
+		return parseMetadataCompactResult(resp.Body)
+	case "STANDARD-XML":
+		return parseMetadataStandardXml(resp.Body)
 	}
 
+	return nil, errors.New("unknows metadata format")
+}
 
+func parseMetadataCompactResult(body io.ReadCloser) (*Metadata,error) {
+	parser := xml.NewDecoder(body)
+
+	metadata := Metadata{}
+	metadata.Classes = make(map[string]MData)
+	metadata.Tables = make(map[string]MData)
+	metadata.Lookups = make(map[string]MData)
+	metadata.LookupTypes = make(map[string]MData)
+	for {
+		token, err := parser.Token()
+		if err != nil {
+			if err == io.EOF {
+				return &metadata, nil
+			}
+			return nil, err
+		}
+		switch t := token.(type) {
+		case xml.StartElement:
+			elmt := xml.StartElement(t)
+			switch elmt.Name.Local {
+			case "RETS":
+				attrs := make(map[string]string)
+				for _,v := range elmt.Attr {
+					attrs[strings.ToLower(v.Name.Local)] = v.Value
+				}
+				code,err := strconv.ParseInt(attrs["replycode"],10,16)
+				if err != nil {
+					return nil, err
+				}
+				if code != 0 {
+					return nil, errors.New(attrs["replytext"])
+				}
+				metadata.Rets.ReplyCode = int(code)
+				metadata.Rets.ReplyText = attrs["replytext"]
+			case "METADATA-SYSTEM":
+				type XmlSystem struct {
+					SystemId string `xml:"SystemID,attr"`
+					Description string `xml:"SystemDescription,attr"`
+				}
+				type XmlMetadataSystem struct {
+					Version string `xml:"Version,attr"`
+					Date string `xml:"Date,attr"`
+					System XmlSystem `xml:"SYSTEM"`
+					Comments string `xml:"COMMENTS"`
+				}
+				xms := XmlMetadataSystem{}
+				err := parser.DecodeElement(&xms, &t)
+				if err != nil {
+					return nil, err
+				}
+				metadata.System.Version = xms.Version
+				metadata.System.Date = xms.Date
+				metadata.System.Comments = strings.TrimSpace(xms.Comments)
+				metadata.System.Id = xms.System.SystemId
+				metadata.System.Description = xms.System.Description
+			case "METADATA-RESOURCE", "METADATA-CLASS", "METADATA-TABLE", "METADATA-LOOKUP","METADATA-LOOKUP_TYPE":
+				type XmlMetadataElement struct {
+					Resource string `xml:"Resource,attr"`
+					/* only valid for table */
+					Class string `xml:"Class,attr"`
+					/* only valid for lookup_type */
+					Lookup string `xml:"Lookup,attr"`
+					Version string `xml:"Version,attr"`
+					Date string `xml:"Date,attr"`
+					Columns string `xml:"COLUMNS"`
+					Data []string `xml:"DATA"`
+				}
+				xme := XmlMetadataElement{}
+				err := parser.DecodeElement(&xme,&t)
+				if err != nil {
+					fmt.Println("failed to decode: ", err)
+					return nil, err
+				}
+				data := *extractMap(xme.Columns, xme.Data)
+				data.Date = xme.Date
+				if err != nil {
+					return nil, err
+				}
+				data.Version = xme.Version
+				data.Id = xme.Resource
+				switch elmt.Name.Local {
+				case "METADATA-RESOURCE":
+					metadata.Resources = data
+				case "METADATA-CLASS":
+					metadata.Classes[data.Id] = data
+				case "METADATA-TABLE":
+					data.Id = xme.Resource +":"+ xme.Class
+					metadata.Tables[data.Id] = data
+				case "METADATA-LOOKUP":
+					metadata.Lookups[data.Id] = data
+				case "METADATA-LOOKUP_TYPE":
+					data.Id = xme.Resource +":"+ xme.Lookup
+					metadata.LookupTypes[data.Id] = data
+				}
+			}
+		}
+	}
 	return &metadata, nil
 }
 
-type MSystem struct {
-	Version, Date string
-	Id, Description string
-	Comments string
-}
-
-func parseMSystem(response []byte) (*MSystem, error) {
-	type XmlMSystem struct {
-		Version string `xml:"Version,attr"`
-		Date string `xml:"Date,attr"`
-		Comments string `xml:"COMMENTS"`
-	}
-	type XmlSystem struct {
-		SystemId string `xml:"SystemID,attr"`
-		Description string `xml:"SystemDescription,attr"`
-	}
-	type XmlData struct {
-		XMLName xml.Name `xml:"RETS"`
-		ReplyCode int `xml:"ReplyCode,attr"`
-		ReplyText string `xml:"ReplyText,attr"`
-		MSystem XmlMSystem `xml:"METADATA-SYSTEM"`
-		System XmlSystem `xml:"SYSTEM"`
-	}
-
-	decoder := xml.NewDecoder(bytes.NewBuffer(response))
-	decoder.Strict = false
-
-	xms := XmlData{}
-	err := decoder.Decode(&xms)
-	if err != nil {
-		return nil, err
-	}
-
-	// transfer the contents to the public struct
-	return &MSystem{
-		Version: xms.MSystem.Version,
-		Date: xms.MSystem.Date,
-		Comments: strings.TrimSpace(xms.MSystem.Comments),
-		Id: xms.System.SystemId,
-		Description: xms.System.Description,
-	}, nil
-}
-
-
 const delim = "	"
-
-/* the common structure */
-type MData struct {
-	Version, Date string
-	Columns []string
-	Rows [][]string
-}
-
-/** cached lookup */
-type Indexer func(col string, row int) string
-/** create the cache */
-func (m *MData) Indexer() Indexer {
-	index := make(map[string]int)
-	for i, c := range m.Columns {
-		index[c] = i
-	}
-	return func(col string, row int) string {
-		return m.Rows[row][index[col]]
-	}
-}
-
 /** extract a map of fields from columns and rows */
 func extractMap(cols string, rows []string) (*MData) {
 	data := MData{}
@@ -178,196 +201,7 @@ func extractMap(cols string, rows []string) (*MData) {
 	return &data
 }
 
-type MResources struct {
-	MData MData
-}
 
-func parseMResources(response []byte) (*MResources, error) {
-	type XmlResource struct {
-		Version string `xml:"Version,attr"`
-		Date string `xml:"Date,attr"`
-		Columns string `xml:"COLUMNS"`
-		Data []string `xml:"DATA"`
-	}
-	type XmlData struct {
-		XMLName xml.Name `xml:"RETS"`
-		ReplyCode int `xml:"ReplyCode,attr"`
-		ReplyText string `xml:"ReplyText,attr"`
-		Info XmlResource `xml:"METADATA-RESOURCE"`
-	}
-
-	decoder := xml.NewDecoder(bytes.NewBuffer(response))
-	decoder.Strict = false
-
-	xms := XmlData{}
-	err := decoder.Decode(&xms)
-	if err != nil {
-		return nil, err
-	}
-
-	// remove the first and last chars
-	data := extractMap(xms.Info.Columns, xms.Info.Data)
-	data.Date = xms.Info.Date
-	data.Version = xms.Info.Version
-
-	// transfer the contents to the public struct
-	return &MResources{
-		MData: *data,
-	}, nil
-}
-
-type MClasses struct {
-	MData MData
-}
-
-func parseMClasses(response []byte) (*MClasses, error) {
-	type XmlClass struct {
-		Resource string `xml:"Resource,attr"`
-		Version string `xml:"Version,attr"`
-		Date string `xml:"Date,attr"`
-		Columns string `xml:"COLUMNS"`
-		Data []string `xml:"DATA"`
-	}
-	type XmlData struct {
-		XMLName xml.Name `xml:"RETS"`
-		ReplyCode int `xml:"ReplyCode,attr"`
-		ReplyText string `xml:"ReplyText,attr"`
-		Info XmlClass `xml:"METADATA-CLASS"`
-	}
-
-	decoder := xml.NewDecoder(bytes.NewBuffer(response))
-	decoder.Strict = false
-
-	xms := XmlData{}
-	err := decoder.Decode(&xms)
-	if err != nil {
-		return nil, err
-	}
-
-	// remove the first and last chars
-	data := extractMap(xms.Info.Columns, xms.Info.Data)
-	data.Date = xms.Info.Date
-	data.Version = xms.Info.Version
-
-	// transfer the contents to the public struct
-	return &MClasses{
-		MData: *data,
-	}, nil
-}
-
-type MTables struct {
-	MData MData
-}
-
-func parseMTables(response []byte) (*MTables, error) {
-	type XmlTable struct {
-		Resource string `xml:"Resource,attr"`
-		Version string `xml:"Version,attr"`
-		Date string `xml:"Date,attr"`
-		Columns string `xml:"COLUMNS"`
-		Data []string `xml:"DATA"`
-	}
-	type XmlData struct {
-		XMLName xml.Name `xml:"RETS"`
-		ReplyCode int `xml:"ReplyCode,attr"`
-		ReplyText string `xml:"ReplyText,attr"`
-		Info XmlTable `xml:"METADATA-TABLE"`
-	}
-
-	decoder := xml.NewDecoder(bytes.NewBuffer(response))
-	decoder.Strict = false
-
-	xms := XmlData{}
-	err := decoder.Decode(&xms)
-	if err != nil {
-		return nil, err
-	}
-
-	// remove the first and last chars
-	data := extractMap(xms.Info.Columns, xms.Info.Data)
-	data.Date = xms.Info.Date
-	data.Version = xms.Info.Version
-
-	// transfer the contents to the public struct
-	return &MTables{
-		MData: *data,
-	}, nil
-}
-
-type MLookups struct {
-	MData MData
-}
-
-func parseMLookups(response []byte) (*MLookups, error) {
-	type XmlTable struct {
-		Resource string `xml:"Resource,attr"`
-		Version string `xml:"Version,attr"`
-		Date string `xml:"Date,attr"`
-		Columns string `xml:"COLUMNS"`
-		Data []string `xml:"DATA"`
-	}
-	type XmlData struct {
-		XMLName xml.Name `xml:"RETS"`
-		ReplyCode int `xml:"ReplyCode,attr"`
-		ReplyText string `xml:"ReplyText,attr"`
-		Info XmlTable `xml:"METADATA-LOOKUP"`
-	}
-
-	decoder := xml.NewDecoder(bytes.NewBuffer(response))
-	decoder.Strict = false
-
-	xms := XmlData{}
-	err := decoder.Decode(&xms)
-	if err != nil {
-		return nil, err
-	}
-
-	// remove the first and last chars
-	data := extractMap(xms.Info.Columns, xms.Info.Data)
-	data.Date = xms.Info.Date
-	data.Version = xms.Info.Version
-
-	// transfer the contents to the public struct
-	return &MLookups{
-		MData: *data,
-	}, nil
-}
-
-type MLookupTypes struct {
-	MData MData
-}
-
-func parseMLookupTypes(response []byte) (*MLookupTypes, error) {
-	type XmlTable struct {
-		Resource string `xml:"Resource,attr"`
-		Version string `xml:"Version,attr"`
-		Date string `xml:"Date,attr"`
-		Columns string `xml:"COLUMNS"`
-		Data []string `xml:"DATA"`
-	}
-	type XmlData struct {
-		XMLName xml.Name `xml:"RETS"`
-		ReplyCode int `xml:"ReplyCode,attr"`
-		ReplyText string `xml:"ReplyText,attr"`
-		Info XmlTable `xml:"METADATA-LOOKUP_TYPE"`
-	}
-
-	decoder := xml.NewDecoder(bytes.NewBuffer(response))
-	decoder.Strict = false
-
-	xms := XmlData{}
-	err := decoder.Decode(&xms)
-	if err != nil {
-		return nil, err
-	}
-
-	// remove the first and last chars
-	data := extractMap(xms.Info.Columns, xms.Info.Data)
-	data.Date = xms.Info.Date
-	data.Version = xms.Info.Version
-
-	// transfer the contents to the public struct
-	return &MLookupTypes{
-		MData: *data,
-	}, nil
+func parseMetadataStandardXml(body io.ReadCloser) (*Metadata,error) {
+	return nil, errors.New("unsupported metadata format option")
 }
