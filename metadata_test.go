@@ -7,10 +7,11 @@ import (
 	"testing"
 )
 
+var retsResponse = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
+`
 
 var metadataSystem string =
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
-<METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+	`<METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <SYSTEM SystemID="SIRM" SystemDescription="MLS System"/>
 <COMMENTS>
 The System is provided to you by Systems.
@@ -19,7 +20,7 @@ The System is provided to you by Systems.
 </RETS>`
 
 func TestParseSystem(t *testing.T) {
-	ms, err := parseMSystem([]byte(metadataSystem))
+	ms, err := parseMSystem([]byte(retsResponse+metadataSystem))
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
@@ -28,8 +29,7 @@ func TestParseSystem(t *testing.T) {
 }
 
 var resource string =
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
-<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+	`<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	ResourceID	StandardName	VisibleName	Description	KeyField	ClassCount	ClassVersion	ClassDate	ObjectVersion	ObjectDate	SearchHelpVersion	SearchHelpDate	EditMaskVersion	EditMaskDate	LookupVersion	LookupDate	UpdateHelpVersion	UpdateHelpDate	ValidationExpressionVersion	ValidationExpressionDate	ValidationLookupVersion	ValidationLookupDate	ValidationExternalVersion	ValidationExternalDate	</COLUMNS>
 <DATA>	ActiveAgent	ActiveAgent	Agent	ActiveAgent	AgentKey	1	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
 <DATA>	Agent	Agent	Agent	Agent	AgentKey	1	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
@@ -38,7 +38,7 @@ var resource string =
 	`
 
 func TestParseResources(t *testing.T) {
-	ms, err := parseMResources([]byte(resource))
+	ms, err := parseMResources([]byte(retsResponse+resource))
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
@@ -54,8 +54,7 @@ func TestParseResources(t *testing.T) {
 
 
 var class string =
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
-<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+	`<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	ClassName	StandardName	VisibleName	Description	TableVersion	TableDate	UpdateVersion	UpdateDate	</COLUMNS>
 <DATA>	COM	MRIS Commercial	MRIS Commercial	MRIS_COM	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
 <DATA>	LOT	MRIS Lot Land	MRIS Lot Land	MRIS_LOT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
@@ -69,7 +68,7 @@ var class string =
 `
 
 func TestParseClass(t *testing.T) {
-	ms, err := parseMClasses([]byte(class))
+	ms, err := parseMClasses([]byte(retsResponse+class))
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
@@ -84,8 +83,7 @@ func TestParseClass(t *testing.T) {
 }
 
 var table string =
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
-<METADATA-TABLE Resource="ActiveAgent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+	`<METADATA-TABLE Resource="ActiveAgent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	SystemName	StandardName	LongName	DBName	ShortName	MaximumLength	DataType	Precision	Searchable	Interpretation	Alignment	UseSeparator	EditMaskID	LookupName	MaxSelect	Units	Index	Minimum	Maximum	Default	Required	SearchHelpID	Unique	</COLUMNS>
 <DATA>	AgentListingServiceName		ListingServiceName	X49076033	ListingServiceName	4000	Character		1		Left	0					1			0			0	</DATA>
 <DATA>	AgentKey		AgentKey	X74130	AgentKey	15	Long	0	1	Number	Right	0					1			0			1	</DATA>
@@ -96,7 +94,7 @@ var table string =
 `
 
 func TestParseTable(t *testing.T) {
-	ms, err := parseMTables([]byte(table))
+	ms, err := parseMTables([]byte(retsResponse+table))
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
@@ -110,8 +108,7 @@ func TestParseTable(t *testing.T) {
 }
 
 var lookup string =
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
-<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+	`<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	LookupName	VisibleName	Version	Date	</COLUMNS>
 <DATA>	COUNTIES_OR_REGIONS	Counties or Regions	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
 <DATA>	TAX_HISTORIC_DESIGNATION_TYPES	Tax Historic Designation Types	1.12.6	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
@@ -122,7 +119,7 @@ var lookup string =
 `
 
 func TestParseLookup(t *testing.T) {
-	ms, err := parseMLookups([]byte(lookup))
+	ms, err := parseMLookups([]byte(retsResponse+lookup))
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
@@ -136,8 +133,7 @@ func TestParseLookup(t *testing.T) {
 }
 
 var lookupType string =
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
-<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Lookup="COUNTIES_OR_REGIONS" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+	`<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Lookup="COUNTIES_OR_REGIONS" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	LongValue	ShortValue	Value	</COLUMNS>
 <DATA>	ALEUTIANS WEST-AK	ALEUTIANS WEST	85014594158	</DATA>
 <DATA>	ATASCOSA-TX	ATASCOSA	85014594154	</DATA>
@@ -148,7 +144,7 @@ var lookupType string =
 `
 
 func TestParseLookupType(t *testing.T) {
-	ms, err := parseMLookupTypes([]byte(lookupType))
+	ms, err := parseMLookupTypes([]byte(retsResponse+lookupType))
 	if err != nil {
 		t.Error("error parsing body: "+ err.Error())
 	}
