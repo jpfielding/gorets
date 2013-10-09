@@ -51,9 +51,8 @@ type GetObjectRequest struct {
 	Resource,
 	Type,
 	Uid,
-	Id,
-	/** '*' or a ':' separated list of #s */
-	ObjectId string
+	/** listing1:1:3:5,listing2:*,listing3:0 */
+	Id string
 	ObjectData []string
 	/* 5.4.1 */
 	Location int
@@ -78,7 +77,6 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	optionalString("UID", r.Uid)
 	// truly optional
 	optionalString("ObjectData", strings.Join(r.ObjectData,","))
-	optionalString("Content-Id", r.ObjectId)
 
 	optionalInt := func (name string, value int) {
 		if value >= 0 {
@@ -151,7 +149,7 @@ func extractBoundary(header string) (string) {
 }
 
 func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (GetObjectResult) {
-	objectId, err := strconv.ParseInt(header.Get("Object-Id"),10, 64)
+	objectId, err := strconv.ParseInt(header.Get("Object-ID"),10, 64)
 	if err != nil {
 		return GetObjectResult{nil, err}
 	}
@@ -192,7 +190,7 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 	object := GetObject{
 		// required
 		ObjectId: int(objectId),
-		ContentId: header.Get("Content-Id"),
+		ContentId: header.Get("Content-ID"),
 		ContentType: header.Get("Content-Type"),
 		// optional
 		Uid: header.Get("UID"),
