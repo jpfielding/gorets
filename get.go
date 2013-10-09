@@ -21,11 +21,11 @@ func (s *Session) Get(url string) (error) {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 	_,err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
+	resp.Body.Close()
 
 	return nil
 }
