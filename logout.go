@@ -19,12 +19,12 @@ func (s *Session) Logout(logoutUrl string) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
+	resp.Body.Close()
 
 	// wipe the cookies
 	jar, err := cookiejar.New(nil)
