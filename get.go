@@ -9,7 +9,7 @@ import (
 )
 
 /**
-	no, really, thats all it does, i probably need to parse some pointless response
+	TODO - this needs to somehow send the results back to the caller
  */
 func (s *Session) Get(url string) (error) {
 	req, err := http.NewRequest(s.HttpMethod, url, nil)

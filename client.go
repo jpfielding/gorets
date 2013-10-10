@@ -72,6 +72,7 @@ func NewSession(user, pw, userAgent, userAgentPw string, logger io.WriteCloser) 
 		transport = &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			Dial: dial,
+
 		}
 	}
 	retsTransport := RetsTransport{
