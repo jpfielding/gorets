@@ -4,6 +4,7 @@
 package gorets
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,7 +14,6 @@ import (
 	"mime/multipart"
 	"strconv"
 	"strings"
-	"encoding/xml"
 )
 
 /* 5.5 spec */
@@ -66,11 +66,7 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	values.Add("Type", r.Type)
 
 	// optional
-	optionalString := func (name, value string) {
-		if value != "" {
-			values.Add(name, value)
-		}
-	}
+	optionalString := OptionalStringValue(values)
 
 	// one or the other _MUST_ be present
 	optionalString("ID", r.Id)
@@ -78,11 +74,7 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	// truly optional
 	optionalString("ObjectData", strings.Join(r.ObjectData,","))
 
-	optionalInt := func (name string, value int) {
-		if value >= 0 {
-			values.Add(name, fmt.Sprintf("%d",value))
-		}
-	}
+	optionalInt := OptionalIntValue(values)
 	optionalInt("Location", r.Location)
 
 	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s",r.Url,values.Encode()), nil)
@@ -168,23 +160,16 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 	}
 
 	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
-	retsErrorMsg := RetsResponse{0, "Success"}
+	retsErrorMsg := &RetsResponse{0, "Success"}
 	switch {
 	case err != nil:
 		retsError = false
 	case retsError:
-		type Rets struct {
-			XMLName xml.Name `xml:"RETS"`
-			ReplyCode int `xml:"ReplyCode,attr"`
-			ReplyText string `xml:"ReplyText,attr"`
-		}
-		response := Rets{}
-		err = xml.Unmarshal(blob, &response)
+		body := ioutil.NopCloser(bytes.NewReader([]byte(blob)))
+		retsErrorMsg, err = ParseRetsResponse(body)
 		if err != nil {
 			return GetObjectResult{nil, err}
 		}
-		retsErrorMsg.ReplyCode = response.ReplyCode
-		retsErrorMsg.ReplyText = response.ReplyText
 	}
 
 	object := GetObject{
@@ -198,7 +183,7 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 		SubDescription: header.Get("Sub-Description"),
 		Location: header.Get("Location"),
 		RetsError: retsError,
-		RetsErrorMessage: retsErrorMsg,
+		RetsErrorMessage: *retsErrorMsg,
 		Preferred: preferred,
 		ObjectData: objectData,
 		Blob: blob,

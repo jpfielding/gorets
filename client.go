@@ -6,10 +6,10 @@ package gorets
 
 import (
 	"errors"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
-	"io"
 )
 
 const DEFAULT_TIMEOUT int = 300000
@@ -49,12 +49,6 @@ type Session struct {
 	Client http.Client
 }
 
-
-/* the common wrapper details for each response */
-type RetsResponse struct {
-	ReplyCode int
-	ReplyText string
-}
 
 func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.WriteCloser) (*Session, error) {
 	var session Session
@@ -136,6 +130,5 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
 	return t.transport.RoundTrip(req)
 }
-
 
 

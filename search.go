@@ -8,15 +8,12 @@ package gorets
 
 import (
 	"encoding/xml"
-	"encoding/hex"
 	"errors"
 	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
-	"strings"
 )
 
 
@@ -34,7 +31,7 @@ const (
 
 type SearchResult struct {
 	RetsResponse RetsResponse
-	Count int64
+	Count int
 	Delimiter string
 	Columns []string
 	Data <-chan []string
@@ -98,11 +95,7 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	values.Add("SearchType", r.SearchType)
 
 	// optional
-	optionalString := func (name, value string) {
-		if value != "" {
-			values.Add(name, value)
-		}
-	}
+	optionalString := OptionalStringValue(values)
 	optionalString("Format", r.Format)
 	optionalString("Select", r.Select)
 	optionalString("Query", r.Query)
@@ -110,11 +103,7 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	optionalString("RestrictedIndicator", r.RestrictedIndicator)
 	optionalString("Payload", r.Payload)
 
-	optionalInt := func (name string, value int) {
-		if value >= 0 {
-			values.Add(name, fmt.Sprintf("%d",value))
-		}
-	}
+	optionalInt := OptionalIntValue(values)
 	optionalInt("Count", r.Count)
 	optionalInt("Limit", r.Limit)
 	optionalInt("Offset", r.Offset)
@@ -152,13 +141,9 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 	var buf bytes.Buffer
 
 	// backgroundable processing of the data into our buffer
-	dataProcessing := func() {
-		delim := result.Delimiter
-		// this channel needs to be closed or the caller can infinite loop
+	bgDataProcessing := func() {
 		defer close(data)
-		// this is the web socket that needs addressed
 		defer body.Close()
-		// extract the data
 		for {
 			// TODO figure out a kill switch for this
 			token, err := parser.Token()
@@ -181,7 +166,7 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 				name := elmt.Name.Local
 				switch name {
 				case "DATA":
-					data <- strings.Split(strings.Trim(buf.String(), delim), delim)
+					data <- SplitRowByDelim(buf.String(), result.Delimiter)
 				case "RETS":
 					return
 				}
@@ -206,37 +191,29 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 			name := elmt.Name.Local
 			switch name {
 			case "RETS":
-				attrs := make(map[string]string)
-				for _,v := range elmt.Attr {
-					attrs[strings.ToLower(v.Name.Local)] = v.Value
-				}
-				code,err := strconv.ParseInt(attrs["replycode"],10,16)
+				rets, err := ParseRetsResponseTag(elmt)
 				if err != nil {
 					return nil, err
 				}
-				result.RetsResponse.ReplyCode = int(code)
-				result.RetsResponse.ReplyText = attrs["replytext"]
+				result.RetsResponse = *rets
 			case "COUNT":
-				result.Count,err = strconv.ParseInt(elmt.Attr[0].Value, 10, 64)
+				result.Count,err = ParseCountTag(elmt)
 				if err != nil {
 					return nil, err
 				}
 			case "DELIMITER":
-				del := elmt.Attr[0].Value
-				pad := strings.Repeat("0",2-len(del))
-				decoded,err := hex.DecodeString(pad+del)
+				result.Delimiter, err = ParseDelimiterTag(elmt)
 				if err != nil {
 					return nil, err
 				}
-				result.Delimiter = string(decoded)
 			}
 		case xml.EndElement:
 			elmt := xml.EndElement(t)
 			name := elmt.Name.Local
 			switch name {
 			case "COLUMNS":
-				result.Columns = strings.Split(strings.Trim(buf.String(), result.Delimiter), result.Delimiter)
-				go dataProcessing()
+				result.Columns = SplitRowByDelim(buf.String(), result.Delimiter)
+				go bgDataProcessing()
 				return &result, nil
 			}
 		case xml.CharData:
