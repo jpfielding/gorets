@@ -179,11 +179,11 @@ const delim = "	"
 func extractMap(cols string, rows []string) (*MData) {
 	data := MData{}
 	// remove the first and last chars
-	data.Columns = strings.Split(strings.Trim(cols,delim),delim)
+	data.Columns = SplitRowByDelim(cols,delim)
 	data.Rows = make([][]string, len(rows))
 	// create each
 	for i,line := range rows {
-		data.Rows[i] = strings.Split(strings.Trim(line,delim),delim)
+		data.Rows[i] = SplitRowByDelim(line,delim)
 	}
 	return &data
 }
