@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"strconv"
 )
 
 type Metadata struct {
@@ -104,19 +103,11 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata,error) {
 			elmt := xml.StartElement(t)
 			switch elmt.Name.Local {
 			case "RETS":
-				attrs := make(map[string]string)
-				for _,v := range elmt.Attr {
-					attrs[strings.ToLower(v.Name.Local)] = v.Value
-				}
-				code,err := strconv.ParseInt(attrs["replycode"],10,16)
+				rets, err := ParseRetsResponseTag(elmt)
 				if err != nil {
 					return nil, err
 				}
-				if code != 0 {
-					return nil, errors.New(attrs["replytext"])
-				}
-				metadata.Rets.ReplyCode = int(code)
-				metadata.Rets.ReplyText = attrs["replytext"]
+				metadata.Rets = *rets
 			case "METADATA-SYSTEM":
 				type XmlSystem struct {
 					SystemId string `xml:"SystemID,attr"`
