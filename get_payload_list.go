@@ -1,27 +1,18 @@
 package gorets
 
 import (
-	"encoding/hex"
 	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
-	"strconv"
 )
-
-type Payload struct {
-	Resource, Class, Version, Date string
-	Columns []string
-	Rows [][]string
-}
 
 type PayloadList struct {
 	Rets RetsResponse
 	Error error
-	Payloads <-chan Payload
+	Payloads <-chan CompactData
 }
 
 type PayloadListRequest struct {
@@ -53,7 +44,7 @@ func (s *Session) GetPayloadList(p PayloadListRequest) (*PayloadList, error) {
 
 
 func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
-	payloads := make(chan Payload)
+	payloads := make(chan CompactData)
 	parser := xml.NewDecoder(body)
 
 	list := PayloadList{
@@ -78,35 +69,13 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 				elmt := xml.StartElement(t)
 				switch elmt.Name.Local {
 				case "RETSPayloadList":
-					type XmlPayloadList struct {
-						Resource string `xml:"Resource,attr"`
-						/* only valid for table */
-						Class string `xml:"Class,attr"`
-						Version string `xml:"Version,attr"`
-						Date string `xml:"Date,attr"`
-						Columns string `xml:"COLUMNS"`
-						Data []string `xml:"DATA"`
-					}
-					xme := XmlPayloadList{}
-					err := parser.DecodeElement(&xme,&t)
+					mcd, err := ParseMetadataCompactDecoded(t, parser, delim)
 					if err != nil {
 						fmt.Println("failed to decode: ", err)
 						list.Error = err
 						return
 					}
-					payload := Payload{
-						Resource: xme.Resource,
-						Class: xme.Class,
-						Date: xme.Date,
-						Version: xme.Version,
-						Columns: strings.Split(strings.Trim(xme.Columns, delim), delim),
-					}
-					payload.Rows = make([][]string, len(xme.Data))
-					// create each
-					for i,line := range xme.Data {
-						payload.Rows[i] = strings.Split(strings.Trim(line,delim),delim)
-					}
-					payloads <- payload
+					payloads <- *mcd
 				}
 			}
 		}
@@ -121,29 +90,19 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 			elmt := xml.StartElement(t)
 			switch elmt.Name.Local {
 			case "RETS":
-				attrs := make(map[string]string)
-				for _,v := range elmt.Attr {
-					attrs[strings.ToLower(v.Name.Local)] = v.Value
-				}
-				code,err := strconv.ParseInt(attrs["replycode"],10,16)
+				rets, err := ParseRetsResponseTag(elmt)
 				if err != nil {
 					return nil, err
 				}
-				if code != 0 {
-					return nil, errors.New(attrs["replytext"])
-				}
-				list.Rets = RetsResponse{
-					ReplyCode:  int(code),
-					ReplyText: attrs["replytext"],
-				}
+				list.Rets = *rets
 				go dataProcessing()
 				return &list, nil
 			case "DELIMITER":
-				decoded,err := hex.DecodeString(elmt.Attr[0].Value)
+				decoded,err := ParseDelimiterTag(elmt)
 				if err != nil {
 					return nil, err
 				}
-				delim = string(decoded)
+				delim = decoded
 			}
 		}
 	}

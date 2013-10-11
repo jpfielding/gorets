@@ -4,6 +4,7 @@ package gorets
 import (
 	"encoding/xml"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 	"strconv"
@@ -35,6 +36,7 @@ func ParseRetsResponse(body io.ReadCloser) (*RetsResponse, error) {
 			}
 		}
 	}
+	return nil, errors.New("rets response not found")
 }
 
 func ParseRetsResponseTag(start xml.StartElement) (*RetsResponse, error) {
@@ -87,5 +89,73 @@ func OptionalIntValue(values url.Values) (func (string, int)) {
 			values.Add(name, fmt.Sprintf("%d",value))
 		}
 	}
+}
+
+/* the common compact decoded structure */
+type CompactData struct {
+	Id, Date, Version string
+	Columns []string
+	Rows [][]string
+}
+
+/** cached lookup */
+type Indexer func(col string, row int) string
+/** create the cache */
+func (m *CompactData) Indexer() Indexer {
+	index := make(map[string]int)
+	for i, c := range m.Columns {
+		index[c] = i
+	}
+	return func(col string, row int) string {
+		return m.Rows[row][index[col]]
+	}
+}
+
+func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, delim string) (*CompactData, error) {
+	type XmlMetadataElement struct {
+		Resource string `xml:"Resource,attr"`
+		/* only valid for table */
+		Class string `xml:"Class,attr"`
+		/* only valid for lookup_type */
+		Lookup string `xml:"Lookup,attr"`
+		Version string `xml:"Version,attr"`
+		Date string `xml:"Date,attr"`
+		Columns string `xml:"COLUMNS"`
+		Data []string `xml:"DATA"`
+	}
+	xme := XmlMetadataElement{}
+	err := parser.DecodeElement(&xme,&start)
+	if err != nil {
+		fmt.Println("failed to decode: ", err)
+		return nil, err
+	}
+	data := *extractMap(xme.Columns, xme.Data, delim)
+	data.Date = xme.Date
+	if err != nil {
+		return nil, err
+	}
+	data.Version = xme.Version
+	data.Id = xme.Resource
+	if xme.Class != "" {
+		data.Id = xme.Resource +":"+ xme.Class
+	}
+	if xme.Lookup != "" {
+		data.Id = xme.Resource +":"+ xme.Lookup
+	}
+
+	return &data, nil
+}
+
+/** extract a map of fields from columns and rows */
+func extractMap(cols string, rows []string, delim string) (*CompactData) {
+	data := CompactData{}
+	// remove the first and last chars
+	data.Columns = SplitRowByDelim(cols,delim)
+	data.Rows = make([][]string, len(rows))
+	// create each
+	for i,line := range rows {
+		data.Rows[i] = SplitRowByDelim(line,delim)
+	}
+	return &data
 }
 

@@ -6,7 +6,6 @@ package gorets
 import (
 	"encoding/xml"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -16,37 +15,17 @@ import (
 type Metadata struct {
 	Rets RetsResponse
 	System MSystem
-	Resources MData
-	Classes map[string]MData
-	Tables map[string]MData
-	Lookups map[string]MData
-	LookupTypes map[string]MData
+	Resources CompactData
+	Classes map[string]CompactData
+	Tables map[string]CompactData
+	Lookups map[string]CompactData
+	LookupTypes map[string]CompactData
 }
 
 type MSystem struct {
 	Date, Version string
 	Id, Description string
 	Comments string
-}
-
-/* the common structure */
-type MData struct {
-	Id, Date, Version string
-	Columns []string
-	Rows [][]string
-}
-
-/** cached lookup */
-type Indexer func(col string, row int) string
-/** create the cache */
-func (m *MData) Indexer() Indexer {
-	index := make(map[string]int)
-	for i, c := range m.Columns {
-		index[c] = i
-	}
-	return func(col string, row int) string {
-		return m.Rows[row][index[col]]
-	}
 }
 
 type MetadataRequest struct {
@@ -86,10 +65,10 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata,error) {
 	parser := xml.NewDecoder(body)
 
 	metadata := Metadata{}
-	metadata.Classes = make(map[string]MData)
-	metadata.Tables = make(map[string]MData)
-	metadata.Lookups = make(map[string]MData)
-	metadata.LookupTypes = make(map[string]MData)
+	metadata.Classes = make(map[string]CompactData)
+	metadata.Tables = make(map[string]CompactData)
+	metadata.Lookups = make(map[string]CompactData)
+	metadata.LookupTypes = make(map[string]CompactData)
 	for {
 		token, err := parser.Token()
 		if err != nil {
@@ -130,62 +109,26 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata,error) {
 				metadata.System.Id = xms.System.SystemId
 				metadata.System.Description = xms.System.Description
 			case "METADATA-RESOURCE", "METADATA-CLASS", "METADATA-TABLE", "METADATA-LOOKUP","METADATA-LOOKUP_TYPE":
-				type XmlMetadataElement struct {
-					Resource string `xml:"Resource,attr"`
-					/* only valid for table */
-					Class string `xml:"Class,attr"`
-					/* only valid for lookup_type */
-					Lookup string `xml:"Lookup,attr"`
-					Version string `xml:"Version,attr"`
-					Date string `xml:"Date,attr"`
-					Columns string `xml:"COLUMNS"`
-					Data []string `xml:"DATA"`
-				}
-				xme := XmlMetadataElement{}
-				err := parser.DecodeElement(&xme,&t)
-				if err != nil {
-					fmt.Println("failed to decode: ", err)
-					return nil, err
-				}
-				data := *extractMap(xme.Columns, xme.Data)
-				data.Date = xme.Date
+				data,err := ParseMetadataCompactDecoded(elmt, parser, "	")
 				if err != nil {
 					return nil, err
 				}
-				data.Version = xme.Version
-				data.Id = xme.Resource
 				switch elmt.Name.Local {
 				case "METADATA-RESOURCE":
-					metadata.Resources = data
+					metadata.Resources = *data
 				case "METADATA-CLASS":
-					metadata.Classes[data.Id] = data
+					metadata.Classes[data.Id] = *data
 				case "METADATA-TABLE":
-					data.Id = xme.Resource +":"+ xme.Class
-					metadata.Tables[data.Id] = data
+					metadata.Tables[data.Id] = *data
 				case "METADATA-LOOKUP":
-					metadata.Lookups[data.Id] = data
+					metadata.Lookups[data.Id] = *data
 				case "METADATA-LOOKUP_TYPE":
-					data.Id = xme.Resource +":"+ xme.Lookup
-					metadata.LookupTypes[data.Id] = data
+					metadata.LookupTypes[data.Id] = *data
 				}
 			}
 		}
 	}
 	return &metadata, nil
-}
-
-const delim = "	"
-/** extract a map of fields from columns and rows */
-func extractMap(cols string, rows []string) (*MData) {
-	data := MData{}
-	// remove the first and last chars
-	data.Columns = SplitRowByDelim(cols,delim)
-	data.Rows = make([][]string, len(rows))
-	// create each
-	for i,line := range rows {
-		data.Rows[i] = SplitRowByDelim(line,delim)
-	}
-	return &data
 }
 
 
