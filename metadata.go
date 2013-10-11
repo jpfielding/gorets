@@ -56,10 +56,6 @@ type MetadataRequest struct {
 }
 
 func (s *Session) GetMetadata(r MetadataRequest) (*Metadata, error) {
-	if r.MType == "*" {
-		panic("not yet supported!")
-	}
-
 	// required
 	values := url.Values{}
 	values.Add("Format", r.Format)
