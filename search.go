@@ -222,7 +222,9 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 					return nil, err
 				}
 			case "DELIMITER":
-				decoded,err := hex.DecodeString(elmt.Attr[0].Value)
+				del := elmt.Attr[0].Value
+				pad := strings.Repeat("0",2-len(del))
+				decoded,err := hex.DecodeString(pad+del)
 				if err != nil {
 					return nil, err
 				}
