@@ -56,13 +56,14 @@ type RetsResponse struct {
 	ReplyText string
 }
 
-func NewSession(user, pw, userAgent, userAgentPw string, logger io.WriteCloser) (*Session, error) {
+func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.WriteCloser) (*Session, error) {
 	var session Session
 	session.Username = user
 	session.Password = pw
 	session.Version = "RETS/1.5"
 	session.UserAgent = userAgent
 	session.UserAgentPassword = userAgentPw
+	session.Version = retsVersion
 	session.HttpMethod = "GET"
 	session.Accept = "*/*"
 
