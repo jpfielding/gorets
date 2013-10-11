@@ -101,7 +101,7 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 						Version: xme.Version,
 						Columns: strings.Split(strings.Trim(xme.Columns, delim), delim),
 					}
-					payload.Rows = make([][]string, len(xme.Rows))
+					payload.Rows = make([][]string, len(xme.Data))
 					// create each
 					for i,line := range xme.Data {
 						payload.Rows[i] = strings.Split(strings.Trim(line,delim),delim)
