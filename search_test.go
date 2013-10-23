@@ -5,6 +5,7 @@ package gorets
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -27,6 +28,14 @@ var compactDecoded string =
 </RETS>
 `
 
+func TestEof(t *testing.T) {
+	body := ioutil.NopCloser(bytes.NewReader([]byte("")))
+
+	_, err := parseCompactResult(body,1)
+	if err != io.EOF {
+		t.Error("error parsing body: "+ err.Error())
+	}
+}
 func TestParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
