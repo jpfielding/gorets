@@ -16,14 +16,14 @@ var compactDecoded string =
 <COUNT Records="10" />
 <DELIMITER value = "09"/>
 <COLUMNS>	A	B	C	D	E	F	</COLUMNS>
-<DATA>	1	2	3	4	5	6	</DATA>
-<DATA>	1	2	3	4	5	6	</DATA>
-<DATA>	1	2	3	4	5	6	</DATA>
-<DATA>	1	2	3	4	5	6	</DATA>
-<DATA>	1	2	3	4	5	6	</DATA>
-<DATA>	1	2	3	4	5	6	</DATA>
-<DATA>	1	2	3	4	5	6	</DATA>
-<DATA>	1	2	3	4	5	6	</DATA>
+<DATA>	1	2	3	4		6	</DATA>
+<DATA>	1	2	3	4		6	</DATA>
+<DATA>	1	2	3	4		6	</DATA>
+<DATA>	1	2	3	4		6	</DATA>
+<DATA>	1	2	3	4		6	</DATA>
+<DATA>	1	2	3	4		6	</DATA>
+<DATA>	1	2	3	4		6	</DATA>
+<DATA>	1	2	3	4		6	</DATA>
 <MAXROWS/>
 </RETS>
 `
@@ -55,11 +55,11 @@ func TestParseCompact(t *testing.T) {
 
 	counter := 0
 	for row := range cr.Data {
-		if strings.Join(row,",") != "1,2,3,4,5,6" {
+		if strings.Join(row,",") != "1,2,3,4,,6" {
 			t.Errorf("bad row %d: %s", counter, row)
 		}
 		filtered := filterTo(row)
-		if strings.Join(filtered,",") != "1,3,5" {
+		if strings.Join(filtered,",") != "1,3," {
 			t.Errorf("bad filtered row %d: %s", counter, filtered)
 		}
 
