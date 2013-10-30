@@ -1,65 +1,66 @@
 /**
-	provides the searching core
+provides the searching core
 
-	see minidom style processing here:
-		http://blog.davidsingleton.org/parsing-huge-xml-files-with-go/
- */
+see minidom style processing here:
+	http://blog.davidsingleton.org/parsing-huge-xml-files-with-go/
+*/
 package gorets
 
 import (
+	"bytes"
 	"encoding/xml"
 	"errors"
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 )
 
-
 /* counts */
 const (
-	COUNT_NONE = 0
+	COUNT_NONE  = 0
 	COUNT_AFTER = 1
-	COUNT_ONLY = 2
+	COUNT_ONLY  = 2
 )
+
 /* field naming */
 const (
 	STANDARD_NAMES_OFF = 0
-	STANDARD_NAMES_ON = 0
+	STANDARD_NAMES_ON  = 0
 )
 
 type SearchResult struct {
-	RetsResponse RetsResponse
-	Count int
-	Delimiter string
-	Columns []string
-	Data <-chan []string
-	MaxRows bool
+	RetsResponse      RetsResponse
+	Count             int
+	Delimiter         string
+	Columns           []string
+	Data              <-chan []string
+	MaxRows           bool
 	ProcessingFailure error
 }
 
-func (m *SearchResult) Index() (map[string]int) {
+func (m *SearchResult) Index() map[string]int {
 	index := make(map[string]int)
 	for i, c := range m.Columns {
 		index[c] = i
 	}
 	return index
 }
+
 /** cached filtering */
 type ColumnFilter func(row []string) (filtered []string)
+
 /** create the cache */
 func (m *SearchResult) FilterTo(cols []string) ColumnFilter {
 	index := m.Index()
-	return func(row []string) (filtered []string){
+	return func(row []string) (filtered []string) {
 		tmp := make([]string, len(cols))
-		for i,c := range cols {
+		for i, c := range cols {
 			tmp[i] = row[index[c]]
 		}
 		return tmp
 	}
 }
-
 
 type SearchRequest struct {
 	Url,
@@ -87,7 +88,7 @@ type SearchRequest struct {
 	Query=%28%28LocaleListingStatus%3D%7CACTIVE-CORE%2CCNTG%2FKO-CORE%2CCNTG%2FNO+KO-CORE%2CAPP+REG-CORE%29%2C%7E%28VOWList%3D0%29%29&
 	QueryType=DMQL2&
 	SearchType=Property
- */
+*/
 func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	// required
 	values := url.Values{}
@@ -98,7 +99,8 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	optionalString := OptionalStringValue(values)
 	optionalString("Format", r.Format)
 	optionalString("Select", r.Select)
-	optionalString("Query", r.Query)
+	opt
+	ionalString("Query", r.Query)
 	optionalString("QueryType", r.QueryType)
 	optionalString("RestrictedIndicator", r.RestrictedIndicator)
 	optionalString("Payload", r.Payload)
@@ -108,7 +110,7 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	optionalInt("Limit", r.Limit)
 	optionalInt("Offset", r.Offset)
 
-	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s",r.Url,values.Encode()), nil)
+	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s", r.Url, values.Encode()), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -127,14 +129,13 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	return nil, nil
 }
 
-
-func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchResult,error) {
-	data := make(chan []string,processingBufferSize)
+func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchResult, error) {
+	data := make(chan []string, processingBufferSize)
 	rets := RetsResponse{}
 	result := SearchResult{
-		Data: data,
+		Data:         data,
 		RetsResponse: rets,
-		MaxRows: false,
+		MaxRows:      false,
 	}
 
 	parser := xml.NewDecoder(body)
@@ -197,7 +198,7 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 				}
 				result.RetsResponse = *rets
 			case "COUNT":
-				result.Count,err = ParseCountTag(elmt)
+				result.Count, err = ParseCountTag(elmt)
 				if err != nil {
 					return nil, err
 				}
@@ -225,7 +226,6 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 	return nil, errors.New("failed to parse rets response")
 }
 
-func parseStandardXml(body *io.ReadCloser) (*SearchResult,error) {
+func parseStandardXml(body *io.ReadCloser) (*SearchResult, error) {
 	return nil, nil
 }
-

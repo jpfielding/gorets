@@ -1,15 +1,14 @@
-package gorets
-
+dPACKAGE gorets
 
 import (
-	"encoding/xml"
 	"encoding/hex"
+	"encoding/xml"
 	"errors"
 	"fmt"
-	"strings"
-	"strconv"
-	"net/url"
 	"io"
+	"net/url"
+	"strconv"
+	"strings"
 )
 
 /* the common wrapper details for each response */
@@ -42,10 +41,10 @@ func ParseRetsResponse(body io.ReadCloser) (*RetsResponse, error) {
 func ParseRetsResponseTag(start xml.StartElement) (*RetsResponse, error) {
 	rets := RetsResponse{}
 	attrs := make(map[string]string)
-	for _,v := range start.Attr {
+	for _, v := range start.Attr {
 		attrs[strings.ToLower(v.Name.Local)] = v.Value
 	}
-	code,err := strconv.ParseInt(attrs["replycode"],10,16)
+	code, err := strconv.ParseInt(attrs["replycode"], 10, 16)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +55,8 @@ func ParseRetsResponseTag(start xml.StartElement) (*RetsResponse, error) {
 
 func ParseDelimiterTag(start xml.StartElement) (string, error) {
 	del := start.Attr[0].Value
-	pad := strings.Repeat("0",2-len(del))
-	decoded,err := hex.DecodeString(pad+del)
+	pad := strings.Repeat("0", 2-len(del))
+	decoded, err := hex.DecodeString(pad + del)
 	if err != nil {
 		return "", err
 	}
@@ -65,28 +64,29 @@ func ParseDelimiterTag(start xml.StartElement) (string, error) {
 }
 
 func ParseCountTag(count xml.StartElement) (int, error) {
-	code,err := strconv.ParseInt(count.Attr[0].Value, 10, 64)
+	code, err := strconv.ParseInt(count.Attr[0].Value, 10, 64)
 	if err != nil {
 		return -1, err
 	}
 	return int(code), nil
 }
 
-func SplitRowByDelim(row, delim string) ([]string) {
+/** see jrets SearchResultHandler for why this is _too_ simplistic */
+func SplitRowByDelim(row, delim string) []string {
 	return strings.Split(strings.Trim(row, delim), delim)
 }
 
-func OptionalStringValue(values url.Values) (func (string, string)) {
-	return func (name, value string) {
+func OptionalStringValue(values url.Values) func(string, string) {
+	return func(name, value string) {
 		if value != "" {
 			values.Add(name, value)
 		}
 	}
 }
-func OptionalIntValue(values url.Values) (func (string, int)) {
-	return func (name string, value int) {
+func OptionalIntValue(values url.Values) func(string, int) {
+	return func(name string, value int) {
 		if value >= 0 {
-			values.Add(name, fmt.Sprintf("%d",value))
+			values.Add(name, fmt.Sprintf("%d", value))
 		}
 	}
 }
@@ -94,12 +94,13 @@ func OptionalIntValue(values url.Values) (func (string, int)) {
 /* the common compact decoded structure */
 type CompactData struct {
 	Id, Date, Version string
-	Columns []string
-	Rows [][]string
+	Columns           []string
+	Rows              [][]string
 }
 
 /** cached lookup */
 type Indexer func(col string, row int) string
+
 /** create the cache */
 func (m *CompactData) Indexer() Indexer {
 	index := make(map[string]int)
@@ -117,14 +118,14 @@ func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, de
 		/* only valid for table */
 		Class string `xml:"Class,attr"`
 		/* only valid for lookup_type */
-		Lookup string `xml:"Lookup,attr"`
-		Version string `xml:"Version,attr"`
-		Date string `xml:"Date,attr"`
-		Columns string `xml:"COLUMNS"`
-		Data []string `xml:"DATA"`
+		Lookup  string   `xml:"Lookup,attr"`
+		Version string   `xml:"Version,attr"`
+		Date    string   `xml:"Date,attr"`
+		Columns string   `xml:"COLUMNS"`
+		Data    []string `xml:"DATA"`
 	}
 	xme := XmlMetadataElement{}
-	err := parser.DecodeElement(&xme,&start)
+	err := parser.DecodeElement(&xme, &start)
 	if err != nil {
 		fmt.Println("failed to decode: ", err)
 		return nil, err
@@ -137,25 +138,24 @@ func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, de
 	data.Version = xme.Version
 	data.Id = xme.Resource
 	if xme.Class != "" {
-		data.Id = xme.Resource +":"+ xme.Class
+		data.Id = xme.Resource + ":" + xme.Class
 	}
 	if xme.Lookup != "" {
-		data.Id = xme.Resource +":"+ xme.Lookup
+		data.Id = xme.Resource + ":" + xme.Lookup
 	}
 
 	return &data, nil
 }
 
 /** extract a map of fields from columns and rows */
-func extractMap(cols string, rows []string, delim string) (*CompactData) {
+func extractMap(cols string, rows []string, delim string) *CompactData {
 	data := CompactData{}
 	// remove the first and last chars
-	data.Columns = SplitRowByDelim(cols,delim)
+	data.Columns = SplitRowByDelim(cols, delim)
 	data.Rows = make([][]string, len(rows))
 	// create each
-	for i,line := range rows {
-		data.Rows[i] = SplitRowByDelim(line,delim)
+	for i, line := range rows {
+		data.Rows[i] = SplitRowByDelim(line, delim)
 	}
 	return &data
 }
-
