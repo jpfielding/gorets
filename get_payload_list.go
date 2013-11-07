@@ -89,7 +89,7 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 		case xml.StartElement:
 			elmt := xml.StartElement(t)
 			switch elmt.Name.Local {
-			case "RETS":
+			case "RETS", "RETS-STATUS":
 				rets, err := ParseRetsResponseTag(elmt)
 				if err != nil {
 					return nil, err

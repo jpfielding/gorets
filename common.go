@@ -1,4 +1,4 @@
-dPACKAGE gorets
+package gorets
 
 import (
 	"encoding/hex"

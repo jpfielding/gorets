@@ -99,8 +99,7 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	optionalString := OptionalStringValue(values)
 	optionalString("Format", r.Format)
 	optionalString("Select", r.Select)
-	opt
-	ionalString("Query", r.Query)
+	optionalString("Query", r.Query)
 	optionalString("QueryType", r.QueryType)
 	optionalString("RestrictedIndicator", r.RestrictedIndicator)
 	optionalString("Payload", r.Payload)
@@ -191,7 +190,7 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 			elmt := xml.StartElement(t)
 			name := elmt.Name.Local
 			switch name {
-			case "RETS":
+			case "RETS", "RETS-STATUS":
 				rets, err := ParseRetsResponseTag(elmt)
 				if err != nil {
 					return nil, err
