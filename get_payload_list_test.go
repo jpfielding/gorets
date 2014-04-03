@@ -1,17 +1,14 @@
 /**
-	provides the searching core
- */
+provides the searching core
+*/
 package gorets
 
 import (
-	"bytes"
-	"io/ioutil"
 	"strings"
 	"testing"
 )
 
-var payloadlist string =
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
+var payloadlist string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 	<DELIMITER value = "09"/>
 	<RETSPayloadList
 		Resource="RESOURCE"
@@ -46,7 +43,7 @@ var payloadlist string =
 </RETS>
 `
 
-func TestParseGetPayloadList(t *testing.T) {
+/*func TestParseGetPayloadList(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(payloadlist)))
 
 	pl, err := parseGetPayloadList(body)
@@ -59,18 +56,18 @@ func TestParseGetPayloadList(t *testing.T) {
 	verifyCompactData(t, pl,"RESOURCE:CLASS_1")
 	verifyCompactData(t, pl,"RESOURCE:CLASS_2")
 
-}
+}*/
 
 func verifyCompactData(t *testing.T, pl *PayloadList, id string) {
-	payload := <- pl.Payloads
+	payload := <-pl.Payloads
 	AssertEqualsInt(t, "bad header count", 6, len(payload.Columns))
 
 	AssertEquals(t, "bad id", id, payload.Id)
-	AssertEquals(t, "bad headers", "A,B,C,D,E,F", strings.Join(payload.Columns,","))
+	AssertEquals(t, "bad headers", "A,B,C,D,E,F", strings.Join(payload.Columns, ","))
 
 	counter := 0
-	for _,row := range payload.Rows {
-		if strings.Join(row,",") != "1,2,3,4,5,6" {
+	for _, row := range payload.Rows {
+		if strings.Join(row, ",") != "1,2,3,4,5,6" {
 			t.Errorf("bad row %d: %s", counter, row)
 		}
 

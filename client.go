@@ -1,7 +1,7 @@
 /**
-	provides a wrapper and built in auth at the transport
-	layer.
- */
+provides a wrapper and built in auth at the transport
+layer.
+*/
 package gorets
 
 import (
@@ -16,45 +16,46 @@ const DEFAULT_TIMEOUT int = 300000
 
 /* standard http header names */
 const (
-	USER_AGENT string = "User-Agent"
-	ACCEPT string = "Accept"
-	CONTENT_TYPE string = "Content-Type"
-	WWW_AUTH string = "Www-Authenticate"
+	USER_AGENT    string = "User-Agent"
+	ACCEPT        string = "Accept"
+	CONTENT_TYPE  string = "Content-Type"
+	WWW_AUTH      string = "Www-Authenticate"
 	WWW_AUTH_RESP string = "Authorization"
 )
+
 /* standard http gzip header names */
 const (
-	ACCEPT_ENCODING string = "Accept-Encoding"
-	CONTENT_ENCODING string = "Content-Encoding"
+	ACCEPT_ENCODING   string = "Accept-Encoding"
+	CONTENT_ENCODING  string = "Content-Encoding"
 	DEFLATE_ENCODINGS string = "gzip,deflate"
 )
+
 /* rets http header names */
 const (
-	RETS_VERSION string = "RETS-Version"
-	RETS_SESSION_ID string = "RETS-Session-ID"
-	RETS_REQUEST_ID string = "RETS-Request-ID"
+	RETS_VERSION        string = "RETS-Version"
+	RETS_SESSION_ID     string = "RETS-Session-ID"
+	RETS_REQUEST_ID     string = "RETS-Request-ID"
 	RETS_UA_AUTH_HEADER string = "RETS-UA-Authorization"
 )
 
 /* holds the state of the server interaction */
 type Session struct {
-	Username,Password string
+	Username, Password string
 
 	UserAgent, UserAgentPassword string
-	HttpMethod string
+	HttpMethod                   string
 
 	Version string
-	Accept string
+	Accept  string
 
 	Client http.Client
 }
-
 
 func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.WriteCloser) (*Session, error) {
 	var session Session
 	session.Username = user
 	session.Password = pw
-	session.Version = "RETS/1.5"
+	session.Version = "RETS/1.7"
 	session.UserAgent = userAgent
 	session.UserAgentPassword = userAgentPw
 	session.Version = retsVersion
@@ -66,13 +67,12 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.
 		dial := WireLog(logger)
 		transport = &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
-			Dial: dial,
-
+			Dial:  dial,
 		}
 	}
 	retsTransport := RetsTransport{
 		transport: transport,
-		session: session,
+		session:   session,
 	}
 	jar, err := cookiejar.New(nil)
 	if err != nil {
@@ -80,7 +80,7 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.
 	}
 	session.Client = http.Client{
 		Transport: &retsTransport,
-		Jar: jar,
+		Jar:       jar,
 	}
 	return &session, nil
 }
@@ -88,7 +88,7 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.
 /* wrapper to intercept each http call */
 type RetsTransport struct {
 	transport http.RoundTripper
-	session Session
+	session   Session
 }
 
 func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -99,7 +99,7 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	if t.session.UserAgentPassword != "" {
 		requestId := req.Header.Get(RETS_REQUEST_ID)
 		sessionId := ""
-		if h,err := req.Cookie(RETS_SESSION_ID); err == nil {
+		if h, err := req.Cookie(RETS_SESSION_ID); err == nil {
 			sessionId = h.Value
 		}
 		uaAuthHeader := CalculateUaAuthHeader(
@@ -125,10 +125,8 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	}
 	challenge := res.Header.Get(WWW_AUTH)
 	if !strings.HasPrefix(strings.ToLower(challenge), "digest") {
-		return nil, errors.New("unknown authentication challenge: "+challenge)
+		return nil, errors.New("unknown authentication challenge: " + challenge)
 	}
 	req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
 	return t.transport.RoundTrip(req)
 }
-
-
