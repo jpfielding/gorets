@@ -2,10 +2,11 @@
 provides a wrapper and built in auth at the transport
 layer.
 */
-package gorets
+package gorets_client
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
@@ -124,9 +125,14 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 		return res, err
 	}
 	challenge := res.Header.Get(WWW_AUTH)
-	if !strings.HasPrefix(strings.ToLower(challenge), "digest") {
-		return nil, errors.New("unknown authentication challenge: " + challenge)
+	fmt.Println(challenge)
+
+	if strings.HasPrefix(strings.ToLower(challenge), "basic") {
+		req.SetBasicAuth(t.session.Username, t.session.Password)
+		return t.transport.RoundTrip(req)
+	} else if strings.HasPrefix(strings.ToLower(challenge), "digest") {
+		req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
+		return t.transport.RoundTrip(req)
 	}
-	req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
-	return t.transport.RoundTrip(req)
+	return nil, errors.New("unknown authentication challenge: " + challenge)
 }

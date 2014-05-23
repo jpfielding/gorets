@@ -1,13 +1,14 @@
 /**
-	wire logging utils
- */
-package gorets
+wire logging utils
+*/
+package gorets_client
 
 import (
 	"io"
 	"net"
 	"time"
 )
+
 /** this just makes the return type for the Dialer function reasonable */
 type Dialer func(network, addr string) (net.Conn, error)
 
@@ -16,7 +17,7 @@ func WireLog(log io.WriteCloser) Dialer {
 	return func(network, addr string) (net.Conn, error) {
 		conn, err := net.Dial(network, addr)
 		wire := WireLogConn{
-			log: log,
+			log:  log,
 			conn: conn,
 		}
 		return &wire, err
@@ -25,7 +26,7 @@ func WireLog(log io.WriteCloser) Dialer {
 
 /** channels might make this perform better, though we'ld have to copy the []byte to do that */
 type WireLogConn struct {
-	log io.WriteCloser
+	log  io.WriteCloser
 	conn net.Conn
 }
 
@@ -57,4 +58,3 @@ func (w *WireLogConn) SetReadDeadline(t time.Time) error {
 func (w *WireLogConn) SetWriteDeadline(t time.Time) error {
 	return w.conn.SetWriteDeadline(t)
 }
-

@@ -1,4 +1,4 @@
-package gorets
+package gorets_client
 
 import (
 	"encoding/xml"
@@ -10,8 +10,8 @@ import (
 )
 
 type PayloadList struct {
-	Rets RetsResponse
-	Error error
+	Rets     RetsResponse
+	Error    error
 	Payloads <-chan CompactData
 }
 
@@ -41,7 +41,6 @@ func (s *Session) GetPayloadList(p PayloadListRequest) (*PayloadList, error) {
 
 	return parseGetPayloadList(resp.Body)
 }
-
 
 func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 	payloads := make(chan CompactData)
@@ -98,7 +97,7 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 				go dataProcessing()
 				return &list, nil
 			case "DELIMITER":
-				decoded,err := ParseDelimiterTag(elmt)
+				decoded, err := ParseDelimiterTag(elmt)
 				if err != nil {
 					return nil, err
 				}
@@ -106,5 +105,5 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 			}
 		}
 	}
-	return nil,errors.New("could not find rets response")
+	return nil, errors.New("could not find rets response")
 }

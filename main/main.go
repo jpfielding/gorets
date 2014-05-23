@@ -7,28 +7,28 @@
  */
 package main
 
-
 import (
 	"flag"
 	"fmt"
-	"os"
-	"github.com/jpfielding/gorets"
 	"io"
+	"os"
+
+	gorets "github.com/jpfielding/gorets_client"
 )
 
-func main () {
+func main() {
 	username := flag.String("username", "", "Username for the RETS server")
 	password := flag.String("password", "", "Password for the RETS server")
 	loginUrl := flag.String("login-url", "", "Login URL for the RETS server")
-	userAgent := flag.String("user-agent","Threewide/1.0","User agent for the RETS client")
-	userAgentPw := flag.String("user-agent-pw","","User agent authentication")
-	logFile := flag.String("log-file","","")
+	userAgent := flag.String("user-agent", "Threewide/1.0", "User agent for the RETS client")
+	userAgentPw := flag.String("user-agent-pw", "", "User agent authentication")
+	logFile := flag.String("log-file", "", "")
 
 	flag.Parse()
 
 	var logger io.WriteCloser = nil
 	if *logFile != "" {
-		file,err := os.Create(*logFile)
+		file, err := os.Create(*logFile)
 		if err != nil {
 			panic(err)
 		}
@@ -59,20 +59,20 @@ func main () {
 	mUrl := capability.GetMetadata
 	format := "COMPACT"
 	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-SYSTEM", "0"})
-//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
-//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
-//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})
+	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
+	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
+	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})
 
 	req := gorets.SearchRequest{
-		Url: capability.Search,
-		Query: "((180=|AH))",
+		Url:        capability.Search,
+		Query:      "((180=|AH))",
 		SearchType: "Property",
-		Class: "1",
-		Format: "COMPACT-DECODED",
-		QueryType: "DMQL2",
-		Count: gorets.COUNT_AFTER,
-		Limit: 3,
-		Offset: -1,
+		Class:      "1",
+		Format:     "COMPACT-DECODED",
+		QueryType:  "DMQL2",
+		Count:      gorets.COUNT_AFTER,
+		Limit:      3,
+		Offset:     -1,
 	}
 	result, err := session.Search(req)
 	if err != nil {
@@ -83,11 +83,11 @@ func main () {
 		fmt.Println(row)
 	}
 
-	one,err := session.GetObject(gorets.GetObjectRequest{
-		Url: capability.GetObject,
+	one, err := session.GetObject(gorets.GetObjectRequest{
+		Url:      capability.GetObject,
 		Resource: "Property",
-		Type: "Photo",
-		Id: "3986587",
+		Type:     "Photo",
+		Id:       "3986587",
 		ObjectId: "*",
 	})
 	if err != nil {
@@ -100,11 +100,11 @@ func main () {
 		o := r.Object
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
-	all,err := session.GetObject(gorets.GetObjectRequest{
-		Url: capability.GetObject,
+	all, err := session.GetObject(gorets.GetObjectRequest{
+		Url:      capability.GetObject,
 		Resource: "Property",
-		Type: "Photo",
-		Id: "3986587",
+		Type:     "Photo",
+		Id:       "3986587",
 		ObjectId: "*",
 	})
 	if err != nil {
@@ -120,4 +120,3 @@ func main () {
 
 	session.Logout(capability.Logout)
 }
-

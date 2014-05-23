@@ -1,21 +1,21 @@
 /**
-	provides the photo extraction core testing
- */
-package gorets
+provides the photo extraction core testing
+*/
+package gorets_client
 
 import (
 	"bytes"
-	"net/http"
 	"io/ioutil"
-	"testing"
+	"net/http"
 	"net/textproto"
+	"testing"
 )
 
 func TestGetObject(t *testing.T) {
 	header := http.Header{}
-	textproto.MIMEHeader(header).Add("Content-Type","image/jpeg")
+	textproto.MIMEHeader(header).Add("Content-Type", "image/jpeg")
 	textproto.MIMEHeader(header).Add("Content-ID", "123456")
-	textproto.MIMEHeader(header).Add("Object-ID","1")
+	textproto.MIMEHeader(header).Add("Object-ID", "1")
 	textproto.MIMEHeader(header).Add("Preferred", "1")
 	textproto.MIMEHeader(header).Add("UID", "1a234234234")
 	textproto.MIMEHeader(header).Add("Description", "Outhouse")
@@ -26,12 +26,12 @@ func TestGetObject(t *testing.T) {
 	reader := ioutil.NopCloser(bytes.NewReader([]byte(body)))
 
 	results := parseGetObjectResult(header, reader)
-	result := <- results
+	result := <-results
 
 	counter := 0
 	o := result.Object
 	if result.Err != nil {
-		t.Error("error parsing multipart: "+ result.Err.Error())
+		t.Error("error parsing multipart: " + result.Err.Error())
 	}
 	if !o.Preferred {
 		t.Errorf("error parsing preferred at object %d", counter)
@@ -53,8 +53,7 @@ var boundary string = "simple boundary"
 
 var contentType string = `multipart/parallel; boundary="simple boundary"`
 
-var multipartBody string =
-	`--simple boundary
+var multipartBody string = `--simple boundary
 Content-Type: image/jpeg
 Content-ID: 123456
 Object-ID: 1
@@ -111,7 +110,7 @@ func TestGetObjects(t *testing.T) {
 	results := parseGetObjectsResult(extracted, body)
 
 	counter := 0
-	r1 := <- results
+	r1 := <-results
 	if r1.Err != nil {
 		t.Errorf("error parsing body at object %d: %s", counter, r1.Err.Error())
 	}
@@ -126,7 +125,7 @@ func TestGetObjects(t *testing.T) {
 	AssertEquals(t, "bad value", "123456", o1.ObjectData["ListingKey"])
 	AssertEquals(t, "bad value", "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
 
-	r2 := <- results
+	r2 := <-results
 	if r2.Err != nil {
 		t.Errorf("error parsing body at object %d: %s", counter, r2.Err.Error())
 	}
@@ -134,7 +133,7 @@ func TestGetObjects(t *testing.T) {
 	AssertEqualsInt(t, "bad value", 2, o2.ObjectId)
 	AssertEquals(t, "bad uid", "1a234234234", o2.Uid)
 
-	r3 := <- results
+	r3 := <-results
 	if r3.Err != nil {
 		t.Errorf("error parsing body at object %d: %s", counter, r3.Err.Error())
 	}
@@ -143,7 +142,7 @@ func TestGetObjects(t *testing.T) {
 	AssertEquals(t, "bad value", "Outhouse", o3.Description)
 	AssertEquals(t, "bad value", "The urinal", o3.SubDescription)
 
-	r4 := <- results
+	r4 := <-results
 	if r4.Err != nil {
 		t.Errorf("error parsing body at object %d: %s", counter, r4.Err.Error())
 	}
@@ -155,7 +154,7 @@ func TestGetObjects(t *testing.T) {
 	AssertEquals(t, "bad value", "There is no object with that Object-ID", o4.RetsErrorMessage.ReplyText)
 	AssertEqualsInt(t, "bad value", 20403, o4.RetsErrorMessage.ReplyCode)
 
-	r5 := <- results
+	r5 := <-results
 	if r5.Err != nil {
 		t.Errorf("error parsing body at object %d: %s", counter, r5.Err.Error())
 	}
@@ -165,6 +164,5 @@ func TestGetObjects(t *testing.T) {
 	AssertEquals(t, "bad value", "123456", o5.ContentId)
 	AssertEqualsInt(t, "bad value", 5, o5.ObjectId)
 	AssertEquals(t, "bad value", "<binary data 5>", string(o5.Blob))
-
 
 }

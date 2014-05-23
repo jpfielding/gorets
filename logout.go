@@ -1,7 +1,7 @@
 /**
-     notify the server we're done and kill our session
+  notify the server we're done and kill our session
 */
-package gorets
+package gorets_client
 
 import (
 	"io/ioutil"

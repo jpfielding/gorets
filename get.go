@@ -1,7 +1,7 @@
 /**
-	Maybe the dumbest thing in all of RETS
- */
-package gorets
+Maybe the dumbest thing in all of RETS
+*/
+package gorets_client
 
 import (
 	"io/ioutil"
@@ -9,9 +9,9 @@ import (
 )
 
 /**
-	TODO - this needs to somehow send the results back to the caller
- */
-func (s *Session) Get(url string) (error) {
+TODO - this needs to somehow send the results back to the caller
+*/
+func (s *Session) Get(url string) error {
 	req, err := http.NewRequest(s.HttpMethod, url, nil)
 	if err != nil {
 		return err
@@ -21,7 +21,7 @@ func (s *Session) Get(url string) (error) {
 	if err != nil {
 		return err
 	}
-	_,err = ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
@@ -29,4 +29,3 @@ func (s *Session) Get(url string) (error) {
 
 	return nil
 }
-

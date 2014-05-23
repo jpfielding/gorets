@@ -4,7 +4,7 @@ provides the searching core
 see minidom style processing here:
 	http://blog.davidsingleton.org/parsing-huge-xml-files-with-go/
 */
-package gorets
+package gorets_client
 
 import (
 	"bytes"

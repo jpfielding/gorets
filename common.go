@@ -1,4 +1,4 @@
-package gorets
+package gorets_client
 
 import (
 	"encoding/hex"

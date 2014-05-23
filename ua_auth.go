@@ -1,8 +1,7 @@
 /**
-	provides the basic mechanism for User Agent authentication for rets
- */
-package gorets
-
+provides the basic mechanism for User Agent authentication for rets
+*/
+package gorets_client
 
 import (
 	"crypto/md5"
@@ -11,16 +10,15 @@ import (
 	"strings"
 )
 
-
 func CalculateUaAuthHeader(userAgent, userAgentPw, requestId, sessionId, retsVersion string) string {
 	hasher := md5.New()
 
-	io.WriteString(hasher, userAgent +":"+ userAgentPw)
+	io.WriteString(hasher, userAgent+":"+userAgentPw)
 	secretHash := hex.EncodeToString(hasher.Sum(nil))
 
-	pieces := strings.Join([]string{secretHash,requestId,sessionId,retsVersion},":");
+	pieces := strings.Join([]string{secretHash, requestId, sessionId, retsVersion}, ":")
 
 	hasher.Reset()
 	io.WriteString(hasher, pieces)
-	return "Digest "+ hex.EncodeToString(hasher.Sum(nil))
+	return "Digest " + hex.EncodeToString(hasher.Sum(nil))
 }

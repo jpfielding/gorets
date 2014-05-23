@@ -1,17 +1,17 @@
 /**
-	provides the photo extraction core
- */
-package gorets
+provides the photo extraction core
+*/
+package gorets_client
 
 import (
 	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
-	"net/url"
-	"net/textproto"
 	"mime/multipart"
+	"net/http"
+	"net/textproto"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -30,7 +30,7 @@ type GetObject struct {
 	SubDescription,
 	Location string
 	/* 5.6.7 - because why would you want to use standard http errors when we can reinvent! */
-	RetsError bool
+	RetsError        bool
 	RetsErrorMessage RetsResponse
 	/* 5.6.3 */
 	Preferred bool
@@ -42,7 +42,7 @@ type GetObject struct {
 
 type GetObjectResult struct {
 	Object *GetObject
-	Err error
+	Err    error
 }
 
 type GetObjectRequest struct {
@@ -72,12 +72,12 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	optionalString("ID", r.Id)
 	optionalString("UID", r.Uid)
 	// truly optional
-	optionalString("ObjectData", strings.Join(r.ObjectData,","))
+	optionalString("ObjectData", strings.Join(r.ObjectData, ","))
 
 	optionalInt := OptionalIntValue(values)
 	optionalInt("Location", r.Location)
 
-	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s",r.Url,values.Encode()), nil)
+	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s", r.Url, values.Encode()), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	return parseGetObjectsResult(boundary, resp.Body), nil
 }
 
-func parseGetObjectResult(header http.Header, body io.ReadCloser) (<-chan GetObjectResult) {
+func parseGetObjectResult(header http.Header, body io.ReadCloser) <-chan GetObjectResult {
 	data := make(chan GetObjectResult)
 	go func() {
 		defer body.Close()
@@ -106,7 +106,7 @@ func parseGetObjectResult(header http.Header, body io.ReadCloser) (<-chan GetObj
 	return data
 }
 
-func parseGetObjectsResult(boundary string, body io.ReadCloser) (<-chan GetObjectResult) {
+func parseGetObjectsResult(boundary string, body io.ReadCloser) <-chan GetObjectResult {
 	data := make(chan GetObjectResult)
 	go func() {
 		defer body.Close()
@@ -118,30 +118,30 @@ func parseGetObjectsResult(boundary string, body io.ReadCloser) (<-chan GetObjec
 			case err == io.EOF:
 				return
 			case err != nil:
-				data <- GetObjectResult{nil,err}
+				data <- GetObjectResult{nil, err}
 				return
 			}
 			data <- parseHeadersAndStream(part.Header, part)
 		}
-	} ()
+	}()
 
 	return data
 }
 
 /** TODO - this is the lazy mans version, this needs to be addressed properly */
-func extractBoundary(header string) (string) {
-	for _,part := range strings.Split(header,";") {
+func extractBoundary(header string) string {
+	for _, part := range strings.Split(header, ";") {
 		part = strings.TrimSpace(part)
 		if strings.HasPrefix(part, "boundary=") {
 			val := strings.SplitAfterN(part, "=", 2)[1]
-			return strings.Trim(val,"\"")
+			return strings.Trim(val, "\"")
 		}
 	}
 	return ""
 }
 
-func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (GetObjectResult) {
-	objectId, err := strconv.ParseInt(header.Get("Object-ID"),10, 64)
+func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) GetObjectResult {
+	objectId, err := strconv.ParseInt(header.Get("Object-ID"), 10, 64)
 	if err != nil {
 		return GetObjectResult{nil, err}
 	}
@@ -150,8 +150,8 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 		preferred = false
 	}
 	objectData := make(map[string]string)
-	for _,v := range header[textproto.CanonicalMIMEHeaderKey("ObjectData")] {
-		kv := strings.Split(v,"=")
+	for _, v := range header[textproto.CanonicalMIMEHeaderKey("ObjectData")] {
+		kv := strings.Split(v, "=")
 		objectData[kv[0]] = kv[1]
 	}
 	blob, err := ioutil.ReadAll(body)
@@ -174,19 +174,19 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) (Get
 
 	object := GetObject{
 		// required
-		ObjectId: int(objectId),
-		ContentId: header.Get("Content-ID"),
+		ObjectId:    int(objectId),
+		ContentId:   header.Get("Content-ID"),
 		ContentType: header.Get("Content-Type"),
 		// optional
-		Uid: header.Get("UID"),
-		Description: header.Get("Description"),
-		SubDescription: header.Get("Sub-Description"),
-		Location: header.Get("Location"),
-		RetsError: retsError,
+		Uid:              header.Get("UID"),
+		Description:      header.Get("Description"),
+		SubDescription:   header.Get("Sub-Description"),
+		Location:         header.Get("Location"),
+		RetsError:        retsError,
 		RetsErrorMessage: *retsErrorMsg,
-		Preferred: preferred,
-		ObjectData: objectData,
-		Blob: blob,
+		Preferred:        preferred,
+		ObjectData:       objectData,
+		Blob:             blob,
 	}
 
 	return GetObjectResult{&object, nil}

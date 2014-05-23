@@ -1,7 +1,7 @@
 /**
-	TODO
- */
-package gorets
+TODO
+*/
+package gorets_client
 
 import (
 	"fmt"
@@ -36,5 +36,3 @@ func BenchmarkXxx(b *testing.B) {
 func ExampleHello() {
 	fmt.Println("hello example")
 }
-
-

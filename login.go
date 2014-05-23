@@ -1,29 +1,29 @@
 /**
 
- */
-package gorets
+*/
+package gorets_client
 
 import (
 	"bufio"
 	"bytes"
 	"encoding/xml"
 	"errors"
-	"net/http"
 	"io"
 	"io/ioutil"
-	"strings"
-	"strconv"
+	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 )
 
 type CapabilityUrls struct {
 	Response RetsResponse
 
 	MemberName, User, Broker, MetadataVersion, MinMetadataVersion string
-	OfficeList []string
-	TimeoutSeconds int64
+	OfficeList                                                    []string
+	TimeoutSeconds                                                int64
 	/** urls for web calls */
-	Login,Action,Search,Get,GetObject,Logout,GetMetadata,ChangePassword string
+	Login, Action, Search, Get, GetObject, Logout, GetMetadata, ChangePassword string
 }
 
 func (s *Session) Login(url string) (*CapabilityUrls, error) {
@@ -45,19 +45,17 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 
 	urls, err := parseCapability(url, capabilities)
 	if err != nil {
-		return nil, errors.New("unable to parse capabilites response: "+string(capabilities))
+		return nil, errors.New("unable to parse capabilites response: " + string(capabilities))
 	}
 	return urls, nil
 }
 
-
-
-func parseCapability(url string, response []byte) (*CapabilityUrls, error){
+func parseCapability(url string, response []byte) (*CapabilityUrls, error) {
 	type XmlRets struct {
-		XMLName xml.Name `xml:"RETS"`
-		ReplyCode int `xml:"ReplyCode,attr"`
-		ReplyText string `xml:"ReplyText,attr"`
-		Response string `xml:"RETS-RESPONSE"`
+		XMLName   xml.Name `xml:"RETS"`
+		ReplyCode int      `xml:"ReplyCode,attr"`
+		ReplyText string   `xml:"ReplyText,attr"`
+		Response  string   `xml:"RETS-RESPONSE"`
 	}
 
 	rets := XmlRets{}
@@ -87,7 +85,6 @@ func parseCapability(url string, response []byte) (*CapabilityUrls, error){
 		values[key] = value
 	}
 
-
 	c := CapabilityUrls{}
 	c.Login = prependHost(url, values["login"])
 	c.Action = prependHost(url, values["action"])
@@ -98,7 +95,7 @@ func parseCapability(url string, response []byte) (*CapabilityUrls, error){
 	c.GetMetadata = prependHost(url, values["getmetadata"])
 	c.ChangePassword = prependHost(url, values["changepassword"])
 
-	c.TimeoutSeconds,_= strconv.ParseInt(values["timeoutseconds"],10,strconv.IntSize)
+	c.TimeoutSeconds, _ = strconv.ParseInt(values["timeoutseconds"], 10, strconv.IntSize)
 	c.Response.ReplyCode = rets.ReplyCode
 	c.Response.ReplyText = rets.ReplyText
 
@@ -107,7 +104,7 @@ func parseCapability(url string, response []byte) (*CapabilityUrls, error){
 	c.Broker = values["broker"]
 	c.MetadataVersion = values["metadataversion"]
 	c.MinMetadataVersion = values["minmetadataversion"]
-	c.OfficeList = strings.Split(values["officelist"],",")
+	c.OfficeList = strings.Split(values["officelist"], ",")
 
 	return &c, nil
 }
@@ -116,7 +113,7 @@ func prependHost(login, other string) string {
 	otherUrl, err := url.Parse(other)
 	// todo do something with this err or kill it
 	if err != nil {
-		 return other
+		return other
 	}
 	if otherUrl.Host != "" {
 		return other

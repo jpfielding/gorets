@@ -1,7 +1,7 @@
 /**
-	parsing the 'login' action from RETS
- */
-package gorets
+parsing the 'login' action from RETS
+*/
+package gorets_client
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
 	body :=
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
+		`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 	<RETS-RESPONSE>
 	MemberName=Threewide Corporation
 	User=2000343, Association Member Primary:Login:Media Restrictions:Office:RETS:RETS Advanced:RETS Customer:System-MRIS:MDS Access Common:MDS Application Login, 90, TURD1
@@ -30,7 +30,7 @@ func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
 	</RETS>`
 	urls, err := parseCapability("http://server.com:6103/platinum/login", []byte(body))
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 
 	if urls.Response.ReplyText != "V2.7.0 2315: Success" {
@@ -51,14 +51,13 @@ func TestPrependHost(t *testing.T) {
 	login := "http://server.com:6103/platinum/login"
 	abs := "http://server.com:6103/platinum/search"
 	rel := "/platinum/search"
-	AssertEquals(t, "absolute url",abs, prependHost(login,abs))
-	AssertEquals(t, "relative url",abs, prependHost(login,rel))
+	AssertEquals(t, "absolute url", abs, prependHost(login, abs))
+	AssertEquals(t, "relative url", abs, prependHost(login, rel))
 }
-
 
 func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 	body :=
-	`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
+		`<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 	<RETS-RESPONSE>
 	MemberName=Threewide Corporation
 	User=2000343, Association Member Primary:Login:Media Restrictions:Office:RETS:RETS Advanced:RETS Customer:System-MRIS:MDS Access Common:MDS Application Login, 90, TURD1
@@ -79,7 +78,7 @@ func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 	</RETS>`
 	urls, err := parseCapability("http://server.com:6103/platinum/login", []byte(body))
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 
 	if urls.Response.ReplyText != "V2.7.0 2315: Success" {

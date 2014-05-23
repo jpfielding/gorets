@@ -1,26 +1,26 @@
 /**
-	http://en.wikipedia.org/wiki/Digest_access_authentication
- */
-package gorets
+http://en.wikipedia.org/wiki/Digest_access_authentication
+*/
+package gorets_client
 
 import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"io"
-	"strings"
-	"strconv"
-	"time"
 	"hash"
+	"io"
+	"strconv"
+	"strings"
+	"time"
 )
 
 /**
-	this method wraps up the functionality of creating a digest response from a challenge
+this method wraps up the functionality of creating a digest response from a challenge
 
-	TODO - http://tools.ietf.org/html/rfc2617
-	TODO - CLEAN THIS TURD UP!!!
-	TODO - actually keep a legit nonce counter, possibly in a digest struct?!?!?
- */
+TODO - http://tools.ietf.org/html/rfc2617
+TODO - CLEAN THIS TURD UP!!!
+TODO - actually keep a legit nonce counter, possibly in a digest struct?!?!?
+*/
 func DigestResponse(challenge, username, password, method, uri string) string {
 	cType, args := parseChallenge(challenge)
 	return challengeResponse(cType, args, username, password, method, uri, createCnonce(), "00000001")
@@ -35,38 +35,36 @@ func challengeResponse(cType string, challenge map[string]string, username, pass
 	params[3] = fmt.Sprintf("cnonce=\"%s\"", cnonce)
 	params[4] = fmt.Sprintf("nc=\"%s\"", nc)
 	i := 5
-	for k,v := range challenge {
+	for k, v := range challenge {
 		params[i] = fmt.Sprintf("%s=\"%s\"", k, v)
 		i++
 	}
 
-	return cType +" "+ strings.Join(params, ", ")
+	return cType + " " + strings.Join(params, ", ")
 }
 
 func createCnonce() string {
-	asString := strconv.FormatInt(time.Now().Unix(),10)
+	asString := strconv.FormatInt(time.Now().Unix(), 10)
 	return md5ThenHex(md5.New(), asString)
 }
 
-
 // TODO convert this into a Digest struct
-func parseChallenge(challenge string) (string,map[string]string) {
+func parseChallenge(challenge string) (string, map[string]string) {
 	pieces := strings.SplitAfterN(challenge, " ", 2)
 	cType, challenge := strings.TrimSpace(pieces[0]), pieces[1]
 	parts := map[string]string{}
-	for _,part := range strings.Split(challenge, ",") {
+	for _, part := range strings.Split(challenge, ",") {
 		part = strings.TrimSpace(part)
-		split := strings.Split(part,"=")
-		parts[split[0]] = strings.TrimSuffix(strings.TrimPrefix(split[1],"\""),"\"")
+		split := strings.Split(part, "=")
+		parts[split[0]] = strings.TrimSuffix(strings.TrimPrefix(split[1], "\""), "\"")
 	}
-	_,hasAlgorithm := parts["algorithm"]
+	_, hasAlgorithm := parts["algorithm"]
 	if !hasAlgorithm {
 		parts["algorithm"] = "MD5"
 	}
 
 	return cType, parts
 }
-
 
 func digest(challenge map[string]string, username, password, method, uri, cnonce, nc string) string {
 	realm := challenge["realm"]
@@ -76,10 +74,10 @@ func digest(challenge map[string]string, username, password, method, uri, cnonce
 
 	hasher := md5.New()
 
-	a1 := strings.Join([]string{username, realm, password},":")
+	a1 := strings.Join([]string{username, realm, password}, ":")
 	ha1 := md5ThenHex(hasher, a1)
 
-	a2 := method +":"+ uri
+	a2 := method + ":" + uri
 	ha2 := md5ThenHex(hasher, a2)
 
 	// md5-sess:
@@ -91,13 +89,13 @@ func digest(challenge map[string]string, username, password, method, uri, cnonce
 
 	switch qop {
 	case "auth":
-		response := strings.Join([]string{ha1, nonce, nc, cnonce, qop, ha2},":")
+		response := strings.Join([]string{ha1, nonce, nc, cnonce, qop, ha2}, ":")
 		return md5ThenHex(hasher, response)
 	case "auth-int":
 		// TODO - requires hash of entity body
 		return "qop: auth-int not yet supported"
 	}
-	response := strings.Join([]string{ha1,nonce,ha2},":")
+	response := strings.Join([]string{ha1, nonce, ha2}, ":")
 	return md5ThenHex(hasher, response)
 }
 

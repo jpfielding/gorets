@@ -1,13 +1,12 @@
 /**
-	http://en.wikipedia.org/wiki/Digest_access_authentication
+http://en.wikipedia.org/wiki/Digest_access_authentication
 */
 
-package gorets
+package gorets_client
 
 import (
 	"testing"
 )
-
 
 func TestDigest(t *testing.T) {
 	username, password := "user", "passwd"
@@ -25,16 +24,15 @@ func TestDigest(t *testing.T) {
 	t.Logf("EXPECTED : %s", expected)
 	t.Logf("ACTUAL   : %s", authorization)
 
-	_,e := parseChallenge(expected)
-	_,a := parseChallenge(authorization)
+	_, e := parseChallenge(expected)
+	_, a := parseChallenge(authorization)
 
-	for k,v := range e {
+	for k, v := range e {
 		if a[k] != v {
 			AssertEquals(t, k, v, a[k])
 		}
 	}
 }
-
 
 func TestDigestQopAuth(t *testing.T) {
 	username, password := "user", "passwd"
@@ -53,10 +51,10 @@ func TestDigestQopAuth(t *testing.T) {
 	t.Logf("EXPECTED : %s", expected)
 	t.Logf("ACTUAL   : %s", authorization)
 
-	_,e := parseChallenge(expected)
-	_,a := parseChallenge(authorization)
+	_, e := parseChallenge(expected)
+	_, a := parseChallenge(authorization)
 
-	for k,v := range e {
+	for k, v := range e {
 		if a[k] != v {
 			AssertEquals(t, k, v, a[k])
 		}

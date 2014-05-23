@@ -1,7 +1,7 @@
 /**
-	extraction of the data pieces describing a RETS system
- */
-package gorets
+extraction of the data pieces describing a RETS system
+*/
+package gorets_client
 
 import (
 	"encoding/xml"
@@ -13,19 +13,19 @@ import (
 )
 
 type Metadata struct {
-	Rets RetsResponse
-	System MSystem
-	Resources CompactData
-	Classes map[string]CompactData
-	Tables map[string]CompactData
-	Lookups map[string]CompactData
+	Rets        RetsResponse
+	System      MSystem
+	Resources   CompactData
+	Classes     map[string]CompactData
+	Tables      map[string]CompactData
+	Lookups     map[string]CompactData
 	LookupTypes map[string]CompactData
 }
 
 type MSystem struct {
-	Date, Version string
+	Date, Version   string
 	Id, Description string
-	Comments string
+	Comments        string
 }
 
 type MetadataRequest struct {
@@ -61,7 +61,7 @@ func (s *Session) GetMetadata(r MetadataRequest) (*Metadata, error) {
 	return nil, errors.New("unknows metadata format")
 }
 
-func parseMetadataCompactResult(body io.ReadCloser) (*Metadata,error) {
+func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 	parser := xml.NewDecoder(body)
 
 	metadata := Metadata{}
@@ -89,14 +89,14 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata,error) {
 				metadata.Rets = *rets
 			case "METADATA-SYSTEM":
 				type XmlSystem struct {
-					SystemId string `xml:"SystemID,attr"`
+					SystemId    string `xml:"SystemID,attr"`
 					Description string `xml:"SystemDescription,attr"`
 				}
 				type XmlMetadataSystem struct {
-					Version string `xml:"Version,attr"`
-					Date string `xml:"Date,attr"`
-					System XmlSystem `xml:"SYSTEM"`
-					Comments string `xml:"COMMENTS"`
+					Version  string    `xml:"Version,attr"`
+					Date     string    `xml:"Date,attr"`
+					System   XmlSystem `xml:"SYSTEM"`
+					Comments string    `xml:"COMMENTS"`
 				}
 				xms := XmlMetadataSystem{}
 				err := parser.DecodeElement(&xms, &t)
@@ -108,8 +108,8 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata,error) {
 				metadata.System.Comments = strings.TrimSpace(xms.Comments)
 				metadata.System.Id = xms.System.SystemId
 				metadata.System.Description = xms.System.Description
-			case "METADATA-RESOURCE", "METADATA-CLASS", "METADATA-TABLE", "METADATA-LOOKUP","METADATA-LOOKUP_TYPE":
-				data,err := ParseMetadataCompactDecoded(elmt, parser, "	")
+			case "METADATA-RESOURCE", "METADATA-CLASS", "METADATA-TABLE", "METADATA-LOOKUP", "METADATA-LOOKUP_TYPE":
+				data, err := ParseMetadataCompactDecoded(elmt, parser, "	")
 				if err != nil {
 					return nil, err
 				}
@@ -131,7 +131,6 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata,error) {
 	return &metadata, nil
 }
 
-
-func parseMetadataStandardXml(body io.ReadCloser) (*Metadata,error) {
+func parseMetadataStandardXml(body io.ReadCloser) (*Metadata, error) {
 	return nil, errors.New("unsupported metadata format option")
 }

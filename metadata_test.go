@@ -1,7 +1,7 @@
 /**
-	parsing the 'login' action from RETS
- */
-package gorets
+parsing the 'login' action from RETS
+*/
+package gorets_client
 
 import (
 	"bytes"
@@ -12,8 +12,7 @@ import (
 var retsStart = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">`
 var retsEnd = `</RETS>`
 
-var system string =
-	`<METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+var system string = `<METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <SYSTEM SystemID="SIRM" SystemDescription="MLS System"/>
 <COMMENTS>
 The System is provided to you by Systems.
@@ -21,11 +20,11 @@ The System is provided to you by Systems.
 </METADATA-SYSTEM>`
 
 func TestSystem(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart+system+retsEnd)))
+	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + system + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 	verifySystem(t, *ms)
 }
@@ -35,19 +34,18 @@ func verifySystem(t *testing.T, ms Metadata) {
 	AssertEquals(t, "bad comments", ms.System.Comments, "The System is provided to you by Systems.")
 }
 
-var resource string =
-	`<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+var resource string = `<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	ResourceID	StandardName	VisibleName	Description	KeyField	ClassCount	ClassVersion	ClassDate	ObjectVersion	ObjectDate	SearchHelpVersion	SearchHelpDate	EditMaskVersion	EditMaskDate	LookupVersion	LookupDate	UpdateHelpVersion	UpdateHelpDate	ValidationExpressionVersion	ValidationExpressionDate	ValidationLookupVersion	ValidationLookupDate	ValidationExternalVersion	ValidationExternalDate	</COLUMNS>
 <DATA>	ActiveAgent	ActiveAgent	Agent	ActiveAgent	AgentKey	1	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
 <DATA>	Agent	Agent	Agent	Agent	AgentKey	1	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
 </METADATA-RESOURCE>`
 
 func TestParseResources(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart+resource+retsEnd)))
+	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + resource + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 	verifyParseResources(t, *ms)
 }
@@ -58,13 +56,11 @@ func verifyParseResources(t *testing.T, ms Metadata) {
 
 	indexer := ms.Resources.Indexer()
 
-	AssertEquals(t, "bad value", "ActiveAgent", indexer("ResourceID",0))
-	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate",1))
+	AssertEquals(t, "bad value", "ActiveAgent", indexer("ResourceID", 0))
+	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate", 1))
 }
 
-
-var class string =
-	`<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+var class string = `<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	ClassName	StandardName	VisibleName	Description	TableVersion	TableDate	UpdateVersion	UpdateDate	</COLUMNS>
 <DATA>	COM	MRIS Commercial	MRIS Commercial	MRIS_COM	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
 <DATA>	LOT	MRIS Lot Land	MRIS Lot Land	MRIS_LOT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			</DATA>
@@ -76,11 +72,11 @@ var class string =
 `
 
 func TestParseClass(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart+class+retsEnd)))
+	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + class + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 	verifyParseClass(t, *ms)
 }
@@ -93,13 +89,12 @@ func verifyParseClass(t *testing.T, ms Metadata) {
 
 	indexer := mdata.Indexer()
 
-	AssertEquals(t, "bad value", "RESO_PROP_2012_05", indexer("ClassName",5))
-	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate",0))
-	AssertEquals(t, "bad value", "MRIS Multi-Family", indexer("VisibleName",2))
+	AssertEquals(t, "bad value", "RESO_PROP_2012_05", indexer("ClassName", 5))
+	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate", 0))
+	AssertEquals(t, "bad value", "MRIS Multi-Family", indexer("VisibleName", 2))
 }
 
-var table string =
-	`<METADATA-TABLE Resource="ActiveAgent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+var table string = `<METADATA-TABLE Resource="ActiveAgent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	SystemName	StandardName	LongName	DBName	ShortName	MaximumLength	DataType	Precision	Searchable	Interpretation	Alignment	UseSeparator	EditMaskID	LookupName	MaxSelect	Units	Index	Minimum	Maximum	Default	Required	SearchHelpID	Unique	</COLUMNS>
 <DATA>	AgentListingServiceName		ListingServiceName	X49076033	ListingServiceName	4000	Character		1		Left	0					1			0			0	</DATA>
 <DATA>	AgentKey		AgentKey	X74130	AgentKey	15	Long	0	1	Number	Right	0					1			0			1	</DATA>
@@ -109,11 +104,11 @@ var table string =
 `
 
 func TestParseTable(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart+table+retsEnd)))
+	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + table + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 	verifyParseTable(t, *ms)
 }
@@ -126,12 +121,11 @@ func verifyParseTable(t *testing.T, ms Metadata) {
 
 	indexer := mdata.Indexer()
 
-	AssertEquals(t, "bad value", "AgentListingServiceName", indexer("SystemName",0))
-	AssertEquals(t, "bad value", "0", indexer("Unique",3))
+	AssertEquals(t, "bad value", "AgentListingServiceName", indexer("SystemName", 0))
+	AssertEquals(t, "bad value", "0", indexer("Unique", 3))
 }
 
-var lookup string =
-	`<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+var lookup string = `<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	LookupName	VisibleName	Version	Date	</COLUMNS>
 <DATA>	COUNTIES_OR_REGIONS	Counties or Regions	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
 <DATA>	TAX_HISTORIC_DESIGNATION_TYPES	Tax Historic Designation Types	1.12.6	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
@@ -141,11 +135,11 @@ var lookup string =
 `
 
 func TestParseLookup(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart+lookup+retsEnd)))
+	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + lookup + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 	verifyParseLookup(t, *ms)
 }
@@ -158,12 +152,11 @@ func verifyParseLookup(t *testing.T, ms Metadata) {
 
 	indexer := mdata.Indexer()
 
-	AssertEquals(t, "bad value", "COUNTIES_OR_REGIONS", indexer("LookupName",0))
-	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date",3))
+	AssertEquals(t, "bad value", "COUNTIES_OR_REGIONS", indexer("LookupName", 0))
+	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date", 3))
 }
 
-var lookupType string =
-	`<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Lookup="COUNTIES_OR_REGIONS" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+var lookupType string = `<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Lookup="COUNTIES_OR_REGIONS" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	LongValue	ShortValue	Value	</COLUMNS>
 <DATA>	ALEUTIANS WEST-AK	ALEUTIANS WEST	85014594158	</DATA>
 <DATA>	ATASCOSA-TX	ATASCOSA	85014594154	</DATA>
@@ -173,11 +166,11 @@ var lookupType string =
 `
 
 func TestParseLookupType(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart+lookupType+retsEnd)))
+	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + lookupType + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 	verifyParseLookupType(t, *ms)
 }
@@ -189,17 +182,15 @@ func verifyParseLookupType(t *testing.T, ms Metadata) {
 
 	indexer := mdata.Indexer()
 
-	AssertEquals(t, "bad value", "BROOMFIELD-CO", indexer("LongValue",2))
-	AssertEquals(t, "bad value", "CLARK", indexer("ShortValue",3))
+	AssertEquals(t, "bad value", "BROOMFIELD-CO", indexer("LongValue", 2))
+	AssertEquals(t, "bad value", "CLARK", indexer("ShortValue", 3))
 }
 
-
-
 func TestParseMetadata(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart+system+resource+class+table+lookup+lookupType+retsEnd)))
+	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + system + resource + class + table + lookup + lookupType + retsEnd)))
 	ms, err := parseMetadataCompactResult(body)
 	if err != nil {
-		t.Error("error parsing body: "+ err.Error())
+		t.Error("error parsing body: " + err.Error())
 	}
 
 	verifySystem(t, *ms)
