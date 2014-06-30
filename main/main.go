@@ -22,6 +22,7 @@ func main() {
 	loginUrl := flag.String("login-url", "", "Login URL for the RETS server")
 	userAgent := flag.String("user-agent", "Threewide/1.0", "User agent for the RETS client")
 	userAgentPw := flag.String("user-agent-pw", "", "User agent authentication")
+	retsVersion := flag.String("rets-version", "", "RETS Version")
 	logFile := flag.String("log-file", "", "")
 
 	flag.Parse()
@@ -37,7 +38,7 @@ func main() {
 		fmt.Println("wire logging enabled: ", file.Name())
 	}
 	// should we throw an err here too?
-	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, logger)
+	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, *retsVersion, logger)
 	if err != nil {
 		panic(err)
 	}
@@ -87,8 +88,7 @@ func main() {
 		Url:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
-		Id:       "3986587",
-		ObjectId: "*",
+		Id:       "3986587:1",
 	})
 	if err != nil {
 		panic(err)
@@ -104,8 +104,7 @@ func main() {
 		Url:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
-		Id:       "3986587",
-		ObjectId: "*",
+		Id:       "3986587:*",
 	})
 	if err != nil {
 		panic(err)

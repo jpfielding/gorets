@@ -53,6 +53,7 @@ type GetObjectRequest struct {
 	Uid,
 	/** listing1:1:3:5,listing2:*,listing3:0 */
 	Id string
+	/** 5.4.2 listing data to be embedded in the response */
 	ObjectData []string
 	/* 5.4.1 */
 	Location int
