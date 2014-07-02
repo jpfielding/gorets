@@ -74,6 +74,7 @@ type SearchRequest struct {
 	Payload string
 
 	Count,
+	// TODO NONE is a valid option, this needs to be modified
 	Limit,
 	Offset int
 }
@@ -106,8 +107,16 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 
 	optionalInt := OptionalIntValue(values)
 	optionalInt("Count", r.Count)
-	optionalInt("Limit", r.Limit)
-	optionalInt("Offset", r.Offset)
+	if r.Offset > 0 {
+		optionalInt("Offset", r.Offset)
+	}
+	// limit is unique in that it can send a value of "NONE"
+	switch {
+		case r.Limit > 0:
+			optionalInt("Limit", r.Limit)
+		case r.Limit < 0:
+			values.Add("Limit", "NONE")
+	}
 
 	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s", r.Url, values.Encode()), nil)
 	if err != nil {
