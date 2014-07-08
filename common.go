@@ -71,9 +71,9 @@ func ParseCountTag(count xml.StartElement) (int, error) {
 	return int(code), nil
 }
 
-/** see jrets SearchResultHandler for why this is _too_ simplistic */
-func SplitRowByDelim(row, delim string) []string {
-	return strings.Split(strings.Trim(row, delim), delim)
+func ParseCompactRow(row, delim string) []string {
+	split := strings.Split(row, delim)
+	return split[1:len(split)-1]
 }
 
 func OptionalStringValue(values url.Values) func(string, string) {
@@ -151,11 +151,11 @@ func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, de
 func extractMap(cols string, rows []string, delim string) *CompactData {
 	data := CompactData{}
 	// remove the first and last chars
-	data.Columns = SplitRowByDelim(cols, delim)
+	data.Columns = ParseCompactRow(cols, delim)
 	data.Rows = make([][]string, len(rows))
 	// create each
 	for i, line := range rows {
-		data.Rows[i] = SplitRowByDelim(line, delim)
+		data.Rows[i] = ParseCompactRow(line, delim)
 	}
 	return &data
 }

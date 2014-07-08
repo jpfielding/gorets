@@ -175,7 +175,7 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 				name := elmt.Name.Local
 				switch name {
 				case "DATA":
-					data <- SplitRowByDelim(buf.String(), result.Delimiter)
+					data <- ParseCompactRow(buf.String(), result.Delimiter)
 				case "RETS":
 					return
 				}
@@ -221,7 +221,7 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 			name := elmt.Name.Local
 			switch name {
 			case "COLUMNS":
-				result.Columns = SplitRowByDelim(buf.String(), result.Delimiter)
+				result.Columns = ParseCompactRow(buf.String(), result.Delimiter)
 				go bgDataProcessing()
 				return &result, nil
 			}

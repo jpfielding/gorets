@@ -35,6 +35,7 @@ func TestEof(t *testing.T) {
 		t.Error("error parsing body: " + err.Error())
 	}
 }
+
 func TestParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
