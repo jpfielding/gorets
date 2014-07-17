@@ -6,6 +6,7 @@ package gorets_client
 import (
 	"strings"
 	"testing"
+	"fmt"
 )
 
 var payloadlist string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
@@ -60,21 +61,17 @@ var payloadlist string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 
 func verifyCompactData(t *testing.T, pl *PayloadList, id string) {
 	payload := <-pl.Payloads
-	AssertEqualsInt(t, "bad header count", 6, len(payload.Columns))
+	equals(t, 6, len(payload.Columns))
 
-	AssertEquals(t, "bad id", id, payload.Id)
-	AssertEquals(t, "bad headers", "A,B,C,D,E,F", strings.Join(payload.Columns, ","))
+	equals(t, id, payload.Id)
+	equals(t, "A,B,C,D,E,F", strings.Join(payload.Columns, ","))
 
 	counter := 0
 	for _, row := range payload.Rows {
-		if strings.Join(row, ",") != "1,2,3,4,5,6" {
-			t.Errorf("bad row %d: %s", counter, row)
-		}
+		assert(t, strings.Join(row, ",") == "1,2,3,4,5,6", fmt.Sprintf("bad row %d: %s", counter, row))
 
-		if pl.Error != nil {
-			t.Errorf("error parsing body at row %d: %s", counter, pl.Error.Error())
-		}
+		ok(t, pl.Error)
 		counter = counter + 1
 	}
-	AssertEqualsInt(t, "bad count", 8, counter)
+	equals(t, 8, counter)
 }

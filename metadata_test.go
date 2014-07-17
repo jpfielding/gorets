@@ -23,15 +23,13 @@ func TestSystem(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + system + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
-	if err != nil {
-		t.Error("error parsing body: " + err.Error())
-	}
+	ok(t,err)
 	verifySystem(t, *ms)
 }
 
 func verifySystem(t *testing.T, ms Metadata) {
-	AssertEquals(t, "bad version", ms.System.Version, "1.12.30")
-	AssertEquals(t, "bad comments", ms.System.Comments, "The System is provided to you by Systems.")
+	assert(t, ms.System.Version == "1.12.30", "bad version")
+	assert(t, ms.System.Comments == "The System is provided to you by Systems.", "bad comments")
 }
 
 var resource string = `<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -44,20 +42,18 @@ func TestParseResources(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + resource + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
-	if err != nil {
-		t.Error("error parsing body: " + err.Error())
-	}
+	ok(t, err)
 	verifyParseResources(t, *ms)
 }
 
 func verifyParseResources(t *testing.T, ms Metadata) {
-	AssertEquals(t, "bad version", "1.12.30", ms.Resources.Version)
-	AssertEqualsInt(t, "wrong number of resources", len(ms.Resources.Rows), 2)
+	equals(t, "1.12.30", ms.Resources.Version)
+	equals(t, len(ms.Resources.Rows), 2)
 
 	indexer := ms.Resources.Indexer()
 
-	AssertEquals(t, "bad value", "ActiveAgent", indexer("ResourceID", 0))
-	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate", 1))
+	equals(t, "ActiveAgent", indexer("ResourceID", 0))
+	equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate", 1))
 }
 
 var class string = `<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -75,23 +71,21 @@ func TestParseClass(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + class + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
-	if err != nil {
-		t.Error("error parsing body: " + err.Error())
-	}
+	ok(t, err)
 	verifyParseClass(t, *ms)
 }
 
 func verifyParseClass(t *testing.T, ms Metadata) {
 	mdata := ms.Classes["Property"]
 
-	AssertEquals(t, "bad version", mdata.Version, "1.12.29")
-	AssertEqualsInt(t, "wrong number of resources", len(mdata.Rows), 6)
+	equals(t, mdata.Version, "1.12.29")
+	equals(t, len(mdata.Rows), 6)
 
 	indexer := mdata.Indexer()
 
-	AssertEquals(t, "bad value", "RESO_PROP_2012_05", indexer("ClassName", 5))
-	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate", 0))
-	AssertEquals(t, "bad value", "MRIS Multi-Family", indexer("VisibleName", 2))
+	equals(t, "RESO_PROP_2012_05", indexer("ClassName", 5))
+	equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate", 0))
+	equals(t, "MRIS Multi-Family", indexer("VisibleName", 2))
 }
 
 var table string = `<METADATA-TABLE Resource="ActiveAgent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -107,22 +101,20 @@ func TestParseTable(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + table + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
-	if err != nil {
-		t.Error("error parsing body: " + err.Error())
-	}
+	ok(t, err)
 	verifyParseTable(t, *ms)
 }
 
 func verifyParseTable(t *testing.T, ms Metadata) {
 	mdata := ms.Tables["ActiveAgent:ActiveAgent"]
 
-	AssertEquals(t, "bad version", "1.12.29", mdata.Version)
-	AssertEqualsInt(t, "wrong number of resources", len(mdata.Rows), 4)
+	equals(t, "1.12.29", mdata.Version)
+	equals(t, len(mdata.Rows), 4)
 
 	indexer := mdata.Indexer()
 
-	AssertEquals(t, "bad value", "AgentListingServiceName", indexer("SystemName", 0))
-	AssertEquals(t, "bad value", "0", indexer("Unique", 3))
+	equals(t, "AgentListingServiceName", indexer("SystemName", 0))
+	equals(t, "0", indexer("Unique", 3))
 }
 
 var lookup string = `<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -138,22 +130,20 @@ func TestParseLookup(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + lookup + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
-	if err != nil {
-		t.Error("error parsing body: " + err.Error())
-	}
+	ok(t, err)
 	verifyParseLookup(t, *ms)
 }
 
 func verifyParseLookup(t *testing.T, ms Metadata) {
 	mdata := ms.Lookups["TaxHistoricalDesignation"]
 
-	AssertEquals(t, "bad version", "1.12.29", mdata.Version)
-	AssertEqualsInt(t, "wrong number of resources", len(mdata.Rows), 4)
+	equals(t, "1.12.29", mdata.Version)
+	equals(t, len(mdata.Rows), 4)
 
 	indexer := mdata.Indexer()
 
-	AssertEquals(t, "bad value", "COUNTIES_OR_REGIONS", indexer("LookupName", 0))
-	AssertEquals(t, "bad value", "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date", 3))
+	equals(t, "COUNTIES_OR_REGIONS", indexer("LookupName", 0))
+	equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date", 3))
 }
 
 var lookupType string = `<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Lookup="COUNTIES_OR_REGIONS" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -169,29 +159,25 @@ func TestParseLookupType(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + lookupType + retsEnd)))
 
 	ms, err := parseMetadataCompactResult(body)
-	if err != nil {
-		t.Error("error parsing body: " + err.Error())
-	}
+	ok(t, err)
 	verifyParseLookupType(t, *ms)
 }
 func verifyParseLookupType(t *testing.T, ms Metadata) {
 	mdata := ms.LookupTypes["TaxHistoricalDesignation:COUNTIES_OR_REGIONS"]
 
-	AssertEquals(t, "bad version", "1.12.29", mdata.Version)
-	AssertEqualsInt(t, "wrong number of resources", len(mdata.Rows), 4)
+	equals(t, "1.12.29", mdata.Version)
+	equals(t, len(mdata.Rows), 4)
 
 	indexer := mdata.Indexer()
 
-	AssertEquals(t, "bad value", "BROOMFIELD-CO", indexer("LongValue", 2))
-	AssertEquals(t, "bad value", "CLARK", indexer("ShortValue", 3))
+	equals(t, "BROOMFIELD-CO", indexer("LongValue", 2))
+	equals(t, "CLARK", indexer("ShortValue", 3))
 }
 
 func TestParseMetadata(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + system + resource + class + table + lookup + lookupType + retsEnd)))
 	ms, err := parseMetadataCompactResult(body)
-	if err != nil {
-		t.Error("error parsing body: " + err.Error())
-	}
+	ok(t, err)
 
 	verifySystem(t, *ms)
 	verifyParseResources(t, *ms)

@@ -29,7 +29,7 @@ func TestDigest(t *testing.T) {
 
 	for k, v := range e {
 		if a[k] != v {
-			AssertEquals(t, k, v, a[k])
+			equals(t, v, a[k])
 		}
 	}
 }
@@ -56,7 +56,7 @@ func TestDigestQopAuth(t *testing.T) {
 
 	for k, v := range e {
 		if a[k] != v {
-			AssertEquals(t, k, v, a[k])
+			equals(t, v, a[k])
 		}
 	}
 }

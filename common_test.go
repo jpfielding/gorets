@@ -1,8 +1,6 @@
 package gorets_client
 
-import (
-	"testing"
-)
+import "testing"
 
 
 func TestCompactRowParsing(t *testing.T) {
@@ -12,6 +10,6 @@ func TestCompactRowParsing(t *testing.T) {
 	headers := ParseCompactRow(col, delim)
 	values := ParseCompactRow(row, delim)
 
-	AssertEqualsInt(t, "bad columns", 6, int(len(headers)))
-	AssertEqualsInt(t, "bad headers", 6, int(len(values)))
+	equals(t, 6, int(len(headers)))
+	equals(t, 6, int(len(values)))
 }

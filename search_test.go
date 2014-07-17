@@ -43,13 +43,13 @@ func TestParseCompact(t *testing.T) {
 	if err != nil {
 		t.Error("error parsing body: " + err.Error())
 	}
-	AssertEqualsInt(t, "bad code", 0, cr.RetsResponse.ReplyCode)
-	AssertEquals(t, "bad text", "V2.7.0 2315: Success", cr.RetsResponse.ReplyText)
+	assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")
+	assert(t, "V2.7.0 2315: Success" == cr.RetsResponse.ReplyText, "bad text")
 
-	AssertEqualsInt(t, "bad count", 10, int(cr.Count))
-	AssertEqualsInt(t, "bad header count", 6, len(cr.Columns))
+	assert(t, 10 == int(cr.Count), "bad count")
+	assert(t, 6 == len(cr.Columns), "bad header count")
 
-	AssertEquals(t, "bad headers", "A,B,C,D,E,F", strings.Join(cr.Columns, ","))
+	assert(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
 
 	filterTo := cr.FilterTo([]string{"A", "C", "E"})
 
@@ -70,8 +70,8 @@ func TestParseCompact(t *testing.T) {
 		counter = counter + 1
 	}
 
-	AssertEqualsInt(t, "bad count", 8, counter)
-	AssertEqualsTrue(t, "bad max rows", cr.MaxRows)
+	assert(t, 8 == counter, "bad count")
+	assert(t, cr.MaxRows, "bad max rows")
 
 }
 

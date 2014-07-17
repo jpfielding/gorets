@@ -28,25 +28,18 @@ func TestGetObject(t *testing.T) {
 	results := parseGetObjectResult(header, reader)
 	result := <-results
 
-	counter := 0
 	o := result.Object
-	if result.Err != nil {
-		t.Error("error parsing multipart: " + result.Err.Error())
-	}
-	if !o.Preferred {
-		t.Errorf("error parsing preferred at object %d", counter)
-	}
-	AssertEquals(t, "bad value", "image/jpeg", o.ContentType)
-	AssertEquals(t, "bad value", "123456", o.ContentId)
-	AssertEqualsInt(t, "bad value", 1, o.ObjectId)
-	AssertEquals(t, "bad uid", "1a234234234", o.Uid)
-	AssertEquals(t, "bad value", "Outhouse", o.Description)
-	AssertEquals(t, "bad value", "The urinal", o.SubDescription)
-	AssertEquals(t, "bad value", "<binary data 1>", string(o.Blob))
-	AssertEquals(t, "bad value", "http://www.simpleboundary.com/image-5.jpg", o.Location)
-	if o.RetsError {
-		t.Errorf("error parsing rets error at object %d", counter)
-	}
+	ok(t, result.Err)
+	equals(t, true, o.Preferred)
+	equals(t, "image/jpeg", o.ContentType)
+	equals(t, "123456", o.ContentId)
+	equals(t, 1, o.ObjectId)
+	equals(t, "1a234234234", o.Uid)
+	equals(t, "Outhouse", o.Description)
+	equals(t, "The urinal", o.SubDescription)
+	equals(t, "<binary data 1>", string(o.Blob))
+	equals(t, "http://www.simpleboundary.com/image-5.jpg", o.Location)
+	equals(t, false, o.RetsError)
 }
 
 var boundary string = "simple boundary"
@@ -97,72 +90,58 @@ Location: http://www.simpleboundary.com/image-5.jpg
 func TestExtractBoundary(t *testing.T) {
 	extracted := extractBoundary(contentType)
 
-	AssertEquals(t, "bad boundary", boundary, extracted)
+	equals(t, boundary, extracted)
 }
 
 func TestGetObjects(t *testing.T) {
 	extracted := extractBoundary(contentType)
 
-	AssertEquals(t, "bad boundary", boundary, extracted)
+	equals(t, boundary, extracted)
 
 	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
 
 	results := parseGetObjectsResult(extracted, body)
 
-	counter := 0
 	r1 := <-results
-	if r1.Err != nil {
-		t.Errorf("error parsing body at object %d: %s", counter, r1.Err.Error())
-	}
+	ok(t, r1.Err)
 	o1 := r1.Object
-	if !o1.Preferred {
-		t.Errorf("error parsing preferred at object %d", counter)
-	}
-	AssertEquals(t, "bad value", "image/jpeg", o1.ContentType)
-	AssertEquals(t, "bad value", "123456", o1.ContentId)
-	AssertEqualsInt(t, "bad value", 1, o1.ObjectId)
-	AssertEquals(t, "bad value", "<binary data 1>", string(o1.Blob))
-	AssertEquals(t, "bad value", "123456", o1.ObjectData["ListingKey"])
-	AssertEquals(t, "bad value", "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
+	equals(t, true, o1.Preferred)
+	equals(t, "image/jpeg", o1.ContentType)
+	equals(t, "123456", o1.ContentId)
+	equals(t, 1, o1.ObjectId)
+	equals(t, "<binary data 1>", string(o1.Blob))
+	equals(t, "123456", o1.ObjectData["ListingKey"])
+	equals(t, "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
 
 	r2 := <-results
-	if r2.Err != nil {
-		t.Errorf("error parsing body at object %d: %s", counter, r2.Err.Error())
-	}
+	ok(t, r2.Err)
 	o2 := r2.Object
-	AssertEqualsInt(t, "bad value", 2, o2.ObjectId)
-	AssertEquals(t, "bad uid", "1a234234234", o2.Uid)
+	equals(t, 2, o2.ObjectId)
+	equals(t, "1a234234234", o2.Uid)
 
 	r3 := <-results
-	if r3.Err != nil {
-		t.Errorf("error parsing body at object %d: %s", counter, r3.Err.Error())
-	}
+	ok(t, r3.Err)
 	o3 := r3.Object
-	AssertEqualsInt(t, "bad value", 3, o3.ObjectId)
-	AssertEquals(t, "bad value", "Outhouse", o3.Description)
-	AssertEquals(t, "bad value", "The urinal", o3.SubDescription)
+	equals(t, 3, o3.ObjectId)
+	equals(t, "Outhouse", o3.Description)
+	equals(t, "The urinal", o3.SubDescription)
 
 	r4 := <-results
-	if r4.Err != nil {
-		t.Errorf("error parsing body at object %d: %s", counter, r4.Err.Error())
-	}
+	ok(t, r4.Err)
 	o4 := r4.Object
-	if !o4.RetsError {
-		t.Errorf("error parsing error at object %d", counter)
-	}
-	AssertEquals(t, "bad value", "text/xml", o4.ContentType)
-	AssertEquals(t, "bad value", "There is no object with that Object-ID", o4.RetsErrorMessage.ReplyText)
-	AssertEqualsInt(t, "bad value", 20403, o4.RetsErrorMessage.ReplyCode)
+	equals(t, true, o4.RetsError)
+
+	equals(t, "text/xml", o4.ContentType)
+	equals(t, "There is no object with that Object-ID", o4.RetsErrorMessage.ReplyText)
+	equals(t, 20403, o4.RetsErrorMessage.ReplyCode)
 
 	r5 := <-results
-	if r5.Err != nil {
-		t.Errorf("error parsing body at object %d: %s", counter, r5.Err.Error())
-	}
+	ok(t, r5.Err)
 	o5 := r5.Object
-	AssertEquals(t, "bad value", "http://www.simpleboundary.com/image-5.jpg", o5.Location)
-	AssertEquals(t, "bad value", "image/jpeg", o5.ContentType)
-	AssertEquals(t, "bad value", "123456", o5.ContentId)
-	AssertEqualsInt(t, "bad value", 5, o5.ObjectId)
-	AssertEquals(t, "bad value", "<binary data 5>", string(o5.Blob))
+	equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
+	equals(t, "image/jpeg", o5.ContentType)
+	equals(t, "123456", o5.ContentId)
+	equals(t, 5, o5.ObjectId)
+	equals(t, "<binary data 5>", string(o5.Blob))
 
 }
