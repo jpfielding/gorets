@@ -76,6 +76,9 @@ func main () {
 		Limit: 3,
 		Offset: -1,
 	}
+	// a quit channel in case we want to stop processing
+	quit := make(chan struct{})
+    defer close(quit)
 	result, err := session.Search(req)
 	if err != nil {
 		panic(err)

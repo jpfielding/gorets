@@ -90,7 +90,7 @@ type SearchRequest struct {
 	QueryType=DMQL2&
 	SearchType=Property
 */
-func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
+func (s *Session) Search(quit <-chan struct{}, r SearchRequest) (*SearchResult, error) {
 	// required
 	values := url.Values{}
 	values.Add("Class", r.Class)
@@ -112,10 +112,10 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 	}
 	// limit is unique in that it can send a value of "NONE"
 	switch {
-		case r.Limit > 0:
-			optionalInt("Limit", r.Limit)
-		case r.Limit < 0:
-			values.Add("Limit", "NONE")
+	case r.Limit > 0:
+		optionalInt("Limit", r.Limit)
+	case r.Limit < 0:
+		values.Add("Limit", "NONE")
 	}
 
 	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s", r.Url, values.Encode()), nil)
@@ -130,14 +130,14 @@ func (s *Session) Search(r SearchRequest) (*SearchResult, error) {
 
 	switch r.Format {
 	case "COMPACT-DECODED", "COMPACT":
-		return parseCompactResult(resp.Body, 100)
+		return parseCompactResult(quit, resp.Body, 100)
 	case "STANDARD-XML":
 		panic("not yet supported!")
 	}
 	return nil, nil
 }
 
-func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchResult, error) {
+func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, processingBufferSize int) (*SearchResult, error) {
 	data := make(chan []string, processingBufferSize)
 	rets := RetsResponse{}
 	result := SearchResult{
@@ -175,7 +175,11 @@ func parseCompactResult(body io.ReadCloser, processingBufferSize int) (*SearchRe
 				name := elmt.Name.Local
 				switch name {
 				case "DATA":
-					data <- ParseCompactRow(buf.String(), result.Delimiter)
+					select {
+					case data <- ParseCompactRow(buf.String(), result.Delimiter):
+					case <-quit:
+						return
+					}
 				case "RETS":
 					return
 				}

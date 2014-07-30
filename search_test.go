@@ -30,7 +30,9 @@ var compactDecoded string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success
 func TestEof(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte("")))
 
-	_, err := parseCompactResult(body, 1)
+	done := make(chan struct{})
+	defer close(done)
+	_, err := parseCompactResult(done, body, 1)
 	if err != io.EOF {
 		t.Error("error parsing body: " + err.Error())
 	}
@@ -39,7 +41,9 @@ func TestEof(t *testing.T) {
 func TestParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
-	cr, err := parseCompactResult(body, 1)
+	done := make(chan struct{})
+	defer close(done)
+	cr, err := parseCompactResult(done, body, 1)
 	if err != nil {
 		t.Error("error parsing body: " + err.Error())
 	}
