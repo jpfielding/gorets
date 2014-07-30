@@ -149,3 +149,29 @@ func TestGetObjects(t *testing.T) {
 	equals(t, "<binary data 5>", string(o5.Blob))
 
 }
+
+func TestParseGetObjectQuit(t *testing.T) {
+	extracted := extractBoundary(contentType)
+
+	equals(t, boundary, extracted)
+
+	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
+
+	quit := make(chan struct{})
+	defer close(quit)
+	results := parseGetObjectsResult(quit, extracted, body)
+
+	r1 := <-results
+	ok(t, r1.Err)
+	assert(t, r1 != GetObjectResult{},"should not be the zerod object")
+	o1 := r1.Object
+	equals(t, "image/jpeg", o1.ContentType)
+	equals(t, "123456", o1.ContentId)
+	equals(t, 1, o1.ObjectId)
+
+	quit <- struct{}{}
+
+	// the closed channel will emit a zero'd value of the proper type
+	r2 := <-results
+	equals(t, r2, GetObjectResult{})
+}

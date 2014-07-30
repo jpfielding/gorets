@@ -38,15 +38,33 @@ func TestEof(t *testing.T) {
 	}
 }
 
+func TestParseSearchQuit(t *testing.T) {
+	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
+
+	quit := make(chan struct{})
+	defer close(quit)
+	cr, err := parseCompactResult(quit, body, 1)
+	ok(t, err)
+
+	row1 := <- cr.Data
+	equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
+
+	quit <- struct{}{}
+
+	// the closed channel will emit a zero'd value of the proper type
+	row2 := <- cr.Data
+	equals(t, "", strings.Join(row2, ","))
+
+}
+
 func TestParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
 	done := make(chan struct{})
 	defer close(done)
 	cr, err := parseCompactResult(done, body, 1)
-	if err != nil {
-		t.Error("error parsing body: " + err.Error())
-	}
+	ok(t, err)
+
 	assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")
 	assert(t, "V2.7.0 2315: Success" == cr.RetsResponse.ReplyText, "bad text")
 
