@@ -77,6 +77,7 @@ type SearchRequest struct {
 	// TODO NONE is a valid option, this needs to be modified
 	Limit,
 	Offset int
+	BufferSize int
 }
 
 /*
@@ -130,15 +131,18 @@ func (s *Session) Search(quit <-chan struct{}, r SearchRequest) (*SearchResult, 
 
 	switch r.Format {
 	case "COMPACT-DECODED", "COMPACT":
-		return parseCompactResult(quit, resp.Body, 100)
+		return parseCompactResult(quit, resp.Body, r.BufferSize)
 	case "STANDARD-XML":
 		panic("not yet supported!")
 	}
 	return nil, nil
 }
 
-func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, processingBufferSize int) (*SearchResult, error) {
-	data := make(chan []string, processingBufferSize)
+func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, bufferSize int) (*SearchResult, error) {
+	if bufferSize <= 0 {
+		bufferSize = 1
+	}
+	data := make(chan []string, bufferSize)
 	rets := RetsResponse{}
 	result := SearchResult{
 		Data:         data,
