@@ -25,7 +25,9 @@ func TestGetObject(t *testing.T) {
 	var body string = `<binary data 1>`
 	reader := ioutil.NopCloser(bytes.NewReader([]byte(body)))
 
-	results := parseGetObjectResult(header, reader)
+	quit := make(chan struct{})
+	defer close(quit)
+	results := parseGetObjectResult(quit, header, reader)
 	result := <-results
 
 	o := result.Object
@@ -100,7 +102,9 @@ func TestGetObjects(t *testing.T) {
 
 	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
 
-	results := parseGetObjectsResult(extracted, body)
+	quit := make(chan struct{})
+	defer close(quit)
+	results := parseGetObjectsResult(quit, extracted, body)
 
 	r1 := <-results
 	ok(t, r1.Err)

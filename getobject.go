@@ -60,7 +60,7 @@ type GetObjectRequest struct {
 }
 
 /* */
-func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) {
+func (s *Session) GetObject(quit <-chan struct{}, r GetObjectRequest) (<-chan GetObjectResult, error) {
 	// required
 	values := url.Values{}
 	values.Add("Resource", r.Resource)
@@ -91,23 +91,27 @@ func (s *Session) GetObject(r GetObjectRequest) (<-chan GetObjectResult, error) 
 	contentType := resp.Header.Get("Content-type")
 	boundary := extractBoundary(contentType)
 	if boundary == "" {
-		return parseGetObjectResult(resp.Header, resp.Body), nil
+		return parseGetObjectResult(quit, resp.Header, resp.Body), nil
 	}
 
-	return parseGetObjectsResult(boundary, resp.Body), nil
+	return parseGetObjectsResult(quit, boundary, resp.Body), nil
 }
 
-func parseGetObjectResult(header http.Header, body io.ReadCloser) <-chan GetObjectResult {
+func parseGetObjectResult(quit <-chan struct{}, header http.Header, body io.ReadCloser) <-chan GetObjectResult {
 	data := make(chan GetObjectResult)
 	go func() {
 		defer body.Close()
 		defer close(data)
-		data <- parseHeadersAndStream(textproto.MIMEHeader(header), body)
+		select {
+		case data <- parseHeadersAndStream(textproto.MIMEHeader(header), body):
+		case <-quit:
+			return
+		}
 	}()
 	return data
 }
 
-func parseGetObjectsResult(boundary string, body io.ReadCloser) <-chan GetObjectResult {
+func parseGetObjectsResult(quit <-chan struct{}, boundary string, body io.ReadCloser) <-chan GetObjectResult {
 	data := make(chan GetObjectResult)
 	go func() {
 		defer body.Close()
@@ -122,7 +126,12 @@ func parseGetObjectsResult(boundary string, body io.ReadCloser) <-chan GetObject
 				data <- GetObjectResult{nil, err}
 				return
 			}
-			data <- parseHeadersAndStream(part.Header, part)
+
+			select {
+			case data <- parseHeadersAndStream(part.Header, part):
+			case <-quit:
+				return
+			}
 		}
 	}()
 
