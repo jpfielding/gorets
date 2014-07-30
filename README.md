@@ -77,9 +77,9 @@ func main () {
 		Offset: -1,
 	}
 	// a quit channel in case we want to stop processing
-	quit := make(chan struct{})
-    defer close(quit)
-	result, err := session.Search(req)
+	quitSearch := make(chan struct{})
+    defer close(quitSearch)
+	result, err := session.Search(quitSearch, req)
 	if err != nil {
 		panic(err)
 	}
@@ -96,7 +96,10 @@ func main () {
 		fmt.Println(filter(row))
 	}
 
-	one,err := session.GetObject(gorets.GetObjectRequest{
+	// a quit channel in case we want to stop processing
+	quitOne := make(chan struct{})
+    defer close(quitOne)
+	one,err := session.GetObject(quitOne, gorets.GetObjectRequest{
 		Url: capability.GetObject,
 		Resource: "Property",
 		Type: "Thumbnail",
@@ -113,7 +116,10 @@ func main () {
 		o := r.Object
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
-	all,err := session.GetObject(gorets.GetObjectRequest{
+	// a quit channel in case we want to stop processing
+	quitAll := make(chan struct{})
+    defer close(quitAll)
+	all,err := session.GetObject(quitAll, gorets.GetObjectRequest{
 		Url: capability.GetObject,
 		Resource: "Property",
 		Type: "Thumbnail",

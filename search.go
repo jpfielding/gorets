@@ -154,7 +154,6 @@ func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, processingBuff
 		defer close(data)
 		defer body.Close()
 		for {
-			// TODO figure out a kill switch for this
 			token, err := parser.Token()
 			if err != nil {
 				result.ProcessingFailure = err
