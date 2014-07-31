@@ -165,18 +165,14 @@ func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, bufferSize int
 			}
 			switch t := token.(type) {
 			case xml.StartElement:
-				elmt := xml.StartElement(t)
-				name := elmt.Name.Local
-				switch name {
+				switch t.Name.Local {
 				case "MAXROWS":
 					result.MaxRows = true
 				}
 				// clear any accumulated data
 				buf.Reset()
 			case xml.EndElement:
-				elmt := xml.EndElement(t)
-				name := elmt.Name.Local
-				switch name {
+				switch t.Name.Local {
 				case "DATA":
 					select {
 					case data <- ParseCompactRow(buf.String(), result.Delimiter):
@@ -203,22 +199,20 @@ func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, bufferSize int
 		case xml.StartElement:
 			// clear any accumulated data
 			buf.Reset()
-			elmt := xml.StartElement(t)
-			name := elmt.Name.Local
-			switch name {
+			switch t.Name.Local {
 			case "RETS", "RETS-STATUS":
-				rets, err := ParseRetsResponseTag(elmt)
+				rets, err := ParseRetsResponseTag(t)
 				if err != nil {
 					return nil, err
 				}
 				result.RetsResponse = *rets
 			case "COUNT":
-				result.Count, err = ParseCountTag(elmt)
+				result.Count, err = ParseCountTag(t)
 				if err != nil {
 					return nil, err
 				}
 			case "DELIMITER":
-				result.Delimiter, err = ParseDelimiterTag(elmt)
+				result.Delimiter, err = ParseDelimiterTag(t)
 				if err != nil {
 					return nil, err
 				}

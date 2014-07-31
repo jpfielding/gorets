@@ -79,10 +79,9 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 		}
 		switch t := token.(type) {
 		case xml.StartElement:
-			elmt := xml.StartElement(t)
-			switch elmt.Name.Local {
+			switch t.Name.Local {
 			case "RETS", "RETS-STATUS":
-				rets, err := ParseRetsResponseTag(elmt)
+				rets, err := ParseRetsResponseTag(t)
 				if err != nil {
 					return nil, err
 				}
@@ -109,11 +108,11 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 				metadata.System.Id = xms.System.SystemId
 				metadata.System.Description = xms.System.Description
 			case "METADATA-RESOURCE", "METADATA-CLASS", "METADATA-TABLE", "METADATA-LOOKUP", "METADATA-LOOKUP_TYPE":
-				data, err := ParseMetadataCompactDecoded(elmt, parser, "	")
+				data, err := ParseMetadataCompactDecoded(t, parser, "	")
 				if err != nil {
 					return nil, err
 				}
-				switch elmt.Name.Local {
+				switch t.Name.Local {
 				case "METADATA-RESOURCE":
 					metadata.Resources = *data
 				case "METADATA-CLASS":

@@ -65,8 +65,7 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 			}
 			switch t := token.(type) {
 			case xml.StartElement:
-				elmt := xml.StartElement(t)
-				switch elmt.Name.Local {
+				switch t.Name.Local {
 				case "RETSPayloadList":
 					mcd, err := ParseMetadataCompactDecoded(t, parser, delim)
 					if err != nil {
