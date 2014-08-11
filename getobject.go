@@ -40,6 +40,27 @@ type GetObject struct {
 	Blob []byte
 }
 
+// helper to abstract the location concept (not thread safe)
+func (obj *GetObject) Content() ([]byte, error) {
+	if obj == nil {
+		return nil, nil
+	}
+	if obj.Blob != nil {
+		return obj.Blob, nil
+	}
+	resp, err := http.Get(obj.Location)
+	if err != nil {
+		return nil, err
+	}
+	blob, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	obj.Blob = blob
+	return blob, nil
+}
+
+
 type GetObjectResult struct {
 	Object *GetObject
 	Err    error
