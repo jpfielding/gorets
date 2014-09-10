@@ -6,7 +6,6 @@ package gorets_client
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
@@ -125,7 +124,6 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 		return res, err
 	}
 	challenge := res.Header.Get(WWW_AUTH)
-	fmt.Println(challenge)
 
 	if strings.HasPrefix(strings.ToLower(challenge), "basic") {
 		req.SetBasicAuth(t.session.Username, t.session.Password)
