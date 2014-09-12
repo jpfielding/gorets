@@ -193,6 +193,9 @@ func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, bufferSize int
 	for {
 		token, err := parser.Token()
 		if err != nil {
+			if err == io.EOF {
+				return &result, err
+			}
 			return nil, err
 		}
 		switch t := token.(type) {
