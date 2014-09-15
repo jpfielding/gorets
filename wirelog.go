@@ -24,7 +24,8 @@ func WireLog(log io.WriteCloser) Dialer {
 	}
 }
 
-/** channels might make this perform better, though we'ld have to copy the []byte to do that */
+// channels might make this perform better, though we'ld have to copy the []byte to do that
+// TODO see if embedding allows us to dump all the boilerplate code below
 type WireLogConn struct {
 	log  io.WriteCloser
 	conn net.Conn
@@ -40,6 +41,7 @@ func (w *WireLogConn) Write(b []byte) (n int, err error) {
 	w.log.Write(b[0:write])
 	return write, err
 }
+
 func (w *WireLogConn) Close() error {
 	return w.conn.Close()
 }
