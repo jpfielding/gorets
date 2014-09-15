@@ -6,7 +6,6 @@ package gorets_client
 import (
 	"io"
 	"net"
-	"time"
 )
 
 /** this just makes the return type for the Dialer function reasonable */
@@ -18,45 +17,27 @@ func WireLog(log io.WriteCloser) Dialer {
 		conn, err := net.Dial(network, addr)
 		wire := WireLogConn{
 			log:  log,
-			conn: conn,
+			Conn: conn,
 		}
 		return &wire, err
 	}
 }
 
 // channels might make this perform better, though we'ld have to copy the []byte to do that
-// TODO see if embedding allows us to dump all the boilerplate code below
 type WireLogConn struct {
-	log  io.WriteCloser
-	conn net.Conn
+	// embedded
+	net.Conn
+	// the destination for the split stream
+	log io.WriteCloser
 }
 
 func (w *WireLogConn) Read(b []byte) (n int, err error) {
-	read, err := w.conn.Read(b)
+	read, err := w.Conn.Read(b)
 	w.log.Write(b[0:read])
 	return read, err
 }
 func (w *WireLogConn) Write(b []byte) (n int, err error) {
-	write, err := w.conn.Write(b)
+	write, err := w.Conn.Write(b)
 	w.log.Write(b[0:write])
 	return write, err
-}
-
-func (w *WireLogConn) Close() error {
-	return w.conn.Close()
-}
-func (w *WireLogConn) LocalAddr() net.Addr {
-	return w.conn.LocalAddr()
-}
-func (w *WireLogConn) RemoteAddr() net.Addr {
-	return w.conn.RemoteAddr()
-}
-func (w *WireLogConn) SetDeadline(t time.Time) error {
-	return w.conn.SetDeadline(t)
-}
-func (w *WireLogConn) SetReadDeadline(t time.Time) error {
-	return w.conn.SetReadDeadline(t)
-}
-func (w *WireLogConn) SetWriteDeadline(t time.Time) error {
-	return w.conn.SetWriteDeadline(t)
 }
