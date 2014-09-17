@@ -60,7 +60,6 @@ func (obj *GetObject) Content() ([]byte, error) {
 	return blob, nil
 }
 
-
 type GetObjectResult struct {
 	Object *GetObject
 	Err    error
@@ -210,8 +209,8 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) GetO
 		ContentType: header.Get("Content-Type"),
 		// optional
 		Uid:              header.Get("UID"),
-		Description:      header.Get("Description"),
-		SubDescription:   header.Get("Sub-Description"),
+		Description:      header.Get("Content-Description"),
+		SubDescription:   header.Get("Content-Sub-Description"),
 		Location:         header.Get("Location"),
 		RetsError:        retsError,
 		RetsErrorMessage: *retsErrorMsg,
