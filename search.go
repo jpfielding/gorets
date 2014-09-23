@@ -12,7 +12,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 )
@@ -181,7 +180,6 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 						return
 					}
 				case "RETS":
-					log.Println("found the end")
 					return
 				}
 			case xml.CharData:
