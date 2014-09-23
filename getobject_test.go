@@ -18,8 +18,8 @@ func TestGetObject(t *testing.T) {
 	textproto.MIMEHeader(header).Add("Object-ID", "1")
 	textproto.MIMEHeader(header).Add("Preferred", "1")
 	textproto.MIMEHeader(header).Add("UID", "1a234234234")
-	textproto.MIMEHeader(header).Add("Description", "Outhouse")
-	textproto.MIMEHeader(header).Add("Sub-Description", "The urinal")
+	textproto.MIMEHeader(header).Add("Content-Description", "Outhouse")
+	textproto.MIMEHeader(header).Add("Content-Sub-Description", "The urinal")
 	textproto.MIMEHeader(header).Add("Location", "http://www.simpleboundary.com/image-5.jpg")
 
 	var body string = `<binary data 1>`
@@ -68,8 +68,8 @@ UID: 1a234234234
 Content-Type: image/jpeg
 Content-ID: 123456
 Object-ID: 3
-Description: Outhouse
-Sub-Description: The urinal
+Content-Description: Outhouse
+Content-Sub-Description: The urinal
 
 <binary data 3>
 --simple boundary
@@ -163,7 +163,7 @@ func TestParseGetObjectQuit(t *testing.T) {
 
 	r1 := <-results
 	ok(t, r1.Err)
-	assert(t, r1 != GetObjectResult{},"should not be the zerod object")
+	assert(t, r1 != GetObjectResult{}, "should not be the zerod object")
 	o1 := r1.Object
 	equals(t, "image/jpeg", o1.ContentType)
 	equals(t, "123456", o1.ContentId)
