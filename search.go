@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -30,13 +31,14 @@ const (
 )
 
 type SearchResult struct {
-	RetsResponse      RetsResponse
-	Count             int
-	Delimiter         string
-	Columns           []string
-	Data              <-chan []string
-	MaxRows           bool
-	ProcessingFailure error
+	RetsResponse RetsResponse
+	Count        int
+	Delimiter    string
+	Columns      []string
+	MaxRows      bool
+
+	Data   <-chan []string
+	Errors chan error
 }
 
 func (m *SearchResult) Index() map[string]int {
@@ -91,7 +93,7 @@ type SearchRequest struct {
 	QueryType=DMQL2&
 	SearchType=Property
 */
-func (s *Session) Search(quit <-chan struct{}, r SearchRequest) (*SearchResult, error) {
+func (s *Session) Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, error) {
 	// required
 	values := url.Values{}
 	values.Add("Class", r.Class)
@@ -131,21 +133,20 @@ func (s *Session) Search(quit <-chan struct{}, r SearchRequest) (*SearchResult, 
 
 	switch r.Format {
 	case "COMPACT-DECODED", "COMPACT":
-		return parseCompactResult(quit, resp.Body, r.BufferSize)
+		data := make(chan []string, r.BufferSize)
+		errs := make(chan error)
+		return parseCompactResult(resp.Body, data, errs, quit)
 	case "STANDARD-XML":
 		panic("not yet supported!")
 	}
 	return nil, nil
 }
 
-func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, bufferSize int) (*SearchResult, error) {
-	if bufferSize <= 0 {
-		bufferSize = 1
-	}
-	data := make(chan []string, bufferSize)
+func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error, quit <-chan struct{}) (*SearchResult, error) {
 	rets := RetsResponse{}
 	result := SearchResult{
 		Data:         data,
+		Errors:       errs,
 		RetsResponse: rets,
 		MaxRows:      false,
 	}
@@ -156,12 +157,12 @@ func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, bufferSize int
 	// backgroundable processing of the data into our buffer
 	bgDataProcessing := func() {
 		defer close(data)
+		defer close(errs)
 		defer body.Close()
 		for {
 			token, err := parser.Token()
 			if err != nil {
-				result.ProcessingFailure = err
-				break
+				result.Errors <- err
 			}
 			switch t := token.(type) {
 			case xml.StartElement:
@@ -180,6 +181,7 @@ func parseCompactResult(quit <-chan struct{}, body io.ReadCloser, bufferSize int
 						return
 					}
 				case "RETS":
+					log.Println("found the end")
 					return
 				}
 			case xml.CharData:

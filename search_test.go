@@ -30,9 +30,11 @@ var compactDecoded string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success
 func TestEof(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte("")))
 
-	done := make(chan struct{})
-	defer close(done)
-	_, err := parseCompactResult(done, body, 1)
+	data := make(chan []string)
+	errs := make(chan error)
+	quit := make(chan struct{})
+	defer close(quit)
+	_, err := parseCompactResult(body, data, errs, quit)
 	if err != io.EOF {
 		t.Error("error parsing body: " + err.Error())
 	}
@@ -41,28 +43,32 @@ func TestEof(t *testing.T) {
 func TestParseSearchQuit(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
+	data := make(chan []string)
+	errs := make(chan error)
 	quit := make(chan struct{})
 	defer close(quit)
-	cr, err := parseCompactResult(quit, body, 1)
+	cr, err := parseCompactResult(body, data, errs, quit)
 	ok(t, err)
 
-	row1 := <- cr.Data
+	row1 := <-cr.Data
 	equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
 
 	quit <- struct{}{}
 
 	// the closed channel will emit a zero'd value of the proper type
-	row2 := <- cr.Data
-	equals(t, "", strings.Join(row2, ","))
+	row2 := <-cr.Data
+	equals(t, 0, len(row2))
 
 }
 
 func TestParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
-	done := make(chan struct{})
-	defer close(done)
-	cr, err := parseCompactResult(done, body, 1)
+	data := make(chan []string)
+	errs := make(chan error)
+	quit := make(chan struct{})
+	defer close(quit)
+	cr, err := parseCompactResult(body, data, errs, quit)
 	ok(t, err)
 
 	assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")
@@ -85,10 +91,12 @@ func TestParseCompact(t *testing.T) {
 			t.Errorf("bad filtered row %d: %s", counter, filtered)
 		}
 
-		if cr.ProcessingFailure != nil {
+		select {
+		case err := <-cr.Errors:
 			t.Errorf("error parsing body at row %d: %s", counter, err.Error())
+			close(quit)
+		default:
 		}
-
 		counter = counter + 1
 	}
 
