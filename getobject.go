@@ -48,9 +48,14 @@ func (obj *GetObject) Content() ([]byte, error) {
 	if obj.Blob != nil {
 		return obj.Blob, nil
 	}
+	fmt.Sprintf("downloading %s", obj.Location)
 	resp, err := http.Get(obj.Location)
-	if err != nil {
+	if err != nil && resp.StatusCode != http.StatusOK {
 		return nil, err
+	}
+	ct := resp.Header.Get("Content-Type")
+	if ct != "" {
+		obj.ContentType = ct
 	}
 	blob, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

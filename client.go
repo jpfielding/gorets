@@ -23,13 +23,6 @@ const (
 	WWW_AUTH_RESP string = "Authorization"
 )
 
-/* standard http gzip header names */
-const (
-	ACCEPT_ENCODING   string = "Accept-Encoding"
-	CONTENT_ENCODING  string = "Content-Encoding"
-	DEFLATE_ENCODINGS string = "gzip,deflate"
-)
-
 /* rets http header names */
 const (
 	RETS_VERSION        string = "RETS-Version"
@@ -66,8 +59,9 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.
 	if logger != nil {
 		dial := WireLog(logger)
 		transport = &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			Dial:  dial,
+			Proxy:              http.ProxyFromEnvironment,
+			DisableCompression: true, // if you're logging it, you might want to read it
+			Dial:               dial,
 		}
 	}
 	retsTransport := RetsTransport{
