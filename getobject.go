@@ -5,6 +5,7 @@ package gorets_client
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -48,10 +49,12 @@ func (obj *GetObject) Content() ([]byte, error) {
 	if obj.Blob != nil {
 		return obj.Blob, nil
 	}
-	fmt.Sprintf("downloading %s", obj.Location)
 	resp, err := http.Get(obj.Location)
-	if err != nil && resp.StatusCode != http.StatusOK {
+	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(resp.Status)
 	}
 	ct := resp.Header.Get("Content-Type")
 	if ct != "" {
