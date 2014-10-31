@@ -3,6 +3,7 @@ gorets
 
 RETS client in Go
 
+[![Build Status](https://travis-ci.org/jpfielding/gorets_client.svg)](https://travis-ci.org/jpfielding/gorets_client)
 
 The attempt is to meet 1.8.0 compliance.
 
