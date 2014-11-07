@@ -31,6 +31,19 @@ const (
 	RETS_UA_AUTH_HEADER string = "RETS-UA-Authorization"
 )
 
+type RetsSession interface {
+	ChangePassword(url string) error
+	Get(url string) error
+	GetMetadata(r MetadataRequest) (*Metadata, error)
+	GetObject(quit <-chan struct{}, r GetObjectRequest) (<-chan GetObjectResult, error)
+	GetPayloadList(p PayloadListRequest) (*PayloadList, error)
+	Login(url string) (*CapabilityUrls, error)
+	Logout(logoutUrl string) error
+	PostObject(url string) error
+	Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, error)
+	Update(url string) error
+}
+
 /* holds the state of the server interaction */
 type Session struct {
 	Username, Password string
