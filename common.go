@@ -3,7 +3,6 @@ package gorets_client
 import (
 	"encoding/hex"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -33,7 +32,6 @@ func ParseRetsResponse(body io.ReadCloser) (*RetsResponse, error) {
 			}
 		}
 	}
-	return nil, errors.New("rets response not found")
 }
 
 func ParseRetsResponseTag(start xml.StartElement) (*RetsResponse, error) {
@@ -71,7 +69,7 @@ func ParseCountTag(count xml.StartElement) (int, error) {
 
 func ParseCompactRow(row, delim string) []string {
 	split := strings.Split(row, delim)
-	return split[1:len(split)-1]
+	return split[1 : len(split)-1]
 }
 
 func OptionalStringValue(values url.Values) func(string, string) {

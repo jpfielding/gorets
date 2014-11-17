@@ -9,7 +9,6 @@ package gorets_client
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -234,8 +233,6 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 			buf.Write(bytes)
 		}
 	}
-
-	return nil, errors.New("failed to parse rets response")
 }
 
 func parseStandardXml(body *io.ReadCloser) (*SearchResult, error) {

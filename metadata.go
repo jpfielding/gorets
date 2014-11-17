@@ -127,7 +127,6 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 			}
 		}
 	}
-	return &metadata, nil
 }
 
 func parseMetadataStandardXml(body io.ReadCloser) (*Metadata, error) {
