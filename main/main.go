@@ -59,7 +59,12 @@ func main() {
 
 	mUrl := capability.GetMetadata
 	format := "COMPACT"
-	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-SYSTEM", "0"})
+	session.GetMetadata(gorets.MetadataRequest{
+		Url:    mUrl,
+		Format: format,
+		MType:  "METADATA-SYSTEM",
+		Id:     "0",
+	})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})

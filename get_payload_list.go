@@ -2,7 +2,6 @@ package gorets_client
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -104,5 +103,4 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 			}
 		}
 	}
-	return nil, errors.New("could not find rets response")
 }
