@@ -64,6 +64,7 @@ func main() {
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})
 
+	quit := make(chan struct{})
 	req := gorets.SearchRequest{
 		Url:        capability.Search,
 		Query:      "((180=|AH))",
@@ -75,7 +76,7 @@ func main() {
 		Limit:      3,
 		Offset:     -1,
 	}
-	result, err := session.Search(req)
+	result, err := session.Search(req, quit)
 	if err != nil {
 		panic(err)
 	}
@@ -84,7 +85,7 @@ func main() {
 		fmt.Println(row)
 	}
 
-	one, err := session.GetObject(gorets.GetObjectRequest{
+	one, err := session.GetObject(quit, gorets.GetObjectRequest{
 		Url:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
@@ -100,7 +101,7 @@ func main() {
 		o := r.Object
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
-	all, err := session.GetObject(gorets.GetObjectRequest{
+	all, err := session.GetObject(quit, gorets.GetObjectRequest{
 		Url:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
