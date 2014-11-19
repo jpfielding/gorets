@@ -50,6 +50,7 @@ func (obj *GetObject) Content() ([]byte, error) {
 		return obj.Blob, nil
 	}
 	resp, err := http.Get(obj.Location)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
