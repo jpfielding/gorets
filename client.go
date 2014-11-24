@@ -57,7 +57,7 @@ type Session struct {
 	Client http.Client
 }
 
-func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.WriteCloser) (*Session, error) {
+func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.WriteCloser) (RetsSession, error) {
 	var session Session
 	session.Username = user
 	session.Password = pw
