@@ -45,7 +45,7 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 
 	urls, err := parseCapability(url, capabilities)
 	if err != nil {
-		return nil, errors.New("unable to parse capabilites response: " + string(capabilities))
+		return nil, errors.New("unable to parse capabilites response: " + string(capabilities) + " Error: " + err.Error())
 	}
 	return urls, nil
 }
@@ -59,8 +59,7 @@ func parseCapability(url string, response []byte) (*CapabilityUrls, error) {
 	}
 
 	rets := XmlRets{}
-	decoder := xml.NewDecoder(bytes.NewBuffer(response))
-	decoder.Strict = false
+	decoder := GetXmlReader(bytes.NewBuffer(response), false)
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
 		return nil, err
