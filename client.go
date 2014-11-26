@@ -80,6 +80,7 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.
 	retsTransport := RetsTransport{
 		transport: transport,
 		session:   session,
+		digest: nil,
 	}
 	jar, err := cookiejar.New(nil)
 	if err != nil {
@@ -96,6 +97,7 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.
 type RetsTransport struct {
 	transport http.RoundTripper
 	session   Session
+	digest    *Digest
 }
 
 func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -118,7 +120,9 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 		)
 		req.Header.Add(RETS_UA_AUTH_HEADER, uaAuthHeader)
 	}
-
+	if t.digest != nil {
+		req.Header.Add(WWW_AUTH_RESP, t.digest.CreateDigestResponse(t.session.Username, t.session.Password, req.Method, req.URL.Path))
+	}
 	res, err := t.transport.RoundTrip(req)
 	if err != nil {
 		return nil, err
@@ -136,7 +140,11 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 		req.SetBasicAuth(t.session.Username, t.session.Password)
 		return t.transport.RoundTrip(req)
 	} else if strings.HasPrefix(strings.ToLower(challenge), "digest") {
-		req.Header.Add(WWW_AUTH_RESP, DigestResponse(challenge, t.session.Username, t.session.Password, req.Method, req.URL.Path))
+		t.digest, err = NewDigest(challenge)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set(WWW_AUTH_RESP, t.digest.CreateDigestResponse(t.session.Username, t.session.Password, req.Method, req.URL.Path))
 		return t.transport.RoundTrip(req)
 	}
 	return nil, errors.New("unknown authentication challenge: " + challenge)
