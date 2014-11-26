@@ -6,6 +6,7 @@ package gorets_client
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"hash"
 	"io"
@@ -14,89 +15,140 @@ import (
 	"time"
 )
 
-/**
-this method wraps up the functionality of creating a digest response from a challenge
-
-TODO - http://tools.ietf.org/html/rfc2617
-TODO - CLEAN THIS TURD UP!!!
-TODO - actually keep a legit nonce counter, possibly in a digest struct?!?!?
-*/
-func DigestResponse(challenge, username, password, method, uri string) string {
-	cType, args := parseChallenge(challenge)
-	return challengeResponse(cType, args, username, password, method, uri, createCnonce(), "00000001")
+type Digest struct {
+	Realm      string
+	Nonce      string
+	Algorithm  string
+    Opaque     string
+    Qop        string
+    NonceCount int
 }
 
-func challengeResponse(cType string, challenge map[string]string, username, password, method, uri, cnonce, nc string) string {
-	params := make([]string, len(challenge)+5)
-	response := digest(challenge, username, password, method, uri, cnonce, nc)
-	params[0] = fmt.Sprintf("username=\"%s\"", username)
-	params[1] = fmt.Sprintf("uri=\"%s\"", uri)
-	params[2] = fmt.Sprintf("response=\"%s\"", response)
-	params[3] = fmt.Sprintf("cnonce=\"%s\"", cnonce)
-	params[4] = fmt.Sprintf("nc=\"%s\"", nc)
-	i := 5
-	for k, v := range challenge {
-		params[i] = fmt.Sprintf("%s=\"%s\"", k, v)
-		i++
+func parseChallenge(chall string) (*Digest, error) {
+	chall = strings.Trim(chall, " \r\n")
+	if !strings.HasPrefix(strings.ToLower(chall), "digest ") {
+		return nil, errors.New("Invalid challenge. Challenge must begin with \"digest\"")
 	}
 
-	return cType + " " + strings.Join(params, ", ")
+	chall = strings.Trim(chall[7:], " \r\n")
+
+	digest, err := parseDirectives(chall, &Digest{Algorithm: "MD5", NonceCount: 1})
+	if err != nil {
+		return nil, err
+	}
+	return digest, nil
 }
 
-func createCnonce() string {
+func parseDirectives(directives string, d *Digest) (*Digest, error) {
+	for _, e := range strings.Split(directives, ",") {
+		directive := strings.SplitN(strings.Trim(e, " \r\n"), "=" , 2)
+		if len(directive) < 2 {
+			return nil, errors.New("Invalid challenge")
+		}
+		switch directive[0] {
+			case "algorithm":
+				d.Algorithm = strings.Trim(directive[1], "\"")
+			case "domain":
+				break
+			case "qop":
+				d.Qop = strings.Trim(directive[1], "\"")
+				if d.Qop == strings.ToLower("auth-int") {
+					return nil, errors.New("auth-int is not supported")
+				}
+			case "nonce":
+				d.Nonce = strings.Trim(directive[1], "\"")
+			case "opaque":
+				d.Opaque = strings.Trim(directive[1], "\"")
+			case "realm":
+				d.Realm = strings.Trim(directive[1], "\"")
+			case "stale":
+				break
+			default:
+				return nil, errors.New("Invalid challenge. Cannot parse directives.")
+		}
+	}
+	return d, nil
+}
+  
+func NewDigest(chall string) (*Digest, error) {
+	c, err := parseChallenge(chall)
+	if err != nil {
+		return nil, err
+	}
+	return &Digest {
+		Realm: c.Realm,
+		Nonce: c.Nonce,
+		Algorithm: c.Algorithm,
+		Opaque: c.Opaque,
+		Qop: c.Qop,
+		NonceCount: 1,
+	}, nil
+}
+
+func (d *Digest) createCnonce() string {
 	asString := strconv.FormatInt(time.Now().Unix(), 10)
 	return md5ThenHex(md5.New(), asString)
 }
 
-// TODO convert this into a Digest struct
-func parseChallenge(challenge string) (string, map[string]string) {
-	pieces := strings.SplitAfterN(challenge, " ", 2)
-	cType, challenge := strings.TrimSpace(pieces[0]), pieces[1]
-	parts := map[string]string{}
-	for _, part := range strings.Split(challenge, ",") {
-		part = strings.TrimSpace(part)
-		split := strings.Split(part, "=")
-		parts[split[0]] = strings.TrimSuffix(strings.TrimPrefix(split[1], "\""), "\"")
-	}
-	_, hasAlgorithm := parts["algorithm"]
-	if !hasAlgorithm {
-		parts["algorithm"] = "MD5"
-	}
-
-	return cType, parts
-}
-
-func digest(challenge map[string]string, username, password, method, uri, cnonce, nc string) string {
-	realm := challenge["realm"]
-	nonce := challenge["nonce"]
-	qop := challenge["qop"]
-	algorithm := challenge["algorithm"]
-
-	hasher := md5.New()
-
-	a1 := strings.Join([]string{username, realm, password}, ":")
+func (d* Digest) createHa1(username, password, cnonce string, hasher hash.Hash) string {
+	//Assuming MD5 or unspecified
+	a1 := strings.Join([]string{username, d.Realm, password}, ":")
 	ha1 := md5ThenHex(hasher, a1)
 
-	a2 := method + ":" + uri
-	ha2 := md5ThenHex(hasher, a2)
-
-	// md5-sess:
-	// ha1 = md5(a1) = md5(md5(username:realm:password):nonce:cnonce)
-	if "md5-sess" == strings.ToLower(algorithm) {
-		md5sess := strings.Join([]string{ha1, nonce, cnonce}, ":")
+	if "md5-sess" == strings.ToLower(d.Algorithm) {
+		md5sess := strings.Join([]string{ha1, d.Nonce, cnonce}, ":")
 		ha1 = md5ThenHex(hasher, md5sess)
 	}
 
-	switch qop {
-	case "auth":
-		response := strings.Join([]string{ha1, nonce, nc, cnonce, qop, ha2}, ":")
-		return md5ThenHex(hasher, response)
-	case "auth-int":
-		// TODO - requires hash of entity body
-		return "qop: auth-int not yet supported"
+	return ha1
+}
+
+func (d *Digest) createHa2(method, uri string, hasher hash.Hash) string {
+	//Assuming qop is auth or unspecified
+	a2 := method + ":" + uri
+	return  md5ThenHex(hasher, a2)
+}
+
+func (d* Digest) createResponse(ha1, ha2, nc, cnonce string, hasher hash.Hash) string {
+	//qop is unspecified
+	response := strings.Join([]string{ha1, d.Nonce, ha2}, ":")
+
+	//qop is auth
+	if "auth" == strings.ToLower(d.Qop) {
+		response = strings.Join([]string{ha1, d.Nonce, nc, cnonce, d.Qop, ha2}, ":")
 	}
-	response := strings.Join([]string{ha1, nonce, ha2}, ":")
 	return md5ThenHex(hasher, response)
+}
+
+func (d *Digest) computeAuthorization(username, password, method, uri, cnonce string) string {
+	nc := fmt.Sprintf("%08x", d.NonceCount)
+	ha1 := d.createHa1(username, password, cnonce, md5.New())
+	ha2 := d.createHa2(method, uri, md5.New())
+	response := d.createResponse(ha1, ha2, nc, cnonce, md5.New())
+
+	sl := []string{fmt.Sprintf(`username="%s"`, username)}
+	sl = append(sl, fmt.Sprintf(`realm="%s"`, d.Realm))
+	sl = append(sl, fmt.Sprintf(`nonce="%s"`, d.Nonce))
+	sl = append(sl, fmt.Sprintf(`uri="%s"`, uri))
+    sl = append(sl, fmt.Sprintf(`response="%s"`, response))
+    if d.Qop != "" {
+        sl = append(sl, fmt.Sprintf("qop=%s", d.Qop))
+        sl = append(sl, fmt.Sprintf("nc=%s", nc))
+        sl = append(sl, fmt.Sprintf(`cnonce="%s"`, cnonce))
+    }
+    if d.Algorithm != "" {
+      	sl = append(sl, fmt.Sprintf(`algorithm="%s"`, d.Algorithm))
+    }
+    if d.Opaque != "" {
+        sl = append(sl, fmt.Sprintf(`opaque="%s"`, d.Opaque))
+    }
+
+    d.NonceCount += 1;
+	return fmt.Sprintf("Digest %s", strings.Join(sl, ", "))
+}
+
+func (d *Digest) CreateDigestResponse(username, password, method, uri string) string {
+	return d.computeAuthorization(username, password, method, uri, d.createCnonce())
 }
 
 func md5ThenHex(hasher hash.Hash, value string) string {
