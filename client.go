@@ -38,7 +38,7 @@ type RetsSession interface {
 	GetObject(quit <-chan struct{}, r GetObjectRequest) (<-chan GetObjectResult, error)
 	GetPayloadList(p PayloadListRequest) (*PayloadList, error)
 	Login(url string) (*CapabilityUrls, error)
-	Logout(logoutUrl string) error
+	Logout(logoutUrl string) (*LogoutResponse, error)
 	PostObject(url string) error
 	Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, error)
 	Update(url string) error
