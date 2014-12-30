@@ -112,6 +112,9 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 				if err != nil {
 					return nil, err
 				}
+				if data == nil {
+					continue
+				}
 				switch t.Name.Local {
 				case "METADATA-RESOURCE":
 					metadata.Resources = *data

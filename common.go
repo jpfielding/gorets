@@ -126,11 +126,11 @@ func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, de
 		fmt.Println("failed to decode: ", err)
 		return nil, err
 	}
+	if xme.Columns == "" {
+		return nil, nil
+	}
 	data := *extractMap(xme.Columns, xme.Data, delim)
 	data.Date = xme.Date
-	if err != nil {
-		return nil, err
-	}
 	data.Version = xme.Version
 	data.Id = xme.Resource
 	if xme.Class != "" {
