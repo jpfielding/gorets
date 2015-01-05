@@ -54,6 +54,8 @@ type Session struct {
 	Version string
 	Accept  string
 
+	Cookies []*http.Cookie
+
 	Client http.Client
 }
 
@@ -67,6 +69,7 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.
 	session.Version = retsVersion
 	session.HttpMethod = "GET"
 	session.Accept = "*/*"
+	session.Cookies = make([]*http.Cookie, 0)
 
 	transport := http.DefaultTransport
 	if logger != nil {
@@ -104,6 +107,9 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	req.Header.Add(USER_AGENT, t.session.UserAgent)
 	req.Header.Add(RETS_VERSION, t.session.Version)
 	req.Header.Add(ACCEPT, t.session.Accept)
+	for _, cookie := range t.session.Cookies {
+		req.AddCookie(cookie)
+	}
 
 	if t.session.UserAgentPassword != "" {
 		requestId := req.Header.Get(RETS_REQUEST_ID)
@@ -133,6 +139,11 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	// TODO check to see if im going to do anything different, if not, just return
 	if err = res.Body.Close(); err != nil {
 		return res, err
+	}
+	t.session.Cookies = make([]*http.Cookie, 0)
+	for _, cookie := range res.Cookies() {
+		t.session.Cookies = append(t.session.Cookies, cookie)
+		req.AddCookie(cookie)
 	}
 	challenge := res.Header.Get(WWW_AUTH)
 
