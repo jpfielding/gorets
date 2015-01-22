@@ -2,3 +2,5 @@
 *.iml
 out
 *~
+metadata/main/metadata.go
+
