@@ -46,5 +46,17 @@ func (m *MResource) InitFromXml(p *xml.Decoder, t xml.StartElement) error {
 }
 
 func (m *MResource) InitFromCompact(p *xml.Decoder, t xml.StartElement) error {
+	cd, err := CompactData{}.Parse(p, t, "	")
+	if err != nil {
+		return err
+	}
+	m.Version = cd.Attrs["Version"]
+	m.Date = cd.Attrs["Date"]
+	for _, r := range cd.Data {
+		res := Resource{}
+		res.ResourceId = r["ResourceID"]
+
+		m.Resource = append(m.Resource, res)
+	}
 	return nil
 }
