@@ -1,38 +1,50 @@
-package gorets_metadata
+package metadata
 
 import (
-	"time"
+	"encoding/xml"
 )
 
 type MResource struct {
-	Version   string
-	Date      time.Time
-	Resources []Resource
+	Version  string `xml:"Version,attr"`
+	Date     string `xml:"Date,attr"`
+	Resource []Resource
 }
 
 type Resource struct {
-	ResourceID                  string
+	ResourceId                  string `xml:"ResourceID"`
 	StandardName                string
 	VisibleName                 string
 	Description                 string
 	KeyField                    string
 	ClassCount                  int
 	ClassVersion                string
-	ClassDate                   *time.Time
+	ClassDate                   string
 	ObjectVersion               string
-	ObjectDate                  *time.Time
+	ObjectDate                  string
 	SearchHelpVersion           string
-	SearchHelpDate              *time.Time
+	SearchHelpDate              string
 	EditMaskVersion             string
-	EditMaskDate                *time.Time
+	EditMaskDate                string
 	LookupVersion               string
-	LookupDate                  *time.Time
+	LookupDate                  string
 	UpdateHelpVersion           string
-	UpdateHelpDate              *time.Time
+	UpdateHelpDate              string
 	ValidationExpressionVersion string
-	ValidationExpressionDate    *time.Time
+	ValidationExpressionDate    string
 	ValidationLookupVersion     string
-	ValidationLookupDate        *time.Time
+	ValidationLookupDate        string
 	ValidationExternalVersion   string
-	ValidationExternalDate      *time.Time
+	ValidationExternalDate      string
+}
+
+func (m *MResource) InitFromXml(p *xml.Decoder, t xml.StartElement) error {
+	err := p.DecodeElement(m, &t)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MResource) InitFromCompact(p *xml.Decoder, t xml.StartElement) error {
+	return nil
 }

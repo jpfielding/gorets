@@ -15,7 +15,7 @@ func ExampleHello() {
 }
 
 */
-package gorets_metadata
+package metadata
 
 import (
 	"fmt"

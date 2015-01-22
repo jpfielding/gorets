@@ -1,4 +1,4 @@
-package gorets_metadata
+package metadata
 
 import ()
 
