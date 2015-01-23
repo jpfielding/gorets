@@ -43,20 +43,7 @@ func (m *MClass) InitFromCompact(p *xml.Decoder, t xml.StartElement) error {
 	m.Resource = cd.Attrs["Resource"]
 	for _, r := range cd.Data {
 		res := Class{}
-		res.ClassName = r["ClassName"]
-		res.StandardName = r["StandardName"]
-		res.VisibleName = r["VisibleName"]
-		res.Description = r["Description"]
-		res.TableVersion = r["TableVersion"]
-		res.TableDate = r["TableDate"]
-		res.UpdateVersion = r["UpdateVersion"]
-		res.UpdateDate = r["UpdateDate"]
-		res.ClassTimeStamp = r["ClassTimeStamp"]
-		res.DeletedFlagField = r["DeletedFlagField"]
-		res.DeletedFlagValue = r["DeletedFlagValue"]
-		res.HasKeyIndex = r["HasKeyIndex"]
-		res.OffsetSupport = r["OffsetSupport"]
-
+		ApplyMap(r, &res)
 		m.Class = append(m.Class, res)
 	}
 	return nil
