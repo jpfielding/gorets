@@ -11,7 +11,7 @@ type MResource struct {
 }
 
 type Resource struct {
-	ResourceId                  string `xml:"ResourceID"`
+	ResourceID                  string
 	StandardName                string
 	VisibleName                 string
 	Description                 string
@@ -54,8 +54,7 @@ func (m *MResource) InitFromCompact(p *xml.Decoder, t xml.StartElement) error {
 	m.Date = cd.Attrs["Date"]
 	for _, r := range cd.Data {
 		res := Resource{}
-		res.ResourceId = r["ResourceID"]
-
+		ApplyMap(r, &res)
 		m.Resource = append(m.Resource, res)
 	}
 	return nil

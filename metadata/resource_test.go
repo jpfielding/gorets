@@ -12,7 +12,7 @@ var mresource MResource = MResource{
 	Date:    "Tue, 02 Dec 2014 01:36:36 GMT",
 	Resource: []Resource{
 		Resource{
-			ResourceId:      "Office",
+			ResourceID:      "Office",
 			StandardName:    "Office",
 			VisibleName:     "Office",
 			Description:     "Office",
@@ -28,7 +28,7 @@ var mresource MResource = MResource{
 			LookupDate:      "Thu, 11 Feb 2010 02:30:25 GMT",
 		},
 		Resource{
-			ResourceId:      "Property",
+			ResourceID:      "Property",
 			StandardName:    "Property",
 			VisibleName:     "Property",
 			Description:     "Property",

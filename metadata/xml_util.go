@@ -3,6 +3,8 @@ package metadata
 import (
 	"encoding/xml"
 	"errors"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -59,6 +61,21 @@ func (cd CompactData) Parse(d *xml.Decoder, s xml.StartElement, delim string) (*
 		cd.Data = append(cd.Data, mapped)
 	}
 	return &cd, nil
+}
+
+// v needs to be a struct
+func ApplyMap(data map[string]string, n interface{}) {
+	for k, v := range data {
+		f := reflect.ValueOf(n).Elem().FieldByName(k)
+		switch f.Kind() {
+		case reflect.String:
+			x := reflect.ValueOf(n).Elem().FieldByName(k)
+			x.Set(reflect.ValueOf(v))
+		case reflect.Int:
+			parsedInt, _ := strconv.ParseInt(v, 10, 64)
+			f.SetInt(parsedInt)
+		}
+	}
 }
 
 func splitCompactRow(row, delim string) []string {
