@@ -56,6 +56,9 @@ func (cd CompactData) Parse(d *xml.Decoder, s xml.StartElement, delim string) (*
 		}
 		mapped := make(map[string]string)
 		for i, c := range cols {
+			if c == "" {
+				continue
+			}
 			mapped[c] = row[i]
 		}
 		cd.Data = append(cd.Data, mapped)
