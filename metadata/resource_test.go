@@ -52,7 +52,6 @@ var mresourceCompact = `<?xml version="1.0" encoding="utf-8"?>
     <COLUMNS>	ResourceID	StandardName	VisibleName	Description	KeyField	ClassCount	ClassVersion	ClassDate	ObjectVersion	ObjectDate	SearchHelpVersion	SearchHelpDate	EditMaskVersion	EditMaskDate	LookupVersion	LookupDate	UpdateHelpVersion	UpdateHelpDate	ValidationExpressionVersion	ValidationExpressionDate	ValidationLookupVersion	ValidationLookupDate	ValidationExternalVersion	ValidationExternalDate	</COLUMNS>
     <DATA>	Office	Office	Office	Office	sysid	1	38.31.12348	Thu, 21 Aug 2014 04:05:48 GMT	28.92.81887	Wed, 31 Aug 2011 04:04:47 GMT			38.31.12348	Thu, 21 Aug 2014 04:05:48 GMT	24.03.55825	Thu, 11 Feb 2010 02:30:25 GMT									</DATA>
     <DATA>	Property	Property	Property	Property	sysid	4	39.19.57282	Mon, 01 Dec 2014 13:01:22 GMT	37.33.45209	Wed, 30 Apr 2014 03:00:09 GMT			39.19.57282	Mon, 01 Dec 2014 13:01:22 GMT	39.11.47282	Sat, 22 Nov 2014 09:01:22 GMT									</DATA>
-    <DATA>	User	Agent	User	User	sysid	1	38.31.12348	Thu, 21 Aug 2014 04:05:48 GMT	11.96.50294	Thu, 13 Feb 2003 10:24:54 GMT			38.31.12348	Thu, 21 Aug 2014 04:05:48 GMT	37.33.16423	Tue, 29 Apr 2014 23:00:23 GMT									</DATA>
   </METADATA-RESOURCE>
 </RETS>
 `
