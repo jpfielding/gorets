@@ -8,6 +8,14 @@ import (
 	"strings"
 )
 
+func AttrsMap(attrs []xml.Attr) map[string]string {
+	tmp := make(map[string]string)
+	for _, v := range attrs {
+		tmp[strings.ToLower(v.Name.Local)] = v.Value
+	}
+	return tmp
+}
+
 // advances the cursor to the named xml.StartElement
 func AdvanceToStartElem(parser *xml.Decoder, start string) (xml.StartElement, error) {
 	for {
