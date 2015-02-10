@@ -166,7 +166,6 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 			case xml.StartElement:
 				switch t.Name.Local {
 				case "MAXROWS":
-					fmt.Println("MAX ROWS!!")
 					result.MaxRows = true
 				}
 				// clear any accumulated data
@@ -177,11 +176,9 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 					select {
 					case data <- ParseCompactRow(buf.String(), result.Delimiter):
 					case <-quit:
-						fmt.Println("QUIT REQUESTED ")
 						return
 					}
 				case "RETS":
-					fmt.Println("FOUND RETS/")
 					return
 				}
 			case xml.CharData:
