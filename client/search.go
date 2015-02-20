@@ -142,7 +142,7 @@ func (s *Session) Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, 
 
 func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error, quit <-chan struct{}) (*SearchResult, error) {
 	rets := RetsResponse{}
-	result := SearchResult{
+	result := &SearchResult{
 		Data:         data,
 		Errors:       errs,
 		RetsResponse: rets,
@@ -154,8 +154,8 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 
 	// backgroundable processing of the data into our buffer
 	bgDataProcessing := func() {
-		defer close(data)
 		defer close(errs)
+		defer close(data)
 		defer body.Close()
 		for {
 			token, err := parser.Token()
@@ -193,7 +193,7 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 		token, err := parser.Token()
 		if err != nil {
 			if err == io.EOF {
-				return &result, err
+				return result, err
 			}
 			return nil, err
 		}
@@ -226,7 +226,7 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 			case "COLUMNS":
 				result.Columns = ParseCompactRow(buf.String(), result.Delimiter)
 				go bgDataProcessing()
-				return &result, nil
+				return result, nil
 			}
 		case xml.CharData:
 			bytes := xml.CharData(t)

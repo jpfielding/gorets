@@ -4,6 +4,7 @@ parsing the 'login' action from RETS
 package client
 
 import (
+	testutils "github.com/jpfielding/gorets/testutils"
 	"testing"
 )
 
@@ -29,20 +30,20 @@ func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
 	</RETS-RESPONSE>
 	</RETS>`
 	urls, err := parseCapability("http://server.com:6103/platinum/login", []byte(body))
-	ok(t, err)
+	testutils.Ok(t, err)
 
-	equals(t, urls.Response.ReplyText, "V2.7.0 2315: Success")
-	equals(t, urls.Response.ReplyCode, 0)
-	equals(t, urls.Login, "http://server.com:6103/platinum/login")
-	equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
+	testutils.Equals(t, urls.Response.ReplyText, "V2.7.0 2315: Success")
+	testutils.Equals(t, urls.Response.ReplyCode, 0)
+	testutils.Equals(t, urls.Login, "http://server.com:6103/platinum/login")
+	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
 }
 
 func TestPrependHost(t *testing.T) {
 	login := "http://server.com:6103/platinum/login"
 	abs := "http://server.com:6103/platinum/search"
 	rel := "/platinum/search"
-	equals(t, abs, prependHost(login, abs))
-	equals(t, abs, prependHost(login, rel))
+	testutils.Equals(t, abs, prependHost(login, abs))
+	testutils.Equals(t, abs, prependHost(login, rel))
 }
 
 func TestParseCapabilitiesRelativeUrls(t *testing.T) {
@@ -67,10 +68,10 @@ func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 	</RETS-RESPONSE>
 	</RETS>`
 	urls, err := parseCapability("http://server.com:6103/platinum/login", []byte(body))
-	ok(t, err)
+	testutils.Ok(t, err)
 
-	equals(t, urls.Response.ReplyText, "V2.7.0 2315: Success")
-	equals(t, urls.Response.ReplyCode, 0)
-	equals(t, urls.Login, "http://server.com:6103/platinum/login")
-	equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
+	testutils.Equals(t, urls.Response.ReplyText, "V2.7.0 2315: Success")
+	testutils.Equals(t, urls.Response.ReplyCode, 0)
+	testutils.Equals(t, urls.Login, "http://server.com:6103/platinum/login")
+	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
 }

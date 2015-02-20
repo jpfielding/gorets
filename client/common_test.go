@@ -1,7 +1,9 @@
 package client
 
-import "testing"
-
+import (
+	testutils "github.com/jpfielding/gorets/testutils"
+	"testing"
+)
 
 func TestCompactRowParsing(t *testing.T) {
 	var col string = `	A	B	C	D	E	F	`
@@ -10,6 +12,6 @@ func TestCompactRowParsing(t *testing.T) {
 	headers := ParseCompactRow(col, delim)
 	values := ParseCompactRow(row, delim)
 
-	equals(t, 6, int(len(headers)))
-	equals(t, 6, int(len(values)))
+	testutils.Equals(t, 6, int(len(headers)))
+	testutils.Equals(t, 6, int(len(values)))
 }

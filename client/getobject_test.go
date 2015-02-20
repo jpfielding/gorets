@@ -5,6 +5,7 @@ package client
 
 import (
 	"bytes"
+	testutils "github.com/jpfielding/gorets/testutils"
 	"io/ioutil"
 	"net/http"
 	"net/textproto"
@@ -31,17 +32,17 @@ func TestGetObject(t *testing.T) {
 	result := <-results
 
 	o := result.Object
-	ok(t, result.Err)
-	equals(t, true, o.Preferred)
-	equals(t, "image/jpeg", o.ContentType)
-	equals(t, "123456", o.ContentId)
-	equals(t, 1, o.ObjectId)
-	equals(t, "1a234234234", o.Uid)
-	equals(t, "Outhouse", o.Description)
-	equals(t, "The urinal", o.SubDescription)
-	equals(t, "<binary data 1>", string(o.Blob))
-	equals(t, "http://www.simpleboundary.com/image-5.jpg", o.Location)
-	equals(t, false, o.RetsError)
+	testutils.Ok(t, result.Err)
+	testutils.Equals(t, true, o.Preferred)
+	testutils.Equals(t, "image/jpeg", o.ContentType)
+	testutils.Equals(t, "123456", o.ContentId)
+	testutils.Equals(t, 1, o.ObjectId)
+	testutils.Equals(t, "1a234234234", o.Uid)
+	testutils.Equals(t, "Outhouse", o.Description)
+	testutils.Equals(t, "The urinal", o.SubDescription)
+	testutils.Equals(t, "<binary data 1>", string(o.Blob))
+	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o.Location)
+	testutils.Equals(t, false, o.RetsError)
 }
 
 var boundary string = "simple boundary"
@@ -92,13 +93,13 @@ Location: http://www.simpleboundary.com/image-5.jpg
 func TestExtractBoundary(t *testing.T) {
 	extracted := extractBoundary(contentType)
 
-	equals(t, boundary, extracted)
+	testutils.Equals(t, boundary, extracted)
 }
 
 func TestGetObjects(t *testing.T) {
 	extracted := extractBoundary(contentType)
 
-	equals(t, boundary, extracted)
+	testutils.Equals(t, boundary, extracted)
 
 	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
 
@@ -107,53 +108,53 @@ func TestGetObjects(t *testing.T) {
 	results := parseGetObjectsResult(quit, extracted, body)
 
 	r1 := <-results
-	ok(t, r1.Err)
+	testutils.Ok(t, r1.Err)
 	o1 := r1.Object
-	equals(t, true, o1.Preferred)
-	equals(t, "image/jpeg", o1.ContentType)
-	equals(t, "123456", o1.ContentId)
-	equals(t, 1, o1.ObjectId)
-	equals(t, "<binary data 1>", string(o1.Blob))
-	equals(t, "123456", o1.ObjectData["ListingKey"])
-	equals(t, "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
+	testutils.Equals(t, true, o1.Preferred)
+	testutils.Equals(t, "image/jpeg", o1.ContentType)
+	testutils.Equals(t, "123456", o1.ContentId)
+	testutils.Equals(t, 1, o1.ObjectId)
+	testutils.Equals(t, "<binary data 1>", string(o1.Blob))
+	testutils.Equals(t, "123456", o1.ObjectData["ListingKey"])
+	testutils.Equals(t, "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
 
 	r2 := <-results
-	ok(t, r2.Err)
+	testutils.Ok(t, r2.Err)
 	o2 := r2.Object
-	equals(t, 2, o2.ObjectId)
-	equals(t, "1a234234234", o2.Uid)
+	testutils.Equals(t, 2, o2.ObjectId)
+	testutils.Equals(t, "1a234234234", o2.Uid)
 
 	r3 := <-results
-	ok(t, r3.Err)
+	testutils.Ok(t, r3.Err)
 	o3 := r3.Object
-	equals(t, 3, o3.ObjectId)
-	equals(t, "Outhouse", o3.Description)
-	equals(t, "The urinal", o3.SubDescription)
+	testutils.Equals(t, 3, o3.ObjectId)
+	testutils.Equals(t, "Outhouse", o3.Description)
+	testutils.Equals(t, "The urinal", o3.SubDescription)
 
 	r4 := <-results
-	ok(t, r4.Err)
+	testutils.Ok(t, r4.Err)
 	o4 := r4.Object
-	equals(t, true, o4.RetsError)
+	testutils.Equals(t, true, o4.RetsError)
 
-	equals(t, "text/xml", o4.ContentType)
-	equals(t, "There is no object with that Object-ID", o4.RetsErrorMessage.ReplyText)
-	equals(t, 20403, o4.RetsErrorMessage.ReplyCode)
+	testutils.Equals(t, "text/xml", o4.ContentType)
+	testutils.Equals(t, "There is no object with that Object-ID", o4.RetsErrorMessage.ReplyText)
+	testutils.Equals(t, 20403, o4.RetsErrorMessage.ReplyCode)
 
 	r5 := <-results
-	ok(t, r5.Err)
+	testutils.Ok(t, r5.Err)
 	o5 := r5.Object
-	equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
-	equals(t, "image/jpeg", o5.ContentType)
-	equals(t, "123456", o5.ContentId)
-	equals(t, 5, o5.ObjectId)
-	equals(t, "<binary data 5>", string(o5.Blob))
+	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
+	testutils.Equals(t, "image/jpeg", o5.ContentType)
+	testutils.Equals(t, "123456", o5.ContentId)
+	testutils.Equals(t, 5, o5.ObjectId)
+	testutils.Equals(t, "<binary data 5>", string(o5.Blob))
 
 }
 
 func TestParseGetObjectQuit(t *testing.T) {
 	extracted := extractBoundary(contentType)
 
-	equals(t, boundary, extracted)
+	testutils.Equals(t, boundary, extracted)
 
 	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
 
@@ -162,16 +163,16 @@ func TestParseGetObjectQuit(t *testing.T) {
 	results := parseGetObjectsResult(quit, extracted, body)
 
 	r1 := <-results
-	ok(t, r1.Err)
-	assert(t, r1 != GetObjectResult{}, "should not be the zerod object")
+	testutils.Ok(t, r1.Err)
+	testutils.Assert(t, r1 != GetObjectResult{}, "should not be the zerod object")
 	o1 := r1.Object
-	equals(t, "image/jpeg", o1.ContentType)
-	equals(t, "123456", o1.ContentId)
-	equals(t, 1, o1.ObjectId)
+	testutils.Equals(t, "image/jpeg", o1.ContentType)
+	testutils.Equals(t, "123456", o1.ContentId)
+	testutils.Equals(t, 1, o1.ObjectId)
 
 	quit <- struct{}{}
 
 	// the closed channel will emit a zero'd value of the proper type
 	r2 := <-results
-	equals(t, r2, GetObjectResult{})
+	testutils.Equals(t, r2, GetObjectResult{})
 }

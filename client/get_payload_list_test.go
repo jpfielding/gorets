@@ -4,9 +4,10 @@ provides the searching core
 package client
 
 import (
+	"fmt"
+	testutils "github.com/jpfielding/gorets/testutils"
 	"strings"
 	"testing"
-	"fmt"
 )
 
 var payloadlist string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
@@ -61,17 +62,17 @@ var payloadlist string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 
 func verifyCompactData(t *testing.T, pl *PayloadList, id string) {
 	payload := <-pl.Payloads
-	equals(t, 6, len(payload.Columns))
+	testutils.Equals(t, 6, len(payload.Columns))
 
-	equals(t, id, payload.Id)
-	equals(t, "A,B,C,D,E,F", strings.Join(payload.Columns, ","))
+	testutils.Equals(t, id, payload.Id)
+	testutils.Equals(t, "A,B,C,D,E,F", strings.Join(payload.Columns, ","))
 
 	counter := 0
 	for _, row := range payload.Rows {
-		assert(t, strings.Join(row, ",") == "1,2,3,4,5,6", fmt.Sprintf("bad row %d: %s", counter, row))
+		testutils.Assert(t, strings.Join(row, ",") == "1,2,3,4,5,6", fmt.Sprintf("bad row %d: %s", counter, row))
 
-		ok(t, pl.Error)
+		testutils.Ok(t, pl.Error)
 		counter = counter + 1
 	}
-	equals(t, 8, counter)
+	testutils.Equals(t, 8, counter)
 }

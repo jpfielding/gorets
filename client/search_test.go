@@ -5,6 +5,7 @@ package client
 
 import (
 	"bytes"
+	testutils "github.com/jpfielding/gorets/testutils"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -48,16 +49,16 @@ func TestParseSearchQuit(t *testing.T) {
 	quit := make(chan struct{})
 	defer close(quit)
 	cr, err := parseCompactResult(body, data, errs, quit)
-	ok(t, err)
+	testutils.Ok(t, err)
 
 	row1 := <-cr.Data
-	equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
+	testutils.Equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
 
 	quit <- struct{}{}
 
 	// the closed channel will emit a zero'd value of the proper type
 	row2 := <-cr.Data
-	equals(t, 0, len(row2))
+	testutils.Equals(t, 0, len(row2))
 
 }
 
@@ -69,15 +70,15 @@ func TestParseCompact(t *testing.T) {
 	quit := make(chan struct{})
 	defer close(quit)
 	cr, err := parseCompactResult(body, data, errs, quit)
-	ok(t, err)
+	testutils.Ok(t, err)
 
-	assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")
-	assert(t, "V2.7.0 2315: Success" == cr.RetsResponse.ReplyText, "bad text")
+	testutils.Assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")
+	testutils.Assert(t, "V2.7.0 2315: Success" == cr.RetsResponse.ReplyText, "bad text")
 
-	assert(t, 10 == int(cr.Count), "bad count")
-	assert(t, 6 == len(cr.Columns), "bad header count")
+	testutils.Assert(t, 10 == int(cr.Count), "bad count")
+	testutils.Assert(t, 6 == len(cr.Columns), "bad header count")
 
-	assert(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
+	testutils.Assert(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
 
 	filterTo := cr.FilterTo([]string{"A", "C", "E"})
 
@@ -100,8 +101,8 @@ func TestParseCompact(t *testing.T) {
 		counter = counter + 1
 	}
 
-	assert(t, 8 == counter, "bad count")
-	assert(t, cr.MaxRows, "bad max rows")
+	testutils.Assert(t, 8 == counter, "bad count")
+	testutils.Assert(t, cr.MaxRows, "bad max rows")
 
 }
 
