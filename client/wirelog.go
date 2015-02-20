@@ -12,9 +12,9 @@ import (
 type Dialer func(network, addr string) (net.Conn, error)
 
 /** create a net.Dial function based on this log */
-func WireLog(log io.WriteCloser) Dialer {
+func WireLog(log io.WriteCloser, dial Dialer) Dialer {
 	return func(network, addr string) (net.Conn, error) {
-		conn, err := net.Dial(network, addr)
+		conn, err := dial(network, addr)
 		wire := WireLogConn{
 			log:  log,
 			Conn: conn,

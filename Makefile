@@ -1,8 +1,7 @@
 all: test
 
 test:
-	go test -v client/*.go
-	go test -v metadata/*.go
+	go test -v ./...
 
 clean:
 	rm *.test

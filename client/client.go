@@ -6,7 +6,6 @@ package client
 
 import (
 	"errors"
-	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"strings"
@@ -59,7 +58,7 @@ type Session struct {
 	Client http.Client
 }
 
-func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.WriteCloser) (RetsSession, error) {
+func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (RetsSession, error) {
 	var session Session
 	session.Username = user
 	session.Password = pw
@@ -71,19 +70,14 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, logger io.
 	session.Accept = "*/*"
 	session.Cookies = make([]*http.Cookie, 0)
 
-	transport := http.DefaultTransport
-	if logger != nil {
-		dial := WireLog(logger)
-		transport = &http.Transport{
-			Proxy:              http.ProxyFromEnvironment,
-			DisableCompression: true, // if you're logging it, you might want to read it
-			Dial:               dial,
-		}
+	if transport == nil {
+		transport = http.DefaultTransport
 	}
+
 	retsTransport := RetsTransport{
 		transport: transport,
 		session:   session,
-		digest: nil,
+		digest:    nil,
 	}
 	jar, err := cookiejar.New(nil)
 	if err != nil {

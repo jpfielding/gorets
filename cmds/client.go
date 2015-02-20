@@ -10,10 +10,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
+	"net"
+	"net/http"
 	"os"
 
-	gorets "github.com/jpfielding/gorets_client"
+	gorets "github.com/jpfielding/gorets/client"
 )
 
 func main() {
@@ -27,18 +28,23 @@ func main() {
 
 	flag.Parse()
 
-	var logger io.WriteCloser = nil
+	d := net.Dial
+
 	if *logFile != "" {
 		file, err := os.Create(*logFile)
 		if err != nil {
 			panic(err)
 		}
 		defer file.Close()
-		logger = file
 		fmt.Println("wire logging enabled: ", file.Name())
+		d = gorets.WireLog(file, d)
 	}
+
 	// should we throw an err here too?
-	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, *retsVersion, logger)
+	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, *retsVersion, &http.Transport{
+		DisableCompression: true,
+		Dial:               d,
+	})
 	if err != nil {
 		panic(err)
 	}
