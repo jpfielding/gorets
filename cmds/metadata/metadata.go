@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
+	"net"
+	"net/http"
 	"os"
-	"path"
 
 	"github.com/jpfielding/gorets/client"
 )
@@ -21,19 +21,23 @@ func main() {
 
 	flag.Parse()
 
-	var logger io.WriteCloser = nil
+	d := net.Dial
+
 	if *logFile != "" {
-		os.MkdirAll(path.Dir(*logFile), os.ModePerm)
 		file, err := os.Create(*logFile)
 		if err != nil {
 			panic(err)
 		}
 		defer file.Close()
-		logger = file
 		fmt.Println("wire logging enabled: ", file.Name())
+		d = client.WireLog(file, d)
 	}
+
 	// should we throw an err here too?
-	session, err := client.NewSession(*username, *password, *userAgent, *userAgentPw, *retsVersion, logger)
+	session, err := client.NewSession(*username, *password, *userAgent, *userAgentPw, *retsVersion, &http.Transport{
+		DisableCompression: true,
+		Dial:               d,
+	})
 	if err != nil {
 		panic(err)
 	}
