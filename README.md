@@ -12,35 +12,44 @@ http://www.reso.org/assets/RETS/Specifications/rets_1_8.pdf.
 ```go
 package main
 
-
 import (
 	"flag"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
-	"github.com/jpfielding/gorets"
-	"io"
+
+	gorets "github.com/jpfielding/gorets/client"
 )
 
-func main () {
+func main() {
 	username := flag.String("username", "", "Username for the RETS server")
 	password := flag.String("password", "", "Password for the RETS server")
 	loginUrl := flag.String("login-url", "", "Login URL for the RETS server")
-	userAgent := flag.String("user-agent","Threewide/1.0","User agent for the RETS client")
-	userAgentPw := flag.String("user-agent-pw","","User agent authentication")
-	logFile := flag.String("log-file","","")
+	userAgent := flag.String("user-agent", "Threewide/1.0", "User agent for the RETS client")
+	userAgentPw := flag.String("user-agent-pw", "", "User agent authentication")
+	retsVersion := flag.String("rets-version", "", "RETS Version")
+	logFile := flag.String("log-file", "", "")
 
 	flag.Parse()
 
-	var logger io.WriteCloser = nil
+	d := net.Dial
+
 	if *logFile != "" {
-		logger,err := os.Create(*logFile)
+		file, err := os.Create(*logFile)
 		if err != nil {
 			panic(err)
 		}
-		defer logger.Close()
+		defer file.Close()
+		fmt.Println("wire logging enabled: ", file.Name())
+		d = gorets.WireLog(file, d)
 	}
+
 	// should we throw an err here too?
-	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, logger)
+	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, *retsVersion, &http.Transport{
+		DisableCompression: true,
+		Dial:               d,
+	})
 	if err != nil {
 		panic(err)
 	}
@@ -56,56 +65,47 @@ func main () {
 
 	err = session.Get(capability.Get)
 	if err != nil {
-		panic(err)
+		fmt.Println("this was stupid, shouldnt even be here")
 	}
 
 	mUrl := capability.GetMetadata
 	format := "COMPACT"
-	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-SYSTEM", "0"})
-//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
-//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
-//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})
+	session.GetMetadata(gorets.MetadataRequest{
+		Url:    mUrl,
+		Format: format,
+		MType:  "METADATA-SYSTEM",
+		Id:     "0",
+	})
+	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
+	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
+	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})
 
+	quit := make(chan struct{})
 	req := gorets.SearchRequest{
-		Url: capability.Search,
-		Query: "((LocaleListingStatus=|ACTIVE-CORE))",
+		Url:        capability.Search,
+		Query:      "((180=|AH))",
 		SearchType: "Property",
-		Class: "ALL",
-		Format: "COMPACT-DECODED",
-		QueryType: "DMQL2",
-		Count: gorets.COUNT_AFTER,
-		Limit: 3,
-		Offset: -1,
+		Class:      "1",
+		Format:     "COMPACT-DECODED",
+		QueryType:  "DMQL2",
+		Count:      gorets.COUNT_AFTER,
+		Limit:      3,
+		Offset:     -1,
 	}
-	// a quit channel in case we want to stop processing
-	quitSearch := make(chan struct{})
-    defer close(quitSearch)
-	result, err := session.Search(quitSearch, req)
+	result, err := session.Search(req, quit)
 	if err != nil {
 		panic(err)
 	}
-	cols := []string{
-		"ListingKey",
-		"ListPrice",
-		"ListingID",
-		"TotalPhotos",
-		"ModificationTimestamp",
-	}
-	fmt.Println("COLUMNS:", cols)
-	filter := result.FilterTo(cols)
+	fmt.Println("COLUMNS:", result.Columns)
 	for row := range result.Data {
-		fmt.Println(filter(row))
+		fmt.Println(row)
 	}
 
-	// a quit channel in case we want to stop processing
-	quitOne := make(chan struct{})
-    defer close(quitOne)
-	one,err := session.GetObject(quitOne, gorets.GetObjectRequest{
-		Url: capability.GetObject,
+	one, err := session.GetObject(quit, gorets.GetObjectRequest{
+		Url:      capability.GetObject,
 		Resource: "Property",
-		Type: "Thumbnail",
-		Id: "10385491290",
-		ObjectId: "*",
+		Type:     "Photo",
+		Id:       "3986587:1",
 	})
 	if err != nil {
 		panic(err)
@@ -117,15 +117,11 @@ func main () {
 		o := r.Object
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
-	// a quit channel in case we want to stop processing
-	quitAll := make(chan struct{})
-    defer close(quitAll)
-	all,err := session.GetObject(quitAll, gorets.GetObjectRequest{
-		Url: capability.GetObject,
+	all, err := session.GetObject(quit, gorets.GetObjectRequest{
+		Url:      capability.GetObject,
 		Resource: "Property",
-		Type: "Thumbnail",
-		Id: "10388845716",
-		ObjectId: "*",
+		Type:     "Photo",
+		Id:       "3986587:*",
 	})
 	if err != nil {
 		panic(err)
