@@ -191,10 +191,12 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 	// extract the basic content before delving into the data
 	for {
 		token, err := parser.Token()
-		if err != nil {
-			if err == io.EOF {
-				return result, err
-			}
+		switch err {
+		case nil:
+			// nothing
+		case io.EOF:
+			return result, nil
+		default:
 			return nil, err
 		}
 		switch t := token.(type) {
