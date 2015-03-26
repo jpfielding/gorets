@@ -120,9 +120,6 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 		)
 		req.Header.Add(RETS_UA_AUTH_HEADER, uaAuthHeader)
 	}
-	if t.digest != nil {
-		req.Header.Add(WWW_AUTH_RESP, t.digest.CreateDigestResponse(t.session.Username, t.session.Password, req.Method, req.URL.Path))
-	}
 	res, err := t.transport.RoundTrip(req)
 	if err != nil {
 		return nil, err
@@ -133,6 +130,9 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	// TODO check to see if im going to do anything different, if not, just return
 	if err = res.Body.Close(); err != nil {
 		return res, err
+	}
+	if t.digest != nil {
+		req.Header.Add(WWW_AUTH_RESP, t.digest.CreateDigestResponse(t.session.Username, t.session.Password, req.Method, req.URL.Path))
 	}
 	t.session.Cookies = make([]*http.Cookie, 0)
 	for _, cookie := range res.Cookies() {
