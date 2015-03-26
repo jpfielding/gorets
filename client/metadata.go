@@ -31,7 +31,7 @@ type MSystem struct {
 
 type MetadataRequest struct {
 	/* RETS request options */
-	Url, Format, MType, Id string
+	URL, HTTPMethod, Format, MType, Id string
 }
 
 func (s *Session) GetMetadata(r MetadataRequest) (*Metadata, error) {
@@ -41,7 +41,12 @@ func (s *Session) GetMetadata(r MetadataRequest) (*Metadata, error) {
 	values.Add("Type", r.MType)
 	values.Add("ID", r.Id)
 
-	req, err := http.NewRequest(s.HttpMethod, r.Url+"?"+values.Encode(), nil)
+	method := "GET"
+	if r.HTTPMethod != "" {
+		method = r.HTTPMethod
+	}
+	// TODO use a URL object then properly append to it
+	req, err := http.NewRequest(method, r.URL+"?"+values.Encode(), nil)
 	if err != nil {
 		return nil, err
 	}

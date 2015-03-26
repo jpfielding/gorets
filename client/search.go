@@ -63,7 +63,7 @@ func (m *SearchResult) FilterTo(cols []string) ColumnFilter {
 }
 
 type SearchRequest struct {
-	Url,
+	URL,
 	Class,
 	SearchType,
 	Format,
@@ -71,7 +71,8 @@ type SearchRequest struct {
 	Query,
 	QueryType,
 	RestrictedIndicator,
-	Payload string
+	Payload,
+	HTTPMethod string
 
 	Count,
 	// TODO NONE is a valid option, this needs to be modified
@@ -119,7 +120,12 @@ func (s *Session) Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, 
 		values.Add("Limit", "NONE")
 	}
 
-	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s", r.Url, values.Encode()), nil)
+	method := "GET"
+	if r.HTTPMethod != "" {
+		method = r.HTTPMethod
+	}
+	// TODO use a URL object then properly append to it
+	req, err := http.NewRequest(method, fmt.Sprintf("%s?%s", r.URL, values.Encode()), nil)
 	if err != nil {
 		return nil, err
 	}

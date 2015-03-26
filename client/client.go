@@ -48,7 +48,6 @@ type Session struct {
 	Username, Password string
 
 	UserAgent, UserAgentPassword string
-	HttpMethod                   string
 
 	Version string
 	Accept  string
@@ -58,7 +57,7 @@ type Session struct {
 	Client http.Client
 }
 
-func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (RetsSession, error) {
+func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (*Session, error) {
 	var session Session
 	session.Username = user
 	session.Password = pw
@@ -66,7 +65,6 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 	session.UserAgent = userAgent
 	session.UserAgentPassword = userAgentPw
 	session.Version = retsVersion
-	session.HttpMethod = "GET"
 	session.Accept = "*/*"
 	session.Cookies = make([]*http.Cookie, 0)
 

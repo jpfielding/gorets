@@ -1,53 +1,64 @@
 package client
- 
- import (
-  	"bufio"
+
+import (
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"io"
- 	"io/ioutil"
- 	"net/http"
- 	"net/http/cookiejar"
+	"io/ioutil"
+	"net/http"
+	"net/http/cookiejar"
 	"strconv"
 	"strings"
 )
 
+// LogoutRequest ...
+type LogoutRequest struct {
+	URL, HTTPMethod string
+}
+
+// LogoutResponse ...
 type LogoutResponse struct {
-	ReplyCode int
-	ReplyText string
-	ConnectTime uint64
-	Billing string
+	ReplyCode      int
+	ReplyText      string
+	ConnectTime    uint64
+	Billing        string
 	SignOffMessage string
 }
 
-func (s *Session) Logout(logoutUrl string) (*LogoutResponse, error) {
- 	req, err := http.NewRequest(s.HttpMethod, logoutUrl, nil)
- 	if err != nil {
+// Logout ...
+func (s *Session) Logout(r LogoutRequest) (*LogoutResponse, error) {
+	method := "GET"
+	if r.HTTPMethod != "" {
+		method = r.HTTPMethod
+	}
+	req, err := http.NewRequest(method, r.URL, nil)
+	if err != nil {
 		return nil, err
- 	}
- 
- 	resp, err := s.Client.Do(req)
- 	if err != nil {
+	}
+
+	resp, err := s.Client.Do(req)
+	if err != nil {
 		return nil, err
- 	}
- 
+	}
+
 	body, err := ioutil.ReadAll(resp.Body)
- 	if err != nil {
+	if err != nil {
 		return nil, err
- 	}
- 	resp.Body.Close()
- 
+	}
+	resp.Body.Close()
+
 	logoutResponse, err := processResponseBody(string(body))
 	if err != nil {
 		return nil, err
 	}
 
- 	// wipe the cookies
- 	jar, err := cookiejar.New(nil)
- 	if err != nil {
+	// wipe the cookies
+	jar, err := cookiejar.New(nil)
+	if err != nil {
 		return nil, err
- 	}
- 	s.Client.Jar = jar
+	}
+	s.Client.Jar = jar
 	return logoutResponse, nil
 }
 
@@ -87,8 +98,8 @@ func processResponseBody(body string) (*LogoutResponse, error) {
 		if err != nil {
 			return nil, err
 		}
-		return (&LogoutResponse{ rets.ReplyCode, rets.ReplyText, connectTime, values["billing"], values["signoffmessage"] }), nil
+		return (&LogoutResponse{rets.ReplyCode, rets.ReplyText, connectTime, values["billing"], values["signoffmessage"]}), nil
 	}
 
-	return (&LogoutResponse{ ReplyCode: rets.ReplyCode, ReplyText: rets.ReplyText, Billing: values["billing"], SignOffMessage: values["signoffmessage"] }), nil
+	return (&LogoutResponse{ReplyCode: rets.ReplyCode, ReplyText: rets.ReplyText, Billing: values["billing"], SignOffMessage: values["signoffmessage"]}), nil
 }

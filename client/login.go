@@ -16,6 +16,10 @@ import (
 	"strings"
 )
 
+type LoginRequest struct {
+	URL, HTTPMethod string
+}
+
 type CapabilityUrls struct {
 	Response RetsResponse
 
@@ -26,8 +30,12 @@ type CapabilityUrls struct {
 	Login, Action, Search, Get, GetObject, Logout, GetMetadata, ChangePassword string
 }
 
-func (s *Session) Login(url string) (*CapabilityUrls, error) {
-	req, err := http.NewRequest(s.HttpMethod, url, nil)
+func (s *Session) Login(r LoginRequest) (*CapabilityUrls, error) {
+	method := "GET"
+	if r.HTTPMethod != "" {
+		method = r.HTTPMethod
+	}
+	req, err := http.NewRequest(method, r.URL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +51,7 @@ func (s *Session) Login(url string) (*CapabilityUrls, error) {
 		return nil, err
 	}
 
-	urls, err := parseCapability(url, capabilities)
+	urls, err := parseCapability(r.URL, capabilities)
 	if err != nil {
 		return nil, errors.New("unable to parse capabilites response: " + string(capabilities) + " Error: " + err.Error())
 	}

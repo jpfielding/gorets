@@ -8,11 +8,19 @@ import (
 	"net/http"
 )
 
+type GetRequest struct {
+	URL, HTTPMethod string
+}
+
 /**
 TODO - this needs to somehow send the results back to the caller
 */
-func (s *Session) Get(url string) error {
-	req, err := http.NewRequest(s.HttpMethod, url, nil)
+func (s *Session) Get(r GetRequest) error {
+	method := "GET"
+	if r.HTTPMethod != "" {
+		method = r.HTTPMethod
+	}
+	req, err := http.NewRequest(method, r.URL, nil)
 	if err != nil {
 		return err
 	}

@@ -76,7 +76,7 @@ type GetObjectResult struct {
 
 type GetObjectRequest struct {
 	/* 5.3 */
-	Url,
+	URL, HTTPMethod,
 	Resource,
 	Type,
 	Uid,
@@ -107,7 +107,12 @@ func (s *Session) GetObject(quit <-chan struct{}, r GetObjectRequest) (<-chan Ge
 	optionalInt := OptionalIntValue(values)
 	optionalInt("Location", r.Location)
 
-	req, err := http.NewRequest(s.HttpMethod, fmt.Sprintf("%s?%s", r.Url, values.Encode()), nil)
+	method := "GET"
+	if r.HTTPMethod != "" {
+		method = r.HTTPMethod
+	}
+	// TODO use a URL object then properly append to it
+	req, err := http.NewRequest(method, fmt.Sprintf("%s?%s", r.URL, values.Encode()), nil)
 	if err != nil {
 		return nil, err
 	}

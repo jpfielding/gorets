@@ -15,7 +15,7 @@ type PayloadList struct {
 }
 
 type PayloadListRequest struct {
-	Url, Id string
+	URL, HTTPMethod, Id string
 }
 
 /**
@@ -27,7 +27,12 @@ func (s *Session) GetPayloadList(p PayloadListRequest) (*PayloadList, error) {
 		values.Add("ID", p.Id)
 	}
 
-	req, err := http.NewRequest(s.HttpMethod, p.Url+"?"+values.Encode(), nil)
+	method := "GET"
+	if p.HTTPMethod != "" {
+		method = p.HTTPMethod
+	}
+	// TODO use a URL object then properly append to it
+	req, err := http.NewRequest(method, p.URL+"?"+values.Encode(), nil)
 	if err != nil {
 		return nil, err
 	}
