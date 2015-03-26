@@ -5,11 +5,12 @@ package client
 
 import (
 	"bytes"
-	testutils "github.com/jpfielding/gorets/testutils"
 	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	testutils "github.com/jpfielding/gorets/testutils"
 )
 
 var compactDecoded string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
@@ -36,8 +37,8 @@ func TestEof(t *testing.T) {
 	quit := make(chan struct{})
 	defer close(quit)
 	_, err := parseCompactResult(body, data, errs, quit)
-	if err != io.EOF {
-		t.Error("error parsing body: " + err.Error())
+	if err == io.EOF {
+		t.Error("eof should not surface: " + err.Error())
 	}
 }
 
