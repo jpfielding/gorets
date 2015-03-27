@@ -46,7 +46,7 @@ func (obj *GetObject) Content() ([]byte, error) {
 	if obj == nil {
 		return nil, nil
 	}
-	if obj.Blob != nil {
+	if len(obj.Blob) == 0 {
 		return obj.Blob, nil
 	}
 	resp, err := http.Get(obj.Location)
