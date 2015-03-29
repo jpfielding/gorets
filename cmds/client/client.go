@@ -20,7 +20,7 @@ import (
 func main() {
 	username := flag.String("username", "", "Username for the RETS server")
 	password := flag.String("password", "", "Password for the RETS server")
-	loginUrl := flag.String("login-url", "", "Login URL for the RETS server")
+	loginURL := flag.String("login-url", "", "Login URL for the RETS server")
 	userAgent := flag.String("user-agent", "Threewide/1.0", "User agent for the RETS client")
 	userAgentPw := flag.String("user-agent-pw", "", "User agent authentication")
 	retsVersion := flag.String("rets-version", "", "RETS Version")
@@ -49,7 +49,7 @@ func main() {
 		panic(err)
 	}
 
-	capability, err := session.Login(*loginUrl)
+	capability, err := session.Login(gorets.LoginRequest{URL: *loginURL})
 	if err != nil {
 		panic(err)
 	}
@@ -58,15 +58,15 @@ func main() {
 	fmt.Println("Search: ", capability.Search)
 	fmt.Println("GetObject: ", capability.GetObject)
 
-	err = session.Get(capability.Get)
+	err = session.Get(gorets.GetRequest{URL: capability.Get})
 	if err != nil {
 		fmt.Println("this was stupid, shouldnt even be here")
 	}
 
-	mUrl := capability.GetMetadata
+	mURL := capability.GetMetadata
 	format := "COMPACT"
 	session.GetMetadata(gorets.MetadataRequest{
-		Url:    mUrl,
+		URL:    mURL,
 		Format: format,
 		MType:  "METADATA-SYSTEM",
 		Id:     "0",
@@ -77,7 +77,7 @@ func main() {
 
 	quit := make(chan struct{})
 	req := gorets.SearchRequest{
-		Url:        capability.Search,
+		URL:        capability.Search,
 		Query:      "((180=|AH))",
 		SearchType: "Property",
 		Class:      "1",
@@ -97,7 +97,7 @@ func main() {
 	}
 
 	one, err := session.GetObject(quit, gorets.GetObjectRequest{
-		Url:      capability.GetObject,
+		URL:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
 		Id:       "3986587:1",
@@ -113,7 +113,7 @@ func main() {
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
 	all, err := session.GetObject(quit, gorets.GetObjectRequest{
-		Url:      capability.GetObject,
+		URL:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
 		Id:       "3986587:*",
@@ -129,5 +129,5 @@ func main() {
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
 
-	session.Logout(capability.Logout)
+	session.Logout(gorets.LogoutRequest{URL: capability.Logout})
 }
