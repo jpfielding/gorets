@@ -187,7 +187,17 @@ func extractBoundary(header string) string {
 func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) GetObjectResult {
 	objectId, err := strconv.ParseInt(header.Get("Object-ID"), 10, 64)
 	if err != nil {
-		return GetObjectResult{nil, err}
+		// Attempt to parse a Rets Response code (if it exists)
+		retsResp, parseErr := ParseRetsResponse(body)
+		if parseErr != nil {
+			return GetObjectResult{nil, err}
+		}
+		// Include a GetObject (empty of content) so that its rets response can be retrieved
+		emptyResult := GetObject{
+			RetsErrorMessage: *retsResp,
+			RetsError:        retsResp.ReplyCode != 0,
+		}
+		return GetObjectResult{&emptyResult, err}
 	}
 	preferred, err := strconv.ParseBool(header.Get("Preferred"))
 	if err != nil {
