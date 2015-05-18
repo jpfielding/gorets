@@ -9,6 +9,7 @@ package client
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -140,10 +141,10 @@ func (s *Session) Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, 
 		data := make(chan []string, r.BufferSize)
 		errs := make(chan error)
 		return parseCompactResult(resp.Body, data, errs, quit)
-	case "STANDARD-XML":
-		panic("not yet supported!")
+		// case "STANDARD-XML":
+		// 	panic("not yet supported!")
 	}
-	return nil, nil
+	return nil, errors.New("unsupported format:" + r.Format)
 }
 
 func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error, quit <-chan struct{}) (*SearchResult, error) {
