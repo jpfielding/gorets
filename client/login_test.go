@@ -4,8 +4,9 @@ parsing the 'login' action from RETS
 package client
 
 import (
-	testutils "github.com/jpfielding/gorets/testutils"
 	"testing"
+
+	testutils "github.com/jpfielding/gorets/testutils"
 )
 
 func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {

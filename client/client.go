@@ -122,6 +122,12 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	if err != nil {
 		return nil, err
 	}
+	// TODO should we optionally wipe existing cookies first?
+	for _, cookie := range res.Cookies() {
+		t.session.Cookies = append(t.session.Cookies, cookie)
+		// go ahead and add it to this request in case we reuse it
+		req.AddCookie(cookie)
+	}
 	if res.StatusCode != http.StatusUnauthorized {
 		return res, err
 	}
@@ -131,11 +137,6 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	}
 	if t.digest != nil {
 		req.Header.Add(WWW_AUTH_RESP, t.digest.CreateDigestResponse(t.session.Username, t.session.Password, req.Method, req.URL.Path))
-	}
-	t.session.Cookies = make([]*http.Cookie, 0)
-	for _, cookie := range res.Cookies() {
-		t.session.Cookies = append(t.session.Cookies, cookie)
-		req.AddCookie(cookie)
 	}
 	challenge := res.Header.Get(WWW_AUTH)
 
