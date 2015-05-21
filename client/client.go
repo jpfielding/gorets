@@ -52,8 +52,6 @@ type Session struct {
 	Version string
 	Accept  string
 
-	Cookies []*http.Cookie
-
 	Client http.Client
 }
 
@@ -66,7 +64,6 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 	session.UserAgentPassword = userAgentPw
 	session.Version = retsVersion
 	session.Accept = "*/*"
-	session.Cookies = make([]*http.Cookie, 0)
 
 	if transport == nil {
 		transport = http.DefaultTransport
@@ -99,9 +96,6 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	req.Header.Add(USER_AGENT, t.session.UserAgent)
 	req.Header.Add(RETS_VERSION, t.session.Version)
 	req.Header.Add(ACCEPT, t.session.Accept)
-	for _, cookie := range t.session.Cookies {
-		req.AddCookie(cookie)
-	}
 
 	if t.session.UserAgentPassword != "" {
 		requestId := req.Header.Get(RETS_REQUEST_ID)
@@ -122,12 +116,7 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	if err != nil {
 		return nil, err
 	}
-	// TODO should we optionally wipe existing cookies first?
-	for _, cookie := range res.Cookies() {
-		t.session.Cookies = append(t.session.Cookies, cookie)
-		// go ahead and add it to this request in case we reuse it
-		req.AddCookie(cookie)
-	}
+	// check for auth issues|
 	if res.StatusCode != http.StatusUnauthorized {
 		return res, err
 	}
