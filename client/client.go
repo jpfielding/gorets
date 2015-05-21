@@ -5,10 +5,8 @@ layer.
 package client
 
 import (
-	"errors"
 	"net/http"
 	"net/http/cookiejar"
-	"strings"
 )
 
 const DEFAULT_TIMEOUT int = 300000
@@ -77,17 +75,23 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 		}
 	}
 
-	retsTransport := RetsTransport{
+	transport = &WWWAuthTransport{
+		transport: transport,
+		Username:  user,
+		Password:  pw,
+	}
+
+	transport = &RetsTransport{
 		transport: transport,
 		session:   session,
-		digest:    nil,
 	}
+
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
 	}
 	session.Client = http.Client{
-		Transport: &retsTransport,
+		Transport: transport,
 		Jar:       jar,
 	}
 	return &session, nil
@@ -97,7 +101,6 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 type RetsTransport struct {
 	transport http.RoundTripper
 	session   Session
-	digest    *Digest
 }
 
 func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -105,33 +108,5 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	req.Header.Add(RETS_VERSION, t.session.Version)
 	req.Header.Add(ACCEPT, t.session.Accept)
 
-	res, err := t.transport.RoundTrip(req)
-	if err != nil {
-		return nil, err
-	}
-	// check for auth issues|
-	if res.StatusCode != http.StatusUnauthorized {
-		return res, err
-	}
-	// TODO check to see if im going to do anything different, if not, just return
-	if err = res.Body.Close(); err != nil {
-		return res, err
-	}
-	if t.digest != nil {
-		req.Header.Add(WWW_AUTH_RESP, t.digest.CreateDigestResponse(t.session.Username, t.session.Password, req.Method, req.URL.Path))
-	}
-	challenge := res.Header.Get(WWW_AUTH)
-
-	if strings.HasPrefix(strings.ToLower(challenge), "basic") {
-		req.SetBasicAuth(t.session.Username, t.session.Password)
-		return t.transport.RoundTrip(req)
-	} else if strings.HasPrefix(strings.ToLower(challenge), "digest") {
-		t.digest, err = NewDigest(challenge)
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Set(WWW_AUTH_RESP, t.digest.CreateDigestResponse(t.session.Username, t.session.Password, req.Method, req.URL.Path))
-		return t.transport.RoundTrip(req)
-	}
-	return nil, errors.New("unknown authentication challenge: " + challenge)
+	return t.transport.RoundTrip(req)
 }
