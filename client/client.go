@@ -47,7 +47,7 @@ type RetsSession interface {
 type Session struct {
 	Username, Password string
 
-	UserAgent, UserAgentPassword string
+	UserAgent string
 
 	Version string
 	Accept  string
@@ -61,12 +61,20 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 	session.Password = pw
 	session.Version = "RETS/1.7"
 	session.UserAgent = userAgent
-	session.UserAgentPassword = userAgentPw
 	session.Version = retsVersion
 	session.Accept = "*/*"
 
 	if transport == nil {
 		transport = http.DefaultTransport
+	}
+
+	if userAgentPw != "" {
+		transport = &UserAgentAuthentication{
+			RETSVersion:       retsVersion,
+			UserAgent:         userAgent,
+			UserAgentPassword: userAgentPw,
+			transport:         transport,
+		}
 	}
 
 	retsTransport := RetsTransport{
@@ -97,21 +105,6 @@ func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	req.Header.Add(RETS_VERSION, t.session.Version)
 	req.Header.Add(ACCEPT, t.session.Accept)
 
-	if t.session.UserAgentPassword != "" {
-		requestId := req.Header.Get(RETS_REQUEST_ID)
-		sessionId := ""
-		if h, err := req.Cookie(RETS_SESSION_ID); err == nil {
-			sessionId = h.Value
-		}
-		uaAuthHeader := CalculateUaAuthHeader(
-			t.session.UserAgent,
-			t.session.UserAgentPassword,
-			requestId,
-			sessionId,
-			t.session.Version,
-		)
-		req.Header.Add(RETS_UA_AUTH_HEADER, uaAuthHeader)
-	}
 	res, err := t.transport.RoundTrip(req)
 	if err != nil {
 		return nil, err
