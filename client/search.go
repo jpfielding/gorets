@@ -168,6 +168,7 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 			token, err := parser.Token()
 			if err != nil {
 				result.Errors <- err
+				continue
 			}
 			switch t := token.(type) {
 			case xml.StartElement:
@@ -181,9 +182,9 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 				switch t.Name.Local {
 				case "DATA":
 					select {
-					case data <- ParseCompactRow(buf.String(), result.Delimiter):
 					case <-quit:
 						return
+					case data <- ParseCompactRow(buf.String(), result.Delimiter):
 					}
 				case "RETS":
 					return
