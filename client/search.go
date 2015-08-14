@@ -156,7 +156,8 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 		MaxRows:      false,
 	}
 
-	parser := xml.NewDecoder(body)
+	parser := GetXmlReader(body, false)
+	// parser := xml.NewDecoder(body)
 	var buf bytes.Buffer
 
 	// backgroundable processing of the data into our buffer
