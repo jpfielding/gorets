@@ -14,6 +14,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"golang.org/x/net/context"
 )
 
 /* counts */
@@ -93,7 +95,7 @@ type SearchRequest struct {
 	QueryType=DMQL2&
 	SearchType=Property
 */
-func (s *Session) Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, error) {
+func (s *Session) Search(ctx context.Context, r SearchRequest) (*SearchResult, error) {
 	// required
 	values := url.Values{}
 	values.Add("Class", r.Class)
@@ -140,14 +142,14 @@ func (s *Session) Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, 
 	case "COMPACT-DECODED", "COMPACT":
 		data := make(chan []string, r.BufferSize)
 		errs := make(chan error)
-		return parseCompactResult(resp.Body, data, errs, quit)
+		return parseCompactResult(ctx, resp.Body, data, errs)
 		// case "STANDARD-XML":
 		// 	panic("not yet supported!")
 	}
 	return nil, errors.New("unsupported format:" + r.Format)
 }
 
-func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error, quit <-chan struct{}) (*SearchResult, error) {
+func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []string, errs chan error) (*SearchResult, error) {
 	rets := RetsResponse{}
 	result := &SearchResult{
 		Data:         data,
@@ -183,7 +185,7 @@ func parseCompactResult(body io.ReadCloser, data chan []string, errs chan error,
 				switch t.Name.Local {
 				case "DATA":
 					select {
-					case <-quit:
+					case <-ctx.Done():
 						return
 					case data <- ParseCompactRow(buf.String(), result.Delimiter):
 					}

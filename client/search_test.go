@@ -9,6 +9,9 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
+	"time"
+
+	"golang.org/x/net/context"
 
 	testutils "github.com/jpfielding/gorets/testutils"
 )
@@ -34,9 +37,7 @@ func TestEof(t *testing.T) {
 
 	data := make(chan []string)
 	errs := make(chan error)
-	quit := make(chan struct{})
-	defer close(quit)
-	_, err := parseCompactResult(body, data, errs, quit)
+	_, err := parseCompactResult(context.Background(), body, data, errs)
 	if err == io.EOF {
 		t.Error("eof should not surface: " + err.Error())
 	}
@@ -47,15 +48,15 @@ func TestParseSearchQuit(t *testing.T) {
 
 	data := make(chan []string)
 	errs := make(chan error)
-	quit := make(chan struct{})
-	defer close(quit)
-	cr, err := parseCompactResult(body, data, errs, quit)
+	ctx, cancel := context.WithCancel(context.Background())
+	cr, err := parseCompactResult(ctx, body, data, errs)
 	testutils.Ok(t, err)
 
 	row1 := <-cr.Data
 	testutils.Equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
 
-	quit <- struct{}{}
+	cancel()
+	time.Sleep(100 * time.Millisecond) // I don't like this, but it allows time for the done channel to close.
 
 	// the closed channel will emit a zero'd value of the proper type
 	row2 := <-cr.Data
@@ -68,9 +69,9 @@ func TestParseCompact(t *testing.T) {
 
 	data := make(chan []string)
 	errs := make(chan error)
-	quit := make(chan struct{})
-	defer close(quit)
-	cr, err := parseCompactResult(body, data, errs, quit)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cr, err := parseCompactResult(ctx, body, data, errs)
 	testutils.Ok(t, err)
 
 	testutils.Assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")
@@ -96,7 +97,7 @@ func TestParseCompact(t *testing.T) {
 		select {
 		case err := <-cr.Errors:
 			t.Errorf("error parsing body at row %d: %s", counter, err.Error())
-			close(quit)
+			cancel()
 		default:
 		}
 		counter = counter + 1

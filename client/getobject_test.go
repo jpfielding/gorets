@@ -5,11 +5,14 @@ package client
 
 import (
 	"bytes"
-	testutils "github.com/jpfielding/gorets/testutils"
 	"io/ioutil"
 	"net/http"
 	"net/textproto"
 	"testing"
+	"time"
+
+	testutils "github.com/jpfielding/gorets/testutils"
+	"golang.org/x/net/context"
 )
 
 func TestGetObject(t *testing.T) {
@@ -26,9 +29,7 @@ func TestGetObject(t *testing.T) {
 	var body string = `<binary data 1>`
 	reader := ioutil.NopCloser(bytes.NewReader([]byte(body)))
 
-	quit := make(chan struct{})
-	defer close(quit)
-	results := parseGetObjectResult(quit, header, reader)
+	results := parseGetObjectResult(context.Background(), header, reader)
 	result := <-results
 
 	o := result.Object
@@ -103,9 +104,7 @@ func TestGetObjects(t *testing.T) {
 
 	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
 
-	quit := make(chan struct{})
-	defer close(quit)
-	results := parseGetObjectsResult(quit, extracted, body)
+	results := parseGetObjectsResult(context.Background(), extracted, body)
 
 	r1 := <-results
 	testutils.Ok(t, r1.Err)
@@ -158,9 +157,8 @@ func TestParseGetObjectQuit(t *testing.T) {
 
 	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
 
-	quit := make(chan struct{})
-	defer close(quit)
-	results := parseGetObjectsResult(quit, extracted, body)
+	ctx, cancel := context.WithCancel(context.Background())
+	results := parseGetObjectsResult(ctx, extracted, body)
 
 	r1 := <-results
 	testutils.Ok(t, r1.Err)
@@ -170,7 +168,8 @@ func TestParseGetObjectQuit(t *testing.T) {
 	testutils.Equals(t, "123456", o1.ContentId)
 	testutils.Equals(t, 1, o1.ObjectId)
 
-	quit <- struct{}{}
+	cancel()
+	time.Sleep(100 * time.Millisecond) // I don't like this, but it allows time for the done channel to close.
 
 	// the closed channel will emit a zero'd value of the proper type
 	r2 := <-results

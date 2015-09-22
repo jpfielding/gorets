@@ -15,6 +15,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"golang.org/x/net/context"
 )
 
 /* 5.5 spec */
@@ -89,7 +91,7 @@ type GetObjectRequest struct {
 }
 
 /* */
-func (s *Session) GetObject(quit <-chan struct{}, r GetObjectRequest) (<-chan GetObjectResult, error) {
+func (s *Session) GetObject(ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error) {
 	// required
 	values := url.Values{}
 	values.Add("Resource", r.Resource)
@@ -125,27 +127,27 @@ func (s *Session) GetObject(quit <-chan struct{}, r GetObjectRequest) (<-chan Ge
 	contentType := resp.Header.Get("Content-type")
 	boundary := extractBoundary(contentType)
 	if boundary == "" {
-		return parseGetObjectResult(quit, resp.Header, resp.Body), nil
+		return parseGetObjectResult(ctx, resp.Header, resp.Body), nil
 	}
 
-	return parseGetObjectsResult(quit, boundary, resp.Body), nil
+	return parseGetObjectsResult(ctx, boundary, resp.Body), nil
 }
 
-func parseGetObjectResult(quit <-chan struct{}, header http.Header, body io.ReadCloser) <-chan GetObjectResult {
+func parseGetObjectResult(ctx context.Context, header http.Header, body io.ReadCloser) <-chan GetObjectResult {
 	data := make(chan GetObjectResult)
 	go func() {
 		defer body.Close()
 		defer close(data)
 		select {
 		case data <- parseHeadersAndStream(textproto.MIMEHeader(header), body):
-		case <-quit:
+		case <-ctx.Done():
 			return
 		}
 	}()
 	return data
 }
 
-func parseGetObjectsResult(quit <-chan struct{}, boundary string, body io.ReadCloser) <-chan GetObjectResult {
+func parseGetObjectsResult(ctx context.Context, boundary string, body io.ReadCloser) <-chan GetObjectResult {
 	data := make(chan GetObjectResult)
 	go func() {
 		defer body.Close()
@@ -163,7 +165,7 @@ func parseGetObjectsResult(quit <-chan struct{}, boundary string, body io.ReadCl
 
 			select {
 			case data <- parseHeadersAndStream(part.Header, part):
-			case <-quit:
+			case <-ctx.Done():
 				return
 			}
 		}
