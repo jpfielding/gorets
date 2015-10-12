@@ -14,6 +14,9 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"golang.org/x/net/context"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 type LoginRequest struct {
@@ -30,7 +33,7 @@ type CapabilityUrls struct {
 	Login, Action, Search, Get, GetObject, Logout, GetMetadata, ChangePassword string
 }
 
-func (s *Session) Login(r LoginRequest) (*CapabilityUrls, error) {
+func (s *Session) Login(ctx context.Context, r LoginRequest) (*CapabilityUrls, error) {
 	method := "GET"
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
@@ -40,7 +43,7 @@ func (s *Session) Login(r LoginRequest) (*CapabilityUrls, error) {
 		return nil, err
 	}
 
-	resp, err := s.Client.Do(req)
+	resp, err := ctxhttp.Do(ctx, &s.Client, req)
 	if err != nil {
 		return nil, err
 	}

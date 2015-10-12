@@ -13,6 +13,9 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
+
+	"golang.org/x/net/context"
 
 	gorets "github.com/jpfielding/gorets/client"
 )
@@ -49,7 +52,10 @@ func main() {
 		panic(err)
 	}
 
-	capability, err := session.Login(gorets.LoginRequest{URL: *loginURL})
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	capability, err := session.Login(ctx, gorets.LoginRequest{URL: *loginURL})
 	if err != nil {
 		panic(err)
 	}
@@ -58,14 +64,14 @@ func main() {
 	fmt.Println("Search: ", capability.Search)
 	fmt.Println("GetObject: ", capability.GetObject)
 
-	err = session.Get(gorets.GetRequest{URL: capability.Get})
+	err = session.Get(ctx, gorets.GetRequest{URL: capability.Get})
 	if err != nil {
 		fmt.Println("this was stupid, shouldnt even be here")
 	}
 
 	mURL := capability.GetMetadata
 	format := "COMPACT"
-	session.GetMetadata(gorets.MetadataRequest{
+	session.GetMetadata(ctx, gorets.MetadataRequest{
 		URL:    mURL,
 		Format: format,
 		MType:  "METADATA-SYSTEM",
@@ -75,7 +81,6 @@ func main() {
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-TABLE", "ActiveAgent:ActiveAgent"})
 
-	quit := make(chan struct{})
 	req := gorets.SearchRequest{
 		URL:        capability.Search,
 		Query:      "((180=|AH))",
@@ -87,7 +92,7 @@ func main() {
 		Limit:      3,
 		Offset:     -1,
 	}
-	result, err := session.Search(req, quit)
+	result, err := session.Search(ctx, req)
 	if err != nil {
 		panic(err)
 	}
@@ -96,7 +101,7 @@ func main() {
 		fmt.Println(row)
 	}
 
-	one, err := session.GetObject(quit, gorets.GetObjectRequest{
+	one, err := session.GetObject(ctx, gorets.GetObjectRequest{
 		URL:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
@@ -112,7 +117,7 @@ func main() {
 		o := r.Object
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
-	all, err := session.GetObject(quit, gorets.GetObjectRequest{
+	all, err := session.GetObject(ctx, gorets.GetObjectRequest{
 		URL:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
@@ -129,5 +134,5 @@ func main() {
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
 
-	session.Logout(gorets.LogoutRequest{URL: capability.Logout})
+	session.Logout(ctx, gorets.LogoutRequest{URL: capability.Logout})
 }

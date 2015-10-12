@@ -6,6 +6,9 @@ package client
 import (
 	"io/ioutil"
 	"net/http"
+
+	"golang.org/x/net/context"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 type GetRequest struct {
@@ -15,7 +18,7 @@ type GetRequest struct {
 /**
 TODO - this needs to somehow send the results back to the caller
 */
-func (s *Session) Get(r GetRequest) error {
+func (s *Session) Get(ctx context.Context, r GetRequest) error {
 	method := "GET"
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
@@ -25,7 +28,7 @@ func (s *Session) Get(r GetRequest) error {
 		return err
 	}
 
-	resp, err := s.Client.Do(req)
+	resp, err := ctxhttp.Do(ctx, &s.Client, req)
 	if err != nil {
 		return err
 	}

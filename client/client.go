@@ -7,6 +7,8 @@ package client
 import (
 	"net/http"
 	"net/http/cookiejar"
+
+	"golang.org/x/net/context"
 )
 
 const DEFAULT_TIMEOUT int = 300000
@@ -29,16 +31,16 @@ const (
 )
 
 type RetsSession interface {
-	ChangePassword(url string) error
-	Get(url string) error
-	GetMetadata(r MetadataRequest) (*Metadata, error)
-	GetObject(quit <-chan struct{}, r GetObjectRequest) (<-chan GetObjectResult, error)
-	GetPayloadList(p PayloadListRequest) (*PayloadList, error)
-	Login(url string) (*CapabilityUrls, error)
-	Logout(logoutUrl string) (*LogoutResponse, error)
-	PostObject(url string) error
-	Search(r SearchRequest, quit <-chan struct{}) (*SearchResult, error)
-	Update(url string) error
+	ChangePassword(ctx context.Context, url string) error
+	Get(ctx context.Context, url string) error
+	GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata, error)
+	GetObject(ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error)
+	GetPayloadList(ctx context.Context, p PayloadListRequest) (*PayloadList, error)
+	Login(ctx context.Context, url string) (*CapabilityUrls, error)
+	Logout(ctx context.Context, logoutUrl string) (*LogoutResponse, error)
+	PostObject(ctx context.Context, url string) error
+	Search(ctx context.Context, r SearchRequest) (*SearchResult, error)
+	Update(ctx context.Context, url string) error
 }
 
 /* holds the state of the server interaction */

@@ -6,6 +6,9 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
+
+	"golang.org/x/net/context"
 
 	"github.com/jpfielding/gorets/client"
 )
@@ -42,7 +45,10 @@ func main() {
 		panic(err)
 	}
 
-	capability, err := session.Login(client.LoginRequest{URL: *loginURL})
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	defer cancel()
+
+	capability, err := session.Login(ctx, client.LoginRequest{URL: *loginURL})
 	if err != nil {
 		panic(err)
 	}
@@ -51,7 +57,7 @@ func main() {
 	fmt.Println("Search: ", capability.Search)
 	fmt.Println("GetObject: ", capability.GetObject)
 
-	err = session.Get(client.GetRequest{URL: capability.Get})
+	err = session.Get(ctx, client.GetRequest{URL: capability.Get})
 	if err != nil {
 		fmt.Println("this was stupid, shouldnt even be here")
 	}
@@ -60,7 +66,7 @@ func main() {
 
 	for _, f := range []string{"STANDARD-XML", "COMPACT"} {
 		for _, t := range []string{"TABLE"} {
-			session.GetMetadata(client.MetadataRequest{
+			session.GetMetadata(ctx, client.MetadataRequest{
 				URL:    mURL,
 				Format: f,
 				MType:  "METADATA-" + t,

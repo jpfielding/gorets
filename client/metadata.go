@@ -11,6 +11,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"golang.org/x/net/context"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 type Metadata struct {
@@ -34,7 +37,7 @@ type MetadataRequest struct {
 	URL, HTTPMethod, Format, MType, Id string
 }
 
-func (s *Session) GetMetadata(r MetadataRequest) (*Metadata, error) {
+func (s *Session) GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata, error) {
 	// required
 	values := url.Values{}
 	values.Add("Format", r.Format)
@@ -51,7 +54,7 @@ func (s *Session) GetMetadata(r MetadataRequest) (*Metadata, error) {
 		return nil, err
 	}
 
-	resp, err := s.Client.Do(req)
+	resp, err := ctxhttp.Do(ctx, &s.Client, req)
 	if err != nil {
 		return nil, err
 	}

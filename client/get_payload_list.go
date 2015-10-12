@@ -6,6 +6,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"golang.org/x/net/context"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 type PayloadList struct {
@@ -20,7 +23,7 @@ type PayloadListRequest struct {
 
 /**
  */
-func (s *Session) GetPayloadList(p PayloadListRequest) (*PayloadList, error) {
+func (s *Session) GetPayloadList(ctx context.Context, p PayloadListRequest) (*PayloadList, error) {
 	// required
 	values := url.Values{}
 	if p.Id == "" {
@@ -37,7 +40,7 @@ func (s *Session) GetPayloadList(p PayloadListRequest) (*PayloadList, error) {
 		return nil, err
 	}
 
-	resp, err := s.Client.Do(req)
+	resp, err := ctxhttp.Do(ctx, &s.Client, req)
 	if err != nil {
 		return nil, err
 	}
