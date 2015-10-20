@@ -28,30 +28,30 @@ type UserAgentAuthentication struct {
 // RoundTrip meets the http.RoundTripper interface to apply UAuth
 func (t *UserAgentAuthentication) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	// did someone else set this?
-	requestId := req.Header.Get(RETS_REQUEST_ID)
-	sessionId := ""
-	if h, err := req.Cookie(RETS_SESSION_ID); err == nil {
-		sessionId = h.Value
+	requestID := req.Header.Get(RETSRequestID)
+	sessionID := ""
+	if h, err := req.Cookie(RETSSessionID); err == nil {
+		sessionID = h.Value
 	}
 	uaAuthHeader := calculateUaAuthHeader(
 		t.UserAgent,
 		t.UserAgentPassword,
-		requestId,
-		sessionId,
+		requestID,
+		sessionID,
 		t.RETSVersion,
 	)
 	// this will replace an existing value
-	req.Header.Set(RETS_UA_AUTH_HEADER, uaAuthHeader)
+	req.Header.Set(RETSUAAuth, uaAuthHeader)
 	return t.transport.RoundTrip(req)
 }
 
-func calculateUaAuthHeader(userAgent, userAgentPw, requestId, sessionId, retsVersion string) string {
+func calculateUaAuthHeader(userAgent, userAgentPw, requestID, sessionID, retsVersion string) string {
 	hasher := md5.New()
 
 	io.WriteString(hasher, userAgent+":"+userAgentPw)
 	secretHash := hex.EncodeToString(hasher.Sum(nil))
 
-	pieces := strings.Join([]string{secretHash, requestId, sessionId, retsVersion}, ":")
+	pieces := strings.Join([]string{secretHash, requestID, sessionID, retsVersion}, ":")
 
 	hasher.Reset()
 	io.WriteString(hasher, pieces)

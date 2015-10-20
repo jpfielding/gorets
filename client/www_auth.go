@@ -23,7 +23,7 @@ func (t *WWWAuthTransport) RoundTrip(req *http.Request) (resp *http.Response, er
 	// attempt to preempt the challenge to save a req/res round trip
 	switch {
 	case t.Digest != nil:
-		req.Header.Set(WWW_AUTH_RESP, t.digestResponse(req))
+		req.Header.Set(WWWAuthResp, t.digestResponse(req))
 	case t.HasBasic:
 		req.SetBasicAuth(t.Username, t.Password)
 	}
@@ -40,7 +40,7 @@ func (t *WWWAuthTransport) RoundTrip(req *http.Request) (resp *http.Response, er
 		req.AddCookie(cookie)
 	}
 	// TODO what should we do if we get more than one challenge type?
-	for _, c := range res.Header[WWW_AUTH] {
+	for _, c := range res.Header[WWWAuth] {
 		switch {
 		case strings.HasPrefix(strings.ToLower(c), "digest"):
 			t.Digest, err = NewDigest(c)
@@ -49,7 +49,7 @@ func (t *WWWAuthTransport) RoundTrip(req *http.Request) (resp *http.Response, er
 				t.Digest = nil
 				continue
 			}
-			req.Header.Set(WWW_AUTH_RESP, t.digestResponse(req))
+			req.Header.Set(WWWAuthResp, t.digestResponse(req))
 			return t.transport.RoundTrip(req)
 		case strings.HasPrefix(strings.ToLower(c), "basic"):
 			t.HasBasic = true

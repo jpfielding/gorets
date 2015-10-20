@@ -1,7 +1,3 @@
-/**
-provides a wrapper and built in auth at the transport
-layer.
-*/
 package client
 
 import (
@@ -11,25 +7,26 @@ import (
 	"golang.org/x/net/context"
 )
 
-const DEFAULT_TIMEOUT int = 300000
+// const DefaultTimeout int = 300000
 
 /* standard http header names */
 const (
-	USER_AGENT    string = "User-Agent"
-	ACCEPT        string = "Accept"
-	CONTENT_TYPE  string = "Content-Type"
-	WWW_AUTH      string = "Www-Authenticate"
-	WWW_AUTH_RESP string = "Authorization"
+	UserAgent   string = "User-Agent"
+	Accept      string = "Accept"
+	ContentType string = "Content-Type"
+	WWWAuth     string = "Www-Authenticate"
+	WWWAuthResp string = "Authorization"
 )
 
 /* rets http header names */
 const (
-	RETS_VERSION        string = "RETS-Version"
-	RETS_SESSION_ID     string = "RETS-Session-ID"
-	RETS_REQUEST_ID     string = "RETS-Request-ID"
-	RETS_UA_AUTH_HEADER string = "RETS-UA-Authorization"
+	RETSVersion   string = "RETS-Version"
+	RETSSessionID string = "RETS-Session-ID"
+	RETSRequestID string = "RETS-Request-ID"
+	RETSUAAuth    string = "RETS-UA-Authorization"
 )
 
+// RetsSession is an interface defining the expected
 type RetsSession interface {
 	ChangePassword(ctx context.Context, url string) error
 	Get(ctx context.Context, url string) error
@@ -37,13 +34,13 @@ type RetsSession interface {
 	GetObject(ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error)
 	GetPayloadList(ctx context.Context, p PayloadListRequest) (*PayloadList, error)
 	Login(ctx context.Context, url string) (*CapabilityUrls, error)
-	Logout(ctx context.Context, logoutUrl string) (*LogoutResponse, error)
+	Logout(ctx context.Context, logoutURL string) (*LogoutResponse, error)
 	PostObject(ctx context.Context, url string) error
 	Search(ctx context.Context, r SearchRequest) (*SearchResult, error)
 	Update(ctx context.Context, url string) error
 }
 
-/* holds the state of the server interaction */
+// Session holds the state of the server interaction
 type Session struct {
 	Username, Password string
 
@@ -55,6 +52,7 @@ type Session struct {
 	Client http.Client
 }
 
+// NewSession configures the default rets session
 func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (*Session, error) {
 	var session Session
 	session.Username = user
@@ -64,30 +62,6 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 	session.Version = retsVersion
 	session.Accept = "*/*"
 
-	if transport == nil {
-		transport = http.DefaultTransport
-	}
-
-	if userAgentPw != "" {
-		transport = &UserAgentAuthentication{
-			RETSVersion:       retsVersion,
-			UserAgent:         userAgent,
-			UserAgentPassword: userAgentPw,
-			transport:         transport,
-		}
-	}
-
-	transport = &WWWAuthTransport{
-		transport: transport,
-		Username:  user,
-		Password:  pw,
-	}
-
-	transport = &RetsTransport{
-		transport: transport,
-		session:   session,
-	}
-
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
@@ -96,19 +70,45 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 		Transport: transport,
 		Jar:       jar,
 	}
+
+	if session.Client.Transport == nil {
+		session.Client.Transport = http.DefaultTransport
+	}
+
+	if userAgentPw != "" {
+		session.Client.Transport = &UserAgentAuthentication{
+			RETSVersion:       retsVersion,
+			UserAgent:         userAgent,
+			UserAgentPassword: userAgentPw,
+			transport:         session.Client.Transport,
+		}
+	}
+
+	session.Client.Transport = &WWWAuthTransport{
+		transport: session.Client.Transport,
+		Username:  user,
+		Password:  pw,
+	}
+
+	session.Client.Transport = &RetsTransport{
+		transport: session.Client.Transport,
+		session:   session,
+	}
+
 	return &session, nil
 }
 
-/* wrapper to intercept each http call */
+// RetsTransport to intercept each http call
 type RetsTransport struct {
 	transport http.RoundTripper
 	session   Session
 }
 
+// RoundTrip implements http.RoundTripper
 func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	req.Header.Add(USER_AGENT, t.session.UserAgent)
-	req.Header.Add(RETS_VERSION, t.session.Version)
-	req.Header.Add(ACCEPT, t.session.Accept)
+	req.Header.Add(UserAgent, t.session.UserAgent)
+	req.Header.Add(RETSVersion, t.session.Version)
+	req.Header.Add(Accept, t.session.Accept)
 
 	return t.transport.RoundTrip(req)
 }
