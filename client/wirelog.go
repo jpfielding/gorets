@@ -1,17 +1,15 @@
-/**
-wire logging utils
-*/
 package client
 
 import (
+	"crypto/tls"
 	"io"
 	"net"
 )
 
-/** this just makes the return type for the Dialer function reasonable */
+// Dialer just makes the return type for the Dialer function reasonable
 type Dialer func(network, addr string) (net.Conn, error)
 
-/** create a net.Dial function based on this log */
+// WireLog create a net.Dial function based on this log
 func WireLog(log io.WriteCloser, dial Dialer) Dialer {
 	return func(network, addr string) (net.Conn, error) {
 		conn, err := dial(network, addr)
@@ -23,7 +21,27 @@ func WireLog(log io.WriteCloser, dial Dialer) Dialer {
 	}
 }
 
-// channels might make this perform better, though we'ld have to copy the []byte to do that
+// WireLogTLS ...
+func WireLogTLS(log io.WriteCloser) Dialer {
+	return func(network, addr string) (net.Conn, error) {
+		config := &tls.Config{InsecureSkipVerify: true}
+		c, err := tls.Dial(network, addr, config)
+		if err != nil {
+			return nil, err
+		}
+		err = c.Handshake()
+		wire := WireLogConn{
+			log:  log,
+			Conn: c,
+		}
+		if err != nil {
+			return &wire, err
+		}
+		return &wire, c.Handshake()
+	}
+}
+
+// WireLogConn ....
 type WireLogConn struct {
 	// embedded
 	net.Conn
