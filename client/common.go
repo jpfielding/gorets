@@ -10,12 +10,13 @@ import (
 	"strings"
 )
 
-/* the common wrapper details for each response */
+// RetsResponse is the common wrapper details for each response
 type RetsResponse struct {
 	ReplyCode int
 	ReplyText string
 }
 
+// ParseRetsResponse ...
 func ParseRetsResponse(body io.ReadCloser) (*RetsResponse, error) {
 	parser := xml.NewDecoder(body)
 	for {
@@ -34,6 +35,7 @@ func ParseRetsResponse(body io.ReadCloser) (*RetsResponse, error) {
 	}
 }
 
+// ParseRetsResponseTag ...
 func ParseRetsResponseTag(start xml.StartElement) (*RetsResponse, error) {
 	rets := RetsResponse{}
 	attrs := make(map[string]string)
@@ -49,6 +51,7 @@ func ParseRetsResponseTag(start xml.StartElement) (*RetsResponse, error) {
 	return &rets, nil
 }
 
+// ParseDelimiterTag ...
 func ParseDelimiterTag(start xml.StartElement) (string, error) {
 	del := start.Attr[0].Value
 	pad := strings.Repeat("0", 2-len(del))
@@ -59,6 +62,7 @@ func ParseDelimiterTag(start xml.StartElement) (string, error) {
 	return string(decoded), nil
 }
 
+// ParseCountTag ...
 func ParseCountTag(count xml.StartElement) (int, error) {
 	code, err := strconv.ParseInt(count.Attr[0].Value, 10, 64)
 	if err != nil {
@@ -67,11 +71,13 @@ func ParseCountTag(count xml.StartElement) (int, error) {
 	return int(code), nil
 }
 
+// ParseCompactRow ...
 func ParseCompactRow(row, delim string) []string {
 	split := strings.Split(row, delim)
 	return split[1 : len(split)-1]
 }
 
+// OptionalStringValue ...
 func OptionalStringValue(values url.Values) func(string, string) {
 	return func(name, value string) {
 		if value != "" {
@@ -79,6 +85,8 @@ func OptionalStringValue(values url.Values) func(string, string) {
 		}
 	}
 }
+
+// OptionalIntValue ...
 func OptionalIntValue(values url.Values) func(string, int) {
 	return func(name string, value int) {
 		if value >= 0 {
@@ -87,17 +95,17 @@ func OptionalIntValue(values url.Values) func(string, int) {
 	}
 }
 
-/* the common compact decoded structure */
+// CompactData is the common compact decoded structure
 type CompactData struct {
-	Id, Date, Version string
+	ID, Date, Version string
 	Columns           []string
 	Rows              [][]string
 }
 
-/** cached lookup */
+// Indexer provices cached lookup for CompactData
 type Indexer func(col string, row int) string
 
-/** create the cache */
+// Indexer create the cache
 func (m *CompactData) Indexer() Indexer {
 	index := make(map[string]int)
 	for i, c := range m.Columns {
@@ -108,8 +116,10 @@ func (m *CompactData) Indexer() Indexer {
 	}
 }
 
+// ParseMetadataCompactDecoded ...
 func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, delim string) (*CompactData, error) {
-	type XmlMetadataElement struct {
+	// XmlMetadataElement is the simple extraction tool for our data
+	type XMLMetadataElement struct {
 		Resource string `xml:"Resource,attr"`
 		/* only valid for table */
 		Class string `xml:"Class,attr"`
@@ -120,7 +130,7 @@ func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, de
 		Columns string   `xml:"COLUMNS"`
 		Data    []string `xml:"DATA"`
 	}
-	xme := XmlMetadataElement{}
+	xme := XMLMetadataElement{}
 	err := parser.DecodeElement(&xme, &start)
 	if err != nil {
 		fmt.Println("failed to decode: ", err)
@@ -132,12 +142,12 @@ func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, de
 	data := *extractMap(xme.Columns, xme.Data, delim)
 	data.Date = xme.Date
 	data.Version = xme.Version
-	data.Id = xme.Resource
+	data.ID = xme.Resource
 	if xme.Class != "" {
-		data.Id = xme.Resource + ":" + xme.Class
+		data.ID = xme.Resource + ":" + xme.Class
 	}
 	if xme.Lookup != "" {
-		data.Id = xme.Resource + ":" + xme.Lookup
+		data.ID = xme.Resource + ":" + xme.Lookup
 	}
 
 	return &data, nil

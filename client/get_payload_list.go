@@ -11,23 +11,24 @@ import (
 	"golang.org/x/net/context/ctxhttp"
 )
 
+// PayloadList ...
 type PayloadList struct {
 	Rets     RetsResponse
 	Error    error
 	Payloads <-chan CompactData
 }
 
+// PayloadListRequest ...
 type PayloadListRequest struct {
-	URL, HTTPMethod, Id string
+	URL, HTTPMethod, ID string
 }
 
-/**
- */
+// GetPayloadList ...
 func (s *Session) GetPayloadList(ctx context.Context, p PayloadListRequest) (*PayloadList, error) {
 	// required
 	values := url.Values{}
-	if p.Id == "" {
-		values.Add("ID", p.Id)
+	if p.ID == "" {
+		values.Add("ID", p.ID)
 	}
 
 	method := "GET"

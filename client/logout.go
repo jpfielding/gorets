@@ -66,15 +66,15 @@ func (s *Session) Logout(ctx context.Context, r LogoutRequest) (*LogoutResponse,
 }
 
 func processResponseBody(body string) (*LogoutResponse, error) {
-	type XmlRets struct {
+	type xmlRets struct {
 		XMLName   xml.Name `xml:"RETS"`
 		ReplyCode int      `xml:"ReplyCode,attr"`
 		ReplyText string   `xml:"ReplyText,attr"`
 		Response  string   `xml:"RETS-RESPONSE"`
 	}
 
-	rets := XmlRets{}
-	decoder := GetXmlReader(bytes.NewBufferString(body), false)
+	rets := xmlRets{}
+	decoder := GetXMLReader(bytes.NewBufferString(body), false)
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
 		return nil, err
@@ -101,8 +101,19 @@ func processResponseBody(body string) (*LogoutResponse, error) {
 		if err != nil {
 			return nil, err
 		}
-		return (&LogoutResponse{rets.ReplyCode, rets.ReplyText, connectTime, values["billing"], values["signoffmessage"]}), nil
+		return (&LogoutResponse{
+			ReplyCode:      rets.ReplyCode,
+			ReplyText:      rets.ReplyText,
+			ConnectTime:    connectTime,
+			Billing:        values["billing"],
+			SignOffMessage: values["signoffmessage"],
+		}), nil
 	}
 
-	return (&LogoutResponse{ReplyCode: rets.ReplyCode, ReplyText: rets.ReplyText, Billing: values["billing"], SignOffMessage: values["signoffmessage"]}), nil
+	return (&LogoutResponse{
+		ReplyCode:      rets.ReplyCode,
+		ReplyText:      rets.ReplyText,
+		Billing:        values["billing"],
+		SignOffMessage: values["signoffmessage"],
+	}), nil
 }

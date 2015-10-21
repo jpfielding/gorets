@@ -33,7 +33,7 @@ type RetsSession interface {
 	GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata, error)
 	GetObject(ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error)
 	GetPayloadList(ctx context.Context, p PayloadListRequest) (*PayloadList, error)
-	Login(ctx context.Context, url string) (*CapabilityUrls, error)
+	Login(ctx context.Context, url string) (*CapabilityURLs, error)
 	Logout(ctx context.Context, logoutURL string) (*LogoutResponse, error)
 	PostObject(ctx context.Context, url string) error
 	Search(ctx context.Context, r SearchRequest) (*SearchResult, error)

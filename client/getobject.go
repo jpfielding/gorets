@@ -1,6 +1,3 @@
-/**
-provides the photo extraction core
-*/
 package client
 
 import (
@@ -19,15 +16,15 @@ import (
 	"golang.org/x/net/context"
 )
 
-/* 5.5 spec */
+// GetObject provides the photo extraction core for RETS section 5.5
 type GetObject struct {
-	/** required */
-	ContentId,
+	// ContentID required
+	ContentID,
 	ContentType string
-	/* 5.5.2 this is probably a bad idea, though its solid with the spec */
-	ObjectId int
-	/** optional-ish _must_ return if the request used this field */
-	Uid string
+	// ObjectID 5.5.2 this is probably a bad idea, though its solid with the spec
+	ObjectID int
+	// optional-ish _must_ return if the request used this field
+	UID string
 	/** optional */
 	Description,
 	SubDescription,
@@ -43,7 +40,7 @@ type GetObject struct {
 	Blob []byte
 }
 
-// helper to abstract the location concept (not thread safe)
+// Content is a helper to abstract the location concept (not thread safe)
 func (obj *GetObject) Content() ([]byte, error) {
 	if obj == nil {
 		return nil, nil
@@ -71,26 +68,28 @@ func (obj *GetObject) Content() ([]byte, error) {
 	return blob, nil
 }
 
+// GetObjectResult ...
 type GetObjectResult struct {
 	Object *GetObject
 	Err    error
 }
 
+// GetObjectRequest ...
 type GetObjectRequest struct {
 	/* 5.3 */
 	URL, HTTPMethod,
 	Resource,
 	Type,
-	Uid,
-	/** listing1:1:3:5,listing2:*,listing3:0 */
-	Id string
+	UID,
+	// ID listing1:1:3:5,listing2:*,listing3:0 */
+	ID string
 	/** 5.4.2 listing data to be embedded in the response */
 	ObjectData []string
 	/* 5.4.1 */
 	Location int
 }
 
-/* */
+// GetObject ...
 func (s *Session) GetObject(ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error) {
 	// required
 	values := url.Values{}
@@ -101,8 +100,8 @@ func (s *Session) GetObject(ctx context.Context, r GetObjectRequest) (<-chan Get
 	optionalString := OptionalStringValue(values)
 
 	// one or the other _MUST_ be present
-	optionalString("ID", r.Id)
-	optionalString("UID", r.Uid)
+	optionalString("ID", r.ID)
+	optionalString("UID", r.UID)
 	// truly optional
 	optionalString("ObjectData", strings.Join(r.ObjectData, ","))
 
@@ -174,7 +173,7 @@ func parseGetObjectsResult(ctx context.Context, boundary string, body io.ReadClo
 	return data
 }
 
-/** TODO - this is the lazy mans version, this needs to be addressed properly */
+// TODO - this is the lazy mans version, this needs to be addressed properly
 func extractBoundary(header string) string {
 	for _, part := range strings.Split(header, ";") {
 		part = strings.TrimSpace(part)
@@ -187,7 +186,7 @@ func extractBoundary(header string) string {
 }
 
 func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) GetObjectResult {
-	objectId, err := strconv.ParseInt(header.Get("Object-ID"), 10, 64)
+	objectID, err := strconv.ParseInt(header.Get("Object-ID"), 10, 64)
 	if err != nil {
 		// Attempt to parse a Rets Response code (if it exists)
 		retsResp, parseErr := ParseRetsResponse(body)
@@ -230,11 +229,11 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) GetO
 
 	object := GetObject{
 		// required
-		ObjectId:    int(objectId),
-		ContentId:   header.Get("Content-ID"),
+		ObjectID:    int(objectID),
+		ContentID:   header.Get("Content-ID"),
 		ContentType: header.Get("Content-Type"),
 		// optional
-		Uid:              header.Get("UID"),
+		UID:              header.Get("UID"),
 		Description:      header.Get("Content-Description"),
 		SubDescription:   header.Get("Content-Sub-Description"),
 		Location:         header.Get("Location"),

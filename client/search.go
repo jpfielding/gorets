@@ -1,9 +1,3 @@
-/**
-provides the searching core
-
-see minidom style processing here:
-	http://blog.davidsingleton.org/parsing-huge-xml-files-with-go/
-*/
 package client
 
 import (
@@ -18,19 +12,18 @@ import (
 	"golang.org/x/net/context"
 )
 
-/* counts */
 const (
-	COUNT_NONE  = 0
-	COUNT_AFTER = 1
-	COUNT_ONLY  = 2
+	// CountNone dont include a count
+	CountNone = 0
+	// CountAfter include a count after the data
+	CountAfter = 1
+	// CountOnly returns only the count
+	CountOnly = 2
 )
 
-/* field naming */
-const (
-	STANDARD_NAMES_OFF = 0
-	STANDARD_NAMES_ON  = 0
-)
+// TODO include standard names constants here
 
+// SearchResult ...
 type SearchResult struct {
 	RetsResponse RetsResponse
 	Count        int
@@ -42,6 +35,7 @@ type SearchResult struct {
 	Errors chan error
 }
 
+// Index ...
 func (m *SearchResult) Index() map[string]int {
 	index := make(map[string]int)
 	for i, c := range m.Columns {
@@ -50,10 +44,10 @@ func (m *SearchResult) Index() map[string]int {
 	return index
 }
 
-/** cached filtering */
+// ColumnFilter cached filtering
 type ColumnFilter func(row []string) (filtered []string)
 
-/** create the cache */
+// FilterTo create the cache
 func (m *SearchResult) FilterTo(cols []string) ColumnFilter {
 	index := m.Index()
 	return func(row []string) (filtered []string) {
@@ -65,6 +59,7 @@ func (m *SearchResult) FilterTo(cols []string) ColumnFilter {
 	}
 }
 
+// SearchRequest ...
 type SearchRequest struct {
 	URL,
 	Class,
@@ -84,17 +79,17 @@ type SearchRequest struct {
 	BufferSize int
 }
 
-/*
-	GET /platinum/search?
-	Class=ALL&
-	Count=1&
-	Format=COMPACT-DECODED&
-	Limit=10&
-	Offset=50&
-	Query=%28%28LocaleListingStatus%3D%7CACTIVE-CORE%2CCNTG%2FKO-CORE%2CCNTG%2FNO+KO-CORE%2CAPP+REG-CORE%29%2C%7E%28VOWList%3D0%29%29&
-	QueryType=DMQL2&
-	SearchType=Property
-*/
+// GET /platinum/search?
+// Class=ALL&
+// Count=1&
+// Format=COMPACT-DECODED&
+// Limit=10&
+// Offset=50&
+// Query=%28%28LocaleListingStatus%3D%7CACTIVE-CORE%2CCNTG%2FKO-CORE%2CCNTG%2FNO+KO-CORE%2CAPP+REG-CORE%29%2C%7E%28VOWList%3D0%29%29&
+// QueryType=DMQL2&
+// SearchType=Property
+
+// Search ...
 func (s *Session) Search(ctx context.Context, r SearchRequest) (*SearchResult, error) {
 	// required
 	values := url.Values{}
@@ -158,7 +153,7 @@ func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []str
 		MaxRows:      false,
 	}
 
-	parser := GetXmlReader(body, false)
+	parser := GetXMLReader(body, false)
 	// parser := xml.NewDecoder(body)
 	var buf bytes.Buffer
 
@@ -248,6 +243,6 @@ func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []str
 	}
 }
 
-func parseStandardXml(body *io.ReadCloser) (*SearchResult, error) {
+func parseStandardXML(body *io.ReadCloser) (*SearchResult, error) {
 	return nil, nil
 }

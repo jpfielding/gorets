@@ -1,6 +1,3 @@
-/**
-Maybe the dumbest thing in all of RETS
-*/
 package client
 
 import (
@@ -11,13 +8,12 @@ import (
 	"golang.org/x/net/context/ctxhttp"
 )
 
+// GetRequest ...
 type GetRequest struct {
 	URL, HTTPMethod string
 }
 
-/**
-TODO - this needs to somehow send the results back to the caller
-*/
+// Get ...
 func (s *Session) Get(ctx context.Context, r GetRequest) error {
 	method := "GET"
 	if r.HTTPMethod != "" {

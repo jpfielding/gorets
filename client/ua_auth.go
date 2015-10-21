@@ -1,8 +1,3 @@
-//
-// Provides the basic mechanism for User Agent authentication for rets
-//
-// RETS 1.8 - 3.10 Computing the RETS-UA-Authorization Value
-
 package client
 
 import (
@@ -14,6 +9,7 @@ import (
 )
 
 // UserAgentAuthentication ...
+// RETS 1.8 - 3.10 Computing the RETS-UA-Authorization Value
 type UserAgentAuthentication struct {
 	transport http.RoundTripper
 

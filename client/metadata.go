@@ -1,6 +1,3 @@
-/**
-extraction of the data pieces describing a RETS system
-*/
 package client
 
 import (
@@ -16,6 +13,7 @@ import (
 	"golang.org/x/net/context/ctxhttp"
 )
 
+// Metadata ...
 type Metadata struct {
 	Rets        RetsResponse
 	System      MSystem
@@ -26,23 +24,26 @@ type Metadata struct {
 	LookupTypes map[string]CompactData
 }
 
+// MSystem ...
 type MSystem struct {
 	Date, Version   string
-	Id, Description string
+	ID, Description string
 	Comments        string
 }
 
+// MetadataRequest ...
 type MetadataRequest struct {
-	/* RETS request options */
-	URL, HTTPMethod, Format, MType, Id string
+	// RETS request options
+	URL, HTTPMethod, Format, MType, ID string
 }
 
+// GetMetadata ...
 func (s *Session) GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata, error) {
 	// required
 	values := url.Values{}
 	values.Add("Format", r.Format)
 	values.Add("Type", r.MType)
-	values.Add("ID", r.Id)
+	values.Add("ID", r.ID)
 
 	method := "GET"
 	if r.HTTPMethod != "" {
@@ -64,7 +65,7 @@ func (s *Session) GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata
 	case "COMPACT":
 		return parseMetadataCompactResult(resp.Body)
 	case "STANDARD-XML":
-		return parseMetadataStandardXml(resp.Body)
+		return parseMetadataStandardXML(resp.Body)
 	}
 
 	return nil, errors.New("unknows metadata format")
@@ -96,17 +97,17 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 				}
 				metadata.Rets = *rets
 			case "METADATA-SYSTEM":
-				type XmlSystem struct {
-					SystemId    string `xml:"SystemID,attr"`
+				type xmlSystem struct {
+					SystemID    string `xml:"SystemID,attr"`
 					Description string `xml:"SystemDescription,attr"`
 				}
-				type XmlMetadataSystem struct {
+				type xmlMetadataSystem struct {
 					Version  string    `xml:"Version,attr"`
 					Date     string    `xml:"Date,attr"`
-					System   XmlSystem `xml:"SYSTEM"`
+					System   xmlSystem `xml:"SYSTEM"`
 					Comments string    `xml:"COMMENTS"`
 				}
-				xms := XmlMetadataSystem{}
+				xms := xmlMetadataSystem{}
 				err := parser.DecodeElement(&xms, &t)
 				if err != nil {
 					return nil, err
@@ -114,7 +115,7 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 				metadata.System.Version = xms.Version
 				metadata.System.Date = xms.Date
 				metadata.System.Comments = strings.TrimSpace(xms.Comments)
-				metadata.System.Id = xms.System.SystemId
+				metadata.System.ID = xms.System.SystemID
 				metadata.System.Description = xms.System.Description
 			case "METADATA-RESOURCE", "METADATA-CLASS", "METADATA-TABLE", "METADATA-LOOKUP", "METADATA-LOOKUP_TYPE":
 				data, err := ParseMetadataCompactDecoded(t, parser, "	")
@@ -128,20 +129,20 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 				case "METADATA-RESOURCE":
 					metadata.Resources = *data
 				case "METADATA-CLASS":
-					metadata.Classes[data.Id] = *data
+					metadata.Classes[data.ID] = *data
 				case "METADATA-TABLE":
-					metadata.Tables[data.Id] = *data
+					metadata.Tables[data.ID] = *data
 				case "METADATA-LOOKUP":
-					metadata.Lookups[data.Id] = *data
+					metadata.Lookups[data.ID] = *data
 				case "METADATA-LOOKUP_TYPE":
-					metadata.LookupTypes[data.Id] = *data
+					metadata.LookupTypes[data.ID] = *data
 				}
 			}
 		}
 	}
 }
 
-func parseMetadataStandardXml(body io.ReadCloser) (*Metadata, error) {
+func parseMetadataStandardXML(body io.ReadCloser) (*Metadata, error) {
 	defer body.Close()
 	ioutil.ReadAll(body)
 	return nil, errors.New("unsupported metadata format option")

@@ -5,9 +5,11 @@ import (
 	"io"
 )
 
-var SelectedCharsetReader func(string, io.Reader) (io.Reader, error) = nil
+// SelectedCharsetReader the variable used to set a selected charset
+var SelectedCharsetReader func(string, io.Reader) (io.Reader, error)
 
-func GetXmlReader(input io.Reader, strict bool) *xml.Decoder {
+// GetXMLReader ...
+func GetXMLReader(input io.Reader, strict bool) *xml.Decoder {
 	decoder := xml.NewDecoder(input)
 	if SelectedCharsetReader != nil {
 		decoder.CharsetReader = SelectedCharsetReader

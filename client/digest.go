@@ -1,6 +1,3 @@
-/**
-http://en.wikipedia.org/wiki/Digest_access_authentication
-*/
 package client
 
 import (
@@ -15,13 +12,14 @@ import (
 	"time"
 )
 
+// Digest http://en.wikipedia.org/wiki/Digest_access_authentication
 type Digest struct {
 	Realm      string
 	Nonce      string
 	Algorithm  string
-    Opaque     string
-    Qop        string
-    NonceCount int
+	Opaque     string
+	Qop        string
+	NonceCount int
 }
 
 func parseChallenge(chall string) (*Digest, error) {
@@ -41,46 +39,47 @@ func parseChallenge(chall string) (*Digest, error) {
 
 func parseDirectives(directives string, d *Digest) (*Digest, error) {
 	for _, e := range strings.Split(directives, ",") {
-		directive := strings.SplitN(strings.Trim(e, " \r\n"), "=" , 2)
+		directive := strings.SplitN(strings.Trim(e, " \r\n"), "=", 2)
 		if len(directive) < 2 {
 			return nil, errors.New("Invalid challenge")
 		}
 		switch directive[0] {
-			case "algorithm":
-				d.Algorithm = strings.Trim(directive[1], "\"")
-			case "domain":
-				break
-			case "qop":
-				d.Qop = strings.Trim(directive[1], "\"")
-				if d.Qop == strings.ToLower("auth-int") {
-					return nil, errors.New("auth-int is not supported")
-				}
-			case "nonce":
-				d.Nonce = strings.Trim(directive[1], "\"")
-			case "opaque":
-				d.Opaque = strings.Trim(directive[1], "\"")
-			case "realm":
-				d.Realm = strings.Trim(directive[1], "\"")
-			case "stale":
-				break
-			default:
-				return nil, errors.New("Invalid challenge. Cannot parse directives.")
+		case "algorithm":
+			d.Algorithm = strings.Trim(directive[1], "\"")
+		case "domain":
+			break
+		case "qop":
+			d.Qop = strings.Trim(directive[1], "\"")
+			if d.Qop == strings.ToLower("auth-int") {
+				return nil, errors.New("auth-int is not supported")
+			}
+		case "nonce":
+			d.Nonce = strings.Trim(directive[1], "\"")
+		case "opaque":
+			d.Opaque = strings.Trim(directive[1], "\"")
+		case "realm":
+			d.Realm = strings.Trim(directive[1], "\"")
+		case "stale":
+			break
+		default:
+			return nil, errors.New("Invalid challenge. Cannot parse directives.")
 		}
 	}
 	return d, nil
 }
-  
+
+// NewDigest ...
 func NewDigest(chall string) (*Digest, error) {
 	c, err := parseChallenge(chall)
 	if err != nil {
 		return nil, err
 	}
-	return &Digest {
-		Realm: c.Realm,
-		Nonce: c.Nonce,
-		Algorithm: c.Algorithm,
-		Opaque: c.Opaque,
-		Qop: c.Qop,
+	return &Digest{
+		Realm:      c.Realm,
+		Nonce:      c.Nonce,
+		Algorithm:  c.Algorithm,
+		Opaque:     c.Opaque,
+		Qop:        c.Qop,
 		NonceCount: 1,
 	}, nil
 }
@@ -90,7 +89,7 @@ func (d *Digest) createCnonce() string {
 	return md5ThenHex(md5.New(), asString)
 }
 
-func (d* Digest) createHa1(username, password, cnonce string, hasher hash.Hash) string {
+func (d *Digest) createHa1(username, password, cnonce string, hasher hash.Hash) string {
 	//Assuming MD5 or unspecified
 	a1 := strings.Join([]string{username, d.Realm, password}, ":")
 	ha1 := md5ThenHex(hasher, a1)
@@ -106,10 +105,10 @@ func (d* Digest) createHa1(username, password, cnonce string, hasher hash.Hash) 
 func (d *Digest) createHa2(method, uri string, hasher hash.Hash) string {
 	//Assuming qop is auth or unspecified
 	a2 := method + ":" + uri
-	return  md5ThenHex(hasher, a2)
+	return md5ThenHex(hasher, a2)
 }
 
-func (d* Digest) createResponse(ha1, ha2, nc, cnonce string, hasher hash.Hash) string {
+func (d *Digest) createResponse(ha1, ha2, nc, cnonce string, hasher hash.Hash) string {
 	//qop is unspecified
 	response := strings.Join([]string{ha1, d.Nonce, ha2}, ":")
 
@@ -130,23 +129,24 @@ func (d *Digest) computeAuthorization(username, password, method, uri, cnonce st
 	sl = append(sl, fmt.Sprintf(`realm="%s"`, d.Realm))
 	sl = append(sl, fmt.Sprintf(`nonce="%s"`, d.Nonce))
 	sl = append(sl, fmt.Sprintf(`uri="%s"`, uri))
-    sl = append(sl, fmt.Sprintf(`response="%s"`, response))
-    if d.Qop != "" {
-        sl = append(sl, fmt.Sprintf("qop=%s", d.Qop))
-        sl = append(sl, fmt.Sprintf("nc=%s", nc))
-        sl = append(sl, fmt.Sprintf(`cnonce="%s"`, cnonce))
-    }
-    if d.Algorithm != "" {
-      	sl = append(sl, fmt.Sprintf(`algorithm="%s"`, d.Algorithm))
-    }
-    if d.Opaque != "" {
-        sl = append(sl, fmt.Sprintf(`opaque="%s"`, d.Opaque))
-    }
+	sl = append(sl, fmt.Sprintf(`response="%s"`, response))
+	if d.Qop != "" {
+		sl = append(sl, fmt.Sprintf("qop=%s", d.Qop))
+		sl = append(sl, fmt.Sprintf("nc=%s", nc))
+		sl = append(sl, fmt.Sprintf(`cnonce="%s"`, cnonce))
+	}
+	if d.Algorithm != "" {
+		sl = append(sl, fmt.Sprintf(`algorithm="%s"`, d.Algorithm))
+	}
+	if d.Opaque != "" {
+		sl = append(sl, fmt.Sprintf(`opaque="%s"`, d.Opaque))
+	}
 
-    d.NonceCount += 1;
+	d.NonceCount++
 	return fmt.Sprintf("Digest %s", strings.Join(sl, ", "))
 }
 
+// CreateDigestResponse ...
 func (d *Digest) CreateDigestResponse(username, password, method, uri string) string {
 	return d.computeAuthorization(username, password, method, uri, d.createCnonce())
 }
