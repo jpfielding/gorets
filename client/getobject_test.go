@@ -26,7 +26,7 @@ func TestGetObject(t *testing.T) {
 	textproto.MIMEHeader(header).Add("Content-Sub-Description", "The urinal")
 	textproto.MIMEHeader(header).Add("Location", "http://www.simpleboundary.com/image-5.jpg")
 
-	var body string = `<binary data 1>`
+	var body = `<binary data 1>`
 	reader := ioutil.NopCloser(bytes.NewReader([]byte(body)))
 
 	results := parseGetObjectResult(context.Background(), header, reader)
@@ -36,9 +36,9 @@ func TestGetObject(t *testing.T) {
 	testutils.Ok(t, result.Err)
 	testutils.Equals(t, true, o.Preferred)
 	testutils.Equals(t, "image/jpeg", o.ContentType)
-	testutils.Equals(t, "123456", o.ContentId)
-	testutils.Equals(t, 1, o.ObjectId)
-	testutils.Equals(t, "1a234234234", o.Uid)
+	testutils.Equals(t, "123456", o.ContentID)
+	testutils.Equals(t, 1, o.ObjectID)
+	testutils.Equals(t, "1a234234234", o.UID)
 	testutils.Equals(t, "Outhouse", o.Description)
 	testutils.Equals(t, "The urinal", o.SubDescription)
 	testutils.Equals(t, "<binary data 1>", string(o.Blob))
@@ -46,11 +46,11 @@ func TestGetObject(t *testing.T) {
 	testutils.Equals(t, false, o.RetsError)
 }
 
-var boundary string = "simple boundary"
+var boundary = "simple boundary"
 
-var contentType string = `multipart/parallel; boundary="simple boundary"`
+var contentType = `multipart/parallel; boundary="simple boundary"`
 
-var multipartBody string = `--simple boundary
+var multipartBody = `--simple boundary
 Content-Type: image/jpeg
 Content-ID: 123456
 Object-ID: 1
@@ -111,8 +111,8 @@ func TestGetObjects(t *testing.T) {
 	o1 := r1.Object
 	testutils.Equals(t, true, o1.Preferred)
 	testutils.Equals(t, "image/jpeg", o1.ContentType)
-	testutils.Equals(t, "123456", o1.ContentId)
-	testutils.Equals(t, 1, o1.ObjectId)
+	testutils.Equals(t, "123456", o1.ContentID)
+	testutils.Equals(t, 1, o1.ObjectID)
 	testutils.Equals(t, "<binary data 1>", string(o1.Blob))
 	testutils.Equals(t, "123456", o1.ObjectData["ListingKey"])
 	testutils.Equals(t, "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
@@ -120,13 +120,13 @@ func TestGetObjects(t *testing.T) {
 	r2 := <-results
 	testutils.Ok(t, r2.Err)
 	o2 := r2.Object
-	testutils.Equals(t, 2, o2.ObjectId)
-	testutils.Equals(t, "1a234234234", o2.Uid)
+	testutils.Equals(t, 2, o2.ObjectID)
+	testutils.Equals(t, "1a234234234", o2.UID)
 
 	r3 := <-results
 	testutils.Ok(t, r3.Err)
 	o3 := r3.Object
-	testutils.Equals(t, 3, o3.ObjectId)
+	testutils.Equals(t, 3, o3.ObjectID)
 	testutils.Equals(t, "Outhouse", o3.Description)
 	testutils.Equals(t, "The urinal", o3.SubDescription)
 
@@ -144,8 +144,8 @@ func TestGetObjects(t *testing.T) {
 	o5 := r5.Object
 	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
 	testutils.Equals(t, "image/jpeg", o5.ContentType)
-	testutils.Equals(t, "123456", o5.ContentId)
-	testutils.Equals(t, 5, o5.ObjectId)
+	testutils.Equals(t, "123456", o5.ContentID)
+	testutils.Equals(t, 5, o5.ObjectID)
 	testutils.Equals(t, "<binary data 5>", string(o5.Blob))
 
 }
@@ -165,8 +165,8 @@ func TestParseGetObjectQuit(t *testing.T) {
 	testutils.Assert(t, r1 != GetObjectResult{}, "should not be the zerod object")
 	o1 := r1.Object
 	testutils.Equals(t, "image/jpeg", o1.ContentType)
-	testutils.Equals(t, "123456", o1.ContentId)
-	testutils.Equals(t, 1, o1.ObjectId)
+	testutils.Equals(t, "123456", o1.ContentID)
+	testutils.Equals(t, 1, o1.ObjectID)
 
 	cancel()
 	time.Sleep(100 * time.Millisecond) // I don't like this, but it allows time for the done channel to close.

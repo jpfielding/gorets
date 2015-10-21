@@ -5,12 +5,13 @@ package client
 
 import (
 	"fmt"
-	testutils "github.com/jpfielding/gorets/testutils"
 	"strings"
 	"testing"
+
+	testutils "github.com/jpfielding/gorets/testutils"
 )
 
-var payloadlist string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
+var payloadlist = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 	<DELIMITER value = "09"/>
 	<RETSPayloadList
 		Resource="RESOURCE"
@@ -64,7 +65,7 @@ func verifyCompactData(t *testing.T, pl *PayloadList, id string) {
 	payload := <-pl.Payloads
 	testutils.Equals(t, 6, len(payload.Columns))
 
-	testutils.Equals(t, id, payload.Id)
+	testutils.Equals(t, id, payload.ID)
 	testutils.Equals(t, "A,B,C,D,E,F", strings.Join(payload.Columns, ","))
 
 	counter := 0
