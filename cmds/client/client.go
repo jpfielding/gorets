@@ -75,7 +75,7 @@ func main() {
 		URL:    mURL,
 		Format: format,
 		MType:  "METADATA-SYSTEM",
-		Id:     "0",
+		ID:     "0",
 	})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
@@ -88,7 +88,7 @@ func main() {
 		Class:      "1",
 		Format:     "COMPACT-DECODED",
 		QueryType:  "DMQL2",
-		Count:      gorets.COUNT_AFTER,
+		Count:      gorets.CountAfter,
 		Limit:      3,
 		Offset:     -1,
 	}
@@ -105,7 +105,7 @@ func main() {
 		URL:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
-		Id:       "3986587:1",
+		ID:       "3986587:1",
 	})
 	if err != nil {
 		panic(err)
@@ -115,13 +115,13 @@ func main() {
 			panic(err)
 		}
 		o := r.Object
-		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
+		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
 	}
 	all, err := session.GetObject(ctx, gorets.GetObjectRequest{
 		URL:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
-		Id:       "3986587:*",
+		ID:       "3986587:*",
 	})
 	if err != nil {
 		panic(err)
@@ -131,7 +131,7 @@ func main() {
 			panic(err)
 		}
 		o := r.Object
-		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
+		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
 	}
 
 	session.Logout(ctx, gorets.LogoutRequest{URL: capability.Logout})

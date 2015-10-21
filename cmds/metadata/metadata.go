@@ -70,7 +70,7 @@ func main() {
 				URL:    mURL,
 				Format: f,
 				MType:  "METADATA-" + t,
-				Id:     "Office",
+				ID:     "Office",
 			})
 		}
 	}
