@@ -35,10 +35,6 @@ func (t *WWWAuthTransport) RoundTrip(req *http.Request) (resp *http.Response, er
 	if res.StatusCode != http.StatusUnauthorized {
 		return res, err
 	}
-	// HACK to get cookies back in the response for those servers that require cookie and www to auth
-	for _, cookie := range res.Cookies() {
-		req.AddCookie(cookie)
-	}
 	// TODO what should we do if we get more than one challenge type?
 	for _, c := range res.Header[WWWAuth] {
 		switch {

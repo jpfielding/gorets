@@ -75,6 +75,11 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 		session.Client.Transport = http.DefaultTransport
 	}
 
+	session.Client.Transport = &RetsTransport{
+		transport: session.Client.Transport,
+		session:   session,
+	}
+
 	if userAgentPw != "" {
 		session.Client.Transport = &UserAgentAuthentication{
 			RETSVersion:       retsVersion,
@@ -90,11 +95,6 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 		Password:  pw,
 	}
 
-	session.Client.Transport = &RetsTransport{
-		transport: session.Client.Transport,
-		session:   session,
-	}
-
 	return &session, nil
 }
 
@@ -105,10 +105,21 @@ type RetsTransport struct {
 }
 
 // RoundTrip implements http.RoundTripper
-func (t *RetsTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+func (t *RetsTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Add(UserAgent, t.session.UserAgent)
 	req.Header.Add(RETSVersion, t.session.Version)
 	req.Header.Add(Accept, t.session.Accept)
 
-	return t.transport.RoundTrip(req)
+	res, err := t.transport.RoundTrip(req)
+
+	// HACK to force cookies into the jar as WWW auth might no set them
+	if rc := res.Cookies(); len(rc) > 0 {
+		t.session.Client.Jar.SetCookies(req.URL, rc)
+	}
+	// HACK to get cookies back in the response for those servers that require cookie and www to auth
+	for _, cookie := range res.Cookies() {
+		req.AddCookie(cookie)
+	}
+
+	return res, err
 }
