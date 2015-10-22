@@ -75,11 +75,6 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 		session.Client.Transport = http.DefaultTransport
 	}
 
-	session.Client.Transport = &RetsTransport{
-		transport: session.Client.Transport,
-		session:   session,
-	}
-
 	if userAgentPw != "" {
 		session.Client.Transport = &UserAgentAuthentication{
 			RETSVersion:       retsVersion,
@@ -93,6 +88,11 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 		transport: session.Client.Transport,
 		Username:  user,
 		Password:  pw,
+	}
+
+	session.Client.Transport = &RetsTransport{
+		transport: session.Client.Transport,
+		session:   session,
 	}
 
 	return &session, nil
