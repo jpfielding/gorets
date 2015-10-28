@@ -96,12 +96,14 @@ func NewSession(user, pwd, userAgent, userAgentPw, retsVersion string, transport
 		Username:  user,
 		Password:  pwd,
 	}).Request
-	// apply ua auth headers per request
-	session.Execute = (&UserAgentAuthentication{
-		Requester:         session.Execute,
-		UserAgent:         userAgent,
-		UserAgentPassword: userAgentPw,
-	}).Request
+	// apply ua auth headers per request, if there is a pwd
+	if userAgentPw != "" {
+		session.Execute = (&UserAgentAuthentication{
+			Requester:         session.Execute,
+			UserAgent:         userAgent,
+			UserAgentPassword: userAgentPw,
+		}).Request
+	}
 
 	return &session, nil
 }
