@@ -28,6 +28,7 @@ func (ua *UserAgentAuthentication) OnRequest(req *http.Request) {
 	requestID := ""
 	if ua.GetRequestID != nil {
 		requestID = ua.GetRequestID(req)
+		req.Header.Set(RETSRequestID, requestID)
 	}
 	sessionID := ""
 	if h, err := req.Cookie(RETSSessionID); err == nil {

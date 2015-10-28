@@ -49,6 +49,7 @@ func (s *Session) Login(ctx context.Context, r LoginRequest) (*CapabilityURLs, e
 	}
 	// check for auth issues
 	if res.StatusCode == http.StatusUnauthorized {
+		// sometimes we get more than one challenge
 		for _, c := range res.Header[WWWAuth] {
 			switch {
 			case strings.HasPrefix(strings.ToLower(c), "digest"):
