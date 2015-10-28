@@ -108,7 +108,7 @@ func (s *Session) GetObject(ctx context.Context, r GetObjectRequest) (<-chan Get
 	optionalInt := OptionalIntValue(values)
 	optionalInt("Location", r.Location)
 
-	method := "GET"
+	method := s.HTTPMethodDefault
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -118,7 +118,7 @@ func (s *Session) GetObject(ctx context.Context, r GetObjectRequest) (<-chan Get
 		return nil, err
 	}
 
-	resp, err := s.Client.Do(req)
+	resp, err := s.Execute(ctx, req)
 	if err != nil {
 		return nil, err
 	}

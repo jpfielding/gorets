@@ -8,46 +8,43 @@ import (
 	"strings"
 )
 
+// RequestIDer allows functions to be provided to generate request ids
+type RequestIDer func(req *http.Request) string
+
 // UserAgentAuthentication ...
 // RETS 1.8 - 3.10 Computing the RETS-UA-Authorization Value
 type UserAgentAuthentication struct {
-	transport http.RoundTripper
-
-	RETSVersion string
-
 	UserAgent,
 	UserAgentPassword string
 
-	// TODO consider a hook for providing a RETS-Request-ID
+	GetRequestID RequestIDer
 }
 
-// RoundTrip meets the http.RoundTripper interface to apply UAuth
-func (t *UserAgentAuthentication) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	// did someone else set this?
-	requestID := req.Header.Get(RETSRequestID)
+// OnRequest allows ua-auth to be hooked into requests prior to sending
+func (ua *UserAgentAuthentication) OnRequest(req *http.Request) {
+	// this should already be set
+	retsVersion := req.Header.Get(RETSVersion)
+	// we generate this and set it in the headers
+	requestID := ""
+	if ua.GetRequestID != nil {
+		requestID = ua.GetRequestID(req)
+	}
 	sessionID := ""
 	if h, err := req.Cookie(RETSSessionID); err == nil {
 		sessionID = h.Value
 	}
-	uaAuthHeader := calculateUaAuthHeader(
-		t.UserAgent,
-		t.UserAgentPassword,
-		requestID,
-		sessionID,
-		t.RETSVersion,
-	)
+	uaAuthHeader := ua.generateHeader(requestID, sessionID, retsVersion)
 	// this will replace an existing value
 	req.Header.Set(RETSUAAuth, uaAuthHeader)
-	return t.transport.RoundTrip(req)
 }
 
-func calculateUaAuthHeader(userAgent, userAgentPw, requestID, sessionID, retsVersion string) string {
+func (ua *UserAgentAuthentication) generateHeader(requestID, sessionID, version string) string {
 	hasher := md5.New()
 
-	io.WriteString(hasher, userAgent+":"+userAgentPw)
+	io.WriteString(hasher, ua.UserAgent+":"+ua.UserAgentPassword)
 	secretHash := hex.EncodeToString(hasher.Sum(nil))
 
-	pieces := strings.Join([]string{secretHash, requestID, sessionID, retsVersion}, ":")
+	pieces := strings.Join([]string{secretHash, requestID, sessionID, version}, ":")
 
 	hasher.Reset()
 	io.WriteString(hasher, pieces)

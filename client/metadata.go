@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"golang.org/x/net/context"
-	"golang.org/x/net/context/ctxhttp"
 )
 
 // Metadata ...
@@ -45,7 +44,7 @@ func (s *Session) GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata
 	values.Add("Type", r.MType)
 	values.Add("ID", r.ID)
 
-	method := "GET"
+	method := s.HTTPMethodDefault
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -55,7 +54,7 @@ func (s *Session) GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata
 		return nil, err
 	}
 
-	resp, err := ctxhttp.Do(ctx, &s.Client, req)
+	resp, err := s.Execute(ctx, req)
 	if err != nil {
 		return nil, err
 	}

@@ -118,7 +118,7 @@ func (s *Session) Search(ctx context.Context, r SearchRequest) (*SearchResult, e
 		values.Add("Limit", "NONE")
 	}
 
-	method := "GET"
+	method := s.HTTPMethodDefault
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -128,7 +128,7 @@ func (s *Session) Search(ctx context.Context, r SearchRequest) (*SearchResult, e
 		return nil, err
 	}
 
-	resp, err := s.Client.Do(req)
+	resp, err := s.Execute(ctx, req)
 	if err != nil {
 		return nil, err
 	}

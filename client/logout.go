@@ -7,12 +7,10 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/http/cookiejar"
 	"strconv"
 	"strings"
 
 	"golang.org/x/net/context"
-	"golang.org/x/net/context/ctxhttp"
 )
 
 // LogoutRequest ...
@@ -31,7 +29,7 @@ type LogoutResponse struct {
 
 // Logout ...
 func (s *Session) Logout(ctx context.Context, r LogoutRequest) (*LogoutResponse, error) {
-	method := "GET"
+	method := s.HTTPMethodDefault
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -40,7 +38,7 @@ func (s *Session) Logout(ctx context.Context, r LogoutRequest) (*LogoutResponse,
 		return nil, err
 	}
 
-	resp, err := ctxhttp.Do(ctx, &s.Client, req)
+	resp, err := s.Execute(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -55,13 +53,11 @@ func (s *Session) Logout(ctx context.Context, r LogoutRequest) (*LogoutResponse,
 	if err != nil {
 		return nil, err
 	}
-
-	// wipe the cookies
-	jar, err := cookiejar.New(nil)
+	// clear any state
+	err = s.Reset()
 	if err != nil {
 		return nil, err
 	}
-	s.Client.Jar = jar
 	return logoutResponse, nil
 }
 

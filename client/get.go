@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"golang.org/x/net/context"
-	"golang.org/x/net/context/ctxhttp"
 )
 
 // GetRequest ...
@@ -15,7 +14,7 @@ type GetRequest struct {
 
 // Get ...
 func (s *Session) Get(ctx context.Context, r GetRequest) error {
-	method := "GET"
+	method := s.HTTPMethodDefault
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -24,7 +23,7 @@ func (s *Session) Get(ctx context.Context, r GetRequest) error {
 		return err
 	}
 
-	resp, err := ctxhttp.Do(ctx, &s.Client, req)
+	resp, err := s.Execute(ctx, req)
 	if err != nil {
 		return err
 	}

@@ -5,11 +5,12 @@ import (
 	"net/http/cookiejar"
 
 	"golang.org/x/net/context"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 // const DefaultTimeout int = 300000
 
-/* standard http header names */
+// standard http header names
 const (
 	UserAgent   string = "User-Agent"
 	Accept      string = "Accept"
@@ -18,7 +19,7 @@ const (
 	WWWAuthResp string = "Authorization"
 )
 
-/* rets http header names */
+// rets http header names
 const (
 	RETSVersion   string = "RETS-Version"
 	RETSSessionID string = "RETS-Session-ID"
@@ -42,84 +43,70 @@ type RetsSession interface {
 
 // Session holds the state of the server interaction
 type Session struct {
+	HTTPMethodDefault string
+
 	Username, Password string
 
-	UserAgent string
+	Execute func(ctx context.Context, req *http.Request) (*http.Response, error)
 
-	Version string
-	Accept  string
-
-	Client http.Client
+	Reset func() error
 }
+
+// OnRequest ...
+type OnRequest func(req *http.Request)
 
 // NewSession configures the default rets session
 func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (*Session, error) {
 	var session Session
+
+	session.HTTPMethodDefault = "GET"
+
 	session.Username = user
 	session.Password = pw
-	session.Version = "RETS/1.7"
-	session.UserAgent = userAgent
-	session.Version = retsVersion
-	session.Accept = "*/*"
 
-	jar, err := cookiejar.New(nil)
+	if transport == nil {
+		transport = http.DefaultTransport
+	}
+
+	client := http.Client{
+		Transport: transport,
+	}
+
+	session.Reset = func() error {
+		jar, err := cookiejar.New(nil)
+		if err != nil {
+			return err
+		}
+		client.Jar = jar
+		return nil
+	}
+	err := session.Reset()
 	if err != nil {
 		return nil, err
 	}
-	session.Client = http.Client{
-		Transport: transport,
-		Jar:       jar,
-	}
 
-	if session.Client.Transport == nil {
-		session.Client.Transport = http.DefaultTransport
-	}
-
+	var onRequest []OnRequest
+	// apply default headers
+	onRequest = append(onRequest, func(req *http.Request) {
+		req.Header.Set(UserAgent, userAgent)
+		req.Header.Set(RETSVersion, retsVersion)
+		req.Header.Set(Accept, "*/*")
+	})
+	// apply ua auth headers per request
 	if userAgentPw != "" {
-		session.Client.Transport = &UserAgentAuthentication{
-			RETSVersion:       retsVersion,
+		uaAuth := UserAgentAuthentication{
 			UserAgent:         userAgent,
 			UserAgentPassword: userAgentPw,
-			transport:         session.Client.Transport,
 		}
+		onRequest = append(onRequest, uaAuth.OnRequest)
 	}
 
-	session.Client.Transport = &WWWAuthTransport{
-		transport: session.Client.Transport,
-		Username:  user,
-		Password:  pw,
-	}
-
-	session.Client.Transport = &RetsTransport{
-		transport: session.Client.Transport,
-		session:   session,
+	session.Execute = func(ctx context.Context, req *http.Request) (*http.Response, error) {
+		for _, or := range onRequest {
+			or(req)
+		}
+		return ctxhttp.Do(ctx, &client, req)
 	}
 
 	return &session, nil
-}
-
-// RetsTransport to intercept each http call
-type RetsTransport struct {
-	transport http.RoundTripper
-	session   Session
-}
-
-// RoundTrip implements http.RoundTripper
-func (t *RetsTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Add(UserAgent, t.session.UserAgent)
-	req.Header.Add(RETSVersion, t.session.Version)
-	req.Header.Add(Accept, t.session.Accept)
-
-	res, err := t.transport.RoundTrip(req)
-
-	// HACK to force cookies into the jar as WWW auth might no set them
-	if rc := res.Cookies(); len(rc) > 0 {
-		t.session.Client.Jar.SetCookies(req.URL, rc)
-	}
-	// HACK to get cookies back in the response for those servers that require cookie and www to auth
-	for _, cookie := range res.Cookies() {
-		req.AddCookie(cookie)
-	}
-
-	return res, err
 }

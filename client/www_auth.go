@@ -19,7 +19,7 @@ func (t *WWWAuthTransport) digestResponse(req *http.Request) string {
 }
 
 // RoundTrip ...
-func (t *WWWAuthTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+func (t *WWWAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// attempt to preempt the challenge to save a req/res round trip
 	switch {
 	case t.Digest != nil:

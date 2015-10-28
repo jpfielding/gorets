@@ -8,7 +8,6 @@ import (
 	"net/url"
 
 	"golang.org/x/net/context"
-	"golang.org/x/net/context/ctxhttp"
 )
 
 // PayloadList ...
@@ -31,7 +30,7 @@ func (s *Session) GetPayloadList(ctx context.Context, p PayloadListRequest) (*Pa
 		values.Add("ID", p.ID)
 	}
 
-	method := "GET"
+	method := s.HTTPMethodDefault
 	if p.HTTPMethod != "" {
 		method = p.HTTPMethod
 	}
@@ -41,7 +40,7 @@ func (s *Session) GetPayloadList(ctx context.Context, p PayloadListRequest) (*Pa
 		return nil, err
 	}
 
-	resp, err := ctxhttp.Do(ctx, &s.Client, req)
+	resp, err := s.Execute(ctx, req)
 	if err != nil {
 		return nil, err
 	}
