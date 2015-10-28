@@ -47,36 +47,6 @@ func (s *Session) Login(ctx context.Context, r LoginRequest) (*CapabilityURLs, e
 	if err != nil {
 		return nil, err
 	}
-	// check for auth issues
-	if res.StatusCode == http.StatusUnauthorized {
-		// sometimes we get more than one challenge
-		for _, c := range res.Header[WWWAuth] {
-			switch {
-			case strings.HasPrefix(strings.ToLower(c), "digest"):
-				digest, err := NewDigest(c)
-				if err != nil {
-					return nil, err
-				}
-				header := digest.CreateDigestResponse(
-					s.Username,
-					s.Password,
-					req.Method,
-					req.URL.Path,
-				)
-				req.Header.Set(WWWAuthResp, header)
-			case strings.HasPrefix(strings.ToLower(c), "basic"):
-				req.SetBasicAuth(s.Username, s.Password)
-			}
-		}
-		res, err = s.Execute(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-		if res.StatusCode != http.StatusOK {
-			return nil, errors.New(res.Status)
-		}
-	}
-
 	capabilities, err := ioutil.ReadAll(res.Body)
 	res.Body.Close()
 	if err != nil {

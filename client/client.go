@@ -41,13 +41,14 @@ type RetsSession interface {
 	Update(ctx context.Context, url string) error
 }
 
+// Requester ...
+type Requester func(ctx context.Context, req *http.Request) (*http.Response, error)
+
 // Session holds the state of the server interaction
 type Session struct {
 	HTTPMethodDefault string
 
-	Username, Password string
-
-	Execute func(ctx context.Context, req *http.Request) (*http.Response, error)
+	Execute Requester
 
 	Reset func() error
 }
@@ -56,13 +57,10 @@ type Session struct {
 type OnRequest func(req *http.Request)
 
 // NewSession configures the default rets session
-func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (*Session, error) {
+func NewSession(user, pwd, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (*Session, error) {
 	var session Session
 
 	session.HTTPMethodDefault = "GET"
-
-	session.Username = user
-	session.Password = pw
 
 	if transport == nil {
 		transport = http.DefaultTransport
@@ -85,28 +83,25 @@ func NewSession(user, pw, userAgent, userAgentPw, retsVersion string, transport 
 		return nil, err
 	}
 
-	var onRequest []OnRequest
 	// apply default headers
-	onRequest = append(onRequest, func(req *http.Request) {
+	session.Execute = func(ctx context.Context, req *http.Request) (*http.Response, error) {
 		req.Header.Set(UserAgent, userAgent)
 		req.Header.Set(RETSVersion, retsVersion)
 		req.Header.Set(Accept, "*/*")
-	})
-	// apply ua auth headers per request
-	if userAgentPw != "" {
-		uaAuth := UserAgentAuthentication{
-			UserAgent:         userAgent,
-			UserAgentPassword: userAgentPw,
-		}
-		onRequest = append(onRequest, uaAuth.OnRequest)
-	}
-
-	session.Execute = func(ctx context.Context, req *http.Request) (*http.Response, error) {
-		for _, or := range onRequest {
-			or(req)
-		}
 		return ctxhttp.Do(ctx, &client, req)
 	}
+	// www auth
+	session.Execute = (&WWWAuthTransport{
+		Requester: session.Execute,
+		Username:  user,
+		Password:  pwd,
+	}).Request
+	// apply ua auth headers per request
+	session.Execute = (&UserAgentAuthentication{
+		Requester:         session.Execute,
+		UserAgent:         userAgent,
+		UserAgentPassword: userAgentPw,
+	}).Request
 
 	return &session, nil
 }
