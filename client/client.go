@@ -48,27 +48,27 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 	}
 	client.Jar = jar
 	// send the request
-	session := func(ctx context.Context, req *http.Request) (*http.Response, error) {
+	request := func(ctx context.Context, req *http.Request) (*http.Response, error) {
 		return ctxhttp.Do(ctx, &client, req)
 	}
 	// www auth
-	session = (&WWWAuthTransport{
-		Requester: session,
+	wwwAuth := (&WWWAuthTransport{
+		Requester: request,
 		Username:  user,
 		Password:  pwd,
 	}).Request
 	// apply ua auth headers per request, if there is a pwd
-	session = (&UserAgentAuthentication{
-		Requester:         session,
+	uaAuth := (&UserAgentAuthentication{
+		Requester:         wwwAuth,
 		UserAgent:         userAgent,
 		UserAgentPassword: userAgentPw,
 	}).Request
 	// apply default headers first (outermost wrapping)
-	session = func(ctx context.Context, req *http.Request) (*http.Response, error) {
+	headers := func(ctx context.Context, req *http.Request) (*http.Response, error) {
 		req.Header.Set(UserAgent, userAgent)
 		req.Header.Set(RETSVersion, retsVersion)
 		req.Header.Set(Accept, "*/*")
-		return session(ctx, req)
+		return uaAuth(ctx, req)
 	}
-	return session, nil
+	return headers, nil
 }
