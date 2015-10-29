@@ -36,11 +36,20 @@ func main() {
 		d = client.WireLog(file, d)
 	}
 
-	// should we throw an err here too?
-	session, err := client.NewSession(*username, *password, *userAgent, *userAgentPw, *retsVersion, &http.Transport{
+	transport := http.Transport{
 		DisableCompression: true,
 		Dial:               d,
-	})
+	}
+
+	// should we throw an err here too?
+	session, err := client.DefaultSession(
+		*username,
+		*password,
+		*userAgent,
+		*userAgentPw,
+		*retsVersion,
+		&transport,
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -48,7 +57,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	capability, err := session.Login(ctx, client.LoginRequest{URL: *loginURL})
+	capability, err := client.Login(session, ctx, client.LoginRequest{URL: *loginURL})
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +66,7 @@ func main() {
 	fmt.Println("Search: ", capability.Search)
 	fmt.Println("GetObject: ", capability.GetObject)
 
-	err = session.Get(ctx, client.GetRequest{URL: capability.Get})
+	err = client.Get(session, ctx, client.GetRequest{URL: capability.Get})
 	if err != nil {
 		fmt.Println("this was stupid, shouldnt even be here")
 	}
@@ -66,7 +75,7 @@ func main() {
 
 	for _, f := range []string{"STANDARD-XML", "COMPACT"} {
 		for _, t := range []string{"TABLE"} {
-			session.GetMetadata(ctx, client.MetadataRequest{
+			client.GetMetadata(session, ctx, client.MetadataRequest{
 				URL:    mURL,
 				Format: f,
 				MType:  "METADATA-" + t,
