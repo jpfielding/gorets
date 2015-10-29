@@ -9,7 +9,7 @@ import (
 // Dialer just makes the return type for the Dialer function reasonable
 type Dialer func(network, addr string) (net.Conn, error)
 
-// WireLog create a net.Dial function based on this log
+// WireLog Dial = gorets.WireLog(file, dial)
 func WireLog(log io.WriteCloser, dial Dialer) Dialer {
 	return func(network, addr string) (net.Conn, error) {
 		conn, err := dial(network, addr)
@@ -21,7 +21,7 @@ func WireLog(log io.WriteCloser, dial Dialer) Dialer {
 	}
 }
 
-// WireLogTLS ...
+// WireLogTLS Transport.DialTLS = gorets.WireLogTLS(file)
 func WireLogTLS(log io.WriteCloser) Dialer {
 	return func(network, addr string) (net.Conn, error) {
 		config := &tls.Config{InsecureSkipVerify: true}
