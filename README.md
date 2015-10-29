@@ -53,6 +53,8 @@ func main() {
 	transport := http.Transport{
 		DisableCompression: true,
 		Dial:               d,
+		// this creates its own dialer atm... this needs to review
+		DialTLS = gorets.WireLogTLS(file)
 	}
 
 	// should we throw an err here too?
