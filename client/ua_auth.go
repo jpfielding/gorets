@@ -55,7 +55,6 @@ func (ua *UserAgentAuthentication) header(requestID, sessionID, version string) 
 	secretHash := hex.EncodeToString(hasher.Sum(nil))
 
 	pieces := strings.Join([]string{secretHash, requestID, sessionID, version}, ":")
-
 	hasher.Reset()
 	io.WriteString(hasher, pieces)
 	return "Digest " + hex.EncodeToString(hasher.Sum(nil))

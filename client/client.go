@@ -47,12 +47,8 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 		return nil, err
 	}
 	client.Jar = jar
-
-	// apply default headers
+	// send the request
 	session := func(ctx context.Context, req *http.Request) (*http.Response, error) {
-		req.Header.Set(UserAgent, userAgent)
-		req.Header.Set(RETSVersion, retsVersion)
-		req.Header.Set(Accept, "*/*")
 		return ctxhttp.Do(ctx, &client, req)
 	}
 	// www auth
@@ -67,6 +63,12 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 		UserAgent:         userAgent,
 		UserAgentPassword: userAgentPw,
 	}).Request
-
+	// apply default headers first (outermost wrapping)
+	session = func(ctx context.Context, req *http.Request) (*http.Response, error) {
+		req.Header.Set(UserAgent, userAgent)
+		req.Header.Set(RETSVersion, retsVersion)
+		req.Header.Set(Accept, "*/*")
+		return session(ctx, req)
+	}
 	return session, nil
 }
