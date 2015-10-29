@@ -47,23 +47,23 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 		return nil, err
 	}
 	client.Jar = jar
-	// send the request
+	// 4) send the request
 	request := func(ctx context.Context, req *http.Request) (*http.Response, error) {
 		return ctxhttp.Do(ctx, &client, req)
 	}
-	// www auth
+	// 3) www auth
 	wwwAuth := (&WWWAuthTransport{
 		Requester: request,
 		Username:  user,
 		Password:  pwd,
 	}).Request
-	// apply ua auth headers per request, if there is a pwd
+	// 2) apply ua auth headers per request, if there is a pwd
 	uaAuth := (&UserAgentAuthentication{
 		Requester:         wwwAuth,
 		UserAgent:         userAgent,
 		UserAgentPassword: userAgentPw,
 	}).Request
-	// apply default headers first (outermost wrapping)
+	// 1) apply default headers first (outermost wrapping)
 	headers := func(ctx context.Context, req *http.Request) (*http.Response, error) {
 		req.Header.Set(UserAgent, userAgent)
 		req.Header.Set(RETSVersion, retsVersion)
