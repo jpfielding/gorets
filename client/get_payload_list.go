@@ -23,14 +23,14 @@ type PayloadListRequest struct {
 }
 
 // GetPayloadList ...
-func (s *Session) GetPayloadList(ctx context.Context, p PayloadListRequest) (*PayloadList, error) {
+func GetPayloadList(requester Requester, ctx context.Context, p PayloadListRequest) (*PayloadList, error) {
 	// required
 	values := url.Values{}
 	if p.ID == "" {
 		values.Add("ID", p.ID)
 	}
 
-	method := s.HTTPMethodDefault
+	method := "GET"
 	if p.HTTPMethod != "" {
 		method = p.HTTPMethod
 	}
@@ -40,7 +40,7 @@ func (s *Session) GetPayloadList(ctx context.Context, p PayloadListRequest) (*Pa
 		return nil, err
 	}
 
-	resp, err := s.Execute(ctx, req)
+	resp, err := requester(ctx, req)
 	if err != nil {
 		return nil, err
 	}

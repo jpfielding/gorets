@@ -32,8 +32,8 @@ type CapabilityURLs struct {
 }
 
 // Login ...
-func (s *Session) Login(ctx context.Context, r LoginRequest) (*CapabilityURLs, error) {
-	method := s.HTTPMethodDefault
+func Login(requester Requester, ctx context.Context, r LoginRequest) (*CapabilityURLs, error) {
+	method := "GET"
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -43,7 +43,7 @@ func (s *Session) Login(ctx context.Context, r LoginRequest) (*CapabilityURLs, e
 		return nil, err
 	}
 
-	res, err := s.Execute(ctx, req)
+	res, err := requester(ctx, req)
 	if err != nil {
 		return nil, err
 	}

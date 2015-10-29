@@ -13,8 +13,8 @@ type GetRequest struct {
 }
 
 // Get ...
-func (s *Session) Get(ctx context.Context, r GetRequest) error {
-	method := s.HTTPMethodDefault
+func Get(requester Requester, ctx context.Context, r GetRequest) error {
+	method := "GET"
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -23,7 +23,7 @@ func (s *Session) Get(ctx context.Context, r GetRequest) error {
 		return err
 	}
 
-	resp, err := s.Execute(ctx, req)
+	resp, err := requester(ctx, req)
 	if err != nil {
 		return err
 	}

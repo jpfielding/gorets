@@ -7,6 +7,6 @@ import (
 )
 
 // PostObject ...
-func (s *Session) PostObject(ctx context.Context, url string) error {
+func PostObject(requester Requester, ctx context.Context, url string) error {
 	return errors.New("Unsupported Operation")
 }

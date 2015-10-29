@@ -7,6 +7,6 @@ import (
 )
 
 // Update ...
-func (s *Session) Update(ctx context.Context, url string) error {
+func Update(requester Requester, ctx context.Context, url string) error {
 	return errors.New("Unsupported Operation")
 }

@@ -28,8 +28,8 @@ type LogoutResponse struct {
 }
 
 // Logout ...
-func (s *Session) Logout(ctx context.Context, r LogoutRequest) (*LogoutResponse, error) {
-	method := s.HTTPMethodDefault
+func Logout(requester Requester, ctx context.Context, r LogoutRequest) (*LogoutResponse, error) {
+	method := "GET"
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -38,7 +38,7 @@ func (s *Session) Logout(ctx context.Context, r LogoutRequest) (*LogoutResponse,
 		return nil, err
 	}
 
-	resp, err := s.Execute(ctx, req)
+	resp, err := requester(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -53,11 +53,7 @@ func (s *Session) Logout(ctx context.Context, r LogoutRequest) (*LogoutResponse,
 	if err != nil {
 		return nil, err
 	}
-	// clear any state
-	err = s.Reset()
-	if err != nil {
-		return nil, err
-	}
+	// TODO clear any state
 	return logoutResponse, nil
 }
 

@@ -26,6 +26,10 @@ type UserAgentAuthentication struct {
 
 // Request allows ua-auth to be hooked into requests prior to sending
 func (ua *UserAgentAuthentication) Request(ctx context.Context, req *http.Request) (*http.Response, error) {
+	// nothing to do gtfo
+	if ua.UserAgentPassword == "" {
+		return ua.Requester(ctx, req)
+	}
 	// this should already be set
 	retsVersion := req.Header.Get(RETSVersion)
 	// we generate this and set it in the headers
@@ -38,13 +42,13 @@ func (ua *UserAgentAuthentication) Request(ctx context.Context, req *http.Reques
 	if h, err := req.Cookie(RETSSessionID); err == nil {
 		sessionID = h.Value
 	}
-	uaAuthHeader := ua.generateHeader(requestID, sessionID, retsVersion)
+	uaAuthHeader := ua.header(requestID, sessionID, retsVersion)
 	// this will replace an existing value
 	req.Header.Set(RETSUAAuth, uaAuthHeader)
 	return ua.Requester(ctx, req)
 }
 
-func (ua *UserAgentAuthentication) generateHeader(requestID, sessionID, version string) string {
+func (ua *UserAgentAuthentication) header(requestID, sessionID, version string) string {
 	hasher := md5.New()
 
 	io.WriteString(hasher, ua.UserAgent+":"+ua.UserAgentPassword)

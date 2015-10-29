@@ -16,7 +16,7 @@ type WWWAuthTransport struct {
 	hasBasic           bool
 }
 
-func (auth *WWWAuthTransport) calc(req *http.Request) string {
+func (auth *WWWAuthTransport) header(req *http.Request) string {
 	return auth.digester.CreateDigestResponse(
 		auth.Username,
 		auth.Password,
@@ -30,7 +30,7 @@ func (auth *WWWAuthTransport) Request(ctx context.Context, req *http.Request) (*
 	// attempt to preempt the challenge to save a req/res round trip
 	switch {
 	case auth.digester != nil:
-		req.Header.Set(WWWAuthResp, auth.calc(req))
+		req.Header.Set(WWWAuthResp, auth.header(req))
 	case auth.hasBasic:
 		req.SetBasicAuth(auth.Username, auth.Password)
 	}
@@ -52,7 +52,7 @@ func (auth *WWWAuthTransport) Request(ctx context.Context, req *http.Request) (*
 				auth.digester = nil
 				continue
 			}
-			req.Header.Set(WWWAuthResp, auth.calc(req))
+			req.Header.Set(WWWAuthResp, auth.header(req))
 			return auth.Requester(ctx, req)
 		case strings.HasPrefix(strings.ToLower(c), "basic"):
 			auth.hasBasic = true

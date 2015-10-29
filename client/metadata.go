@@ -37,14 +37,14 @@ type MetadataRequest struct {
 }
 
 // GetMetadata ...
-func (s *Session) GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata, error) {
+func GetMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*Metadata, error) {
 	// required
 	values := url.Values{}
 	values.Add("Format", r.Format)
 	values.Add("Type", r.MType)
 	values.Add("ID", r.ID)
 
-	method := s.HTTPMethodDefault
+	method := "GET"
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -54,7 +54,7 @@ func (s *Session) GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata
 		return nil, err
 	}
 
-	resp, err := s.Execute(ctx, req)
+	resp, err := requester(ctx, req)
 	if err != nil {
 		return nil, err
 	}

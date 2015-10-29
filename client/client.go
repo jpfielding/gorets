@@ -27,41 +27,13 @@ const (
 	RETSUAAuth    string = "RETS-UA-Authorization"
 )
 
-// RetsSession is an interface defining the expected
-type RetsSession interface {
-	ChangePassword(ctx context.Context, url string) error
-	Get(ctx context.Context, url string) error
-	GetMetadata(ctx context.Context, r MetadataRequest) (*Metadata, error)
-	GetObject(ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error)
-	GetPayloadList(ctx context.Context, p PayloadListRequest) (*PayloadList, error)
-	Login(ctx context.Context, url string) (*CapabilityURLs, error)
-	Logout(ctx context.Context, logoutURL string) (*LogoutResponse, error)
-	PostObject(ctx context.Context, url string) error
-	Search(ctx context.Context, r SearchRequest) (*SearchResult, error)
-	Update(ctx context.Context, url string) error
-}
+// TODO create a Session interface with a Requester and a reset to clear state and pass that in
 
 // Requester ...
 type Requester func(ctx context.Context, req *http.Request) (*http.Response, error)
 
-// Session holds the state of the server interaction
-type Session struct {
-	HTTPMethodDefault string
-
-	Execute Requester
-
-	Reset func() error
-}
-
-// OnRequest ...
-type OnRequest func(req *http.Request)
-
-// NewSession configures the default rets session
-func NewSession(user, pwd, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (*Session, error) {
-	var session Session
-
-	session.HTTPMethodDefault = "GET"
-
+// DefaultSession configures the default rets session
+func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (Requester, error) {
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
@@ -70,40 +42,31 @@ func NewSession(user, pwd, userAgent, userAgentPw, retsVersion string, transport
 		Transport: transport,
 	}
 
-	session.Reset = func() error {
-		jar, err := cookiejar.New(nil)
-		if err != nil {
-			return err
-		}
-		client.Jar = jar
-		return nil
-	}
-	err := session.Reset()
+	jar, err := cookiejar.New(nil)
 	if err != nil {
 		return nil, err
 	}
+	client.Jar = jar
 
 	// apply default headers
-	session.Execute = func(ctx context.Context, req *http.Request) (*http.Response, error) {
+	session := func(ctx context.Context, req *http.Request) (*http.Response, error) {
 		req.Header.Set(UserAgent, userAgent)
 		req.Header.Set(RETSVersion, retsVersion)
 		req.Header.Set(Accept, "*/*")
 		return ctxhttp.Do(ctx, &client, req)
 	}
 	// www auth
-	session.Execute = (&WWWAuthTransport{
-		Requester: session.Execute,
+	session = (&WWWAuthTransport{
+		Requester: session,
 		Username:  user,
 		Password:  pwd,
 	}).Request
 	// apply ua auth headers per request, if there is a pwd
-	if userAgentPw != "" {
-		session.Execute = (&UserAgentAuthentication{
-			Requester:         session.Execute,
-			UserAgent:         userAgent,
-			UserAgentPassword: userAgentPw,
-		}).Request
-	}
+	session = (&UserAgentAuthentication{
+		Requester:         session,
+		UserAgent:         userAgent,
+		UserAgentPassword: userAgentPw,
+	}).Request
 
-	return &session, nil
+	return session, nil
 }

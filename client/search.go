@@ -90,7 +90,7 @@ type SearchRequest struct {
 // SearchType=Property
 
 // Search ...
-func (s *Session) Search(ctx context.Context, r SearchRequest) (*SearchResult, error) {
+func Search(requester Requester, ctx context.Context, r SearchRequest) (*SearchResult, error) {
 	// required
 	values := url.Values{}
 	values.Add("Class", r.Class)
@@ -118,7 +118,7 @@ func (s *Session) Search(ctx context.Context, r SearchRequest) (*SearchResult, e
 		values.Add("Limit", "NONE")
 	}
 
-	method := s.HTTPMethodDefault
+	method := "GET"
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -128,7 +128,7 @@ func (s *Session) Search(ctx context.Context, r SearchRequest) (*SearchResult, e
 		return nil, err
 	}
 
-	resp, err := s.Execute(ctx, req)
+	resp, err := requester(ctx, req)
 	if err != nil {
 		return nil, err
 	}

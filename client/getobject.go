@@ -89,8 +89,8 @@ type GetObjectRequest struct {
 	Location int
 }
 
-// GetObject ...
-func (s *Session) GetObject(ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error) {
+// GetObjects ...
+func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error) {
 	// required
 	values := url.Values{}
 	values.Add("Resource", r.Resource)
@@ -108,7 +108,7 @@ func (s *Session) GetObject(ctx context.Context, r GetObjectRequest) (<-chan Get
 	optionalInt := OptionalIntValue(values)
 	optionalInt("Location", r.Location)
 
-	method := s.HTTPMethodDefault
+	method := "GET"
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -118,7 +118,7 @@ func (s *Session) GetObject(ctx context.Context, r GetObjectRequest) (<-chan Get
 		return nil, err
 	}
 
-	resp, err := s.Execute(ctx, req)
+	resp, err := requester(ctx, req)
 	if err != nil {
 		return nil, err
 	}
