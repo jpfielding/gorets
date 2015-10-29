@@ -32,13 +32,15 @@ func main() {
 	password := flag.String("password", "", "Password for the RETS server")
 	loginURL := flag.String("login-url", "", "Login URL for the RETS server")
 	userAgent := flag.String("user-agent", "Threewide/1.0", "User agent for the RETS client")
-	userAgentPw := flag.String("user-agent-pw", "", "User agent authentication")
+	userAgentPw := flag.String("user-agent-pw", "", "User agent password (for RETS UA-Auth)")
 	retsVersion := flag.String("rets-version", "", "RETS Version")
 	logFile := flag.String("log-file", "", "")
 
 	flag.Parse()
 
-	d := net.Dial
+	transport := http.Transport{
+		DisableCompression: true,
+	}
 
 	if *logFile != "" {
 		file, err := os.Create(*logFile)
@@ -47,18 +49,14 @@ func main() {
 		}
 		defer file.Close()
 		fmt.Println("wire logging enabled: ", file.Name())
-		d = gorets.WireLog(file, d)
-	}
-
-	transport := http.Transport{
-		DisableCompression: true,
-		Dial:               d,
+		// set the dial  
+		transport.Dial = gorets.WireLog(file, net.Dial)
 		// this creates its own dialer atm... this needs to review
-		DialTLS = gorets.WireLogTLS(file)
+		transport.DialTLS = gorets.WireLogTLS(file)
 	}
 
 	// should we throw an err here too?
-	session, err := gorets.NewSession(
+	session, err := gorets.DefaultSession(
 	 	*username, 
 	 	*password,
 	 	*userAgent, 
