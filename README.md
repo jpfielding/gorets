@@ -50,11 +50,22 @@ func main() {
 		d = gorets.WireLog(file, d)
 	}
 
-	// should we throw an err here too?
-	session, err := gorets.NewSession(*username, *password, *userAgent, *userAgentPw, *retsVersion, &http.Transport{
+	transport := http.Transport{
 		DisableCompression: true,
 		Dial:               d,
-	})
+		// this creates its own dialer atm... this needs to review
+		DialTLS = gorets.WireLogTLS(file)
+	}
+
+	// should we throw an err here too?
+	session, err := gorets.NewSession(
+	 	*username, 
+	 	*password,
+	 	*userAgent, 
+	 	*userAgentPw, 
+	 	*retsVersion, 
+	 	&transport,
+	 	)
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +73,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	capability, err := session.Login(ctx, gorets.LoginRequest{URL: *loginURL})
+	capability, err := gorets.Login(session, ctx, gorets.LoginRequest{URL: *loginURL})
 	if err != nil {
 		panic(err)
 	}
@@ -71,7 +82,7 @@ func main() {
 	fmt.Println("Search: ", capability.Search)
 	fmt.Println("GetObject: ", capability.GetObject)
 
-	err = session.Get(ctx, gorets.GetRequest{URL: capability.Get})
+	err = gorets.Get(session, ctx, gorets.GetRequest{URL: capability.Get})
 	if err != nil {
 		fmt.Println("this was stupid, shouldnt even be here")
 	}
@@ -99,7 +110,7 @@ func main() {
 		Limit:      3,
 		Offset:     -1,
 	}
-	result, err := session.Search(ctx, req)
+	result, err := gorets.Search(session, ctx, req)
 	if err != nil {
 		panic(err)
 	}
@@ -108,7 +119,7 @@ func main() {
 		fmt.Println(row)
 	}
 
-	one, err := session.GetObject(ctx, gorets.GetObjectRequest{
+	one, err := gorets.GetObject(session, ctx, gorets.GetObjectRequest{
 		URL:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
@@ -124,7 +135,7 @@ func main() {
 		o := r.Object
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
-	all, err := session.GetObject(ctx, gorets.GetObjectRequest{
+	all, err := gorets.GetObject(session, ctx, gorets.GetObjectRequest{
 		URL:      capability.GetObject,
 		Resource: "Property",
 		Type:     "Photo",
@@ -141,6 +152,6 @@ func main() {
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
 	}
 
-	session.Logout(ctx, gorets.LogoutRequest{URL: capability.Logout})
+	gorets.Logout(session, ctx, gorets.LogoutRequest{URL: capability.Logout})
 }
 ```
