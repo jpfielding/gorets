@@ -29,7 +29,7 @@ const (
 
 // TODO create a Session interface with a Requester and a reset to clear state and pass that in
 
-// Requester ...
+// Requester implmenters should not assume any order of ops
 type Requester func(ctx context.Context, req *http.Request) (*http.Response, error)
 
 // DefaultSession configures the default rets session
@@ -62,6 +62,8 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 		Requester:         wwwAuth,
 		UserAgent:         userAgent,
 		UserAgentPassword: userAgentPw,
+		GetRETSVersion:    CreateRETSVersioner(retsVersion),
+		GetSessionID:      CreateSessionIDer(client.Jar),
 	}).Request
 	// 1) apply default headers first (outermost wrapping)
 	headers := func(ctx context.Context, req *http.Request) (*http.Response, error) {

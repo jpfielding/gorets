@@ -10,9 +10,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-// RequestIDer allows functions to be provided to generate request ids
-type RequestIDer func(req *http.Request) string
-
 // UserAgentAuthentication ...
 // RETS 1.8 - 3.10 Computing the RETS-UA-Authorization Value
 type UserAgentAuthentication struct {
@@ -20,8 +17,12 @@ type UserAgentAuthentication struct {
 
 	UserAgent,
 	UserAgentPassword string
-
-	GetRequestID RequestIDer
+	// usually a constant, but a func hook just in case it changes mid-session
+	GetRETSVersion RequestIDer
+	// go create one if you want, sadist
+	CreateRequestID RequestIDer
+	// extracts from a cookie, but that cookie isnt guaranteed to be in the req that we receive
+	GetSessionID RequestIDer
 }
 
 // Request allows ua-auth to be hooked into requests prior to sending
@@ -30,17 +31,21 @@ func (ua *UserAgentAuthentication) Request(ctx context.Context, req *http.Reques
 	if ua.UserAgentPassword == "" {
 		return ua.Requester(ctx, req)
 	}
-	// this should already be set
-	retsVersion := req.Header.Get(RETSVersion)
+	//
+	retsVersion := ""
+	if ua.GetRETSVersion != nil {
+		retsVersion = ua.GetRETSVersion(req)
+	}
 	// we generate this and set it in the headers
 	requestID := ""
-	if ua.GetRequestID != nil {
-		requestID = ua.GetRequestID(req)
+	if ua.CreateRequestID != nil {
+		requestID = ua.CreateRequestID(req)
 		req.Header.Set(RETSRequestID, requestID)
 	}
+	// need to extract this from context that we may not have at this level
 	sessionID := ""
-	if h, err := req.Cookie(RETSSessionID); err == nil {
-		sessionID = h.Value
+	if ua.GetSessionID != nil {
+		sessionID = ua.GetSessionID(req)
 	}
 	uaAuthHeader := ua.header(requestID, sessionID, retsVersion)
 	// this will replace an existing value
@@ -58,4 +63,26 @@ func (ua *UserAgentAuthentication) header(requestID, sessionID, version string) 
 	hasher.Reset()
 	io.WriteString(hasher, pieces)
 	return "Digest " + hex.EncodeToString(hasher.Sum(nil))
+}
+
+// RequestIDer allows functions to be provided to generate request ids
+type RequestIDer func(req *http.Request) string
+
+// CreateSessionIDer provides a default implement for extracting the session from a cookie jar
+func CreateSessionIDer(jar http.CookieJar) RequestIDer {
+	return func(req *http.Request) string {
+		for _, c := range jar.Cookies(req.URL) {
+			if c.Name == RETSSessionID {
+				return c.Value
+			}
+		}
+		return ""
+	}
+}
+
+// CreateRETSVersioner provides a hook to get a RETS Version from a request
+func CreateRETSVersioner(version string) RequestIDer {
+	return func(req *http.Request) string {
+		return version
+	}
 }
