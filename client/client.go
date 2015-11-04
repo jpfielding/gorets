@@ -1,11 +1,14 @@
 package client
 
 import (
+	"encoding/xml"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
+	"golang.org/x/net/html/charset"
 )
 
 // const DefaultTimeout int = 300000
@@ -73,4 +76,17 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 		return uaAuth(ctx, req)
 	}
 	return headers, nil
+}
+
+// SelectedCharsetReader the variable used to set a selected charset
+var SelectedCharsetReader func(string, io.Reader) (io.Reader, error) = charset.NewReaderLabel
+
+// GetXMLReader ...
+func GetXMLReader(input io.Reader, strict bool) *xml.Decoder {
+	decoder := xml.NewDecoder(input)
+	if SelectedCharsetReader != nil {
+		decoder.CharsetReader = SelectedCharsetReader
+	}
+	decoder.Strict = strict
+	return decoder
 }
