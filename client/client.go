@@ -84,18 +84,24 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 // DefaultXMLDecoder the variable used to set a selected charset
 var DefaultXMLDecoder = CreateXMLDecoder
 
-// CreateXMLDecoder decodes xml using the given content type or relies on the header if needed
-func CreateXMLDecoder(input io.Reader, contentType string, strict bool) *xml.Decoder {
-	if strings.Contains(contentType, "charset=") {
-		if e, _, _ := charset.DetermineEncoding([]byte{}, contentType); e != encoding.Nop {
-			input = transform.NewReader(input, e.NewDecoder())
-			decoder := xml.NewDecoder(input)
-			decoder.Strict = strict
-		}
-	}
+// CreateXMLDecoder decodes xml using the given the header if needed
+func CreateXMLDecoder(input io.Reader, strict bool) *xml.Decoder {
 	decoder := xml.NewDecoder(input)
 	decoder.Strict = strict
 	// this only gets used when a proper xml header is used
 	decoder.CharsetReader = charset.NewReaderLabel
 	return decoder
+}
+
+// DefaultReEncodeReader allows overriding the re-encoding operation
+var DefaultReEncodeReader = ReEncodeReader
+
+// ReEncodeReader re-encodes a reader based on the http content type provided
+func ReEncodeReader(input io.Reader, contentType string) io.Reader {
+	if strings.Contains(contentType, "charset=") {
+		if e, _, _ := charset.DetermineEncoding([]byte{}, contentType); e != encoding.Nop {
+			return transform.NewReader(input, e.NewDecoder())
+		}
+	}
+	return input
 }

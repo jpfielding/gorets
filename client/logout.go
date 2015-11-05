@@ -59,7 +59,7 @@ func processResponseBody(body io.ReadCloser, contentType string) (*LogoutRespons
 	}
 
 	rets := xmlRets{}
-	decoder := DefaultXMLDecoder(body, contentType, false)
+	decoder := DefaultXMLDecoder(DefaultReEncodeReader(body, contentType), false)
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
 		return nil, err

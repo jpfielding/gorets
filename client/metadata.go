@@ -71,7 +71,7 @@ func GetMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*
 
 func parseMetadataCompactResult(body io.ReadCloser, contentType string) (*Metadata, error) {
 	defer body.Close()
-	parser := DefaultXMLDecoder(body, contentType, false)
+	parser := DefaultXMLDecoder(DefaultReEncodeReader(body, contentType), false)
 
 	metadata := Metadata{}
 	metadata.Classes = make(map[string]CompactData)
