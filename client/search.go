@@ -137,14 +137,14 @@ func Search(requester Requester, ctx context.Context, r SearchRequest) (*SearchR
 	case "COMPACT-DECODED", "COMPACT":
 		data := make(chan []string, r.BufferSize)
 		errs := make(chan error)
-		return parseCompactResult(ctx, resp.Body, data, errs)
+		return parseCompactResult(ctx, resp.Body, resp.Header.Get("Content-Type"), data, errs)
 		// case "STANDARD-XML":
 		// 	panic("not yet supported!")
 	}
 	return nil, errors.New("unsupported format:" + r.Format)
 }
 
-func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []string, errs chan error) (*SearchResult, error) {
+func parseCompactResult(ctx context.Context, body io.ReadCloser, contentType string, data chan []string, errs chan error) (*SearchResult, error) {
 	rets := RetsResponse{}
 	result := &SearchResult{
 		Data:         data,
@@ -153,7 +153,7 @@ func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []str
 		MaxRows:      false,
 	}
 
-	parser := GetXMLReader(body, false)
+	parser := DefaultXMLDecoder(body, contentType, false)
 	// parser := xml.NewDecoder(body)
 	var buf bytes.Buffer
 

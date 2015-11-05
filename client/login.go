@@ -2,11 +2,9 @@ package client
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/xml"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -47,20 +45,16 @@ func Login(requester Requester, ctx context.Context, r LoginRequest) (*Capabilit
 	if err != nil {
 		return nil, err
 	}
-	capabilities, err := ioutil.ReadAll(res.Body)
-	res.Body.Close()
-	if err != nil {
-		return nil, err
-	}
 
-	urls, err := parseCapability(r.URL, capabilities)
+	urls, err := parseCapability(res.Body, res.Header.Get("Content-Type"), r.URL)
 	if err != nil {
-		return nil, errors.New("unable to parse capabilites response: " + string(capabilities) + " Error: " + err.Error())
+		return nil, errors.New("unable to parse capabilites response: " + err.Error())
 	}
 	return urls, nil
 }
 
-func parseCapability(url string, response []byte) (*CapabilityURLs, error) {
+func parseCapability(body io.ReadCloser, contentType, url string) (*CapabilityURLs, error) {
+	defer body.Close()
 	type xmlRets struct {
 		XMLName   xml.Name `xml:"RETS"`
 		ReplyCode int      `xml:"ReplyCode,attr"`
@@ -69,7 +63,7 @@ func parseCapability(url string, response []byte) (*CapabilityURLs, error) {
 	}
 
 	rets := xmlRets{}
-	decoder := GetXMLReader(bytes.NewBuffer(response), false)
+	decoder := DefaultXMLDecoder(body, contentType, false)
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
 		return nil, err

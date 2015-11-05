@@ -5,10 +5,13 @@ import (
 	"io"
 	"net/http"
 	"net/http/cookiejar"
+	"strings"
 
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 	"golang.org/x/net/html/charset"
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/transform"
 )
 
 // const DefaultTimeout int = 300000
@@ -78,15 +81,21 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 	return headers, nil
 }
 
-// SelectedCharsetReader the variable used to set a selected charset
-var SelectedCharsetReader func(string, io.Reader) (io.Reader, error) = charset.NewReaderLabel
+// DefaultXMLDecoder the variable used to set a selected charset
+var DefaultXMLDecoder = CreateXMLDecoder
 
-// GetXMLReader ...
-func GetXMLReader(input io.Reader, strict bool) *xml.Decoder {
-	decoder := xml.NewDecoder(input)
-	if SelectedCharsetReader != nil {
-		decoder.CharsetReader = SelectedCharsetReader
+// CreateXMLDecoder decodes xml using the given content type or relies on the header if needed
+func CreateXMLDecoder(input io.Reader, contentType string, strict bool) *xml.Decoder {
+	if strings.Contains(contentType, "charset=") {
+		if e, _, _ := charset.DetermineEncoding([]byte{}, contentType); e != encoding.Nop {
+			input = transform.NewReader(input, e.NewDecoder())
+			decoder := xml.NewDecoder(input)
+			decoder.Strict = strict
+		}
 	}
+	decoder := xml.NewDecoder(input)
 	decoder.Strict = strict
+	// this only gets used when a proper xml header is used
+	decoder.CharsetReader = charset.NewReaderLabel
 	return decoder
 }

@@ -2,10 +2,8 @@ package client
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/xml"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -43,13 +41,7 @@ func Logout(requester Requester, ctx context.Context, r LogoutRequest) (*LogoutR
 		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	resp.Body.Close()
-
-	logoutResponse, err := processResponseBody(string(body))
+	logoutResponse, err := processResponseBody(resp.Body, resp.Header.Get("Content-Type"))
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +49,8 @@ func Logout(requester Requester, ctx context.Context, r LogoutRequest) (*LogoutR
 	return logoutResponse, nil
 }
 
-func processResponseBody(body string) (*LogoutResponse, error) {
+func processResponseBody(body io.ReadCloser, contentType string) (*LogoutResponse, error) {
+	defer body.Close()
 	type xmlRets struct {
 		XMLName   xml.Name `xml:"RETS"`
 		ReplyCode int      `xml:"ReplyCode,attr"`
@@ -66,7 +59,7 @@ func processResponseBody(body string) (*LogoutResponse, error) {
 	}
 
 	rets := xmlRets{}
-	decoder := GetXMLReader(bytes.NewBufferString(body), false)
+	decoder := DefaultXMLDecoder(body, contentType, false)
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
 		return nil, err
