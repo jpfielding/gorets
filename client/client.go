@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/cookiejar"
-	"strings"
 
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
@@ -97,11 +96,14 @@ func CreateXMLDecoder(input io.Reader, strict bool) *xml.Decoder {
 var DefaultReEncodeReader = ReEncodeReader
 
 // ReEncodeReader re-encodes a reader based on the http content type provided
-func ReEncodeReader(input io.Reader, contentType string) io.Reader {
-	if strings.Contains(contentType, "charset=") {
-		if e, _, _ := charset.DetermineEncoding([]byte{}, contentType); e != encoding.Nop {
-			return transform.NewReader(input, e.NewDecoder())
+func ReEncodeReader(input io.ReadCloser, contentType string) io.ReadCloser {
+	if e, _, _ := charset.DetermineEncoding([]byte{}, contentType); e != encoding.Nop {
+		type closer struct {
+			io.Reader
+			io.Closer
 		}
+		tr := transform.NewReader(input, e.NewDecoder())
+		return closer{tr, input}
 	}
 	return input
 }

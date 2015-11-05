@@ -58,20 +58,21 @@ func GetMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*
 	if err != nil {
 		return nil, err
 	}
-	contentType := resp.Header.Get("Content-Type")
+	body := DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType))
+
 	switch r.Format {
 	case "COMPACT":
-		return parseMetadataCompactResult(resp.Body, contentType)
+		return parseMetadataCompactResult(body)
 	case "STANDARD-XML":
-		return parseMetadataStandardXML(resp.Body, contentType)
+		return parseMetadataStandardXML(body)
 	}
 
 	return nil, errors.New("unknows metadata format")
 }
 
-func parseMetadataCompactResult(body io.ReadCloser, contentType string) (*Metadata, error) {
+func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 	defer body.Close()
-	parser := DefaultXMLDecoder(DefaultReEncodeReader(body, contentType), false)
+	parser := DefaultXMLDecoder(body, false)
 
 	metadata := Metadata{}
 	metadata.Classes = make(map[string]CompactData)
@@ -141,7 +142,7 @@ func parseMetadataCompactResult(body io.ReadCloser, contentType string) (*Metada
 	}
 }
 
-func parseMetadataStandardXML(body io.ReadCloser, contentType string) (*Metadata, error) {
+func parseMetadataStandardXML(body io.ReadCloser) (*Metadata, error) {
 	defer body.Close()
 	ioutil.ReadAll(body)
 	return nil, errors.New("unsupported metadata format option")

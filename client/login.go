@@ -41,19 +41,20 @@ func Login(requester Requester, ctx context.Context, r LoginRequest) (*Capabilit
 		return nil, err
 	}
 
-	res, err := requester(ctx, req)
+	resp, err := requester(ctx, req)
 	if err != nil {
 		return nil, err
 	}
+	body := DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType))
 
-	urls, err := parseCapability(res.Body, res.Header.Get("Content-Type"), r.URL)
+	urls, err := parseCapability(body, r.URL)
 	if err != nil {
 		return nil, errors.New("unable to parse capabilites response: " + err.Error())
 	}
 	return urls, nil
 }
 
-func parseCapability(body io.ReadCloser, contentType, url string) (*CapabilityURLs, error) {
+func parseCapability(body io.ReadCloser, url string) (*CapabilityURLs, error) {
 	defer body.Close()
 	type xmlRets struct {
 		XMLName   xml.Name `xml:"RETS"`
@@ -63,7 +64,7 @@ func parseCapability(body io.ReadCloser, contentType, url string) (*CapabilityUR
 	}
 
 	rets := xmlRets{}
-	decoder := DefaultXMLDecoder(DefaultReEncodeReader(body, contentType), false)
+	decoder := DefaultXMLDecoder(body, false)
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
 		return nil, err

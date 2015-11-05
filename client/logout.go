@@ -40,8 +40,9 @@ func Logout(requester Requester, ctx context.Context, r LogoutRequest) (*LogoutR
 	if err != nil {
 		return nil, err
 	}
+	body := DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType))
 
-	logoutResponse, err := processResponseBody(resp.Body, resp.Header.Get("Content-Type"))
+	logoutResponse, err := processResponseBody(body)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func Logout(requester Requester, ctx context.Context, r LogoutRequest) (*LogoutR
 	return logoutResponse, nil
 }
 
-func processResponseBody(body io.ReadCloser, contentType string) (*LogoutResponse, error) {
+func processResponseBody(body io.ReadCloser) (*LogoutResponse, error) {
 	defer body.Close()
 	type xmlRets struct {
 		XMLName   xml.Name `xml:"RETS"`
@@ -59,7 +60,7 @@ func processResponseBody(body io.ReadCloser, contentType string) (*LogoutRespons
 	}
 
 	rets := xmlRets{}
-	decoder := DefaultXMLDecoder(DefaultReEncodeReader(body, contentType), false)
+	decoder := DefaultXMLDecoder(body, false)
 	err := decoder.Decode(&rets)
 	if err != nil && err != io.EOF {
 		return nil, err
