@@ -92,16 +92,10 @@ func TestParseCompact(t *testing.T) {
 
 	testutils.Assert(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
 
-	filterTo := cr.FilterTo([]string{"A", "C", "E"})
-
 	counter := 0
 	for row := range cr.Data {
 		if strings.Join(row, ",") != "1,2,3,4,,6" {
 			t.Errorf("bad row %d: %s", counter, row)
-		}
-		filtered := filterTo(row)
-		if strings.Join(filtered, ",") != "1,3," {
-			t.Errorf("bad filtered row %d: %s", counter, filtered)
 		}
 
 		select {
