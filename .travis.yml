@@ -1,7 +1,10 @@
 language: go
+sudo: false
 
 install:
   - go get golang.org/x/net/context
+  - go get golang.org/x/net/
+  - go get golang.org/x/text
 
 go:
   - 1.3
