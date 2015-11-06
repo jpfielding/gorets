@@ -16,7 +16,17 @@ import (
 	testutils "github.com/jpfielding/gorets/testutils"
 )
 
-var compactDecoded string = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
+// GET /platinum/search?
+// Class=ALL&
+// Count=1&
+// Format=COMPACT-DECODED&
+// Limit=10&
+// Offset=50&
+// Query=%28%28LocaleListingStatus%3D%7CACTIVE-CORE%2CCNTG%2FKO-CORE%2CCNTG%2FNO+KO-CORE%2CAPP+REG-CORE%29%2C%7E%28VOWList%3D0%29%29&
+// QueryType=DMQL2&
+// SearchType=Property
+
+var compactDecoded = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 <COUNT Records="10" />
 <DELIMITER value = "09"/>
 <COLUMNS>	A	B	C	D	E	F	</COLUMNS>

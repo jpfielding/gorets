@@ -35,30 +35,6 @@ type SearchResult struct {
 	Errors chan error
 }
 
-// Index ...
-func (m *SearchResult) Index() map[string]int {
-	index := make(map[string]int)
-	for i, c := range m.Columns {
-		index[c] = i
-	}
-	return index
-}
-
-// ColumnFilter cached filtering
-type ColumnFilter func(row []string) (filtered []string)
-
-// FilterTo create the cache
-func (m *SearchResult) FilterTo(cols []string) ColumnFilter {
-	index := m.Index()
-	return func(row []string) (filtered []string) {
-		tmp := make([]string, len(cols))
-		for i, c := range cols {
-			tmp[i] = row[index[c]]
-		}
-		return tmp
-	}
-}
-
 // SearchRequest ...
 type SearchRequest struct {
 	URL,
@@ -78,16 +54,6 @@ type SearchRequest struct {
 	Offset int
 	BufferSize int
 }
-
-// GET /platinum/search?
-// Class=ALL&
-// Count=1&
-// Format=COMPACT-DECODED&
-// Limit=10&
-// Offset=50&
-// Query=%28%28LocaleListingStatus%3D%7CACTIVE-CORE%2CCNTG%2FKO-CORE%2CCNTG%2FNO+KO-CORE%2CAPP+REG-CORE%29%2C%7E%28VOWList%3D0%29%29&
-// QueryType=DMQL2&
-// SearchType=Property
 
 // Search ...
 func Search(requester Requester, ctx context.Context, r SearchRequest) (*SearchResult, error) {
