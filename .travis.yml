@@ -2,8 +2,11 @@ language: go
 sudo: false
 
 install:
-  - go get golang.org/x/net
-  - go get golang.org/x/text
+  - go get golang.org/x/net/context
+  - go get golang.org/x/net/context/ctxhttp
+  - go get golang.org/x/net/html/charset
+  - go get golang.org/x/text/encoding
+  - go get golang.org/x/text/transform
 
 go:
   - 1.3
