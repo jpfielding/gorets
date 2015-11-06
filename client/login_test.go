@@ -4,6 +4,8 @@ parsing the 'login' action from RETS
 package client
 
 import (
+	"io/ioutil"
+	"strings"
 	"testing"
 
 	testutils "github.com/jpfielding/gorets/testutils"
@@ -30,7 +32,10 @@ func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
 	ChangePassword=http://server.com:6103/platinum/changepassword
 	</RETS-RESPONSE>
 	</RETS>`
-	urls, err := parseCapability("http://server.com:6103/platinum/login", []byte(body))
+	urls, err := parseCapability(
+		ioutil.NopCloser(strings.NewReader(body)),
+		"http://server.com:6103/platinum/login",
+	)
 	testutils.Ok(t, err)
 
 	testutils.Equals(t, urls.Response.ReplyText, "V2.7.0 2315: Success")
@@ -68,7 +73,10 @@ func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 	ChangePassword=/platinum/changepassword
 	</RETS-RESPONSE>
 	</RETS>`
-	urls, err := parseCapability("http://server.com:6103/platinum/login", []byte(body))
+	urls, err := parseCapability(
+		ioutil.NopCloser(strings.NewReader(body)),
+		"http://server.com:6103/platinum/login",
+	)
 	testutils.Ok(t, err)
 
 	testutils.Equals(t, urls.Response.ReplyText, "V2.7.0 2315: Success")

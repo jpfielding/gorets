@@ -1,18 +1,24 @@
 package client
 
 import (
-	testutils "github.com/jpfielding/gorets/testutils"
+	"io/ioutil"
+	"strings"
 	"testing"
+
+	testutils "github.com/jpfielding/gorets/testutils"
 )
 
 func TestProcessResponseBodyFull(t *testing.T) {
-	actual, err := processResponseBody(`<RETS ReplyCode="0" ReplyText="Logging out">
+	actual, err := processResponseBody(
+		ioutil.NopCloser(strings.NewReader(
+			`<RETS ReplyCode="0" ReplyText="Logging out">
 						 				<RETS-RESPONSE>
 						 				ConnectTime=12345
 						 				Billing=Im Billing You
 						 				SignOffMessage=Goodbye
 						 				</RETS-RESPONSE>
-		                 				</RETS>`)
+		                 				</RETS>`,
+		)))
 
 	if err != nil {
 		t.Fail()
@@ -24,12 +30,15 @@ func TestProcessResponseBodyFull(t *testing.T) {
 }
 
 func TestProcessResponseBodyNoBilling(t *testing.T) {
-	actual, err := processResponseBody(`<RETS ReplyCode="0" ReplyText="Logging out">
+	actual, err := processResponseBody(
+		ioutil.NopCloser(strings.NewReader(
+			`<RETS ReplyCode="0" ReplyText="Logging out">
 						 				<RETS-RESPONSE>
 						 				ConnectTime=0
 						 				SignOffMessage=Goodbye
 						 				</RETS-RESPONSE>
-		                 				</RETS>`)
+		                 				</RETS>`,
+		)))
 
 	if err != nil {
 		t.Fail()
@@ -41,12 +50,15 @@ func TestProcessResponseBodyNoBilling(t *testing.T) {
 }
 
 func TestProcessResponseBodyNoConnectTime(t *testing.T) {
-	actual, err := processResponseBody(`<RETS ReplyCode="0" ReplyText="Logging out">
+	actual, err := processResponseBody(
+		ioutil.NopCloser(strings.NewReader(
+			`<RETS ReplyCode="0" ReplyText="Logging out">
 						 				<RETS-RESPONSE>
 						 				Billing=Im Billing You
 						 				SignOffMessage=Goodbye
 						 				</RETS-RESPONSE>
-		                 				</RETS>`)
+		                 				</RETS>`,
+		)))
 
 	if err != nil {
 		t.Fail()
