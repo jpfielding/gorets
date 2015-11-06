@@ -3,7 +3,6 @@ sudo: false
 
 install:
   - go get golang.org/x/net/context
-  - go get golang.org/x/net
   - go get golang.org/x/text
   - go get golang.org/x/tools
 go:
