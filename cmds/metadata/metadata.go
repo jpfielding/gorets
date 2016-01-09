@@ -16,11 +16,14 @@ import (
 func main() {
 	username := flag.String("username", "", "Username for the RETS server")
 	password := flag.String("password", "", "Password for the RETS server")
+	format := flag.String("format", "COMPACT", "COMPACT or STANDARD-XML")
+	mType := flag.String("type", "METADATA-SYSTEM", "Metadata Type 'METADATA-TABLE'")
+	id := flag.String("id", "*", "Property, Office, Agent, User")
 	loginURL := flag.String("login-url", "http://sum.rets.interealty.com/Login.asmx/Login", "Login URL for the RETS server")
 	userAgent := flag.String("user-agent", "Threewide/1.5", "User agent for the RETS client")
 	userAgentPw := flag.String("user-agent-pw", "listhub", "User agent authentication")
 	retsVersion := flag.String("rets-version", "RETS/1.5", "RETS Version")
-	logFile := flag.String("log-file", "/tmp/listhub/sarco-rets.log", "")
+	logFile := flag.String("log-file", "/tmp/listhub/rets.log", "")
 
 	flag.Parse()
 
@@ -63,24 +66,23 @@ func main() {
 	}
 	fmt.Println("Login: ", capability.Login)
 	fmt.Println("Metadata: ", capability.GetMetadata)
-	fmt.Println("Search: ", capability.Search)
-	fmt.Println("GetObject: ", capability.GetObject)
-
-	err = client.Get(session, ctx, client.GetRequest{URL: capability.Get})
-	if err != nil {
-		fmt.Println("this was stupid, shouldnt even be here")
-	}
 
 	mURL := capability.GetMetadata
 
-	for _, f := range []string{"STANDARD-XML", "COMPACT"} {
-		for _, t := range []string{"TABLE"} {
-			client.GetMetadata(session, ctx, client.MetadataRequest{
-				URL:    mURL,
-				Format: f,
-				MType:  "METADATA-" + t,
-				ID:     "Office",
-			})
+	metadata, err := client.GetCompactMetadata(session, ctx, client.MetadataRequest{
+		URL:    mURL,
+		Format: *format,
+		MType:  *mType,
+		ID:     *id,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	for id, elems := range metadata.Elements {
+		for _, cd := range elems {
+			fmt.Println(id + ": " + cd.ID)
 		}
 	}
 }

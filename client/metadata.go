@@ -2,9 +2,8 @@ package client
 
 import (
 	"encoding/xml"
-	"errors"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,13 +13,17 @@ import (
 
 // Metadata ...
 type Metadata struct {
-	Rets        RetsResponse
-	System      MSystem
-	Resources   CompactData
-	Classes     map[string]CompactData
-	Tables      map[string]CompactData
-	Lookups     map[string]CompactData
-	LookupTypes map[string]CompactData
+	Rets     RetsResponse
+	System   MSystem
+	Elements map[string][]CompactData
+}
+
+func (m Metadata) find(name string) map[string]CompactData {
+	classes := make(map[string]CompactData)
+	for _, cd := range m.Elements[name] {
+		classes[cd.ID] = cd
+	}
+	return classes
 }
 
 // MSystem ...
@@ -36,8 +39,8 @@ type MetadataRequest struct {
 	URL, HTTPMethod, Format, MType, ID string
 }
 
-// GetMetadata ...
-func GetMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*Metadata, error) {
+// StreamMetadata ...
+func StreamMetadata(requester Requester, ctx context.Context, r MetadataRequest) (io.ReadCloser, error) {
 	// required
 	values := url.Values{}
 	values.Add("Format", r.Format)
@@ -58,27 +61,26 @@ func GetMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*
 	if err != nil {
 		return nil, err
 	}
-	body := DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType))
-
-	switch r.Format {
-	case "COMPACT":
-		return parseMetadataCompactResult(body)
-	case "STANDARD-XML":
-		return parseMetadataStandardXML(body)
-	}
-
-	return nil, errors.New("unknows metadata format")
+	return DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType)), nil
 }
 
-func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
+// GetCompactMetadata ...
+func GetCompactMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*Metadata, error) {
+	r.Format = "COMPACT"
+	body, err := StreamMetadata(requester, ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	return ParseMetadataCompactResult(body)
+}
+
+// ParseMetadataCompactResult ...
+func ParseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 	defer body.Close()
 	parser := DefaultXMLDecoder(body, false)
 
 	metadata := Metadata{}
-	metadata.Classes = make(map[string]CompactData)
-	metadata.Tables = make(map[string]CompactData)
-	metadata.Lookups = make(map[string]CompactData)
-	metadata.LookupTypes = make(map[string]CompactData)
+	metadata.Elements = make(map[string][]CompactData)
 	for {
 		token, err := parser.Token()
 		if err != nil {
@@ -117,7 +119,7 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 				metadata.System.Comments = strings.TrimSpace(xms.Comments)
 				metadata.System.ID = xms.System.SystemID
 				metadata.System.Description = xms.System.Description
-			case "METADATA-RESOURCE", "METADATA-CLASS", "METADATA-TABLE", "METADATA-LOOKUP", "METADATA-LOOKUP_TYPE":
+			default:
 				data, err := ParseMetadataCompactDecoded(t, parser, "	")
 				if err != nil {
 					return nil, err
@@ -125,25 +127,58 @@ func parseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
 				if data == nil {
 					continue
 				}
-				switch t.Name.Local {
-				case "METADATA-RESOURCE":
-					metadata.Resources = *data
-				case "METADATA-CLASS":
-					metadata.Classes[data.ID] = *data
-				case "METADATA-TABLE":
-					metadata.Tables[data.ID] = *data
-				case "METADATA-LOOKUP":
-					metadata.Lookups[data.ID] = *data
-				case "METADATA-LOOKUP_TYPE":
-					metadata.LookupTypes[data.ID] = *data
-				}
+				metadata.Elements[t.Name.Local] = append(metadata.Elements[t.Name.Local], *data)
 			}
 		}
 	}
 }
 
-func parseMetadataStandardXML(body io.ReadCloser) (*Metadata, error) {
-	defer body.Close()
-	ioutil.ReadAll(body)
-	return nil, errors.New("unsupported metadata format option")
+// ParseMetadataCompactDecoded ...
+func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, delim string) (*CompactData, error) {
+	// XmlMetadataElement is the simple extraction tool for our data
+	type XMLMetadataElement struct {
+		Resource string `xml:"Resource,attr"`
+		/* only valid for table */
+		Class string `xml:"Class,attr"`
+		/* only valid for lookup_type */
+		Lookup  string   `xml:"Lookup,attr"`
+		Version string   `xml:"Version,attr"`
+		Date    string   `xml:"Date,attr"`
+		Columns string   `xml:"COLUMNS"`
+		Data    []string `xml:"DATA"`
+	}
+	xme := XMLMetadataElement{}
+	err := parser.DecodeElement(&xme, &start)
+	if err != nil {
+		fmt.Println("failed to decode: ", err)
+		return nil, err
+	}
+	if xme.Columns == "" {
+		return nil, nil
+	}
+	data := *extractMap(xme.Columns, xme.Data, delim)
+	data.Date = xme.Date
+	data.Version = xme.Version
+	data.ID = xme.Resource
+	if xme.Class != "" {
+		data.ID = xme.Resource + ":" + xme.Class
+	}
+	if xme.Lookup != "" {
+		data.ID = xme.Resource + ":" + xme.Lookup
+	}
+
+	return &data, nil
+}
+
+/** extract a map of fields from columns and rows */
+func extractMap(cols string, rows []string, delim string) *CompactData {
+	data := CompactData{}
+	// remove the first and last chars
+	data.Columns = ParseCompactRow(cols, delim)
+	data.Rows = make([][]string, len(rows))
+	// create each
+	for i, line := range rows {
+		data.Rows[i] = ParseCompactRow(line, delim)
+	}
+	return &data
 }
