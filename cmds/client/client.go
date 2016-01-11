@@ -80,7 +80,7 @@ func main() {
 
 	mURL := capability.GetMetadata
 	format := "COMPACT"
-	gorets.GetMetadata(session, ctx, gorets.MetadataRequest{
+	gorets.GetCompactMetadata(session, ctx, gorets.MetadataRequest{
 		URL:    mURL,
 		Format: format,
 		MType:  "METADATA-SYSTEM",
