@@ -96,8 +96,6 @@ func TestCreateResponseQopAuth(t *testing.T) {
 func TestDigest(t *testing.T) {
 	username, password := "user", "passwd"
 
-	wwwAuthenticate := `Digest realm="users@mris.com", nonce="31333739363738363932323632201e00230a639db77779b354d601ee5d2e", opaque="6e6f742075736564"`
-
 	expected := `Digest username="user", realm="users@mris.com", nonce="31333739363738363932323632201e00230a639db77779b354d601ee5d2e", uri="/platinum/login", response="5f8d366fb430e9b395a84dba52247a35", algorithm="MD5", opaque="6e6f742075736564"`
 
 	method, uri := "GET", "/platinum/login"
