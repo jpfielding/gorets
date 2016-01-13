@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -30,8 +29,8 @@ type GetObject struct {
 	SubDescription,
 	Location string
 	/* 5.6.7 - because why would you want to use standard http errors when we can reinvent! */
-	RetsError        bool
-	RetsErrorMessage RetsResponse
+	RetsError   bool
+	RetsMessage *RetsResponse
 	/* 5.6.3 */
 	Preferred bool
 	/* 5.6.5 */
@@ -91,8 +90,12 @@ type GetObjectRequest struct {
 
 // GetObjects ...
 func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (<-chan GetObjectResult, error) {
+	url, err := url.Parse(r.URL)
+	if err != nil {
+		return nil, err
+	}
 	// required
-	values := url.Values{}
+	values := url.Query()
 	values.Add("Resource", r.Resource)
 	values.Add("Type", r.Type)
 
@@ -112,8 +115,10 @@ func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (<
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
-	// TODO use a URL object then properly append to it
-	req, err := http.NewRequest(method, fmt.Sprintf("%s?%s", r.URL, values.Encode()), nil)
+
+	url.RawQuery = values.Encode()
+
+	req, err := http.NewRequest(method, url.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -195,8 +200,8 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) GetO
 		}
 		// Include a GetObject (empty of content) so that its rets response can be retrieved
 		emptyResult := GetObject{
-			RetsErrorMessage: *retsResp,
-			RetsError:        retsResp.ReplyCode != 0,
+			RetsMessage: retsResp,
+			RetsError:   retsResp.ReplyCode != 0,
 		}
 		return GetObjectResult{&emptyResult, err}
 	}
@@ -214,17 +219,13 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) GetO
 		return GetObjectResult{nil, err}
 	}
 
+	// 5.6.7
 	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
-	retsErrorMsg := &RetsResponse{0, "Success"}
-	switch {
-	case err != nil:
-		retsError = false
-	case retsError:
-		body := ioutil.NopCloser(bytes.NewReader([]byte(blob)))
-		retsErrorMsg, err = ParseRetsResponse(body)
-		if err != nil {
-			return GetObjectResult{nil, err}
-		}
+	retsMsg, err := ParseRetsResponse(ioutil.NopCloser(bytes.NewReader([]byte(blob))))
+
+	// there is a rets message, stash it and wipe the content
+	if err == nil {
+		blob = nil
 	}
 
 	object := GetObject{
@@ -233,15 +234,15 @@ func parseHeadersAndStream(header textproto.MIMEHeader, body io.ReadCloser) GetO
 		ContentID:   header.Get("Content-ID"),
 		ContentType: header.Get("Content-Type"),
 		// optional
-		UID:              header.Get("UID"),
-		Description:      header.Get("Content-Description"),
-		SubDescription:   header.Get("Content-Sub-Description"),
-		Location:         header.Get("Location"),
-		RetsError:        retsError,
-		RetsErrorMessage: *retsErrorMsg,
-		Preferred:        preferred,
-		ObjectData:       objectData,
-		Blob:             blob,
+		UID:            header.Get("UID"),
+		Description:    header.Get("Content-Description"),
+		SubDescription: header.Get("Content-Sub-Description"),
+		Location:       header.Get("Location"),
+		RetsError:      retsError,
+		RetsMessage:    retsMsg,
+		Preferred:      preferred,
+		ObjectData:     objectData,
+		Blob:           blob,
 	}
 
 	return GetObjectResult{&object, nil}

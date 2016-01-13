@@ -84,11 +84,25 @@ RETS-Error: 1
 
 --simple boundary
 Content-Type: image/jpeg
-Content-ID: 123456
+Content-ID: 123457
 Object-ID: 5
 Location: http://www.simpleboundary.com/image-5.jpg
 
-<binary data 5>
+
+--simple boundary
+Content-Type: image/jpeg
+Content-ID: 123457
+Object-ID: 6
+Location: http://www.simpleboundary.com/image-6.jpg
+
+<binary data 6>
+--simple boundary
+Content-Type: image/jpeg
+Content-ID: 123457
+Object-ID: 7
+Location: http://www.simpleboundary.com/image-7.jpg
+
+<RETS ReplyCode="0" ReplyText="Found it!"/>
 --simple boundary--`
 
 func TestExtractBoundary(t *testing.T) {
@@ -136,17 +150,37 @@ func TestGetObjects(t *testing.T) {
 	testutils.Equals(t, true, o4.RetsError)
 
 	testutils.Equals(t, "text/xml", o4.ContentType)
-	testutils.Equals(t, "There is no object with that Object-ID", o4.RetsErrorMessage.ReplyText)
-	testutils.Equals(t, 20403, o4.RetsErrorMessage.ReplyCode)
+	testutils.Equals(t, "There is no object with that Object-ID", o4.RetsMessage.ReplyText)
+	testutils.Equals(t, 20403, o4.RetsMessage.ReplyCode)
 
 	r5 := <-results
 	testutils.Ok(t, r5.Err)
 	o5 := r5.Object
 	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
 	testutils.Equals(t, "image/jpeg", o5.ContentType)
-	testutils.Equals(t, "123456", o5.ContentID)
+	testutils.Equals(t, "123457", o5.ContentID)
 	testutils.Equals(t, 5, o5.ObjectID)
-	testutils.Equals(t, "<binary data 5>", string(o5.Blob))
+	testutils.Equals(t, "", string(o5.Blob))
+
+	r6 := <-results
+	testutils.Ok(t, r6.Err)
+	o6 := r6.Object
+	testutils.Equals(t, "http://www.simpleboundary.com/image-6.jpg", o6.Location)
+	testutils.Equals(t, "image/jpeg", o6.ContentType)
+	testutils.Equals(t, "123457", o6.ContentID)
+	testutils.Equals(t, 6, o6.ObjectID)
+	testutils.Equals(t, "<binary data 6>", string(o6.Blob))
+	testutils.Assert(t, o6.RetsMessage == nil, "should not be the zerod object")
+
+	r7 := <-results
+	testutils.Ok(t, r7.Err)
+	o7 := r7.Object
+	testutils.Equals(t, "http://www.simpleboundary.com/image-7.jpg", o7.Location)
+	testutils.Equals(t, "image/jpeg", o7.ContentType)
+	testutils.Equals(t, "123457", o7.ContentID)
+	testutils.Equals(t, 7, o7.ObjectID)
+	testutils.Equals(t, "", string(o7.Blob))
+	testutils.Equals(t, "Found it!", o7.RetsMessage.ReplyText)
 
 }
 
