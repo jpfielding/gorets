@@ -101,7 +101,7 @@ func main() {
 		Limit:      3,
 		Offset:     -1,
 	}
-	result, err := gorets.Search(session, ctx, req)
+	result, err := gorets.SearchCompact(session, ctx, req)
 	if err != nil {
 		panic(err)
 	}
