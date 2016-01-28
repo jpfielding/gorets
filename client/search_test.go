@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
-	"time"
 
 	"golang.org/x/net/context"
 
@@ -45,9 +44,7 @@ var compactDecoded = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 func TestEof(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte("")))
 
-	data := make(chan []string)
-	errs := make(chan error)
-	_, err := parseCompactResult(context.Background(), body, data, errs)
+	_, err := NewCompactSearchResult(context.Background(), body, 0)
 	if err == io.EOF {
 		t.Error("eof should not surface: " + err.Error())
 	}
@@ -56,32 +53,32 @@ func TestEof(t *testing.T) {
 func TestParseSearchQuit(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
-	data := make(chan []string)
-	errs := make(chan error)
 	ctx, cancel := context.WithCancel(context.Background())
-	cr, err := parseCompactResult(ctx, body, data, errs)
+	cr, err := NewCompactSearchResult(ctx, body, 0)
 	testutils.Ok(t, err)
 
 	row1 := <-cr.Data
 	testutils.Equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
 
 	cancel()
-	time.Sleep(100 * time.Millisecond) // I don't like this, but it allows time for the done channel to close.
+	testutils.Equals(t, "context canceled", ctx.Err().Error())
+
+	// still one left before the cancel call is seen
+	row2 := <-cr.Data
+	testutils.Equals(t, "1,2,3,4,,6", strings.Join(row2, ","))
 
 	// the closed channel will emit a zero'd value of the proper type
-	row2 := <-cr.Data
-	testutils.Equals(t, 0, len(row2))
+	row3 := <-cr.Data
+	testutils.Equals(t, 0, len(row3))
 
 }
 
 func TestParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
-	data := make(chan []string)
-	errs := make(chan error)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	cr, err := parseCompactResult(ctx, body, data, errs)
+	cr, err := NewCompactSearchResult(ctx, body, 0)
 	testutils.Ok(t, err)
 
 	testutils.Assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")

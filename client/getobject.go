@@ -94,8 +94,9 @@ func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (<
 	if err != nil {
 		return nil, err
 	}
-	// required
 	values := url.Query()
+
+	// required
 	values.Add("Resource", r.Resource)
 	values.Add("Type", r.Type)
 

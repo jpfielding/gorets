@@ -3,8 +3,6 @@ package client
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -23,8 +21,8 @@ const (
 
 // TODO include standard names constants here
 
-// SearchResult ...
-type SearchResult struct {
+// CompactSearchResult ...
+type CompactSearchResult struct {
 	RetsResponse RetsResponse
 	Count        int
 	Delimiter    string
@@ -55,10 +53,14 @@ type SearchRequest struct {
 	BufferSize int
 }
 
-// Search ...
-func Search(requester Requester, ctx context.Context, r SearchRequest) (*SearchResult, error) {
+// SearchStream ...
+func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io.ReadCloser, error) {
+	url, err := url.Parse(r.URL)
+	if err != nil {
+		return nil, err
+	}
+	values := url.Query()
 	// required
-	values := url.Values{}
 	values.Add("Class", r.Class)
 	values.Add("SearchType", r.SearchType)
 
@@ -88,8 +90,10 @@ func Search(requester Requester, ctx context.Context, r SearchRequest) (*SearchR
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
-	// TODO use a URL object then properly append to it
-	req, err := http.NewRequest(method, fmt.Sprintf("%s?%s", r.URL, values.Encode()), nil)
+
+	url.RawQuery = values.Encode()
+
+	req, err := http.NewRequest(method, url.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -98,22 +102,24 @@ func Search(requester Requester, ctx context.Context, r SearchRequest) (*SearchR
 	if err != nil {
 		return nil, err
 	}
-	body := DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType))
-
-	switch r.Format {
-	case "COMPACT-DECODED", "COMPACT":
-		data := make(chan []string, r.BufferSize)
-		errs := make(chan error)
-		return parseCompactResult(ctx, body, data, errs)
-		// case "STANDARD-XML":
-		// 	panic("not yet supported!")
-	}
-	return nil, errors.New("unsupported format:" + r.Format)
+	return DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType)), nil
 }
 
-func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []string, errs chan error) (*SearchResult, error) {
+// SearchCompact if you set the wrong request Format you will get nothing back
+func SearchCompact(requester Requester, ctx context.Context, r SearchRequest) (*CompactSearchResult, error) {
+	body, err := SearchStream(requester, ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	return NewCompactSearchResult(ctx, body, r.BufferSize)
+}
+
+// NewCompactSearchResult ...
+func NewCompactSearchResult(ctx context.Context, body io.ReadCloser, bufferSize int) (*CompactSearchResult, error) {
+	data := make(chan []string, bufferSize)
+	errs := make(chan error)
 	rets := RetsResponse{}
-	result := &SearchResult{
+	result := &CompactSearchResult{
 		Data:         data,
 		Errors:       errs,
 		RetsResponse: rets,
@@ -121,15 +127,21 @@ func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []str
 	}
 
 	parser := DefaultXMLDecoder(body, false)
-	// parser := xml.NewDecoder(body)
 	var buf bytes.Buffer
 
 	// backgroundable processing of the data into our buffer
 	bgDataProcessing := func() {
-		defer close(errs)
+		// intentionally not closing errs
 		defer close(data)
 		defer body.Close()
 		for {
+			select {
+			case <-ctx.Done():
+				// no need to pipe the ctx err back as the caller already has it
+				return
+			default:
+				// not cancelled, keep going
+			}
 			token, err := parser.Token()
 			if err != nil {
 				result.Errors <- err
@@ -146,11 +158,7 @@ func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []str
 			case xml.EndElement:
 				switch t.Name.Local {
 				case "DATA":
-					select {
-					case <-ctx.Done():
-						return
-					case data <- ParseCompactRow(buf.String(), result.Delimiter):
-					}
+					data <- ParseCompactRow(buf.String(), result.Delimiter)
 				case "RETS":
 					return
 				}
@@ -208,8 +216,4 @@ func parseCompactResult(ctx context.Context, body io.ReadCloser, data chan []str
 			buf.Write(bytes)
 		}
 	}
-}
-
-func parseStandardXML(body *io.ReadCloser) (*SearchResult, error) {
-	return nil, nil
 }

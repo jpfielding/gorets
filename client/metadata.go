@@ -39,10 +39,14 @@ type MetadataRequest struct {
 	URL, HTTPMethod, Format, MType, ID string
 }
 
-// StreamMetadata ...
-func StreamMetadata(requester Requester, ctx context.Context, r MetadataRequest) (io.ReadCloser, error) {
+// MetadataStream ...
+func MetadataStream(requester Requester, ctx context.Context, r MetadataRequest) (io.ReadCloser, error) {
+	url, err := url.Parse(r.URL)
+	if err != nil {
+		return nil, err
+	}
+	values := url.Query()
 	// required
-	values := url.Values{}
 	values.Add("Format", r.Format)
 	values.Add("Type", r.MType)
 	values.Add("ID", r.ID)
@@ -51,8 +55,10 @@ func StreamMetadata(requester Requester, ctx context.Context, r MetadataRequest)
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
-	// TODO use a URL object then properly append to it
-	req, err := http.NewRequest(method, r.URL+"?"+values.Encode(), nil)
+
+	url.RawQuery = values.Encode()
+
+	req, err := http.NewRequest(method, url.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +73,7 @@ func StreamMetadata(requester Requester, ctx context.Context, r MetadataRequest)
 // GetCompactMetadata ...
 func GetCompactMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*Metadata, error) {
 	r.Format = "COMPACT"
-	body, err := StreamMetadata(requester, ctx, r)
+	body, err := MetadataStream(requester, ctx, r)
 	if err != nil {
 		return nil, err
 	}
