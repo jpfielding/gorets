@@ -142,12 +142,13 @@ func NewCompactSearchResult(ctx context.Context, body io.ReadCloser, bufferSize 
 			}
 			switch t := token.(type) {
 			case xml.StartElement:
+				// clear any accumulated data
+				buf.Reset()
+				// check tags
 				switch t.Name.Local {
 				case "MAXROWS":
 					result.MaxRows = true
 				}
-				// clear any accumulated data
-				buf.Reset()
 			case xml.EndElement:
 				switch t.Name.Local {
 				case "DATA":
