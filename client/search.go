@@ -135,13 +135,6 @@ func NewCompactSearchResult(ctx context.Context, body io.ReadCloser, bufferSize 
 		defer close(data)
 		defer body.Close()
 		for {
-			select {
-			case <-ctx.Done():
-				// no need to pipe the ctx err back as the caller already has it
-				return
-			default:
-				// not cancelled, keep going
-			}
 			token, err := parser.Token()
 			if err != nil {
 				result.Errors <- err
@@ -158,7 +151,13 @@ func NewCompactSearchResult(ctx context.Context, body io.ReadCloser, bufferSize 
 			case xml.EndElement:
 				switch t.Name.Local {
 				case "DATA":
-					data <- ParseCompactRow(buf.String(), result.Delimiter)
+					// need to select on both chans to avoid deadlock
+					select {
+					case <-ctx.Done():
+						// no need to pipe the ctx err back as the caller already has it
+						return
+					case data <- ParseCompactRow(buf.String(), result.Delimiter):
+					}
 				case "RETS":
 					return
 				}
