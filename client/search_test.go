@@ -61,12 +61,17 @@ func TestParseSearchQuit(t *testing.T) {
 	testutils.Equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
 
 	cancel()
-	// testutils.Equals(t, "context canceled", ctx.Err().Error())
-	//
-	// // the closed channel will emit a zero'd value of the proper type
-	// row3, ok := <-cr.Data
-	// testutils.Assert(t, !ok, "closed")
-	// testutils.Equals(t, 0, len(row3))
+	testutils.Equals(t, "context canceled", ctx.Err().Error())
+
+	// the closed channel will emit a zero'd value of the proper type
+	row3, ok := <-cr.Data
+	// sometimes its not empty yet
+	if ok {
+		testutils.Equals(t, "1,2,3,4,,6", strings.Join(row3, ","))
+		row3, ok = <-cr.Data
+	}
+	testutils.Assert(t, !ok, "closed")
+	testutils.Equals(t, 0, len(row3))
 
 }
 
