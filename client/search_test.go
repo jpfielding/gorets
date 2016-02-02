@@ -60,7 +60,7 @@ func TestParseSearchQuit(t *testing.T) {
 	row1 := <-cr.Data
 	testutils.Equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
 
-	// cancel()
+	cancel()
 	// testutils.Equals(t, "context canceled", ctx.Err().Error())
 	//
 	// // the closed channel will emit a zero'd value of the proper type
