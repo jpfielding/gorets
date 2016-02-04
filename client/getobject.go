@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"golang.org/x/net/context"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 // GetObject provides the photo extraction core for RETS section 5.5
@@ -39,15 +40,15 @@ type GetObject struct {
 	Blob []byte
 }
 
-// Content is a helper to abstract the location concept (not thread safe)
-func (obj *GetObject) Content() ([]byte, error) {
+// ContentWithContext is a helper to abstract the location concept (not thread safe)
+func (obj *GetObject) ContentWithContext(ctx context.Context) ([]byte, error) {
 	if obj == nil {
 		return nil, nil
 	}
 	if len(obj.Blob) > 0 || obj.Location == "" {
 		return obj.Blob, nil
 	}
-	resp, err := http.Get(obj.Location)
+	resp, err := ctxhttp.Get(ctx, nil, obj.Location)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +66,11 @@ func (obj *GetObject) Content() ([]byte, error) {
 	}
 	obj.Blob = blob
 	return blob, nil
+}
+
+// Content is a helper to abstract the location concept (not thread safe)
+func (obj *GetObject) Content() ([]byte, error) {
+	return obj.ContentWithContext(context.Background())
 }
 
 // GetObjectResult ...
