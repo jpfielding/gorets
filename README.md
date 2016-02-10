@@ -87,11 +87,11 @@ func main() {
 
 	mURL := capability.GetMetadata
 	format := "COMPACT"
-	gorets.GetMetadata(session, ctx, gorets.MetadataRequest{
+	gorets.GetCompactMetadata(session, ctx, gorets.MetadataRequest{
 		URL:    mURL,
 		Format: format,
 		MType:  "METADATA-SYSTEM",
-		Id:     "0",
+		ID:     "0",
 	})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-RESOURCE", "0"})
 	//	session.GetMetadata(gorets.MetadataRequest{mUrl, format, "METADATA-CLASS", "ActiveAgent"})
@@ -104,11 +104,11 @@ func main() {
 		Class:      "1",
 		Format:     "COMPACT-DECODED",
 		QueryType:  "DMQL2",
-		Count:      gorets.COUNT_AFTER,
+		Count:      gorets.CountAfter,
 		Limit:      3,
 		Offset:     -1,
 	}
-	result, err := gorets.Search(session, ctx, req)
+	result, err := gorets.SearchCompact(session, ctx, req)
 	if err != nil {
 		panic(err)
 	}
