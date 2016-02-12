@@ -1,8 +1,6 @@
 package client
 
 import (
-	"bytes"
-	"encoding/xml"
 	"io"
 	"net/http"
 	"net/url"
@@ -21,18 +19,6 @@ const (
 
 // TODO include standard names constants here
 
-// CompactSearchResult ...
-type CompactSearchResult struct {
-	RetsResponse RetsResponse
-	Count        int
-	Delimiter    string
-	Columns      []string
-	MaxRows      bool
-
-	Data   <-chan []string
-	Errors chan error
-}
-
 // SearchRequest ...
 type SearchRequest struct {
 	URL,
@@ -50,7 +36,7 @@ type SearchRequest struct {
 	// TODO NONE is a valid option, this needs to be modified
 	Limit,
 	Offset int
-	BufferSize int
+	BufferSize int // TODO unused atm
 }
 
 // SearchStream ...
@@ -103,115 +89,4 @@ func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io
 		return nil, err
 	}
 	return DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType)), nil
-}
-
-// SearchCompact if you set the wrong request Format you will get nothing back
-func SearchCompact(requester Requester, ctx context.Context, r SearchRequest) (*CompactSearchResult, error) {
-	body, err := SearchStream(requester, ctx, r)
-	if err != nil {
-		return nil, err
-	}
-	return NewCompactSearchResult(body, r.BufferSize)
-}
-
-// NewCompactSearchResult ...
-func NewCompactSearchResult(body io.ReadCloser, bufferSize int) (*CompactSearchResult, error) {
-	data := make(chan []string, bufferSize)
-	errs := make(chan error)
-	rets := RetsResponse{}
-	result := &CompactSearchResult{
-		Data:         data,
-		Errors:       errs,
-		RetsResponse: rets,
-		MaxRows:      false,
-	}
-
-	parser := DefaultXMLDecoder(body, false)
-	var buf bytes.Buffer
-
-	// backgroundable processing of the data into our buffer
-	bgDataProcessing := func() {
-		// intentionally not closing errs
-		defer close(data)
-		defer body.Close()
-		for {
-			token, err := parser.Token()
-			if err != nil {
-				result.Errors <- err
-				// quit here or loop _forever_
-				if err == io.EOF {
-					return
-				}
-				continue
-			}
-			switch t := token.(type) {
-			case xml.StartElement:
-				// clear any accumulated data
-				buf.Reset()
-				// check tags
-				switch t.Name.Local {
-				case "MAXROWS":
-					result.MaxRows = true
-				}
-			case xml.EndElement:
-				switch t.Name.Local {
-				case "DATA":
-					data <- ParseCompactRow(buf.String(), result.Delimiter)
-				case "RETS":
-					return
-				}
-			case xml.CharData:
-				bytes := xml.CharData(t)
-				buf.Write(bytes)
-			}
-		}
-	}
-
-	// extract the basic content before delving into the data
-	for {
-		token, err := parser.Token()
-		switch err {
-		case nil:
-			// nothing
-		case io.EOF:
-			return result, nil
-		default:
-			return nil, err
-		}
-		switch t := token.(type) {
-		case xml.StartElement:
-			// clear any accumulated data
-			buf.Reset()
-			switch t.Name.Local {
-			case "RETS", "RETS-STATUS":
-				rets, err := ParseRetsResponseTag(t)
-				if err != nil {
-					return nil, err
-				}
-				result.RetsResponse = *rets
-			case "COUNT":
-				result.Count, err = ParseCountTag(t)
-				if err != nil {
-					return nil, err
-				}
-			case "DELIMITER":
-				result.Delimiter, err = ParseDelimiterTag(t)
-				if err != nil {
-					return nil, err
-				}
-			}
-		case xml.EndElement:
-			elmt := xml.EndElement(t)
-			name := elmt.Name.Local
-			switch name {
-			case "COLUMNS":
-				result.Columns = ParseCompactRow(buf.String(), result.Delimiter)
-				go bgDataProcessing()
-				return result, nil
-			}
-		case xml.CharData:
-			bytes := xml.CharData(t)
-			buf.Write(bytes)
-		}
-	}
 }
