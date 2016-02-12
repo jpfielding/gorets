@@ -102,12 +102,17 @@ func main() {
 		Offset:     -1,
 	}
 	result, err := gorets.SearchCompact(session, ctx, req)
+	defer result.Close()
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("COLUMNS:", result.Columns)
-	for row := range result.Data {
+	err = result.Listen(func(row []string, err error) error {
 		fmt.Println(row)
+		return nil
+	})
+	if err != nil {
+		panic(err)
 	}
 
 	one, err := gorets.GetObjects(session, ctx, gorets.GetObjectRequest{
