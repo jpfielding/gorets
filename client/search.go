@@ -138,6 +138,7 @@ func NewCompactSearchResult(body io.ReadCloser, bufferSize int) (*CompactSearchR
 			token, err := parser.Token()
 			if err != nil {
 				result.Errors <- err
+				// quit here or loop _forever_
 				if err == io.EOF {
 					return
 				}
