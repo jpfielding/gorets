@@ -55,19 +55,20 @@ func TestParseSearchQuit(t *testing.T) {
 	cr, err := NewCompactSearchResult(body, 0)
 	testutils.Ok(t, err)
 
+	rowsFound := 0
 	for {
 		select {
 		case data := <-cr.Data:
 			testutils.Equals(t, "1,2,3,4,,6", strings.Join(data, ","))
+			rowsFound++
 		case err := <-cr.Errors:
 			switch err {
 			case io.EOF:
 				return
-			default:
-				testutils.Ok(t, err)
 			}
 		}
 	}
+	testutils.Equals(t, 8, rowsFound)
 }
 
 func TestParseCompact(t *testing.T) {
