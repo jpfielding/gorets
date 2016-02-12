@@ -9,9 +9,6 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
-	"time"
-
-	"golang.org/x/net/context"
 
 	testutils "github.com/jpfielding/gorets/testutils"
 )
@@ -45,41 +42,38 @@ var compactDecoded = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 func TestEof(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte("")))
 
-	_, err := NewCompactSearchResult(context.Background(), body, 0)
+	_, err := NewCompactSearchResult(body, 0)
 	if err == io.EOF {
 		t.Error("eof should not surface: " + err.Error())
 	}
 }
 
 func TestParseSearchQuit(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
+	noEnd := strings.Split(compactDecoded, "<MAXROWS/>")[0]
+	body := ioutil.NopCloser(bytes.NewReader([]byte(noEnd)))
 
-	ctx, cancel := context.WithCancel(context.Background())
-	cr, err := NewCompactSearchResult(ctx, body, 0)
+	cr, err := NewCompactSearchResult(body, 0)
 	testutils.Ok(t, err)
 
-	row1 := <-cr.Data
-	testutils.Equals(t, "1,2,3,4,,6", strings.Join(row1, ","))
-
-	cancel()
-	testutils.Equals(t, "context canceled", ctx.Err().Error())
-	// I don't like this, but it allows time for the select to choose Done
-	time.Sleep(100 * time.Millisecond)
-
-	// the closed channel will emit a zero'd value of the proper type
-	row3, ok := <-cr.Data
-
-	testutils.Assert(t, !ok, "closed")
-	testutils.Equals(t, 0, len(row3))
-
+	for {
+		select {
+		case data := <-cr.Data:
+			testutils.Equals(t, "1,2,3,4,,6", strings.Join(data, ","))
+		case err := <-cr.Errors:
+			switch err {
+			case io.EOF:
+				return
+			default:
+				testutils.Ok(t, err)
+			}
+		}
+	}
 }
 
 func TestParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	cr, err := NewCompactSearchResult(ctx, body, 0)
+	cr, err := NewCompactSearchResult(body, 0)
 	testutils.Ok(t, err)
 
 	testutils.Assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")
@@ -99,7 +93,6 @@ func TestParseCompact(t *testing.T) {
 		select {
 		case err := <-cr.Errors:
 			t.Errorf("error parsing body at row %d: %s", counter, err.Error())
-			cancel()
 		default:
 		}
 		counter = counter + 1

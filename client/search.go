@@ -111,11 +111,11 @@ func SearchCompact(requester Requester, ctx context.Context, r SearchRequest) (*
 	if err != nil {
 		return nil, err
 	}
-	return NewCompactSearchResult(ctx, body, r.BufferSize)
+	return NewCompactSearchResult(body, r.BufferSize)
 }
 
 // NewCompactSearchResult ...
-func NewCompactSearchResult(ctx context.Context, body io.ReadCloser, bufferSize int) (*CompactSearchResult, error) {
+func NewCompactSearchResult(body io.ReadCloser, bufferSize int) (*CompactSearchResult, error) {
 	data := make(chan []string, bufferSize)
 	errs := make(chan error)
 	rets := RetsResponse{}
@@ -138,6 +138,9 @@ func NewCompactSearchResult(ctx context.Context, body io.ReadCloser, bufferSize 
 			token, err := parser.Token()
 			if err != nil {
 				result.Errors <- err
+				if err == io.EOF {
+					return
+				}
 				continue
 			}
 			switch t := token.(type) {
@@ -152,13 +155,7 @@ func NewCompactSearchResult(ctx context.Context, body io.ReadCloser, bufferSize 
 			case xml.EndElement:
 				switch t.Name.Local {
 				case "DATA":
-					// need to select on both chans to avoid deadlock
-					select {
-					case <-ctx.Done():
-						// no need to pipe the ctx err back as the caller already has it
-						return
-					case data <- ParseCompactRow(buf.String(), result.Delimiter):
-					}
+					data <- ParseCompactRow(buf.String(), result.Delimiter)
 				case "RETS":
 					return
 				}
