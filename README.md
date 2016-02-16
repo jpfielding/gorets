@@ -116,10 +116,13 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("COLUMNS:", result.Columns)
-	err = result.ForEach(func(row []string, err error) error {
+	hasMoreRows, err := result.ForEach(func(row []string, err error) error {
 		fmt.Println(row)
 		return nil
 	})
+	if hasMoreRows {
+		fmt.Println("more rows available")
+	}
 	if err != nil {
 		panic(err)
 	}
