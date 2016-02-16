@@ -5,7 +5,6 @@ package client
 
 import (
 	"bytes"
-	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -46,6 +45,15 @@ func TestEof(t *testing.T) {
 	testutils.NotOk(t, err)
 }
 
+func TestNoEof(t *testing.T) {
+	rets := `<RETS ReplyCode="20201" ReplyText="No Records Found." ></RETS>`
+	body := ioutil.NopCloser(bytes.NewReader([]byte(rets)))
+
+	cr, err := NewCompactSearchResult(body)
+	testutils.Ok(t, err)
+	testutils.Equals(t, 20201, cr.RetsResponse.ReplyCode)
+}
+
 func TestParseSearchQuit(t *testing.T) {
 	noEnd := strings.Split(compactDecoded, "<MAXROWS/>")[0]
 	body := ioutil.NopCloser(bytes.NewReader([]byte(noEnd)))
@@ -56,7 +64,7 @@ func TestParseSearchQuit(t *testing.T) {
 	rowsFound := 0
 	cr.ForEach(func(data []string, err error) error {
 		if err != nil {
-			testutils.Equals(t, io.EOF, err)
+			testutils.Assert(t, strings.Contains(err.Error(), "EOF"), "found something not eof")
 			return err
 		}
 		testutils.Equals(t, "1,2,3,4,,6", strings.Join(data, ","))
