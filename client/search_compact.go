@@ -121,6 +121,9 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 			case "COLUMNS":
 				result.Columns = ParseCompactRow(result.buf.String(), result.Delimiter)
 				return result, nil
+			case "RETS", "RETS-STATUS":
+				// if there is only a RETS tag.. just exit
+				return result, nil
 			}
 		case xml.CharData:
 			bytes := xml.CharData(t)
