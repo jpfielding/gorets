@@ -116,7 +116,7 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("COLUMNS:", result.Columns)
-	err = result.Listen(func(row []string, err error) error {
+	err = result.ForEach(func(row []string, err error) error {
 		fmt.Println(row)
 		return nil
 	})
