@@ -74,6 +74,9 @@ func (c *CompactSearchResult) ForEach(each CompactRow) (bool, error) {
 
 // Close ...
 func (c *CompactSearchResult) Close() error {
+	if c == nil || c.body == nil {
+		return nil
+	}
 	return c.body.Close()
 }
 
