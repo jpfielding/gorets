@@ -81,7 +81,7 @@ func TestParseCompact(t *testing.T) {
 	testutils.Assert(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
 
 	counter := 0
-	cr.ForEach(func(row []string, err error) error {
+	maxRows, err := cr.ForEach(func(row []string, err error) error {
 		if strings.Join(row, ",") != "1,2,3,4,,6" {
 			t.Errorf("bad row %d: %s", counter, row)
 		}
@@ -94,6 +94,6 @@ func TestParseCompact(t *testing.T) {
 	})
 
 	testutils.Assert(t, 8 == counter, "bad count")
-	testutils.Assert(t, cr.MaxRows, "bad max rows")
+	testutils.Assert(t, maxRows, "bad max rows")
 
 }
