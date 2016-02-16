@@ -97,7 +97,7 @@ func main() {
 		Class:      "1",
 		Format:     "COMPACT-DECODED",
 		QueryType:  "DMQL2",
-		Count:      gorets.CountAfter,
+		Count:      gorets.CountIncluded,
 		Limit:      3,
 		Offset:     -1,
 	}
