@@ -43,9 +43,7 @@ func TestEof(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte("")))
 
 	_, err := NewCompactSearchResult(body)
-	if err == io.EOF {
-		t.Error("eof should not surface: " + err.Error())
-	}
+	testutils.NotOk(t, err)
 }
 
 func TestParseSearchQuit(t *testing.T) {
@@ -56,8 +54,9 @@ func TestParseSearchQuit(t *testing.T) {
 	testutils.Ok(t, err)
 
 	rowsFound := 0
-	cr.Listen(func(data []string, err error) error {
+	cr.ForEach(func(data []string, err error) error {
 		if err != nil {
+			testutils.Equals(t, io.EOF, err)
 			return err
 		}
 		testutils.Equals(t, "1,2,3,4,,6", strings.Join(data, ","))
@@ -82,7 +81,7 @@ func TestParseCompact(t *testing.T) {
 	testutils.Assert(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
 
 	counter := 0
-	cr.Listen(func(row []string, err error) error {
+	cr.ForEach(func(row []string, err error) error {
 		if strings.Join(row, ",") != "1,2,3,4,,6" {
 			t.Errorf("bad row %d: %s", counter, row)
 		}

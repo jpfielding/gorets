@@ -33,8 +33,8 @@ type CompactSearchResult struct {
 // CompactRow ...
 type CompactRow func(row []string, err error) error
 
-// Listen ...
-func (c *CompactSearchResult) Listen(each CompactRow) error {
+// ForEach ...
+func (c *CompactSearchResult) ForEach(each CompactRow) error {
 	defer c.body.Close()
 	for {
 		token, err := c.parser.Token()
@@ -73,7 +73,7 @@ func (c *CompactSearchResult) Listen(each CompactRow) error {
 
 // Close ...
 func (c *CompactSearchResult) Close() error {
-	return c.Close()
+	return c.body.Close()
 }
 
 // NewCompactSearchResult ...
@@ -90,12 +90,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 	// extract the basic content before delving into the data
 	for {
 		token, err := parser.Token()
-		switch err {
-		case nil:
-			// nothing
-		case io.EOF:
-			return result, nil
-		default:
+		if err != nil {
 			return nil, err
 		}
 		switch t := token.(type) {
