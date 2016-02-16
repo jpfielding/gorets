@@ -77,7 +77,7 @@ func (c *CompactSearchResult) Close() error {
 	return c.body.Close()
 }
 
-// NewCompactSearchResult ...
+// NewCompactSearchResult _always_ close this
 func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 	rets := RetsResponse{}
 	parser := DefaultXMLDecoder(body, false)
@@ -90,7 +90,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 	for {
 		token, err := parser.Token()
 		if err != nil {
-			return nil, err
+			return result, err
 		}
 		switch t := token.(type) {
 		case xml.StartElement:
@@ -100,18 +100,18 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 			case "RETS", "RETS-STATUS":
 				rets, err := ParseRetsResponseTag(t)
 				if err != nil {
-					return nil, err
+					return result, err
 				}
 				result.RetsResponse = *rets
 			case "COUNT":
 				result.Count, err = ParseCountTag(t)
 				if err != nil {
-					return nil, err
+					return result, err
 				}
 			case "DELIMITER":
 				result.Delimiter, err = ParseDelimiterTag(t)
 				if err != nil {
-					return nil, err
+					return result, err
 				}
 			}
 		case xml.EndElement:
