@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"io"
 
 	"golang.org/x/net/context"
@@ -23,7 +24,6 @@ type CompactSearchResult struct {
 	Count        int
 	Delimiter    string
 	Columns      []string
-	MaxRows      bool
 
 	body   io.ReadCloser
 	parser *xml.Decoder
@@ -33,14 +33,15 @@ type CompactSearchResult struct {
 // CompactRow ...
 type CompactRow func(row []string, err error) error
 
-// ForEach ...
-func (c *CompactSearchResult) ForEach(each CompactRow) error {
+// ForEach returns MaxRows and any error that 'each' wont handle
+func (c *CompactSearchResult) ForEach(each CompactRow) (bool, error) {
 	defer c.body.Close()
+	maxRows := false
 	for {
 		token, err := c.parser.Token()
 		if err != nil {
 			if err = each(nil, err); err != nil {
-				return err
+				return maxRows, err
 			}
 			continue
 		}
@@ -51,24 +52,24 @@ func (c *CompactSearchResult) ForEach(each CompactRow) error {
 			// check tags
 			switch t.Name.Local {
 			case "MAXROWS":
-				c.MaxRows = true
+				maxRows = true
 			}
 		case xml.EndElement:
 			switch t.Name.Local {
 			case "DATA":
 				err := each(ParseCompactRow(c.buf.String(), c.Delimiter), nil)
 				if err != nil {
-					return err
+					return maxRows, err
 				}
 			case "RETS":
-				return nil
+				return maxRows, nil
 			}
 		case xml.CharData:
 			bytes := xml.CharData(t)
 			c.buf.Write(bytes)
 		}
 	}
-	return nil
+	return maxRows, errors.New("invalid exit from RETS stream")
 }
 
 // Close ...
@@ -82,11 +83,9 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 	parser := DefaultXMLDecoder(body, false)
 	result := &CompactSearchResult{
 		RetsResponse: rets,
-		MaxRows:      false,
 		body:         body,
 		parser:       parser,
 	}
-
 	// extract the basic content before delving into the data
 	for {
 		token, err := parser.Token()

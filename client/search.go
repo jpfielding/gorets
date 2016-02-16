@@ -11,8 +11,8 @@ import (
 const (
 	// CountNone dont include a count
 	CountNone = 0
-	// CountAfter include a count after the data
-	CountAfter = 1
+	// CountIncluded include a count after the data
+	CountIncluded = 1
 	// CountOnly returns only the count
 	CountOnly = 2
 )
