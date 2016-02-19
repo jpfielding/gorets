@@ -25,7 +25,7 @@ func ParseRetsResponse(body io.ReadCloser) (*RetsResponse, error) {
 		case xml.StartElement:
 			// clear any accumulated data
 			switch t.Name.Local {
-			case "RETS":
+			case "RETS", "RETS-STATUS":
 				return ParseRetsResponseTag(t)
 			}
 		}

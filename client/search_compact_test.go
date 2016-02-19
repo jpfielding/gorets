@@ -54,6 +54,17 @@ func TestNoEof(t *testing.T) {
 	testutils.Equals(t, 20201, cr.RetsResponse.ReplyCode)
 }
 
+func TestEmbeddedRetsStatus(t *testing.T) {
+	rets := `<?xml version="1.0" encoding="UTF-8" ?>
+			<RETS ReplyCode="0" ReplyText="Operation Successful">
+			<RETS-STATUS ReplyCode="20201" ReplyText="No matching records were found" />
+			</RETS>`
+	body := ioutil.NopCloser(bytes.NewReader([]byte(rets)))
+	cr, err := NewCompactSearchResult(body)
+	testutils.Ok(t, err)
+	testutils.Equals(t, 20201, cr.RetsResponse.ReplyCode)
+}
+
 func TestParseSearchQuit(t *testing.T) {
 	noEnd := strings.Split(compactDecoded, "<MAXROWS/>")[0]
 	body := ioutil.NopCloser(bytes.NewReader([]byte(noEnd)))
