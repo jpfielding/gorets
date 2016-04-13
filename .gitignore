@@ -3,4 +3,4 @@
 out
 *~
 metadata/main/metadata.go
-
+vendor/
