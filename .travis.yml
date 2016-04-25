@@ -2,14 +2,12 @@ language: go
 sudo: false
 
 install:
-  - go get golang.org/x/net/context
-  - go get golang.org/x/net/context/ctxhttp
-  - go get golang.org/x/net/html/charset
-  - go get golang.org/x/text/encoding
-  - go get golang.org/x/text/transform
+  - export GO15VENDOREXPERIMENT=1
+  - wget https://github.com/Masterminds/glide/releases/download/0.10.2/glide-0.10.2-linux-386.zip -O glide.zip
+  - unzip glide.zip
+  - export PATH=$PATH:$PWD/linux-386/
 
 go:
-  - 1.3
-  - 1.4
   - 1.5
+  - 1.6
   - tip
