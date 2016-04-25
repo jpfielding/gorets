@@ -30,7 +30,8 @@ type SearchRequest struct {
 	QueryType,
 	RestrictedIndicator,
 	Payload,
-	HTTPMethod string
+	HTTPMethod,
+	DefaultEncoding string
 
 	Count,
 	// TODO NONE is a valid option, this needs to be modified
@@ -88,5 +89,9 @@ func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io
 	if err != nil {
 		return nil, err
 	}
-	return DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType)), nil
+	contentType := resp.Header.Get(ContentType)
+	if contentType == "" {
+		contentType = r.DefaultEncoding
+	}
+	return DefaultReEncodeReader(resp.Body, contentType), nil
 }
