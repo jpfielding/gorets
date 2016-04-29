@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gorets/testutils"
+	testutils "github.com/jpfielding/gotest/testutils"
 )
 
 var payloadlist = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">

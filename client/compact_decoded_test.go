@@ -1,8 +1,9 @@
 package client
 
 import (
-	testutils "github.com/jpfielding/gorets/testutils"
 	"testing"
+
+	testutils "github.com/jpfielding/gotest/testutils"
 )
 
 func TestCompactRowParsing(t *testing.T) {

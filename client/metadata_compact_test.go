@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	testutils "github.com/jpfielding/gorets/testutils"
+	testutils "github.com/jpfielding/gotest/testutils"
 )
 
 var retsStart = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">`

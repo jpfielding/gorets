@@ -8,7 +8,7 @@ import (
 	"crypto/md5"
 	"testing"
 
-	testutils "github.com/jpfielding/gorets/testutils"
+	testutils "github.com/jpfielding/gotest/testutils"
 )
 
 func TestParseChallenge(t *testing.T) {

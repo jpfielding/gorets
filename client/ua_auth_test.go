@@ -3,7 +3,7 @@ package client
 import (
 	"testing"
 
-	testutils "github.com/jpfielding/gorets/testutils"
+	testutils "github.com/jpfielding/gotest/testutils"
 )
 
 func TestUaAuth(t *testing.T) {

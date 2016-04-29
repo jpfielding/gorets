@@ -16,3 +16,6 @@ import:
     ref:     d68c3ecb62c850b645dc072a8d78006286bf81ca
     subpackages:
     - /ssh/terminal
+  - package: github.com/jpfielding/gotest
+    ref:     9af298f44dfd4448f39984a38ee176cfff9f774f
+

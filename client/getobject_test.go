@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	testutils "github.com/jpfielding/gorets/testutils"
+	testutils "github.com/jpfielding/gotest/testutils"
 	"golang.org/x/net/context"
 )
 

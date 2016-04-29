@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gorets/testutils"
+	testutils "github.com/jpfielding/gotest/testutils"
 )
 
 func TestProcessResponseBodyFull(t *testing.T) {
