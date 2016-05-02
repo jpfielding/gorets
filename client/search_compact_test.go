@@ -45,6 +45,29 @@ func TestEof(t *testing.T) {
 	testutils.NotOk(t, err)
 }
 
+func TestBadChar(t *testing.T) {
+	rets := `<?xml version="1.0" encoding="UTF-8" ?>
+			<RETS ReplyCode="0" ReplyText="Operation Successful">
+			<COUNT Records="1" />
+			<DELIMITER value = "09"/>
+			<COLUMNS>	A	B	C	D	E	F	</COLUMNS>
+			<DATA>	1` + "\x0b" + `1	2	3	4		6	</DATA>
+
+			</RETS>`
+	body := ioutil.NopCloser(bytes.NewReader([]byte(rets)))
+
+	cr, err := NewCompactSearchResult(body)
+	testutils.Ok(t, err)
+	testutils.Equals(t, 0, cr.RetsResponse.ReplyCode)
+	counter := 0
+	cr.ForEach(func(row []string, err error) error {
+		testutils.Ok(t, err)
+		testutils.Equals(t, "1 1,2,3,4,,6", strings.Join(row, ","))
+		counter = counter + 1
+		return nil
+	})
+}
+
 func TestNoEof(t *testing.T) {
 	rets := `<RETS ReplyCode="20201" ReplyText="No Records Found." ></RETS>`
 	body := ioutil.NopCloser(bytes.NewReader([]byte(rets)))

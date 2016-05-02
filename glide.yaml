@@ -18,4 +18,5 @@ import:
     - /ssh/terminal
   - package: github.com/jpfielding/gotest
     ref:     9af298f44dfd4448f39984a38ee176cfff9f774f
-
+  - package: github.com/jpfielding/gofilters
+    ref:     74f6f1cc130f1275420877f77a44145c7739c836

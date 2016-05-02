@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 
+	"github.com/jpfielding/gofilters/filter"
 	"golang.org/x/net/context"
 	"golang.org/x/net/context/ctxhttp"
 	"golang.org/x/net/html/charset"
@@ -85,6 +86,8 @@ var DefaultXMLDecoder = CreateXMLDecoder
 
 // CreateXMLDecoder decodes xml using the given the header if needed
 func CreateXMLDecoder(input io.Reader, strict bool) *xml.Decoder {
+	// drop any chars that will blow up the xml decoder and replace with a space
+	input = filter.NewReader(input, filter.XML10Filter(filter.SpaceChar))
 	decoder := xml.NewDecoder(input)
 	decoder.Strict = strict
 	// this only gets used when a proper xml header is used
