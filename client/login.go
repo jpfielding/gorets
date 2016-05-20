@@ -69,7 +69,7 @@ func parseCapability(body io.ReadCloser, url string) (*CapabilityURLs, error) {
 	if err != nil && err != io.EOF {
 		return nil, err
 	}
-	if rets.Response == "" {
+	if strings.TrimSpace(rets.Response) == "" {
 		return nil, errors.New("failed to read urls")
 	}
 
