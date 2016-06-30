@@ -11,8 +11,5 @@ http://www.reso.org/assets/RETS/Specifications/rets_1_8.pdf.
 
 Find me at gophers.slack.com#gorets
 
-
-example at 
-
-[a relative link](cmds/demo.go)
+[Exmaple Code](cmds/demo.go)
 
