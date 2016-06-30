@@ -14,5 +14,5 @@ Find me at gophers.slack.com#gorets
 
 example at 
 
-http://github.com/jpfielding/gorets/blob/master/cmds/demo.go
+[a relative link](cmds/demo.go)
 
