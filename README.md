@@ -3,7 +3,7 @@ gorets
 
 RETS client in Go
 
-[![Build Status](https://travis-ci.org/jpfielding/rets.svg?branch=master)](https://travis-ci.org/jpfielding/rets.
+[![Build Status](https://travis-ci.org/jpfielding/gorets.svg?branch=master)](https://travis-ci.org/jpfielding/gorets.
 
 The attempt is to meet 1.8.0 compliance.
 
@@ -25,6 +25,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gowirelog/wirelog"
 )
 
 func main() {
@@ -38,21 +39,10 @@ func main() {
 
 	flag.Parse()
 
-	transport := http.Transport{
-		DisableCompression: true,
-	}
+	transport := wirelog.NewHTTPTransport()
 
 	if *logFile != "" {
-		file, err := os.Create(*logFile)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		fmt.Println("wire logging enabled: ", file.Name())
-		// set the dial  
-		transport.Dial = rets.WireLog(file, net.Dial)
-		// this creates its own dialer atm... this needs to review
-		transport.DialTLS = rets.WireLogTLS(file)
+		wirelog.LogToFile(transport, *logFile, true, true)
 	}
 
 	// should we throw an err here too?
