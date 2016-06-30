@@ -1,30 +1,16 @@
-gorets
-======
-
-RETS client in Go
-
-[![Build Status](https://travis-ci.org/jpfielding/rets.svg?branch=master)](https://travis-ci.org/jpfielding/rets.
-
-The attempt is to meet 1.8.0 compliance.
-
-http://www.reso.org/assets/RETS/Specifications/rets_1_8.pdf.
-
-Find me at gophers.slack.com#gorets
-
-```go
 package main
 
 import (
 	"flag"
 	"fmt"
-	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"golang.org/x/net/context"
 
 	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gotabular/tabular"
+	"github.com/jpfielding/gowirelog/wirelog"
 )
 
 func main() {
@@ -32,38 +18,31 @@ func main() {
 	password := flag.String("password", "", "Password for the RETS server")
 	loginURL := flag.String("login-url", "", "Login URL for the RETS server")
 	userAgent := flag.String("user-agent", "Threewide/1.0", "User agent for the RETS client")
-	userAgentPw := flag.String("user-agent-pw", "", "User agent password (for RETS UA-Auth)")
+	userAgentPw := flag.String("user-agent-pw", "", "User agent authentication")
 	retsVersion := flag.String("rets-version", "", "RETS Version")
+	resource := flag.String("resource", "", "")
+	class := flag.String("class", "", "")
+	idField := flag.String("id-field", "", "")
+	dmql := flag.String("dmql", "", "query")
 	logFile := flag.String("log-file", "", "")
 
 	flag.Parse()
 
-	transport := http.Transport{
-		DisableCompression: true,
-	}
+	var transport http.Transport
 
 	if *logFile != "" {
-		file, err := os.Create(*logFile)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		fmt.Println("wire logging enabled: ", file.Name())
-		// set the dial  
-		transport.Dial = rets.WireLog(file, net.Dial)
-		// this creates its own dialer atm... this needs to review
-		transport.DialTLS = rets.WireLogTLS(file)
+		wirelog.LogToFile(&transport, *logFile, true, true)
 	}
 
 	// should we throw an err here too?
 	session, err := rets.DefaultSession(
-	 	*username,
-	 	*password,
-	 	*userAgent,
-	 	*userAgentPw,
-	 	*retsVersion,
-	 	&transport,
-	 	)
+		*username,
+		*password,
+		*userAgent,
+		*userAgentPw,
+		*retsVersion,
+		&transport,
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -99,14 +78,14 @@ func main() {
 
 	req := rets.SearchRequest{
 		URL:        capability.Search,
-		Query:      "((180=|AH))",
-		SearchType: "Property",
-		Class:      "1",
+		Query:      *dmql,
+		SearchType: *resource,
+		Class:      *class,
 		Format:     "COMPACT-DECODED",
 		QueryType:  "DMQL2",
 		Count:      rets.CountIncluded,
-		Limit:      3,
-		Offset:     -1,
+		// Limit:      3,
+		// Offset:     -1,
 	}
 	result, err := rets.SearchCompact(session, ctx, req)
 	defer result.Close()
@@ -114,8 +93,12 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("COLUMNS:", result.Columns)
+	var ids []string
+	// create an indexer to quickly pull the right value
+	indexer := tabular.Columns(result.Columns).Index()
 	hasMoreRows, err := result.ForEach(func(row []string, err error) error {
 		fmt.Println(row)
+		ids = append(ids, indexer(*idField, tabular.Row(row)))
 		return nil
 	})
 	if hasMoreRows {
@@ -124,40 +107,43 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	one, err := rets.GetObject(session, ctx, rets.GetObjectRequest{
-		URL:      capability.GetObject,
-		Resource: "Property",
-		Type:     "Photo",
-		Id:       "3986587:1",
-	})
-	if err != nil {
-		panic(err)
-	}
-	for r := range one {
+	// warning, this does _all_ of the photos
+	for _, id := range ids {
+		one, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
+			URL:      capability.GetObject,
+			Resource: *resource,
+			Type:     "Photo",
+			ID:       fmt.Sprintf("%s:1", id),
+		})
 		if err != nil {
 			panic(err)
 		}
-		o := r.Object
-		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
+		for r := range one {
+			if err != nil {
+				panic(err)
+			}
+			o := r.Object
+			fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
+		}
 	}
-	all, err := rets.GetObject(session, ctx, rets.GetObjectRequest{
-		URL:      capability.GetObject,
-		Resource: "Property",
-		Type:     "Photo",
-		Id:       "3986587:*",
-	})
-	if err != nil {
-		panic(err)
-	}
-	for r := range all {
+	// warning, this does _all_ of the photos
+	for _, id := range ids {
+		all, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
+			URL:      capability.GetObject,
+			Resource: *resource,
+			Type:     "Photo",
+			ID:       fmt.Sprintf("%s:*", id),
+		})
 		if err != nil {
 			panic(err)
 		}
-		o := r.Object
-		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentId, o.ObjectId, len(o.Blob))
+		for r := range all {
+			if err != nil {
+				panic(err)
+			}
+			o := r.Object
+			fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
+		}
 	}
-
 	rets.Logout(session, ctx, rets.LogoutRequest{URL: capability.Logout})
 }
-```
