@@ -79,7 +79,7 @@ func main() {
 		if *output == "" {
 			continue
 		}
-		path := fmt.Sprintf("%s/%d", *output, o.ContentID)
+		path := fmt.Sprintf("%s/%s", *output, o.ContentID)
 		os.MkdirAll(path, os.ModePerm)
 		f, err := os.Create(fmt.Sprintf("%s/%d", path, o.ObjectID))
 		if err != nil {
