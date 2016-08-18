@@ -13,5 +13,7 @@ Find me at gophers.slack.com#gorets
 
 
 [Example Search](cmds/search.go)
+
 [Example GetObject](cmds/getobject.go)
+
 [Example Metadata](cmds/metadata.go)
