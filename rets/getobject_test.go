@@ -9,10 +9,8 @@ import (
 	"net/http"
 	"net/textproto"
 	"testing"
-	"time"
 
 	testutils "github.com/jpfielding/gotest/testutils"
-	"golang.org/x/net/context"
 )
 
 func TestGetObject(t *testing.T) {
@@ -27,13 +25,24 @@ func TestGetObject(t *testing.T) {
 	textproto.MIMEHeader(header).Add("Location", "http://www.simpleboundary.com/image-5.jpg")
 
 	var body = `<binary data 1>`
-	reader := ioutil.NopCloser(bytes.NewReader([]byte(body)))
 
-	results := parseGetObjectResult(context.Background(), header, reader)
-	result := <-results
+	response := GetObjectResponse{
+		response: &http.Response{
+			Header: header,
+			Body:   ioutil.NopCloser(bytes.NewReader([]byte(body))),
+		},
+	}
+	defer response.Close()
+	var objects []*Object
+	err := response.ForEach(func(o *Object, err error) error {
+		objects = append(objects, o)
+		return nil
+	})
+	testutils.Ok(t, err)
 
-	o := result.Object
-	testutils.Ok(t, result.Err)
+	testutils.Equals(t, 1, len(objects))
+
+	o := objects[0]
 	testutils.Equals(t, true, o.Preferred)
 	testutils.Equals(t, "image/jpeg", o.ContentType)
 	testutils.Equals(t, "123456", o.ContentID)
@@ -105,24 +114,24 @@ Location: http://www.simpleboundary.com/image-7.jpg
 <RETS ReplyCode="0" ReplyText="Found it!"/>
 --simple boundary--`
 
-func TestExtractBoundary(t *testing.T) {
-	extracted := extractBoundary(contentType)
-
-	testutils.Equals(t, boundary, extracted)
-}
-
 func TestGetObjects(t *testing.T) {
-	extracted := extractBoundary(contentType)
+	headers := http.Header{}
+	headers.Add("Content-Type", contentType)
+	response := GetObjectResponse{
+		response: &http.Response{
+			Header: headers,
+			Body:   ioutil.NopCloser(bytes.NewReader([]byte(multipartBody))),
+		},
+	}
+	defer response.Close()
+	var objects []*Object
+	response.ForEach(func(o *Object, err error) error {
+		testutils.Ok(t, err)
+		objects = append(objects, o)
+		return nil
+	})
 
-	testutils.Equals(t, boundary, extracted)
-
-	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
-
-	results := parseGetObjectsResult(context.Background(), extracted, body)
-
-	r1 := <-results
-	testutils.Ok(t, r1.Err)
-	o1 := r1.Object
+	o1 := objects[0]
 	testutils.Equals(t, true, o1.Preferred)
 	testutils.Equals(t, "image/jpeg", o1.ContentType)
 	testutils.Equals(t, "123456", o1.ContentID)
@@ -131,40 +140,30 @@ func TestGetObjects(t *testing.T) {
 	testutils.Equals(t, "123456", o1.ObjectData["ListingKey"])
 	testutils.Equals(t, "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
 
-	r2 := <-results
-	testutils.Ok(t, r2.Err)
-	o2 := r2.Object
+	o2 := objects[1]
 	testutils.Equals(t, 2, o2.ObjectID)
 	testutils.Equals(t, "1a234234234", o2.UID)
 
-	r3 := <-results
-	testutils.Ok(t, r3.Err)
-	o3 := r3.Object
+	o3 := objects[2]
 	testutils.Equals(t, 3, o3.ObjectID)
 	testutils.Equals(t, "Outhouse", o3.Description)
 	testutils.Equals(t, "The urinal", o3.SubDescription)
 
-	r4 := <-results
-	testutils.Ok(t, r4.Err)
-	o4 := r4.Object
+	o4 := objects[3]
 	testutils.Equals(t, true, o4.RetsError)
 
 	testutils.Equals(t, "text/xml", o4.ContentType)
 	testutils.Equals(t, "There is no object with that Object-ID", o4.RetsMessage.ReplyText)
 	testutils.Equals(t, 20403, o4.RetsMessage.ReplyCode)
 
-	r5 := <-results
-	testutils.Ok(t, r5.Err)
-	o5 := r5.Object
+	o5 := objects[4]
 	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
 	testutils.Equals(t, "image/jpeg", o5.ContentType)
 	testutils.Equals(t, "123457", o5.ContentID)
 	testutils.Equals(t, 5, o5.ObjectID)
 	testutils.Equals(t, "", string(o5.Blob))
 
-	r6 := <-results
-	testutils.Ok(t, r6.Err)
-	o6 := r6.Object
+	o6 := objects[5]
 	testutils.Equals(t, "http://www.simpleboundary.com/image-6.jpg", o6.Location)
 	testutils.Equals(t, "image/jpeg", o6.ContentType)
 	testutils.Equals(t, "123457", o6.ContentID)
@@ -172,9 +171,7 @@ func TestGetObjects(t *testing.T) {
 	testutils.Equals(t, "<binary data 6>", string(o6.Blob))
 	testutils.Assert(t, o6.RetsMessage == nil, "should not be the zerod object")
 
-	r7 := <-results
-	testutils.Ok(t, r7.Err)
-	o7 := r7.Object
+	o7 := objects[6]
 	testutils.Equals(t, "http://www.simpleboundary.com/image-7.jpg", o7.Location)
 	testutils.Equals(t, "image/jpeg", o7.ContentType)
 	testutils.Equals(t, "123457", o7.ContentID)
@@ -182,30 +179,4 @@ func TestGetObjects(t *testing.T) {
 	testutils.Equals(t, "", string(o7.Blob))
 	testutils.Equals(t, "Found it!", o7.RetsMessage.ReplyText)
 
-}
-
-func TestParseGetObjectQuit(t *testing.T) {
-	extracted := extractBoundary(contentType)
-
-	testutils.Equals(t, boundary, extracted)
-
-	body := ioutil.NopCloser(bytes.NewReader([]byte(multipartBody)))
-
-	ctx, cancel := context.WithCancel(context.Background())
-	results := parseGetObjectsResult(ctx, extracted, body)
-
-	r1 := <-results
-	testutils.Ok(t, r1.Err)
-	testutils.Assert(t, r1 != GetObjectResult{}, "should not be the zerod object")
-	o1 := r1.Object
-	testutils.Equals(t, "image/jpeg", o1.ContentType)
-	testutils.Equals(t, "123456", o1.ContentID)
-	testutils.Equals(t, 1, o1.ObjectID)
-
-	cancel()
-	time.Sleep(100 * time.Millisecond) // I don't like this, but it allows time for the done channel to close.
-
-	// the closed channel will emit a zero'd value of the proper type
-	r2 := <-results
-	testutils.Equals(t, r2, GetObjectResult{})
 }

@@ -59,7 +59,7 @@ func main() {
 	// feedback
 	fmt.Println("GetObject: ", capability.GetObject)
 	// warning, this does _all_ of the photos
-	one, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
+	response, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
 		URL:      capability.GetObject,
 		Resource: getOptions.Resource,
 		Type:     getOptions.Type,
@@ -68,28 +68,25 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// TODO need to close chan, or better yet, not let it be a chan
-	for r := range one {
-		if err != nil {
-			panic(err)
-		}
-		o := r.Object
+	defer response.Close()
+	err = response.ForEach(func(o *rets.Object, err error) error {
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
 		// if we arent saving, then we quit
 		if *output == "" {
-			continue
+			return nil
 		}
 		path := fmt.Sprintf("%s/%s", *output, o.ContentID)
 		os.MkdirAll(path, os.ModePerm)
 		f, err := os.Create(fmt.Sprintf("%s/%d", path, o.ObjectID))
 		if err != nil {
-			panic(err)
+			return err
 		}
 		defer f.Close()
 		_, err = f.Write(o.Blob)
-		if err != nil {
-			panic(err)
-		}
+		return err
+	})
+	if err != nil {
+		panic(err)
 	}
 }
 
