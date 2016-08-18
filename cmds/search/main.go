@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"time"
 
 	"golang.org/x/net/context"
@@ -62,6 +61,7 @@ func main() {
 	fmt.Println("Search: ", capability.Search)
 	req := rets.SearchRequest{
 		URL:        capability.Search,
+		Select:     searchOpts.Select,
 		Query:      searchOpts.Query,
 		SearchType: searchOpts.Resource,
 		Class:      searchOpts.Class,
@@ -74,7 +74,7 @@ func main() {
 
 	w := csv.NewWriter(os.Stdout)
 	if *output != "" {
-		os.MkdirAll(filepath.Dir(*output), 0777)
+		os.MkdirAll(*output, 0777)
 		f, _ := os.Create(*output + "/results.csv")
 		defer f.Close()
 		w = csv.NewWriter(f)
@@ -110,6 +110,7 @@ type SearchOptions struct {
 	CountType int    `json:"count-type"`
 	Limit     int    `json:"limit"`
 	Query     string `json:"query"`
+	Select    string `json:"select"`
 }
 
 // SetFlags ...
@@ -118,6 +119,7 @@ func (o *SearchOptions) SetFlags() {
 	flag.StringVar(&o.Class, "class", "Residential", "Subtype of resource")
 	flag.StringVar(&o.Format, "format", "COMPACT-DECODED", "Format for the RETS response")
 	flag.StringVar(&o.QueryType, "query-type", "DMQL2", "Query type (defaults to DMQL2)")
+	flag.StringVar(&o.Select, "select", "", "Fields to be returned")
 	flag.StringVar(&o.Query, "dmql", "(ModificationTimestamp=2000-01-01T00:00:00+)", "DMQL for the results")
 	flag.IntVar(&o.CountType, "count-type", rets.CountIncluded, "How to deal with the search count")
 	flag.IntVar(&o.Limit, "limit", 0, "Limit rows returned per page")

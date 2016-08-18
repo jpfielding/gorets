@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"time"
 
 	"github.com/jpfielding/gorets/cmds/common"
@@ -13,21 +14,21 @@ func main() {
 	mtype := flag.String("mtype", "METADATA-SYSTEM", "The type of metadata requested")
 	format := flag.String("format", "COMPACT", "Metadata format")
 	id := flag.String("id", "*", "Metadata identifier")
+
 	configFile := flag.String("config-file", "", "Config file for RETS connection")
+
+	config := common.Config{}
+	config.SetFlags()
 
 	flag.Parse()
 
-	config := common.Config{}
 	if *configFile != "" {
 		err := config.LoadFrom(*configFile)
 		if err != nil {
 			panic(err)
 		}
-	} else {
-		// setup flag parsing for this type
-		config.SetFlags()
-		flag.Parse()
 	}
+	fmt.Printf("Connection Settings: %v\n", config)
 
 	// should we throw an err here too?
 	session, err := config.Initialize()

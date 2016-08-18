@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -12,25 +14,32 @@ import (
 )
 
 func main() {
-	resource := flag.String("property", "Property", "Resource type for this object")
-	id := flag.String("id", "1:*", "Comma separate list of ids: '234:*,123:0,123:1'")
-	otype := flag.String("type", "Photo", "Object type for this request")
-	directory := flag.String("directory", "", "Directory for file output")
+	optionsFile := flag.String("object-options", "", "Get object")
 	configFile := flag.String("config-file", "", "Config file for RETS connection")
+	output := flag.String("output", "", "Directory for file output")
+
+	config := common.Config{}
+	config.SetFlags()
+
+	getOptions := GetObjectOptions{}
+	getOptions.SetFlags()
 
 	flag.Parse()
 
-	config := common.Config{}
 	if *configFile != "" {
 		err := config.LoadFrom(*configFile)
 		if err != nil {
 			panic(err)
 		}
-	} else {
-		// setup flag parsing for this type
-		config.SetFlags()
-		// flag.Parse()
 	}
+	fmt.Printf("Connection Settings: %v\n", config)
+	if *optionsFile != "" {
+		err := getOptions.LoadFrom(*optionsFile)
+		if err != nil {
+			panic(err)
+		}
+	}
+	fmt.Printf("GetObject Options: %v\n", getOptions)
 
 	// should we throw an err here too?
 	session, err := config.Initialize()
@@ -52,9 +61,9 @@ func main() {
 	// warning, this does _all_ of the photos
 	one, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
 		URL:      capability.GetObject,
-		Resource: *resource,
-		Type:     *otype,
-		ID:       *id,
+		Resource: getOptions.Resource,
+		Type:     getOptions.Type,
+		ID:       getOptions.ID,
 	})
 	if err != nil {
 		panic(err)
@@ -67,12 +76,12 @@ func main() {
 		o := r.Object
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
 		// if we arent saving, then we quit
-		if *directory == "" {
+		if *output == "" {
 			continue
 		}
-		path := fmt.Sprintf("%s/%s", directory, o.ContentID)
+		path := fmt.Sprintf("%s/%d", *output, o.ContentID)
 		os.MkdirAll(path, os.ModePerm)
-		f, err := os.Create(fmt.Sprintf("%s/%s", path, o.ObjectID))
+		f, err := os.Create(fmt.Sprintf("%s/%d", path, o.ObjectID))
 		if err != nil {
 			panic(err)
 		}
@@ -82,4 +91,34 @@ func main() {
 			panic(err)
 		}
 	}
+}
+
+// GetObjectOptions ...
+type GetObjectOptions struct {
+	Resource string `json:"resource"`
+	Type     string `json:"type"`
+	ID       string `json:"id"`
+}
+
+// SetFlags ...
+func (o *GetObjectOptions) SetFlags() {
+	flag.StringVar(&o.Resource, "resource", "Property", "Resource for the search")
+	flag.StringVar(&o.Type, "type", "Photo", "Photo, document, etc...")
+	flag.StringVar(&o.ID, "id", "*", "Subtype of resource")
+}
+
+// LoadFrom ...
+func (o *GetObjectOptions) LoadFrom(filename string) error {
+	// xlog.Println("loading:", filename)
+	file, err := os.Open(filename)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	blob, err := ioutil.ReadAll(file)
+	err = json.Unmarshal(blob, o)
+	if err != nil {
+		return err
+	}
+	return nil
 }
