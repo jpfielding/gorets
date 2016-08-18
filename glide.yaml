@@ -22,5 +22,3 @@ import:
     ref:     74f6f1cc130f1275420877f77a44145c7739c836
   - package: github.com/jpfielding/gowirelog
     ref:     0e597359079aff7eb6e1df1bb0a73d1c68d6ee63
-  - package: github.com/jpfielding/gotabular
-    ref:     6fedcafb8e3ffb62073dd87f4ba8cca9b25b05a0
