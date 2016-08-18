@@ -4,11 +4,12 @@ import (
 	"flag"
 	"time"
 
+	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"
 	"golang.org/x/net/context"
 )
 
-func main3() {
+func main() {
 	mtype := flag.String("mtype", "METADATA-SYSTEM", "The type of metadata requested")
 	format := flag.String("format", "COMPACT", "Metadata format")
 	id := flag.String("id", "*", "Metadata identifier")
@@ -16,7 +17,7 @@ func main3() {
 
 	flag.Parse()
 
-	config := Config{}
+	config := common.Config{}
 	if *configFile != "" {
 		err := config.LoadFrom(*configFile)
 		if err != nil {

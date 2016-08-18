@@ -6,11 +6,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"
 	"golang.org/x/net/context"
 )
 
-func main2() {
+func main() {
 	resource := flag.String("property", "Property", "Resource type for this object")
 	id := flag.String("id", "1:*", "Comma separate list of ids: '234:*,123:0,123:1'")
 	otype := flag.String("type", "Photo", "Object type for this request")
@@ -19,7 +20,7 @@ func main2() {
 
 	flag.Parse()
 
-	config := Config{}
+	config := common.Config{}
 	if *configFile != "" {
 		err := config.LoadFrom(*configFile)
 		if err != nil {

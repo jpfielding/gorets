@@ -12,6 +12,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"
 )
 
@@ -20,7 +21,7 @@ func main() {
 	searchFile := flag.String("search-options", "", "Config file for search options")
 	output := flag.String("output", "", "Directory for file output")
 
-	config := Config{}
+	config := common.Config{}
 	config.SetFlags()
 
 	searchOpts := SearchOptions{}
