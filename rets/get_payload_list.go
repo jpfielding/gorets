@@ -103,7 +103,7 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 				go dataProcessing()
 				return &list, nil
 			case "DELIMITER":
-				decoded, err := ParseDelimiterTag(elmt)
+				decoded, err := DelimiterTag(elmt).Parse()
 				if err != nil {
 					return nil, err
 				}

@@ -126,7 +126,6 @@ func (o *SearchOptions) SetFlags() {
 
 // LoadFrom ...
 func (o *SearchOptions) LoadFrom(filename string) error {
-	// xlog.Println("loading:", filename)
 	file, err := os.Open(filename)
 	defer file.Close()
 	if err != nil {

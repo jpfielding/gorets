@@ -28,9 +28,21 @@ func (m *CompactData) Indexer() Indexer {
 	}
 }
 
-// ParseDelimiterTag ...
-func ParseDelimiterTag(start xml.StartElement) (string, error) {
-	del := start.Attr[0].Value
+// CompactRow ...
+type CompactRow string
+
+// Parse ...
+func (cr CompactRow) Parse(delim string) []string {
+	split := strings.Split(string(cr), delim)
+	return split[1 : len(split)-1]
+}
+
+// DelimiterTag holds the seperator for compact data
+type DelimiterTag xml.StartElement
+
+// Parse ...
+func (dt DelimiterTag) Parse() (string, error) {
+	del := dt.Attr[0].Value
 	pad := strings.Repeat("0", 2-len(del))
 	decoded, err := hex.DecodeString(pad + del)
 	if err != nil {
@@ -39,17 +51,14 @@ func ParseDelimiterTag(start xml.StartElement) (string, error) {
 	return string(decoded), nil
 }
 
-// ParseCountTag ...
-func ParseCountTag(count xml.StartElement) (int, error) {
-	code, err := strconv.ParseInt(count.Attr[0].Value, 10, 64)
+// CountTag ...
+type CountTag xml.StartElement
+
+// Parse ...
+func (ct CountTag) Parse() (int, error) {
+	code, err := strconv.ParseInt(ct.Attr[0].Value, 10, 64)
 	if err != nil {
 		return -1, err
 	}
 	return int(code), nil
-}
-
-// ParseCompactRow ...
-func ParseCompactRow(row, delim string) []string {
-	split := strings.Split(row, delim)
-	return split[1 : len(split)-1]
 }

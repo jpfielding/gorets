@@ -30,11 +30,11 @@ type CompactSearchResult struct {
 	buf    bytes.Buffer
 }
 
-// CompactRow ...
-type CompactRow func(row []string, err error) error
+// EachRow ...
+type EachRow func(row []string, err error) error
 
 // ForEach returns MaxRows and any error that 'each' wont handle
-func (c *CompactSearchResult) ForEach(each CompactRow) (bool, error) {
+func (c *CompactSearchResult) ForEach(each EachRow) (bool, error) {
 	defer c.body.Close()
 	maxRows := false
 	for {
@@ -57,7 +57,7 @@ func (c *CompactSearchResult) ForEach(each CompactRow) (bool, error) {
 		case xml.EndElement:
 			switch t.Name.Local {
 			case "DATA":
-				err := each(ParseCompactRow(c.buf.String(), c.Delimiter), nil)
+				err := each(CompactRow(c.buf.String()).Parse(c.Delimiter), nil)
 				if err != nil {
 					return maxRows, err
 				}
@@ -107,12 +107,12 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 				}
 				result.RetsResponse = *rets
 			case "COUNT":
-				result.Count, err = ParseCountTag(t)
+				result.Count, err = CountTag(t).Parse()
 				if err != nil {
 					return result, err
 				}
 			case "DELIMITER":
-				result.Delimiter, err = ParseDelimiterTag(t)
+				result.Delimiter, err = DelimiterTag(t).Parse()
 				if err != nil {
 					return result, err
 				}
@@ -122,7 +122,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 			name := elmt.Name.Local
 			switch name {
 			case "COLUMNS":
-				result.Columns = ParseCompactRow(result.buf.String(), result.Delimiter)
+				result.Columns = CompactRow(result.buf.String()).Parse(result.Delimiter)
 				return result, nil
 			case "RETS", "RETS-STATUS":
 				// if there is only a RETS tag.. just exit

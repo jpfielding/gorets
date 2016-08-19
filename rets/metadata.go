@@ -180,11 +180,11 @@ func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, de
 func extractMap(cols string, rows []string, delim string) *CompactData {
 	data := CompactData{}
 	// remove the first and last chars
-	data.Columns = ParseCompactRow(cols, delim)
+	data.Columns = CompactRow(cols).Parse(delim)
 	data.Rows = make([][]string, len(rows))
 	// create each
 	for i, line := range rows {
-		data.Rows[i] = ParseCompactRow(line, delim)
+		data.Rows[i] = CompactRow(line).Parse(delim)
 	}
 	return &data
 }
