@@ -2,7 +2,7 @@ package: main
 
 import:
   - package: golang.org/x/net
-    ref:     fb93926129b8ec0056f2f458b1f519654814edf0
+    ref:     07b51741c1d6423d4a6abab1c49940ec09cb1aaf
     subpackages:
     - /context/ctxhttp
     - /html/charset
