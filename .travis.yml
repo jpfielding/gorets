@@ -3,7 +3,7 @@ sudo: false
 
 install:
   - export GO15VENDOREXPERIMENT=1
-  - wget https://github.com/Masterminds/glide/releases/download/0.10.2/glide-0.10.2-linux-386.zip -O glide.zip
+  - wget https://github.com/Masterminds/glide/releases/download/v0.11.1/glide-v0.11.1-linux-386.zip -O glide.zip
   - unzip glide.zip
   - export PATH=$PATH:$PWD/linux-386/
 
