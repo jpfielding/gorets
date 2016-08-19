@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
 // GetRequest ...

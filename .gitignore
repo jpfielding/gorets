@@ -4,3 +4,4 @@ out
 *~
 metadata/main/metadata.go
 vendor/
+glide.lock

@@ -4,7 +4,6 @@ import:
   - package: golang.org/x/net
     ref:     fb93926129b8ec0056f2f458b1f519654814edf0
     subpackages:
-    - /context
     - /context/ctxhttp
     - /html/charset
   - package: golang.org/x/text

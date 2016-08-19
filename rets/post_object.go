@@ -3,7 +3,7 @@ package rets
 import (
 	"errors"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
 // PostObject ...

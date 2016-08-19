@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 
-	"golang.org/x/net/context"
+	"context"
+
 	"golang.org/x/net/context/ctxhttp"
 )
 

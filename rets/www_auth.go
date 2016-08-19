@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
 // WWWAuthTransport manages rfc2617 authentication

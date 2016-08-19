@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"flag"
@@ -8,8 +9,6 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"

@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"time"
 
 	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"
-	"golang.org/x/net/context"
 )
 
 func main() {

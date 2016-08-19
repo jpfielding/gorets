@@ -6,7 +6,7 @@ import (
 	"errors"
 	"io"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
 // SearchCompact if you set the wrong request Format you will get nothing back

@@ -8,9 +8,10 @@ import (
 	"os"
 	"time"
 
+	"context"
+
 	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"
-	"golang.org/x/net/context"
 )
 
 func main() {
