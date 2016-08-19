@@ -12,7 +12,7 @@ http://www.reso.org/assets/RETS/Specifications/rets_1_8.pdf.
 Find me at gophers.slack.com#gorets
 
 ```
-config.json
+config.json:
 {
 	"username": "user",
 	"password": "pwd",
@@ -28,7 +28,7 @@ config.json
 ```
 go run cmds/search/*.go -config-file ~/gorets/config.json -search-options ~/gorets/search.json -output=/tmp/
 
-search.json
+search.json:
 {
 	"resource": "Property",
 	"class": "Residential",
@@ -44,5 +44,12 @@ search.json
 [Example GetObject](cmds/getobject/main.go)
 ```
 go run cmds/getobject/*.go -config-file ~/gorets/config.json -object-options ~/gorets/getobject.json -output=/tmp/
+
+getobject.json:
+{
+	"resource": "Property",
+	"type": "Photo",
+	"id": "1330918:*,1555397:*"
+}
 ```
 [Example Metadata](cmds/metadata/main.go)
