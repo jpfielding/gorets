@@ -1,4 +1,6 @@
-package: main
+package: github.com/jpfielding/gorets
+homepage: github.com/jpfielding/gorets
+license: GPL3
 
 import:
   - package: golang.org/x/net
