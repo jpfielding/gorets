@@ -12,8 +12,8 @@ http://www.reso.org/assets/RETS/Specifications/rets_1_8.pdf.
 Find me at gophers.slack.com#gorets
 
 
-[Example Search](cmds/search.go)
+[Example Search](cmds/search/main.go)
 
-[Example GetObject](cmds/getobject.go)
+[Example GetObject](cmds/getobject/main.go)
 
-[Example Metadata](cmds/metadata.go)
+[Example Metadata](cmds/metadata/main.go)
