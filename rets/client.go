@@ -6,6 +6,7 @@ import (
 
 	"context"
 
+	"github.com/jpfielding/gowirelog/wirelog"
 	"golang.org/x/net/context/ctxhttp"
 )
 
@@ -36,7 +37,7 @@ type Requester func(ctx context.Context, req *http.Request) (*http.Response, err
 // DefaultSession configures the default rets session
 func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (Requester, error) {
 	if transport == nil {
-		transport = http.DefaultTransport
+		transport = wirelog.NewHTTPTransport()
 	}
 
 	client := http.Client{
