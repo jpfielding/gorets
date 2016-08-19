@@ -55,6 +55,8 @@ getobject.json:
 [Example Metadata](cmds/metadata/main.go)
 ```
 go run cmds/metadata/*.go -config-file ~/gorets/config.json -metadata-options ~/gorets/metadata.json -output /tmp
+
+metadata.json
 {
         "metadata-type": "METADATA-SYSTEM",
         "format":       "COMPACT",
