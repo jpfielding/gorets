@@ -23,7 +23,7 @@ type CompactSearchResult struct {
 	RetsResponse RetsResponse
 	Count        int
 	Delimiter    string
-	Columns      []string
+	Columns      Row
 
 	body   io.ReadCloser
 	parser *xml.Decoder
@@ -31,7 +31,7 @@ type CompactSearchResult struct {
 }
 
 // EachRow ...
-type EachRow func(row []string, err error) error
+type EachRow func(row Row, err error) error
 
 // ForEach returns MaxRows and any error that 'each' wont handle
 func (c *CompactSearchResult) ForEach(each EachRow) (bool, error) {

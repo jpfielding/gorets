@@ -11,16 +11,37 @@ import (
 	"context"
 )
 
-// Metadata ...
-type Metadata struct {
+// CompactMetadata ...
+type CompactMetadata struct {
 	Rets     RetsResponse
 	System   MSystem
 	Elements map[string][]CompactData
 }
 
-func (m Metadata) find(name string) map[string]CompactData {
+// CompactData is the common compact decoded structure
+type CompactData struct {
+	ID, Date, Version string
+	Columns           Row
+	Rows              []Row
+}
+
+// Indexer provices cached lookup for CompactData
+type Indexer func(col string, row int) string
+
+// Indexer create the cache
+func (cd *CompactData) Indexer() Indexer {
+	index := make(map[string]int)
+	for i, c := range cd.Columns {
+		index[c] = i
+	}
+	return func(col string, row int) string {
+		return cd.Rows[row][index[col]]
+	}
+}
+
+func (cm CompactMetadata) find(name string) map[string]CompactData {
 	classes := make(map[string]CompactData)
-	for _, cd := range m.Elements[name] {
+	for _, cd := range cm.Elements[name] {
 		classes[cd.ID] = cd
 	}
 	return classes
@@ -71,7 +92,7 @@ func MetadataStream(requester Requester, ctx context.Context, r MetadataRequest)
 }
 
 // GetCompactMetadata ...
-func GetCompactMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*Metadata, error) {
+func GetCompactMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*CompactMetadata, error) {
 	r.Format = "COMPACT"
 	body, err := MetadataStream(requester, ctx, r)
 	if err != nil {
@@ -81,11 +102,11 @@ func GetCompactMetadata(requester Requester, ctx context.Context, r MetadataRequ
 }
 
 // ParseMetadataCompactResult ...
-func ParseMetadataCompactResult(body io.ReadCloser) (*Metadata, error) {
+func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 	defer body.Close()
 	parser := DefaultXMLDecoder(body, false)
 
-	metadata := Metadata{}
+	metadata := CompactMetadata{}
 	metadata.Elements = make(map[string][]CompactData)
 	for {
 		token, err := parser.Token()
@@ -181,7 +202,7 @@ func extractMap(cols string, rows []string, delim string) *CompactData {
 	data := CompactData{}
 	// remove the first and last chars
 	data.Columns = CompactRow(cols).Parse(delim)
-	data.Rows = make([][]string, len(rows))
+	data.Rows = make([]Row, len(rows))
 	// create each
 	for i, line := range rows {
 		data.Rows[i] = CompactRow(line).Parse(delim)
