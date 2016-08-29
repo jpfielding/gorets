@@ -76,20 +76,13 @@ type XMLMetadataForeignKey struct {
 
 // MetadataForeignKey ...
 type MetadataForeignKey struct {
-	// <ForeignKeyID>18</ForeignKeyID>
-	ForeignKeyID string `xml:"ForeignKeyID"`
-	// <ParentResourceID>Property</ParentResourceID>
+	ForeignKeyID     string `xml:"ForeignKeyID"`
 	ParentResourceID string `xml:"ParentResourceID"`
-	// <ParentClassID>Listing</ParentClassID>
-	ParentClassID string `xml:"ParentClassID"`
-	// <ParentSystemName>Matrix_Unique_ID</ParentSystemName>
+	ParentClassID    string `xml:"ParentClassID"`
 	ParentSystemName string `xml:"ParentSystemName"`
-	// <ChildResourceID>PropertySubTable</ChildResourceID>
-	ChildResourceID string `xml:"ChildResourceID"`
-	// <ChildClassID>Room</ChildClassID>
-	ChildClassID string `xml:"ChildClassID"`
-	// <ChildSystemName>Listing_MUI</ChildSystemName>
-	ChildSystemName string `xml:"ChildSystemName"`
+	ChildResourceID  string `xml:"ChildResourceID"`
+	ChildClassID     string `xml:"ChildClassID"`
+	ChildSystemName  string `xml:"ChildSystemName"`
 }
 
 // XMLMetadataResource ...
@@ -100,56 +93,31 @@ type XMLMetadataResource struct {
 
 // MetadataResource ...
 type MetadataResource struct {
-	// 	<ResourceID>Agent</ResourceID>
-	ResourceID string `xml:"ResourceID"`
-	// <StandardName>Agent</StandardName>
-	StandardName string `xml:"StandardName"`
-	// <VisibleName>Agent</VisibleName>
-	VisibleName string `xml:"VisibleName"`
-	// <Description>Agent</Description>
-	Description string `xml:"Description"`
-	// <KeyField>Matrix_Unique_ID</KeyField>
-	KeyField string `xml:"KeyField"`
-	// <ClassCount>1</ClassCount>
-	ClassCount int `xml:"ClassCount"`
-	// <ClassVersion>1.00.00045</ClassVersion>
-	ClassVersion string `xml:"ClassVersion"`
-	// <ClassDate>2016-07-11T18:22:38Z</ClassDate>
-	ClassDate time.Time `xml:"ClassDate"`
-	// <ObjectVersion>1.00.00001</ObjectVersion>
-	ObjectVersion string `xml:"ObjectVersion"`
-	// <ObjectDate>2014-06-04T15:55:22Z</ObjectDate>
-	ObjectDate time.Time `xml:"ObjectDate"`
-	// <SearchHelpVersion>1.00.00000</SearchHelpVersion>
-	SearchHelpVersion string `xml:"SearchHelpVersion"`
-	// <SearchHelpDate>2014-02-05T19:15:32Z</SearchHelpDate>
-	SearchHelpDate time.Time `xml:"SearchHelpDate"`
-	// <EditMaskVersion>1.00.00000</EditMaskVersion>
-	EditMaskVersion string `xml:"EditMaskVersion"`
-	// <EditMaskDate>2014-02-05T19:15:32Z</EditMaskDate>
-	EditMaskDate time.Time `xml:"EditMaskDate"`
-	// <LookupVersion>1.00.00110</LookupVersion>
-	LookupVersion string `xml:"LookupVersion"`
-	// <LookupDate>2016-08-08T16:00:15Z</LookupDate>
-	LookupDate time.Time `xml:"LookupDate"`
-	// <UpdateHelpVersion>1.00.00000</UpdateHelpVersion>
-	UpdateHelpVersion string `xml:"UpdateHelpVersion"`
-	// <UpdateHelpDate>2014-02-05T19:15:32Z</UpdateHelpDate>
-	UpdateHelpDate time.Time `xml:"UpdateHelpDate"`
-	// <ValidationExpressionVersion>1.00.00000</ValidationExpressionVersion>
-	ValidationExpressionVersion string `xml:"ValidationExpressionVersion"`
-	// <ValidationExpressionDate>2014-02-05T19:15:32Z</ValidationExpressionDate>
-	ValidationExpressionDate time.Time `xml:"ValidationExpressionDate"`
-	// <ValidationLookupVersion>1.00.00000</ValidationLookupVersion>
-	ValidationLookupVersion string `xml:"ValidationLookupVersion"`
-	// <ValidationLookupDate>2014-02-05T19:15:32Z</ValidationLookupDate>
-	ValidationLookupDate time.Time `xml:"ValidationLookupDate"`
-	// <ValidationExternalVersion>1.00.00000</ValidationExternalVersion>
-	ValidationExternalVersion string `xml:"ValidationExternalVersion"`
-	// <ValidationExternalDate>2014-02-05T19:15:32Z</ValidationExternalDate>
-	ValidationExternalDate time.Time `xml:"ValidationExternalDate"`
-	// <X-DisplayOrder/>
-	XDisplayOrder int `xml:"X-DisplayOrder"`
+	ResourceID                  string    `xml:"ResourceID"`
+	StandardName                string    `xml:"StandardName"`
+	VisibleName                 string    `xml:"VisibleName"`
+	Description                 string    `xml:"Description"`
+	KeyField                    string    `xml:"KeyField"`
+	ClassCount                  int       `xml:"ClassCount"`
+	ClassVersion                string    `xml:"ClassVersion"`
+	ClassDate                   time.Time `xml:"ClassDate"`
+	ObjectVersion               string    `xml:"ObjectVersion"`
+	ObjectDate                  time.Time `xml:"ObjectDate"`
+	SearchHelpVersion           string    `xml:"SearchHelpVersion"`
+	SearchHelpDate              time.Time `xml:"SearchHelpDate"`
+	EditMaskVersion             string    `xml:"EditMaskVersion"`
+	EditMaskDate                time.Time `xml:"EditMaskDate"`
+	LookupVersion               string    `xml:"LookupVersion"`
+	LookupDate                  time.Time `xml:"LookupDate"`
+	UpdateHelpVersion           string    `xml:"UpdateHelpVersion"`
+	UpdateHelpDate              time.Time `xml:"UpdateHelpDate"`
+	ValidationExpressionVersion string    `xml:"ValidationExpressionVersion"`
+	ValidationExpressionDate    time.Time `xml:"ValidationExpressionDate"`
+	ValidationLookupVersion     string    `xml:"ValidationLookupVersion"`
+	ValidationLookupDate        time.Time `xml:"ValidationLookupDate"`
+	ValidationExternalVersion   string    `xml:"ValidationExternalVersion"`
+	ValidationExternalDate      time.Time `xml:"ValidationExternalDate"`
+	XDisplayOrder               int       `xml:"X-DisplayOrder"`
 
 	// the resource children
 	MetadataClass  XMLMetadataClass  `xml:"METADATA-CLASS"`
@@ -166,32 +134,19 @@ type XMLMetadataClass struct {
 
 // MetadataClass ...
 type MetadataClass struct {
-	// <ClassName>Agent</ClassName>
-	ClassName string `xml:"ClassName"`
-	// <StandardName/>
-	StandardName string `xml:"StandardName"`
-	// <VisibleName>Agent</VisibleName>
-	VisibleName string `xml:"VisibleName"`
-	// <Description>Agent</Description>
-	Description string `xml:"Description"`
-	// <TableVersion>1.00.00040</TableVersion>
-	TableVersion string `xml:"TableVersion"`
-	// <TableDate>2016-07-11T18:22:38Z</TableDate>
-	TableDate time.Time `xml:"TableDate"`
-	// <UpdateVersion>1.00.00000</UpdateVersion>
-	UpdateVersion string `xml:"UpdateVersion"`
-	// <UpdateDate>2014-02-05T19:16:09Z</UpdateDate>
-	UpdateDate string `xml:"UpdateDate"`
-	// <X-DisplayOrder/>
-	XDisplayOrder int `xml:"X-DisplayOrder"`
-	// <ColumnGroupVersion/>
-	ColumnGroupVersion string `xml:"ColumnGroupVersion"`
-	// <ColumnGroupDate/>
-	ColumnGroupDate time.Time `xml:"ColumnGroupDate"`
-	// <ColumnGroupSetVersion/>
-	ColumnGroupSetVersion string `xml:"ColumnGroupSetVersion"`
-	// <ColumnGroupSetDate/>
-	ColumnGroupSetDate time.Time `xml:"ColumnGroupSetDate"`
+	ClassName             string    `xml:"ClassName"`
+	StandardName          string    `xml:"StandardName"`
+	VisibleName           string    `xml:"VisibleName"`
+	Description           string    `xml:"Description"`
+	TableVersion          string    `xml:"TableVersion"`
+	TableDate             time.Time `xml:"TableDate"`
+	UpdateVersion         string    `xml:"UpdateVersion"`
+	UpdateDate            string    `xml:"UpdateDate"`
+	XDisplayOrder         int       `xml:"X-DisplayOrder"`
+	ColumnGroupVersion    string    `xml:"ColumnGroupVersion"`
+	ColumnGroupDate       time.Time `xml:"ColumnGroupDate"`
+	ColumnGroupSetVersion string    `xml:"ColumnGroupSetVersion"`
+	ColumnGroupSetDate    time.Time `xml:"ColumnGroupSetDate"`
 }
 
 // XMLMetadataTable ...
@@ -204,52 +159,29 @@ type XMLMetadataTable struct {
 
 // MetadataTable ...
 type MetadataTable struct {
-	// <SystemName>AgentLSCcode</SystemName>
-	SystemName string `xml:"SystemName"`
-	// <StandardName/>
-	StandardName string `xml:"StandardName"`
-	// <LongName>Agent LS Ccode</LongName>
-	LongName string `xml:"LongName"`
-	// <DBName>R574</DBName>
-	DBName string `xml:"DBName"`
-	// <ShortName>Agent LSC Code</ShortName>
-	ShortName string `xml:"ShortName"`
-	// <MaximumLength>75</MaximumLength>
-	MaximumLength int `xml:"MaximumLength"`
-	// <DataType>Character</DataType>
-	DataType string `xml:"DataType"`
-	// <Precision/>
-	Precision string `xml:"Precision"`
-	// <Searchable>1</Searchable>
-	Searchable int `xml:"Searchable"`
-	// <Interpretation>Lookup</Interpretation>
+	SystemName     string `xml:"SystemName"`
+	StandardName   string `xml:"StandardName"`
+	LongName       string `xml:"LongName"`
+	DBName         string `xml:"DBName"`
+	ShortName      string `xml:"ShortName"`
+	MaximumLength  int    `xml:"MaximumLength"`
+	DataType       string `xml:"DataType"`
+	Precision      string `xml:"Precision"`
+	Searchable     int    `xml:"Searchable"`
 	Interpretation string `xml:"Interpretation"`
-	// <Alignment>Left</Alignment>
-	Alignment string `xml:"Alignment"`
-	// <UseSeparator>0</UseSeparator>
-	UseSeparator int `xml:"UseSeparator"`
-	// <EditMaskID/>
-	EditMaskID string `xml:"EditMaskID"`
-	// <LookupName>BoardID</LookupName>
-	LookupName string `xml:"LookupName"`
-	// <MaxSelect>1</MaxSelect>
-	MaxSelect int `xml:"MaxSelect"`
-	// <Units/>
-	Units string `xml:"Units"`
-	// <Index>1</Index>
-	Index int `xml:"Index"`
-	// <Minimum/>
-	Minimum string `xml:"Minimum"`
-	// <Maximum/>
-	Maximum string `xml:"Maxiumum"`
-	// <Default/>
-	Default string `xml:"Default"`
-	// <Required>0</Required>
-	Required int `xml:"Required"`
-	// <SearchHelpID/>
-	SearchHelpID string `xml:"SearchHelpID"`
-	// <Unique>0</Unique>
-	Unique int `xml:"Unique"`
+	Alignment      string `xml:"Alignment"`
+	UseSeparator   int    `xml:"UseSeparator"`
+	EditMaskID     string `xml:"EditMaskID"`
+	LookupName     string `xml:"LookupName"`
+	MaxSelect      int    `xml:"MaxSelect"`
+	Units          string `xml:"Units"`
+	Index          int    `xml:"Index"`
+	Minimum        string `xml:"Minimum"`
+	Maximum        string `xml:"Maxiumum"`
+	Default        string `xml:"Default"`
+	Required       int    `xml:"Required"`
+	SearchHelpID   string `xml:"SearchHelpID"`
+	Unique         int    `xml:"Unique"`
 }
 
 // XMLMetadataObject ...
@@ -261,14 +193,10 @@ type XMLMetadataObject struct {
 
 // MetadataObject ...
 type MetadataObject struct {
-	// <ObjectType>AgentPhoto</ObjectType>
-	ObjectType string `xml:"ObjectType"`
-	// <StandardName/>
+	ObjectType   string `xml:"ObjectType"`
 	StandardName string `xml:"ObjectType"`
-	// <MimeType>image/jpeg</MimeType>
-	MimeType string `xml:"MimeType"`
-	// <Description>AgentPhoto</Description>
-	Description string `xml:"Description"`
+	MimeType     string `xml:"MimeType"`
+	Description  string `xml:"Description"`
 }
 
 // XMLMetadataLookup ...
@@ -280,14 +208,10 @@ type XMLMetadataLookup struct {
 
 // MetadataLookupType ...
 type MetadataLookupType struct {
-	// <LookupName>AgentStatus</LookupName>
-	LookupName string `xml:"LookupName"`
-	// <VisibleName>Agent Status</VisibleName>
-	VisibleName string `xml:"VisibleName"`
-	// <LookupTypeVersion>1.00.00004</LookupTypeVersion>
-	LookupTypeVersion string `xml:"LookupTypeVersion"`
-	// <LookupTypeDate>2014-02-24T15:55:08Z</LookupTypeDate>
-	LookupTypeDate time.Time `xml:"LookupTypeDate"`
+	LookupName        string    `xml:"LookupName"`
+	VisibleName       string    `xml:"VisibleName"`
+	LookupTypeVersion string    `xml:"LookupTypeVersion"`
+	LookupTypeDate    time.Time `xml:"LookupTypeDate"`
 
 	LookupType []XMLMetadataLookupType `xml:"METADATA-LOOKUP_TYPE"`
 }
@@ -302,12 +226,8 @@ type XMLMetadataLookupType struct {
 
 // MetadataLookup ...
 type MetadataLookup struct {
-	// <LongValue>Active</LongValue>
-	LongValue string `xml:"LongValue"`
-	// <ShortValue>A</ShortValue>
-	ShortValue string `xml:"ShortValue"`
-	// <Value>A</Value>
-	Value string `xml:"Value"`
-	// <X-DisplayOrder/>
-	XDisplayOrder int `xml:"X-DisplayOrder"`
+	LongValue     string `xml:"LongValue"`
+	ShortValue    string `xml:"ShortValue"`
+	Value         string `xml:"Value"`
+	XDisplayOrder int    `xml:"X-DisplayOrder"`
 }
