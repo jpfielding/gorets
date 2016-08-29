@@ -37,7 +37,7 @@ func (cd *CompactData) Indexer() Indexer {
 	}
 }
 
-func (cm CompactMetadata) find(name string) map[string]CompactData {
+func (cm *CompactMetadata) find(name string) map[string]CompactData {
 	classes := make(map[string]CompactData)
 	for _, cd := range cm.Elements[name] {
 		classes[cd.ID] = cd
