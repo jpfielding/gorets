@@ -27,7 +27,7 @@ type MUpdateType struct {
 	Date       DateTime     `xml:"Date,attr"`
 	Version    Version      `xml:"Version,attr"`
 	Resource   string       `xml:"Resource,attr"`
-	Lookup     string       `xml:"Update,attr"`
+	Update     string       `xml:"Update,attr"`
 	UpdateType []UpdateType `xml:"Update"`
 }
 
@@ -37,7 +37,7 @@ type UpdateType struct {
 	SystemName             string `xml:"SystemName"`
 	Sequence               Number `xml:"Sequence"`
 	Attributes             string `xml:"Attributes"`
-	Default                string `xml:"Defualt"`
+	Default                string `xml:"Default"`
 	ValidationExpressionID string `xml:"ValidationExpressionID"`
 	UpdateHelpID           string `xml:"UpdateHelpID"`
 	ValidationLookupName   string `xml:"ValidationLookupName"` // deprecated
