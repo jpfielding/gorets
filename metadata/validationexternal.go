@@ -13,10 +13,10 @@ type MValidationExternal struct {
 
 // ValidationExternal ...
 type ValidationExternal struct {
-	Date                   time.Time `xml:"Date,attr"`
-	Version                Version   `xml:"Version,attr"`
 	MetadataEntryID        string    `xml:"MetadataEntryID"`
 	ValidationExternalName string    `xml:"ValidationExternalName"`
 	SearchResource         string    `xml:"SearchResource"`
 	SearchClass            string    `xml:"SearchClass"`
+	Date                   time.Time `xml:"Date,attr"`
+	Version                Version   `xml:"Version,attr"`
 }
