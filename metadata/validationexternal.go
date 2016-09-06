@@ -4,9 +4,10 @@ import "time"
 
 // MValidationExternal ...
 type MValidationExternal struct {
-	Date               time.Time            `xml:"Date,attr"`
-	Version            Version              `xml:"Version,attr"`
-	Resource           string               `xml:"Resource,attr"`
+	Date     time.Time `xml:"Date,attr"`
+	Version  Version   `xml:"Version,attr"`
+	Resource string    `xml:"Resource,attr"`
+
 	ValidationExternal []ValidationExternal `xml:"ValidationExternal"`
 }
 

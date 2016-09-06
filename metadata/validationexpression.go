@@ -4,9 +4,10 @@ import "time"
 
 // MValidationExpression ...
 type MValidationExpression struct {
-	Date                 time.Time              `xml:"Date,attr"`
-	Version              Version                `xml:"Version,attr"`
-	Resource             string                 `xml:"Resource,attr"`
+	Date     time.Time `xml:"Date,attr"`
+	Version  Version   `xml:"Version,attr"`
+	Resource string    `xml:"Resource,attr"`
+
 	ValidationExpression []ValidationExpression `xml:"ValidationExpression"`
 }
 
@@ -15,4 +16,6 @@ type ValidationExpression struct {
 	MetadataEntryID          string `xml:"MetadataEntryID"`
 	ValidationExpressionID   string `xml:"ValidationExpressionID"`
 	ValidationExpressionType string `xml:"ValidationExpressionType"`
+	Message                  string `xml:"Message"`
+	IsCaseSensitive          *bool  `xml:"IsCaseSensitive"`
 }

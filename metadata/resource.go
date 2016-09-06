@@ -43,7 +43,9 @@ type Resource struct {
 	MSearchHelp           MSearchHelp           `xml:"METADATA-SEARCH_HELP"`
 	MEditMask             MEditMask             `xml:"METADATA-EDIT_MASK"`
 	MUpdateHelp           MUpdateHelp           `xml:"METADATA-UPDATE_HELP"`
-	MValidationLookup     MValidationLookup     `xml:"METADATA-VALIDATION_LOOKUP"`
 	MValidationExternal   MValidationExternal   `xml:"METADATA-VALIDATION_EXTERNAL"`
 	MValidationExpression MValidationExpression `xml:"METADATA-VALIDATION_EXPRESSION"`
+
+	// deprecated
+	MValidationLookup MValidationLookup `xml:"METADATA-VALIDATION_LOOKUP"`
 }

@@ -12,8 +12,15 @@ type MObject struct {
 
 // Object ...
 type Object struct {
-	ObjectType   string `xml:"ObjectType"`
-	StandardName string `xml:"ObjectType"`
-	MimeType     string `xml:"MimeType"`
-	Description  string `xml:"Description"`
+	MetadataEntryID      string `xml:"MedataEntryID"`
+	ObjectType           string `xml:"ObjectType"`
+	MimeType             string `xml:"MIMEType"`
+	VisibleName          string `xml:"VisibleName"`
+	Description          string `xml:"Description"`
+	ObjectTimeStamp      string `xml:"ObjectTimeStamp"`
+	ObjectCount          string `xml:"ObjectCount"`
+	LocationAvailability *int   `xml:"LocationAvailability"`
+	PostSupport          *int   `xml:"PostSupport"`
+	ObjectData           string `xml:"ObjectData"`
+	MaxFileSize          *int   `xml:"MaxFileSize"`
 }
