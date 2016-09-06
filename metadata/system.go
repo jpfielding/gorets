@@ -16,7 +16,7 @@ type System struct {
 	TimeZoneOffset string `xml:"TimeZoneOffset,attr"`
 	MetadataID     string `xml:"MetadataID,attr"`
 
-	Comment           string    `xml:"COMMENTS"`
+	Comments          string    `xml:"COMMENTS"`
 	ResourceVersion   Version   `xml:"ResourceVersion"`
 	ResourceDate      time.Time `xml:ResourceDate"`
 	ForeignKeyVersion Version   `xml:"ForeignKeyVersion"`

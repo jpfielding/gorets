@@ -17,23 +17,23 @@ type Resource struct {
 	Description                 string    `xml:"Description"`
 	KeyField                    string    `xml:"KeyField"`
 	ClassCount                  int       `xml:"ClassCount"`
-	ClassVersion                string    `xml:"ClassVersion"`
+	ClassVersion                Version   `xml:"ClassVersion"`
 	ClassDate                   time.Time `xml:"ClassDate"`
-	ObjectVersion               string    `xml:"ObjectVersion"`
+	ObjectVersion               Version   `xml:"ObjectVersion"`
 	ObjectDate                  time.Time `xml:"ObjectDate"`
-	SearchHelpVersion           string    `xml:"SearchHelpVersion"`
+	SearchHelpVersion           Version   `xml:"SearchHelpVersion"`
 	SearchHelpDate              time.Time `xml:"SearchHelpDate"`
-	EditMaskVersion             string    `xml:"EditMaskVersion"`
+	EditMaskVersion             Version   `xml:"EditMaskVersion"`
 	EditMaskDate                time.Time `xml:"EditMaskDate"`
-	LookupVersion               string    `xml:"LookupVersion"`
+	LookupVersion               Version   `xml:"LookupVersion"`
 	LookupDate                  time.Time `xml:"LookupDate"`
-	UpdateHelpVersion           string    `xml:"UpdateHelpVersion"`
+	UpdateHelpVersion           Version   `xml:"UpdateHelpVersion"`
 	UpdateHelpDate              time.Time `xml:"UpdateHelpDate"`
-	ValidationExpressionVersion string    `xml:"ValidationExpressionVersion"`
+	ValidationExpressionVersion Version   `xml:"ValidationExpressionVersion"`
 	ValidationExpressionDate    time.Time `xml:"ValidationExpressionDate"`
-	ValidationLookupVersion     string    `xml:"ValidationLookupVersion"`
+	ValidationLookupVersion     Version   `xml:"ValidationLookupVersion"`
 	ValidationLookupDate        time.Time `xml:"ValidationLookupDate"`
-	ValidationExternalVersion   string    `xml:"ValidationExternalVersion"`
+	ValidationExternalVersion   Version   `xml:"ValidationExternalVersion"`
 	ValidationExternalDate      time.Time `xml:"ValidationExternalDate"`
 
 	// the resource children

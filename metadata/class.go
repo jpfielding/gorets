@@ -16,18 +16,18 @@ type Class struct {
 	StandardName          string    `xml:"StandardName"`
 	VisibleName           string    `xml:"VisibleName"`
 	Description           string    `xml:"Description"`
-	TableVersion          string    `xml:"TableVersion"`
+	TableVersion          Version   `xml:"TableVersion"`
 	TableDate             time.Time `xml:"TableDate"`
-	UpdateVersion         string    `xml:"UpdateVersion"`
+	UpdateVersion         Version   `xml:"UpdateVersion"`
 	UpdateDate            time.Time `xml:"UpdateDate"`
 	ClassTimeStamp        time.Time `xml:"ClassTimeStamp"`
 	DeletedFlagField      string    `xml:"DeletedFlagField"`
 	DeletedFlagValue      string    `xml:"DeletedFlagValue"`
 	HasKeyIndex           *bool     `xml:"HasKeyIndex"`
 	OffsetSupport         *bool     `xml:"OffsetSupport"`
-	ColumnGroupVersion    string    `xml:"ColumnGroupVersion"`
+	ColumnGroupVersion    Version   `xml:"ColumnGroupVersion"`
 	ColumnGroupDate       time.Time `xml:"ColumnGroupDate"`
-	ColumnGroupSetVersion string    `xml:"ColumnGroupSetVersion"`
+	ColumnGroupSetVersion Version   `xml:"ColumnGroupSetVersion"`
 	ColumnGroupSetDate    time.Time `xml:"ColumnGroupSetDate"`
 
 	// maybe put a placeholder in for unmapped fields ??
