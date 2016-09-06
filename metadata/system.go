@@ -1,12 +1,10 @@
 package metadata
 
-import "time"
-
 // MSystem ...
 type MSystem struct {
-	Date    time.Time `xml:"Date,attr"`
-	Version Version   `xml:"Version,attr"`
-	System  System    `xml:"SYSTEM"`
+	Date    DateTime `xml:"Date,attr"`
+	Version Version  `xml:"Version,attr"`
+	System  System   `xml:"SYSTEM"`
 }
 
 // System ...
@@ -16,13 +14,13 @@ type System struct {
 	TimeZoneOffset string `xml:"TimeZoneOffset,attr"`
 	MetadataID     string `xml:"MetadataID,attr"`
 
-	Comments          string    `xml:"COMMENTS"`
-	ResourceVersion   Version   `xml:"ResourceVersion"`
-	ResourceDate      time.Time `xml:ResourceDate"`
-	ForeignKeyVersion Version   `xml:"ForeignKeyVersion"`
-	ForeignKeyDate    time.Time `xml:"ForeignKeyDate"`
-	FilterVersion     Version   `xml:"FilterVerision"`
-	FilterDate        time.Time `xml:"FilterDate"`
+	Comments          string   `xml:"COMMENTS"`
+	ResourceVersion   Version  `xml:"ResourceVersion"`
+	ResourceDate      DateTime `xml:ResourceDate"`
+	ForeignKeyVersion Version  `xml:"ForeignKeyVersion"`
+	ForeignKeyDate    DateTime `xml:"ForeignKeyDate"`
+	FilterVersion     Version  `xml:"FilterVerision"`
+	FilterDate        DateTime `xml:"FilterDate"`
 
 	MForeignKey MForeignKey `xml:"METADATA-FOREIGN_KEY"`
 	MResource   MResource   `xml:"METADATA-RESOURCE"`

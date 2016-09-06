@@ -1,12 +1,10 @@
 package metadata
 
-import "time"
-
 // MFilter ...
 type MFilter struct {
-	Date    time.Time `xml:"Date,attr"`
-	Version Version   `xml:"Version,attr"`
-	Filter  []Filter  `xml:"Filter"`
+	Date    DateTime `xml:"Date,attr"`
+	Version Version  `xml:"Version,attr"`
+	Filter  []Filter `xml:"Filter"`
 }
 
 // Filter ...
@@ -21,8 +19,8 @@ type Filter struct {
 
 // MFilterType ...
 type MFilterType struct {
-	Date    time.Time `xml:"Date,attr"`
-	Version Version   `xml:"Version,attr"`
+	Date    DateTime `xml:"Date,attr"`
+	Version Version  `xml:"Version,attr"`
 
 	Filter []FilterType `"xml:FilterType"`
 }

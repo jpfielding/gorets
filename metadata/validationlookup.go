@@ -1,10 +1,8 @@
 package metadata
 
-import "time"
-
 // MValidationLookup ...
 type MValidationLookup struct {
-	Date             time.Time          `xml:"Date,attr"`
+	Date             DateTime           `xml:"Date,attr"`
 	Version          Version            `xml:"Version,attr"`
 	Resource         string             `xml:"Resource,attr"`
 	ValidationLookup []ValidationLookup `xml:"ValidationLookup"`
@@ -12,21 +10,21 @@ type MValidationLookup struct {
 
 // ValidationLookup ...
 type ValidationLookup struct {
-	Date         time.Time `xml:"Date,attr"`
-	Version      Version   `xml:"Version,attr"`
-	Parent1Field string    `xml:"Parent1Field"`
-	Parent2Field string    `xml:"Parent2Field"`
-	Value        string    `xml:"Value"`
+	Date         DateTime `xml:"Date,attr"`
+	Version      Version  `xml:"Version,attr"`
+	Parent1Field string   `xml:"Parent1Field"`
+	Parent2Field string   `xml:"Parent2Field"`
+	Value        string   `xml:"Value"`
 
 	MLookupType MLookupType `xml:"METADATA-LOOKUP_TYPE"`
 }
 
 // MValidationLookupType ...
 type MValidationLookupType struct {
-	Date             time.Time `xml:"Date,attr"`
-	Version          Version   `xml:"Version,attr"`
-	Resource         string    `xml:"Resource,attr"`
-	ValidationLookup string    `xml:"ValidationLookup,attr"`
+	Date             DateTime `xml:"Date,attr"`
+	Version          Version  `xml:"Version,attr"`
+	Resource         string   `xml:"Resource,attr"`
+	ValidationLookup string   `xml:"ValidationLookup,attr"`
 
 	ValidationLookupType []ValidationLookupType `xml:"ValidationLookup"`
 }

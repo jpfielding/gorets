@@ -1,10 +1,8 @@
 package metadata
 
-import "time"
-
 // MUpdateHelp ...
 type MUpdateHelp struct {
-	Date       time.Time    `xml:"Date,attr"`
+	Date       DateTime     `xml:"Date,attr"`
 	Version    Version      `xml:"Version,attr"`
 	Resource   string       `xml:"Resource,attr"`
 	UpdateHelp []UpdateHelp `xml:"UpdateHelp"`

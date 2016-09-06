@@ -1,12 +1,10 @@
 package metadata
 
-import "time"
-
 // MValidationExpression ...
 type MValidationExpression struct {
-	Date     time.Time `xml:"Date,attr"`
-	Version  Version   `xml:"Version,attr"`
-	Resource string    `xml:"Resource,attr"`
+	Date     DateTime `xml:"Date,attr"`
+	Version  Version  `xml:"Version,attr"`
+	Resource string   `xml:"Resource,attr"`
 
 	ValidationExpression []ValidationExpression `xml:"ValidationExpression"`
 }
