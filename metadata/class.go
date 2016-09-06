@@ -30,6 +30,5 @@ type Class struct {
 	ColumnGroupSetVersion Version   `xml:"ColumnGroupSetVersion"`
 	ColumnGroupSetDate    time.Time `xml:"ColumnGroupSetDate"`
 
-	// maybe put a placeholder in for unmapped fields ??
-	// XDisplayOrder         int       `xml:"X-DisplayOrder"`
+	MUpdate MUpdate `xml:"METADATA-UPDATE"`
 }
