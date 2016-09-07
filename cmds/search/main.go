@@ -89,7 +89,7 @@ func main() {
 		}
 		w.Write(result.Columns)
 		count := 0
-		hasMoreRows, err = result.ForEach(func(row []string, err error) error {
+		hasMoreRows, err = result.ForEach(func(row rets.Row, err error) error {
 			w.Write(row)
 			count++
 			return nil
