@@ -4,19 +4,19 @@ package metadata
 type MLookup struct {
 	Date     DateTime `xml:"Date,attr"`
 	Version  Version  `xml:"Version,attr"`
-	Resource string   `xml:"Resource,attr"`
+	Resource RETSID   `xml:"Resource,attr"`
 	Lookup   []Lookup `xml:"Lookup"`
 }
 
 // Lookup ...
 type Lookup struct {
-	MetadataEntryID   string   `xml:"MetadataEntryID"`
-	LookupName        string   `xml:"LookupName"`
-	VisibleName       string   `xml:"VisibleName"`
-	LookupTypeVersion Version  `xml:"LookupTypeVersion"`
-	LookupTypeDate    DateTime `xml:"LookupTypeDate"`
-	FilterID          string   `xml:"FilterID"`
-	NotShowByDefault  *bool    `xml:"NotShowByDefault"`
+	MetadataEntryID   RETSID    `xml:"MetadataEntryID"`
+	LookupName        RETSName  `xml:"LookupName"`
+	VisibleName       PlainText `xml:"VisibleName"`
+	LookupTypeVersion Version   `xml:"LookupTypeVersion"`
+	LookupTypeDate    DateTime  `xml:"LookupTypeDate"`
+	FilterID          RETSID    `xml:"FilterID"`
+	NotShowByDefault  Boolean   `xml:"NotShowByDefault"`
 
 	MLookupType MLookupType `xml:"METADATA-LOOKUP_TYPE"`
 }
@@ -25,16 +25,15 @@ type Lookup struct {
 type MLookupType struct {
 	Date       DateTime     `xml:"Date,attr"`
 	Version    Version      `xml:"Version,attr"`
-	Resource   string       `xml:"Resource,attr"`
-	Lookup     string       `xml:"Lookup,attr"`
+	Resource   RETSID       `xml:"Resource,attr"`
+	Lookup     RETSID       `xml:"Lookup,attr"`
 	LookupType []LookupType `xml:"Lookup"`
 }
 
 // LookupType ...
 type LookupType struct {
-	MetadataEntryID string `xml:"MetadataEntryID"`
-	LongValue       string `xml:"LongValue"`
-	ShortValue      string `xml:"ShortValue"`
-	Value           string `xml:"Value"`
-	// XDisplayOrder int    `xml:"X-DisplayOrder"`
+	MetadataEntryID RETSID    `xml:"MetadataEntryID"`
+	LongValue       PlainText `xml:"LongValue"`
+	ShortValue      PlainText `xml:"ShortValue"`
+	Value           PlainText `xml:"Value"`
 }

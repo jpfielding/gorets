@@ -4,20 +4,20 @@ package metadata
 type MUpdate struct {
 	Date     DateTime `xml:"Date,attr"`
 	Version  Version  `xml:"Version,attr"`
-	Resource string   `xml:"Resource,attr"`
-	Class    string   `xml:"Class,attr"`
+	Resource RETSID   `xml:"Resource,attr"`
+	Class    RETSID   `xml:"Class,attr"`
 	Update   []Update `xml:"Update"`
 }
 
 // Update ...
 type Update struct {
-	MetadataEntryID   string   `xml:"MetadataEntryID"`
-	UpdateAction      string   `xml:"UpdateAction"`
-	Description       string   `xml:"Description"`
-	KeyField          string   `xml:"KeyField"`
-	UpdateTypeVersion Version  `xml:"UpdateTypeVersion"`
-	UpdateTypeDate    DateTime `xml:"UpdateTypeDate"`
-	RequiresBegin     Boolean  `xml:"RequiresBegin"`
+	MetadataEntryID   RETSID    `xml:"MetadataEntryID"`
+	UpdateAction      AlphaNum  `xml:"UpdateAction"` // some standardish names add,clone,change,delete,beginupdate
+	Description       PlainText `xml:"Description"`
+	KeyField          RETSName  `xml:"KeyField"`
+	UpdateTypeVersion Version   `xml:"UpdateTypeVersion"`
+	UpdateTypeDate    DateTime  `xml:"UpdateTypeDate"`
+	RequiresBegin     Boolean   `xml:"RequiresBegin"`
 
 	MUpdateType MUpdateType `xml:"METADATA-UPDATE_TYPE"`
 }
@@ -26,23 +26,23 @@ type Update struct {
 type MUpdateType struct {
 	Date       DateTime     `xml:"Date,attr"`
 	Version    Version      `xml:"Version,attr"`
-	Resource   string       `xml:"Resource,attr"`
-	Update     string       `xml:"Update,attr"`
+	Resource   RETSID       `xml:"Resource,attr"`
+	Update     RETSID       `xml:"Update,attr"`
 	UpdateType []UpdateType `xml:"Update"`
 }
 
 // UpdateType ...
 type UpdateType struct {
-	MetadataEntryID        string     `xml:"MetadataEntryID"`
-	SystemName             string     `xml:"SystemName"`
-	Sequence               Number     `xml:"Sequence"`
-	Attributes             string     `xml:"Attributes"`
-	Default                string     `xml:"Default"`
-	ValidationExpressionID StringList `xml:"ValidationExpressionID"`
-	UpdateHelpID           string     `xml:"UpdateHelpID"`
-	ValidationLookupName   string     `xml:"ValidationLookupName"` // deprecated
-	ValidationExternalName string     `xml:"ValidationExternalName"`
-	MaxUpdate              Number     `xml:"MaxUpdate"`
-	SearchResultOrder      Number     `xml:"SearchResultOrder"`
-	SearchQueryOrder       Number     `xml:"SearchQueryOrder"`
+	MetadataEntryID        RETSID      `xml:"MetadataEntryID"`
+	SystemName             RETSName    `xml:"SystemName"`
+	Sequence               Numeric     `xml:"Sequence"`
+	Attributes             NumericList `xml:"Attributes"` // TODO limit to 1-7
+	Default                PlainText   `xml:"Default"`
+	ValidationExpressionID RETSNames   `xml:"ValidationExpressionID"`
+	UpdateHelpID           RETSName    `xml:"UpdateHelpID"`
+	ValidationLookupName   RETSName    `xml:"ValidationLookupName"` // deprecated
+	ValidationExternalName RETSName    `xml:"ValidationExternalName"`
+	MaxUpdate              Numeric     `xml:"MaxUpdate"`
+	SearchResultOrder      Numeric     `xml:"SearchResultOrder"`
+	SearchQueryOrder       Numeric     `xml:"SearchQueryOrder"`
 }

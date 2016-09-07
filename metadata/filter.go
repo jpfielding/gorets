@@ -9,12 +9,12 @@ type MFilter struct {
 
 // Filter ...
 type Filter struct {
-	FilterID          string `xml:"FilterID"`
-	ParentResource    string `xml:"ParentResource"`
-	ParentLookupName  string `xml:"ParentLookupName"`
-	ChildResource     string `xml:"ChildResource"`
-	ChildLookupName   string `xml:"ChildLookupName"`
-	NotShownByDefault *bool  `xml:"NotShownByDefault"`
+	FilterID          RETSID   `xml:"FilterID"`
+	ParentResource    RETSID   `xml:"ParentResource"`
+	ParentLookupName  RETSName `xml:"ParentLookupName"`
+	ChildResource     RETSID   `xml:"ChildResource"`
+	ChildLookupName   RETSName `xml:"ChildLookupName"`
+	NotShownByDefault Boolean  `xml:"NotShownByDefault"`
 }
 
 // MFilterType ...
@@ -27,7 +27,7 @@ type MFilterType struct {
 
 // FilterType ...
 type FilterType struct {
-	FilterTypeID string `xml:FilterTypeID`
-	ParentValue  string `xml:ParentValue`
-	ChildValue   string `xml:ChildValue`
+	FilterTypeID RETSID    `xml:FilterTypeID`
+	ParentValue  PlainText `xml:ParentValue`
+	ChildValue   PlainText `xml:ChildValue`
 }

@@ -9,30 +9,30 @@ type MResource struct {
 
 // Resource ...
 type Resource struct {
-	ResourceID                  string   `xml:"ResourceID"`
-	StandardName                string   `xml:"StandardName"`
-	VisibleName                 string   `xml:"VisibleName"`
-	Description                 string   `xml:"Description"`
-	KeyField                    string   `xml:"KeyField"`
-	ClassCount                  Number   `xml:"ClassCount"`
-	ClassVersion                Version  `xml:"ClassVersion"`
-	ClassDate                   DateTime `xml:"ClassDate"`
-	ObjectVersion               Version  `xml:"ObjectVersion"`
-	ObjectDate                  DateTime `xml:"ObjectDate"`
-	SearchHelpVersion           Version  `xml:"SearchHelpVersion"`
-	SearchHelpDate              DateTime `xml:"SearchHelpDate"`
-	EditMaskVersion             Version  `xml:"EditMaskVersion"`
-	EditMaskDate                DateTime `xml:"EditMaskDate"`
-	LookupVersion               Version  `xml:"LookupVersion"`
-	LookupDate                  DateTime `xml:"LookupDate"`
-	UpdateHelpVersion           Version  `xml:"UpdateHelpVersion"`
-	UpdateHelpDate              DateTime `xml:"UpdateHelpDate"`
-	ValidationExpressionVersion Version  `xml:"ValidationExpressionVersion"`
-	ValidationExpressionDate    DateTime `xml:"ValidationExpressionDate"`
-	ValidationLookupVersion     Version  `xml:"ValidationLookupVersion"`
-	ValidationLookupDate        DateTime `xml:"ValidationLookupDate"`
-	ValidationExternalVersion   Version  `xml:"ValidationExternalVersion"`
-	ValidationExternalDate      DateTime `xml:"ValidationExternalDate"`
+	ResourceID                  RETSID    `xml:"ResourceID"`
+	StandardName                AlphaNum  `xml:"StandardName"`
+	VisibleName                 PlainText `xml:"VisibleName"`
+	Description                 PlainText `xml:"Description"`
+	KeyField                    RETSName  `xml:"KeyField"`
+	ClassCount                  Numeric   `xml:"ClassCount"`
+	ClassVersion                Version   `xml:"ClassVersion"`
+	ClassDate                   DateTime  `xml:"ClassDate"`
+	ObjectVersion               Version   `xml:"ObjectVersion"`
+	ObjectDate                  DateTime  `xml:"ObjectDate"`
+	SearchHelpVersion           Version   `xml:"SearchHelpVersion"`
+	SearchHelpDate              DateTime  `xml:"SearchHelpDate"`
+	EditMaskVersion             Version   `xml:"EditMaskVersion"`
+	EditMaskDate                DateTime  `xml:"EditMaskDate"`
+	LookupVersion               Version   `xml:"LookupVersion"`
+	LookupDate                  DateTime  `xml:"LookupDate"`
+	UpdateHelpVersion           Version   `xml:"UpdateHelpVersion"`
+	UpdateHelpDate              DateTime  `xml:"UpdateHelpDate"`
+	ValidationExpressionVersion Version   `xml:"ValidationExpressionVersion"`
+	ValidationExpressionDate    DateTime  `xml:"ValidationExpressionDate"`
+	ValidationLookupVersion     Version   `xml:"ValidationLookupVersion"`
+	ValidationLookupDate        DateTime  `xml:"ValidationLookupDate"`
+	ValidationExternalVersion   Version   `xml:"ValidationExternalVersion"`
+	ValidationExternalDate      DateTime  `xml:"ValidationExternalDate"`
 
 	// the resource children
 	MClass                MClass                `xml:"METADATA-CLASS"`

@@ -9,14 +9,14 @@ type MForeignKey struct {
 
 // ForeignKey ...
 type ForeignKey struct {
-	ForeignKeyID           string  `xml:"ForeignKeyID"`
-	ParentResourceID       string  `xml:"ParentResourceID"`
-	ParentClassID          string  `xml:"ParentClassID"`
-	ParentSystemName       string  `xml:"ParentSystemName"`
-	ChildResourceID        string  `xml:"ChildResourceID"`
-	ChildClassID           string  `xml:"ChildClassID"`
-	ChildSystemName        string  `xml:"ChildSystemName"`
-	ConditionalParentField string  `xml:"ConditionalParentField"`
-	ConditionalParentValue string  `xml:"ConditionalParentValue"`
-	OneToManyFlag          Boolean `xml:"OneToManyFlag"`
+	ForeignKeyID           RETSID   `xml:"ForeignKeyID"`
+	ParentResourceID       RETSID   `xml:"ParentResourceID"`
+	ParentClassID          RETSID   `xml:"ParentClassID"`
+	ParentSystemName       RETSName `xml:"ParentSystemName"`
+	ChildResourceID        RETSID   `xml:"ChildResourceID"`
+	ChildClassID           RETSID   `xml:"ChildClassID"`
+	ChildSystemName        RETSName `xml:"ChildSystemName"`
+	ConditionalParentField RETSName `xml:"ConditionalParentField"`
+	ConditionalParentValue RETSName `xml:"ConditionalParentValue"`
+	OneToManyFlag          Boolean  `xml:"OneToManyFlag"`
 }

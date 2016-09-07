@@ -4,44 +4,44 @@ package metadata
 type MTable struct {
 	Date     DateTime `xml:"Date,attr"`
 	Version  Version  `xml:"Version,attr"`
-	Resource string   `xml:"Resource,attr"`
-	Class    string   `xml:"Class,attr"`
+	Resource RETSID   `xml:"Resource,attr"`
+	Class    RETSID   `xml:"Class,attr"`
 	Table    []Table  `xml:"Table"`
 }
 
 // Table ...
 type Table struct {
-	MetadataEntryID    string     `xml:"MetadataEntryID"`
-	SystemName         string     `xml:"SystemName"`
-	StandardName       string     `xml:"StandardName"`
-	LongName           string     `xml:"LongName"`
-	DBName             string     `xml:"DBName"`
-	ShortName          string     `xml:"ShortName"`
-	MaximumLength      Number     `xml:"MaximumLength"`
-	DataType           string     `xml:"DataType"`
-	Precision          Number     `xml:"Precision"`
-	Searchable         Boolean    `xml:"Searchable"`
-	Interpretation     string     `xml:"Interpretation"`
-	Alignment          string     `xml:"Alignment"`
-	UseSeparator       Boolean    `xml:"UseSeparator"`
-	EditMaskID         StringList `xml:"EditMaskID"`
-	LookupName         string     `xml:"LookupName"`
-	MaxSelect          Number     `xml:"MaxSelect"`
-	Units              string     `xml:"Units"`
-	Index              Boolean    `xml:"Index"`
-	Minimum            string     `xml:"Minimum"`
-	Maximum            string     `xml:"Maxiumum"`
-	Default            Number     `xml:"Default"`
-	Required           Number     `xml:"Required"`
-	SearchHelpID       string     `xml:"SearchHelpID"`
-	Unique             Boolean    `xml:"Unique"`
-	ModTimeStamp       DateTime   `xml:"ModTimeStamp"`
-	ForeignKeyName     string     `xml:"ForeignKeyName"`
-	ForeignField       string     `xml:"ForeignField"`
-	KeyQuery           string     `xml:"KeyQuery"`  // deprecated
-	KeySelect          string     `xml:"KeySelect"` // deprecated
-	InKeyIndex         Boolean    `xml:"InKeyIndex"`
-	FilterParentField  string     `xml:"FilterParentField"`
-	DefaultSearchOrder Number     `xml:"DefaultSearchOrder"`
-	Case               string     `xml:"Case"`
+	MetadataEntryID    RETSID    `xml:"MetadataEntryID"`
+	SystemName         RETSName  `xml:"SystemName"`
+	StandardName       RETSName  `xml:"StandardName"`
+	LongName           Text      `xml:"LongName"`
+	DBName             AlphaNum  `xml:"DBName"`
+	ShortName          Text      `xml:"ShortName"`
+	MaximumLength      Numeric   `xml:"MaximumLength"` // TODO limit to postive
+	DataType           string    `xml:"DataType"`      // TODO limit to options
+	Precision          Numeric   `xml:"Precision"`     // TODO limit to positive
+	Searchable         Boolean   `xml:"Searchable"`
+	Interpretation     string    `xml:"Interpretation"` // TODO limit to options
+	Alignment          string    `xml:"Alignment"`      // TODO limit to options
+	UseSeparator       Boolean   `xml:"UseSeparator"`   // TODO limit to options
+	EditMaskID         RETSNames `xml:"EditMaskID"`
+	LookupName         RETSName  `xml:"LookupName"`
+	MaxSelect          Numeric   `xml:"MaxSelect"`
+	Units              string    `xml:"Units"`
+	Index              Boolean   `xml:"Index"`
+	Minimum            Numeric   `xml:"Minimum"`
+	Maximum            Numeric   `xml:"Maxiumum"`
+	Default            Numeric   `xml:"Default"`
+	Required           Numeric   `xml:"Required"`
+	SearchHelpID       RETSName  `xml:"SearchHelpID"`
+	Unique             Boolean   `xml:"Unique"`
+	ModTimeStamp       DateTime  `xml:"ModTimeStamp"`
+	ForeignKeyName     RETSID    `xml:"ForeignKeyName"`
+	ForeignField       RETSName  `xml:"ForeignField"`
+	KeyQuery           Boolean   `xml:"KeyQuery"`  // deprecated
+	KeySelect          Boolean   `xml:"KeySelect"` // deprecated
+	InKeyIndex         Boolean   `xml:"InKeyIndex"`
+	FilterParentField  RETSName  `xml:"FilterParentField"`
+	DefaultSearchOrder Numeric   `xml:"DefaultSearchOrder"`
+	Case               string    `xml:"Case"` // TODO limit to known options
 }
