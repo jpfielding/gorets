@@ -33,16 +33,16 @@ type MUpdateType struct {
 
 // UpdateType ...
 type UpdateType struct {
-	MetadataEntryID        string `xml:"MetadataEntryID"`
-	SystemName             string `xml:"SystemName"`
-	Sequence               Number `xml:"Sequence"`
-	Attributes             string `xml:"Attributes"`
-	Default                string `xml:"Default"`
-	ValidationExpressionID string `xml:"ValidationExpressionID"`
-	UpdateHelpID           string `xml:"UpdateHelpID"`
-	ValidationLookupName   string `xml:"ValidationLookupName"` // deprecated
-	ValidationExternalName string `xml:"ValidationExternalName"`
-	MaxUpdate              Number `xml:"MaxUpdate"`
-	SearchResultOrder      Number `xml:"SearchResultOrder"`
-	SearchQueryOrder       Number `xml:"SearchQueryOrder"`
+	MetadataEntryID        string     `xml:"MetadataEntryID"`
+	SystemName             string     `xml:"SystemName"`
+	Sequence               Number     `xml:"Sequence"`
+	Attributes             string     `xml:"Attributes"`
+	Default                string     `xml:"Default"`
+	ValidationExpressionID StringList `xml:"ValidationExpressionID"`
+	UpdateHelpID           string     `xml:"UpdateHelpID"`
+	ValidationLookupName   string     `xml:"ValidationLookupName"` // deprecated
+	ValidationExternalName string     `xml:"ValidationExternalName"`
+	MaxUpdate              Number     `xml:"MaxUpdate"`
+	SearchResultOrder      Number     `xml:"SearchResultOrder"`
+	SearchQueryOrder       Number     `xml:"SearchQueryOrder"`
 }

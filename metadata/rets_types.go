@@ -8,6 +8,16 @@ import (
 
 //------------------------------------------
 
+// StringList ...
+type StringList string
+
+// Parse ...
+func (sl StringList) Parse() []string {
+	return strings.Split(string(sl), ",")
+}
+
+//------------------------------------------
+
 // Version ...
 type Version string
 
