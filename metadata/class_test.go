@@ -1,4 +1,4 @@
-package test
+package metadata
 
 var example = `
 <RETS ReplyCode="0" ReplyText="Operation Successful">
