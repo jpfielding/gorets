@@ -24,10 +24,10 @@ type MSystem struct {
 
 // System ...
 type System struct {
-	ID             string `xml:"SystemID,attr"`
-	Description    string `xml:"SystemDescription,attr"`
-	TimeZoneOffset string `xml:"TimeZoneOffset,attr"`
-	MetadataID     string `xml:"MetadataID,attr"`
+	SystemID          string `xml:"SystemID,attr"`
+	SystemDescription string `xml:"SystemDescription,attr"`
+	TimeZoneOffset    string `xml:"TimeZoneOffset,attr"`
+	MetadataID        string `xml:"MetadataID,attr"`
 
 	Comments          string   `xml:"COMMENTS"`
 	ResourceVersion   Version  `xml:"ResourceVersion"`
