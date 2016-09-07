@@ -1,5 +1,20 @@
 package metadata
 
+import "encoding/xml"
+
+// StandardXML ...
+type StandardXML struct {
+	XMLName   xml.Name    `xml:"RETS"`
+	ReplyCode int         `xml:"ReplyCode,attr"`
+	ReplyText string      `xml:"ReplyText,attr"`
+	Metadata  XMLMetadata `xml:"METADATA"`
+}
+
+// XMLMetadata ...
+type XMLMetadata struct {
+	System MSystem `xml:"METADATA-SYSTEM"`
+}
+
 // MSystem ...
 type MSystem struct {
 	Date    DateTime `xml:"Date,attr"`
