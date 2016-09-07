@@ -60,7 +60,7 @@ func TestBadChar(t *testing.T) {
 	testutils.Ok(t, err)
 	testutils.Equals(t, 0, cr.RetsResponse.ReplyCode)
 	counter := 0
-	cr.ForEach(func(row []string, err error) error {
+	cr.ForEach(func(row Row, err error) error {
 		testutils.Ok(t, err)
 		testutils.Equals(t, "1 1,2,3,4,,6", strings.Join(row, ","))
 		counter = counter + 1
@@ -96,7 +96,7 @@ func TestParseSearchQuit(t *testing.T) {
 	testutils.Ok(t, err)
 
 	rowsFound := 0
-	cr.ForEach(func(data []string, err error) error {
+	cr.ForEach(func(data Row, err error) error {
 		if err != nil {
 			testutils.Assert(t, strings.Contains(err.Error(), "EOF"), "found something not eof")
 			return err
@@ -123,7 +123,7 @@ func TestParseCompact(t *testing.T) {
 	testutils.Assert(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
 
 	counter := 0
-	maxRows, err := cr.ForEach(func(row []string, err error) error {
+	maxRows, err := cr.ForEach(func(row Row, err error) error {
 		if strings.Join(row, ",") != "1,2,3,4,,6" {
 			t.Errorf("bad row %d: %s", counter, row)
 		}

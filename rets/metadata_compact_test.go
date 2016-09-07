@@ -29,9 +29,9 @@ func TestSystem(t *testing.T) {
 	verifySystem(t, *ms)
 }
 
-func verifySystem(t *testing.T, ms Metadata) {
-	testutils.Assert(t, ms.System.Version == "1.12.30", "bad version")
-	testutils.Assert(t, ms.System.Comments == "The System is provided to you by Systems.", "bad comments")
+func verifySystem(t *testing.T, cm CompactMetadata) {
+	testutils.Assert(t, cm.System.Version == "1.12.30", "bad version")
+	testutils.Assert(t, cm.System.Comments == "The System is provided to you by Systems.", "bad comments")
 }
 
 var resource = `<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -48,8 +48,8 @@ func TestParseResources(t *testing.T) {
 	verifyParseResources(t, *ms)
 }
 
-func verifyParseResources(t *testing.T, ms Metadata) {
-	resource := ms.find("METADATA-RESOURCE")[""]
+func verifyParseResources(t *testing.T, cm CompactMetadata) {
+	resource := cm.find("METADATA-RESOURCE")[""]
 	testutils.Equals(t, "1.12.30", resource.Version)
 	testutils.Equals(t, len(resource.Rows), 2)
 
@@ -78,8 +78,8 @@ func TestParseClass(t *testing.T) {
 	verifyParseClass(t, *ms)
 }
 
-func verifyParseClass(t *testing.T, ms Metadata) {
-	classes := ms.find("METADATA-CLASS")
+func verifyParseClass(t *testing.T, cm CompactMetadata) {
+	classes := cm.find("METADATA-CLASS")
 	mdata := classes["Property"]
 
 	testutils.Equals(t, mdata.Version, "1.12.29")
@@ -109,8 +109,8 @@ func TestParseTable(t *testing.T) {
 	verifyParseTable(t, *ms)
 }
 
-func verifyParseTable(t *testing.T, ms Metadata) {
-	tables := ms.find("METADATA-TABLE")
+func verifyParseTable(t *testing.T, cm CompactMetadata) {
+	tables := cm.find("METADATA-TABLE")
 	mdata := tables["ActiveAgent:ActiveAgent"]
 
 	testutils.Equals(t, "1.12.29", mdata.Version)
@@ -139,8 +139,8 @@ func TestParseLookup(t *testing.T) {
 	verifyParseLookup(t, *ms)
 }
 
-func verifyParseLookup(t *testing.T, ms Metadata) {
-	lookups := ms.find("METADATA-LOOKUP")
+func verifyParseLookup(t *testing.T, cm CompactMetadata) {
+	lookups := cm.find("METADATA-LOOKUP")
 	mdata := lookups["TaxHistoricalDesignation"]
 
 	testutils.Equals(t, "1.12.29", mdata.Version)
@@ -168,8 +168,8 @@ func TestParseLookupType(t *testing.T) {
 	testutils.Ok(t, err)
 	verifyParseLookupType(t, *ms)
 }
-func verifyParseLookupType(t *testing.T, ms Metadata) {
-	lookupTypes := ms.find("METADATA-LOOKUP_TYPE")
+func verifyParseLookupType(t *testing.T, cm CompactMetadata) {
+	lookupTypes := cm.find("METADATA-LOOKUP_TYPE")
 	mdata := lookupTypes["TaxHistoricalDesignation:COUNTIES_OR_REGIONS"]
 
 	testutils.Equals(t, "1.12.29", mdata.Version)
