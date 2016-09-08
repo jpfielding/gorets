@@ -18,7 +18,7 @@ type Class struct {
 	TableDate             DateTime  `xml:"TableDate"`
 	UpdateVersion         Version   `xml:"UpdateVersion"`
 	UpdateDate            DateTime  `xml:"UpdateDate"`
-	ClassTimeStamp        DateTime  `xml:"ClassTimeStamp"`
+	ClassTimeStamp        RETSName  `xml:"ClassTimeStamp"`
 	DeletedFlagField      RETSName  `xml:"DeletedFlagField"`
 	DeletedFlagValue      AlphaNum  `xml:"DeletedFlagValue"`
 	HasKeyIndex           Boolean   `xml:"HasKeyIndex"`

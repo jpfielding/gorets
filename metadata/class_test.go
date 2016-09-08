@@ -23,18 +23,6 @@ var example = `
   <Class>
       <ClassName>LOTL</ClassName>
       <StandardName>Land</StandardName>
-      <VisibleName>Lots &amp; Land</VisibleName>
-      <Description>Contains data for Lots &amp; Land searches.</Description>
-      <TableVersion>01.72.11580</TableVersion>
-      <TableDate>2016-02-09T06:02:17</TableDate>
-      <UpdateVersion>01.72.10221</UpdateVersion>
-      <UpdateDate/>
-      <ClassTimeStamp>LastModifiedDateTime</ClassTimeStamp>
-      <DeletedFlagField/>
-      <DeletedFlagValue/>
-      <HasKeyIndex>0</HasKeyIndex>
-      <METADATA-TABLE Version="01.72.11580" Date="2016-02-09T06:02:17" System="ANNA" Resource="Property" Class="LOTL">
-      </METADATA-TABLE>
   </Class>
   </METADATA-CLASS>
 </METADATA>

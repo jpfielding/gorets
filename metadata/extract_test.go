@@ -9,12 +9,6 @@ import (
 )
 
 func TestNext(t *testing.T) {
-	type pet struct {
-		Gender string `xml:"gender,attr"`
-		Fixed  bool   `xml:"fixed,attr"`
-		Name   string `xml:"name,attr"`
-	}
-
 	var raw = `<?xml version="1.0" encoding="utf-8"?>
     <RETS ReplyCode="0" ReplyText="Operation successful.">
     <METADATA>
