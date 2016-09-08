@@ -1,8 +1,16 @@
 package metadata
 
-// func TestReadClass(t *testing.T) {
+import (
+	"bytes"
+	"io/ioutil"
+	"testing"
 
-var raw = `<?xml version="1.0" encoding="utf-8"?>
+	"github.com/jpfielding/gotest/testutils"
+)
+
+func TestReadClass(t *testing.T) {
+
+	var raw = `<?xml version="1.0" encoding="utf-8"?>
     <RETS ReplyCode="0" ReplyText="Operation Successful">
     <METADATA>
     <METADATA-CLASS Version="01.72.11588" Date="2016-06-01T16:05:01" Resource="Property">
@@ -34,20 +42,20 @@ var raw = `<?xml version="1.0" encoding="utf-8"?>
     </METADATA>
     </RETS>`
 
-// body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
-//
-// extractor := &Extractor{Body: body}
-// rets, err := extractor.Open()
-//
-// testutils.Ok(t, err)
-// testutils.Equals(t, "Operation successful.", rets.ReplyText)
-// testutils.Equals(t, 0, rets.ReplyCode)
-//
-// mclass := &MClass{}
-// err = extractor.Next("METADATA-CLASS", mclass)
-// testutils.Ok(t, err)
-// testutils.Equals(t, resource, string(mclass.Resource))
-// testutils.Equals(t, version, string(mclass.Version))
-// testutils.Equals(t, date, string(mclass.Date))
-// testutils.Equals(t, 0, len(mclass.Class))
-// }
+	body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
+
+	extractor := &Extractor{Body: body}
+	rets, err := extractor.Open()
+
+	testutils.Ok(t, err)
+	testutils.Equals(t, "Operation Successful", rets.ReplyText)
+	testutils.Equals(t, 0, rets.ReplyCode)
+
+	mclass := &MClass{}
+	err = extractor.Next("METADATA-CLASS", mclass)
+	testutils.Ok(t, err)
+	testutils.Equals(t, "Property", string(mclass.Resource))
+	testutils.Equals(t, "01.72.11588", string(mclass.Version))
+	testutils.Equals(t, "2016-06-01T16:05:01", string(mclass.Date))
+	testutils.Equals(t, 2, len(mclass.Class))
+}
