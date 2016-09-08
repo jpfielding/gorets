@@ -2,7 +2,6 @@ package metadata
 
 import (
 	"bytes"
-	"encoding/xml"
 	"io/ioutil"
 	"testing"
 
@@ -17,29 +16,38 @@ func TestNext(t *testing.T) {
 	}
 
 	var raw = `<?xml version="1.0" encoding="utf-8"?>
-	<pets>
-		<dog gender="male" fixed="true" name="buddy"/>
-		<cat gender="female" fixed="true" name="snowball"/>
-		<dog gender="female" fixed="true" name="josie"/>
-		<cat gender="male" fixed="false" name="mr bojangles"/>
-	</pets>`
+    <RETS ReplyCode="0" ReplyText="Operation successful.">
+    <METADATA>
+    <METADATA-CLASS Version="01.72.11582" Date="2016-03-29T21:50:11" Resource="Agent">
+    </METADATA-CLASS>
+    <METADATA-CLASS Version="01.72.11583" Date="2016-03-29T21:50:11" Resource="Office">
+    </METADATA-CLASS>
+    <METADATA-CLASS Version="01.72.11584" Date="2016-03-29T21:50:11" Resource="Listing">
+    </METADATA-CLASS>
+    </METADATA>
+    </RETS>`
 	body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
-	parser := xml.NewDecoder(body)
 
-	nextTest := func(tag, name, gender string, fixed bool) func(*testing.T) {
+	extractor := &Extractor{Body: body}
+	rets, err := extractor.Open()
+
+	testutils.Ok(t, err)
+	testutils.Equals(t, "Operation successful.", rets.ReplyText)
+	testutils.Equals(t, 0, rets.ReplyCode)
+
+	next := func(resource, version, date string) func(*testing.T) {
 		return func(tt *testing.T) {
-			start, err := Next(parser, tag)
-			testutils.Ok(tt, err)
-			pet := pet{}
-			err = parser.DecodeElement(&pet, &start)
-			testutils.Ok(tt, err)
-			testutils.Equals(tt, name, pet.Name)
-			testutils.Equals(tt, gender, pet.Gender)
-			testutils.Equals(tt, fixed, pet.Fixed)
+			mclass := &MClass{}
+			err = extractor.Next("METADATA-CLASS", mclass)
+			testutils.Ok(t, err)
+			testutils.Equals(tt, resource, string(mclass.Resource))
+			testutils.Equals(tt, version, string(mclass.Version))
+			testutils.Equals(tt, date, string(mclass.Date))
+			testutils.Equals(tt, 0, len(mclass.Class))
 		}
 	}
 
-	t.Run("buddy", nextTest("dog", "buddy", "male", true))
-	t.Run("josie", nextTest("dog", "josie", "female", true))
-	t.Run("mr bojangles", nextTest("cat", "mr bojangles", "male", false))
+	t.Run("agent", next("Agent", "01.72.11582", "2016-03-29T21:50:11"))
+	t.Run("offfice", next("Office", "01.72.11583", "2016-03-29T21:50:11"))
+	t.Run("listing", next("Listing", "01.72.11584", "2016-03-29T21:50:11"))
 }

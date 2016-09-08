@@ -37,23 +37,5 @@ var example = `
       </METADATA-TABLE>
   </Class>
   </METADATA-CLASS>
-  <METADATA-CLASS Version="01.72.11582" Date="2016-03-29T21:50:11" Resource="Agent">
-    <Class>
-      <ClassName>MEMB</ClassName>
-      <StandardName>REAgent</StandardName>
-      <VisibleName>Member</VisibleName>
-      <Description>Contains data for Agent searches.</Description>
-      <TableVersion>01.72.11582</TableVersion>
-      <TableDate>2016-03-29T21:50:11</TableDate>
-      <UpdateVersion/>
-      <UpdateDate/>
-      <ClassTimeStamp>LastModifiedDateTime</ClassTimeStamp>
-      <DeletedFlagField/>
-      <DeletedFlagValue/>
-      <HasKeyIndex>0</HasKeyIndex>
-      <METADATA-TABLE Version="01.72.11582" Date="2016-03-29T21:50:11" System="ANNA" Resource="Agent" Class="MEMB">
-      </METADATA-TABLE>
-      </Class>
-  </METADATA-CLASS>
 </METADATA>
 </RETS>`

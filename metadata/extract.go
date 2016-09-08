@@ -3,32 +3,68 @@ package metadata
 import (
 	"encoding/xml"
 	"io"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
-// err := p.DecodeElement(m, &t)
-
-// MClasses extracts classes from a metadata stream
-func MClasses(body io.ReadCloser, err error) ([]MClass, error) {
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, nil
+// Extractor processes metadata elements
+type Extractor struct {
+	Body   io.ReadCloser
+	parser *xml.Decoder
 }
 
-// Next advances the cursor to the named xml.StartElement
-func Next(parser *xml.Decoder, start string) (xml.StartElement, error) {
+// Open a metadata stream and read in the RETS response
+func (e *Extractor) Open() (RETSResponse, error) {
+	// TODO extract common work from rets/rets_response.go
+	rets := RETSResponse{}
+	e.parser = xml.NewDecoder(e.Body)
+	start, err := e.startAt("(RETS|RETS-STATUS)")
+	attrs := make(map[string]string)
+	for _, v := range start.Attr {
+		attrs[strings.ToLower(v.Name.Local)] = v.Value
+	}
+	code, err := strconv.ParseInt(attrs["replycode"], 10, 16)
+	if err != nil {
+		return rets, err
+	}
+	rets.ReplyCode = int(code)
+	rets.ReplyText = attrs["replytext"]
+	return rets, nil
+}
+
+// Next the provided elemment
+func (e *Extractor) Next(match string, elem interface{}) error {
+	next, err := e.startAt(match)
+	if err != nil {
+		return err
+	}
+	return e.parser.DecodeElement(elem, &next)
+}
+
+// startAt advances the cursor to the named xml.StartElement
+func (e *Extractor) startAt(match string) (xml.StartElement, error) {
+	next, err := regexp.Compile(match)
+	if err != nil {
+		return xml.StartElement{}, err
+	}
 	for {
-		token, err := parser.Token()
+		token, err := e.parser.Token()
 		if err != nil {
 			return xml.StartElement{}, err
 		}
 		switch t := token.(type) {
 		case xml.StartElement:
-			switch t.Name.Local {
-			case start:
+			if next.MatchString(t.Name.Local) {
 				return t, nil
 			}
 		}
 	}
+}
+
+// RETSResponse ...
+type RETSResponse struct {
+	// TODO extract common work from rets/rets_response.go
+	ReplyCode int
+	ReplyText string
 }
