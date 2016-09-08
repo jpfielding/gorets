@@ -9,7 +9,6 @@ import (
 )
 
 func TestReadClass(t *testing.T) {
-
 	var raw = `<?xml version="1.0" encoding="utf-8"?>
     <RETS ReplyCode="0" ReplyText="Operation Successful">
     <METADATA>
@@ -43,6 +42,7 @@ func TestReadClass(t *testing.T) {
     </RETS>`
 
 	body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
+	defer body.Close()
 
 	extractor := &Extractor{Body: body}
 	rets, err := extractor.Open()
@@ -58,4 +58,16 @@ func TestReadClass(t *testing.T) {
 	testutils.Equals(t, "01.72.11588", string(mclass.Version))
 	testutils.Equals(t, "2016-06-01T16:05:01", string(mclass.Date))
 	testutils.Equals(t, 2, len(mclass.Class))
+
+	comm := mclass.Class[0]
+	testutils.Equals(t, "COMM", string(comm.ClassName))
+	testutils.Equals(t, "CommercialSale", string(comm.StandardName))
+	testutils.Equals(t, "Commercial", string(comm.VisibleName))
+	testutils.Equals(t, "Contains data for Commercial searches.", string(comm.Description))
+	testutils.Equals(t, "TableVersion", string(comm.TableVersion))
+	testutils.Equals(t, "TableDate", string(comm.TableDate))
+
+	lotl := mclass.Class[1]
+	testutils.Equals(t, "LOTL", string(lotl.ClassName))
+	testutils.Equals(t, "Land", string(lotl.StandardName))
 }
