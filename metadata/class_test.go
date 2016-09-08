@@ -66,6 +66,7 @@ func TestReadClass(t *testing.T) {
 	testutils.Equals(t, "Contains data for Commercial searches.", string(comm.Description))
 	testutils.Equals(t, "TableVersion", string(comm.TableVersion))
 	testutils.Equals(t, "TableDate", string(comm.TableDate))
+	// TODO fill in the rest when time permits
 
 	lotl := mclass.Class[1]
 	testutils.Equals(t, "LOTL", string(lotl.ClassName))
