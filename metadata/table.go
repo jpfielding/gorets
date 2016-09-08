@@ -6,11 +6,11 @@ type MTable struct {
 	Version  Version  `xml:"Version,attr"`
 	Resource RETSID   `xml:"Resource,attr"`
 	Class    RETSID   `xml:"Class,attr"`
-	Table    []Table  `xml:"Table"`
+	Field    []Field  `xml:"Field"`
 }
 
-// Table ...
-type Table struct {
+// Field ...
+type Field struct {
 	MetadataEntryID    RETSID    `xml:"MetadataEntryID"`
 	SystemName         RETSName  `xml:"SystemName"`
 	StandardName       RETSName  `xml:"StandardName"`

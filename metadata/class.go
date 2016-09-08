@@ -28,5 +28,6 @@ type Class struct {
 	ColumnGroupSetVersion Version   `xml:"ColumnGroupSetVersion"`
 	ColumnGroupSetDate    DateTime  `xml:"ColumnGroupSetDate"`
 
+	MTable  MTable  `xml:"METADATA-TABLE"`
 	MUpdate MUpdate `xml:"METADATA-UPDATE"`
 }

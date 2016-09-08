@@ -2,7 +2,7 @@ package metadata
 
 import "encoding/xml"
 
-// StandardXML ...
+// StandardXML is a mapping that can be used directly with an xml.Decoder to extract a full mapping
 type StandardXML struct {
 	XMLName   xml.Name    `xml:"RETS"`
 	ReplyCode int         `xml:"ReplyCode,attr"`

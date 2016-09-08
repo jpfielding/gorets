@@ -8,7 +8,7 @@ import (
 	"github.com/jpfielding/gotest/testutils"
 )
 
-func TestReadClass(t *testing.T) {
+func TestClass(t *testing.T) {
 	var raw = `<?xml version="1.0" encoding="utf-8"?>
     <RETS ReplyCode="0" ReplyText="Operation Successful">
     <METADATA>
@@ -26,10 +26,10 @@ func TestReadClass(t *testing.T) {
         <DeletedFlagField/>
         <DeletedFlagValue/>
         <HasKeyIndex>0</HasKeyIndex>
-        <ColumnGroupVersion>01.72.11581</TableVersion>
-        <ColumnGroupDate>2016-02-09T06:02:17</TableDate>
-        <ColumnGroupSetVersion>01.72.11581</TableVersion>
-        <ColumnGroupSetDate>2016-02-09T06:02:17</TableDate>
+        <ColumnGroupVersion>01.72.11581</ColumnGroupVersion>
+        <ColumnGroupDate>2016-02-09T06:02:17</ColumnGroupDate>
+        <ColumnGroupSetVersion>01.72.11581</ColumnGroupSetVersion>
+        <ColumnGroupSetDate>2016-02-09T06:02:17</ColumnGroupSetDate>
         <METADATA-TABLE Version="01.72.11581" Date="2016-02-09T06:02:17" System="ANNA" Resource="Property" Class="COMM">
         </METADATA-TABLE>
       </Class>
@@ -64,8 +64,8 @@ func TestReadClass(t *testing.T) {
 	testutils.Equals(t, "CommercialSale", string(comm.StandardName))
 	testutils.Equals(t, "Commercial", string(comm.VisibleName))
 	testutils.Equals(t, "Contains data for Commercial searches.", string(comm.Description))
-	testutils.Equals(t, "TableVersion", string(comm.TableVersion))
-	testutils.Equals(t, "TableDate", string(comm.TableDate))
+	testutils.Equals(t, "01.72.11581", string(comm.TableVersion))
+	testutils.Equals(t, "2016-02-09T06:02:17", string(comm.TableDate))
 	// TODO fill in the rest when time permits
 
 	lotl := mclass.Class[1]
