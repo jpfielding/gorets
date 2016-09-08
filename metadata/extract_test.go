@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"testing"
 
@@ -21,6 +22,7 @@ func TestNext(t *testing.T) {
     </METADATA>
     </RETS>`
 	body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
+	defer body.Close()
 
 	extractor := &Extractor{Body: body}
 	rets, err := extractor.Open()
@@ -44,4 +46,7 @@ func TestNext(t *testing.T) {
 	t.Run("agent", next("Agent", "01.72.11582", "2016-03-29T21:50:11"))
 	t.Run("offfice", next("Office", "01.72.11583", "2016-03-29T21:50:11"))
 	t.Run("listing", next("Listing", "01.72.11584", "2016-03-29T21:50:11"))
+
+	err = extractor.Next("METADATA-CLASS", &MClass{})
+	testutils.Equals(t, io.EOF, err)
 }
