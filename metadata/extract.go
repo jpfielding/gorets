@@ -19,7 +19,7 @@ func (e *Extractor) Open() (RETSResponse, error) {
 	// TODO extract common work from rets/rets_response.go
 	rets := RETSResponse{}
 	e.parser = xml.NewDecoder(e.Body)
-	start, err := e.startAt("(RETS|RETS-STATUS)")
+	start, err := e.skipTo("(RETS|RETS-STATUS)")
 	attrs := make(map[string]string)
 	for _, v := range start.Attr {
 		attrs[strings.ToLower(v.Name.Local)] = v.Value
@@ -33,17 +33,17 @@ func (e *Extractor) Open() (RETSResponse, error) {
 	return rets, nil
 }
 
-// Next the provided elemment
-func (e *Extractor) Next(match string, elem interface{}) error {
-	next, err := e.startAt(match)
+// DecodeNext the provided elemment
+func (e *Extractor) DecodeNext(match string, elem interface{}) error {
+	next, err := e.skipTo(match)
 	if err != nil {
 		return err
 	}
 	return e.parser.DecodeElement(elem, &next)
 }
 
-// startAt advances the cursor to the named xml.StartElement
-func (e *Extractor) startAt(match string) (xml.StartElement, error) {
+// skipTo advances the cursor to the named xml.StartElement
+func (e *Extractor) skipTo(match string) (xml.StartElement, error) {
 	next, err := regexp.Compile(match)
 	if err != nil {
 		return xml.StartElement{}, err

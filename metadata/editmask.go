@@ -2,15 +2,15 @@ package metadata
 
 // MEditMask ...
 type MEditMask struct {
-	Date     DateTime   `xml:"Date,attr"`
-	Version  Version    `xml:"Version,attr"`
-	Resource RETSID     `xml:"Resource,attr"`
-	EditMask []EditMask `xml:"EditMask"`
+	Date     DateTime   `xml:"Date,attr,omitempty"`
+	Version  Version    `xml:"Version,attr,omitempty"`
+	Resource RETSID     `xml:"Resource,attr,omitempty"`
+	EditMask []EditMask `xml:"EditMask,omitempty"`
 }
 
 // EditMask ...
 type EditMask struct {
-	MetadataEntryID RETSID   `xml:"MetadataEntryID"`
-	EditMaskID      RETSName `xml:"EditMaskID"`
-	Value           Text     `xml:"Value"`
+	MetadataEntryID RETSID   `xml:"MetadataEntryID,omitempty"`
+	EditMaskID      RETSName `xml:"EditMaskID,omitempty"`
+	Value           Text     `xml:"Value,omitempty"`
 }

@@ -34,7 +34,7 @@ func TestNext(t *testing.T) {
 	next := func(resource, version, date string) func(*testing.T) {
 		return func(tt *testing.T) {
 			mclass := &MClass{}
-			err = extractor.Next("METADATA-CLASS", mclass)
+			err = extractor.DecodeNext("METADATA-CLASS", mclass)
 			testutils.Ok(t, err)
 			testutils.Equals(tt, resource, string(mclass.Resource))
 			testutils.Equals(tt, version, string(mclass.Version))
@@ -47,6 +47,6 @@ func TestNext(t *testing.T) {
 	t.Run("offfice", next("Office", "01.72.11583", "2016-03-29T21:50:11"))
 	t.Run("listing", next("Listing", "01.72.11584", "2016-03-29T21:50:11"))
 
-	err = extractor.Next("METADATA-CLASS", &MClass{})
+	err = extractor.DecodeNext("METADATA-CLASS", &MClass{})
 	testutils.Equals(t, io.EOF, err)
 }

@@ -2,32 +2,32 @@ package metadata
 
 // MClass ...
 type MClass struct {
-	Date     DateTime `xml:"Date,attr"`
-	Version  Version  `xml:"Version,attr"`
-	Resource RETSID   `xml:"Resource,attr"`
-	Class    []Class  `xml:"Class"`
+	Date     DateTime `xml:"Date,attr,omitempty"`
+	Version  Version  `xml:"Version,attr,omitempty"`
+	Resource RETSID   `xml:"Resource,attr,omitempty"`
+	Class    []Class  `xml:"Class,omitempty"`
 }
 
 // Class ...
 type Class struct {
-	ClassName             RETSName  `xml:"ClassName"`
-	StandardName          PlainText `xml:"StandardName"`
-	VisibleName           PlainText `xml:"VisibleName"`
-	Description           PlainText `xml:"Description"`
-	TableVersion          Version   `xml:"TableVersion"`
-	TableDate             DateTime  `xml:"TableDate"`
-	UpdateVersion         Version   `xml:"UpdateVersion"`
-	UpdateDate            DateTime  `xml:"UpdateDate"`
-	ClassTimeStamp        RETSName  `xml:"ClassTimeStamp"`
-	DeletedFlagField      RETSName  `xml:"DeletedFlagField"`
-	DeletedFlagValue      AlphaNum  `xml:"DeletedFlagValue"`
-	HasKeyIndex           Boolean   `xml:"HasKeyIndex"`
-	OffsetSupport         Boolean   `xml:"OffsetSupport"`
-	ColumnGroupVersion    Version   `xml:"ColumnGroupVersion"`
-	ColumnGroupDate       DateTime  `xml:"ColumnGroupDate"`
-	ColumnGroupSetVersion Version   `xml:"ColumnGroupSetVersion"`
-	ColumnGroupSetDate    DateTime  `xml:"ColumnGroupSetDate"`
+	ClassName             RETSName  `xml:"ClassName,omitempty"`
+	StandardName          PlainText `xml:"StandardName,omitempty"`
+	VisibleName           PlainText `xml:"VisibleName,omitempty"`
+	Description           PlainText `xml:"Description,omitempty"`
+	TableVersion          Version   `xml:"TableVersion,omitempty"`
+	TableDate             DateTime  `xml:"TableDate,omitempty"`
+	UpdateVersion         Version   `xml:"UpdateVersion,omitempty"`
+	UpdateDate            DateTime  `xml:"UpdateDate,omitempty"`
+	ClassTimeStamp        RETSName  `xml:"ClassTimeStamp,omitempty"`
+	DeletedFlagField      RETSName  `xml:"DeletedFlagField,omitempty"`
+	DeletedFlagValue      AlphaNum  `xml:"DeletedFlagValue,omitempty"`
+	HasKeyIndex           Boolean   `xml:"HasKeyIndex,omitempty"`
+	OffsetSupport         Boolean   `xml:"OffsetSupport,omitempty"`
+	ColumnGroupVersion    Version   `xml:"ColumnGroupVersion,omitempty"`
+	ColumnGroupDate       DateTime  `xml:"ColumnGroupDate,omitempty"`
+	ColumnGroupSetVersion Version   `xml:"ColumnGroupSetVersion,omitempty"`
+	ColumnGroupSetDate    DateTime  `xml:"ColumnGroupSetDate,omitempty"`
 
-	MTable  MTable  `xml:"METADATA-TABLE"`
-	MUpdate MUpdate `xml:"METADATA-UPDATE"`
+	MTable  MTable  `xml:"METADATA-TABLE,omitempty"`
+	MUpdate MUpdate `xml:"METADATA-UPDATE,omitempty"`
 }

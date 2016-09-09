@@ -52,7 +52,7 @@ func TestClass(t *testing.T) {
 	testutils.Equals(t, 0, rets.ReplyCode)
 
 	mclass := &MClass{}
-	err = extractor.Next("METADATA-CLASS", mclass)
+	err = extractor.DecodeNext("METADATA-CLASS", mclass)
 	testutils.Ok(t, err)
 	testutils.Equals(t, "Property", string(mclass.Resource))
 	testutils.Equals(t, "01.72.11588", string(mclass.Version))

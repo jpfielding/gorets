@@ -54,7 +54,7 @@ func TestSystem(t *testing.T) {
 	testutils.Equals(t, 0, rets.ReplyCode)
 
 	xml := MSystem{}
-	err = extractor.Next("METADATA-SYSTEM", &xml)
+	err = extractor.DecodeNext("METADATA-SYSTEM", &xml)
 	if err != io.EOF {
 		testutils.Ok(t, err)
 	}

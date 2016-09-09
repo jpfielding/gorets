@@ -2,38 +2,38 @@ package metadata
 
 // MLookup ...
 type MLookup struct {
-	Date     DateTime `xml:"Date,attr"`
-	Version  Version  `xml:"Version,attr"`
-	Resource RETSID   `xml:"Resource,attr"`
-	Lookup   []Lookup `xml:"Lookup"`
+	Date     DateTime `xml:"Date,attr,omitempty"`
+	Version  Version  `xml:"Version,attr,omitempty"`
+	Resource RETSID   `xml:"Resource,attr,omitempty"`
+	Lookup   []Lookup `xml:"Lookup,omitempty"`
 }
 
 // Lookup ...
 type Lookup struct {
-	MetadataEntryID   RETSID    `xml:"MetadataEntryID"`
-	LookupName        RETSName  `xml:"LookupName"`
-	VisibleName       PlainText `xml:"VisibleName"`
-	LookupTypeVersion Version   `xml:"LookupTypeVersion"`
-	LookupTypeDate    DateTime  `xml:"LookupTypeDate"`
-	FilterID          RETSID    `xml:"FilterID"`
-	NotShowByDefault  Boolean   `xml:"NotShowByDefault"`
+	MetadataEntryID   RETSID    `xml:"MetadataEntryID,omitempty"`
+	LookupName        RETSName  `xml:"LookupName,omitempty"`
+	VisibleName       PlainText `xml:"VisibleName,omitempty"`
+	LookupTypeVersion Version   `xml:"LookupTypeVersion,omitempty"`
+	LookupTypeDate    DateTime  `xml:"LookupTypeDate,omitempty"`
+	FilterID          RETSID    `xml:"FilterID,omitempty"`
+	NotShowByDefault  Boolean   `xml:"NotShowByDefault,omitempty"`
 
-	MLookupType MLookupType `xml:"METADATA-LOOKUP_TYPE"`
+	MLookupType MLookupType `xml:"METADATA-LOOKUP_TYPE,omitempty"`
 }
 
 // MLookupType ...
 type MLookupType struct {
-	Date       DateTime     `xml:"Date,attr"`
-	Version    Version      `xml:"Version,attr"`
-	Resource   RETSID       `xml:"Resource,attr"`
-	Lookup     RETSID       `xml:"Lookup,attr"`
-	LookupType []LookupType `xml:"Lookup"`
+	Date       DateTime     `xml:"Date,attr,omitempty"`
+	Version    Version      `xml:"Version,attr,omitempty"`
+	Resource   RETSID       `xml:"Resource,attr,omitempty"`
+	Lookup     RETSID       `xml:"Lookup,attr,omitempty"`
+	LookupType []LookupType `xml:"Lookup,omitempty"`
 }
 
 // LookupType ...
 type LookupType struct {
-	MetadataEntryID RETSID    `xml:"MetadataEntryID"`
-	LongValue       PlainText `xml:"LongValue"`
-	ShortValue      PlainText `xml:"ShortValue"`
-	Value           PlainText `xml:"Value"`
+	MetadataEntryID RETSID    `xml:"MetadataEntryID,omitempty"`
+	LongValue       PlainText `xml:"LongValue,omitempty"`
+	ShortValue      PlainText `xml:"ShortValue,omitempty"`
+	Value           PlainText `xml:"Value,omitempty"`
 }

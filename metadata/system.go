@@ -4,40 +4,40 @@ import "encoding/xml"
 
 // StandardXML is a mapping that can be used directly with an xml.Decoder to extract a full mapping
 type StandardXML struct {
-	XMLName   xml.Name    `xml:"RETS"`
-	ReplyCode int         `xml:"ReplyCode,attr"`
-	ReplyText string      `xml:"ReplyText,attr"`
-	Metadata  XMLMetadata `xml:"METADATA"`
+	XMLName   xml.Name    `xml:"RETS,omitempty"`
+	ReplyCode int         `xml:"ReplyCode,attr,omitempty"`
+	ReplyText string      `xml:"ReplyText,attr,omitempty"`
+	Metadata  XMLMetadata `xml:"METADATA,omitempty"`
 }
 
 // XMLMetadata ...
 type XMLMetadata struct {
-	System MSystem `xml:"METADATA-SYSTEM"`
+	System MSystem `xml:"METADATA-SYSTEM,omitempty"`
 }
 
 // MSystem ...
 type MSystem struct {
-	Date    DateTime `xml:"Date,attr"`
-	Version Version  `xml:"Version,attr"`
-	System  System   `xml:"SYSTEM"`
+	Date    DateTime `xml:"Date,attr,omitempty"`
+	Version Version  `xml:"Version,attr,omitempty"`
+	System  System   `xml:"SYSTEM,omitempty"`
 }
 
 // System ...
 type System struct {
-	SystemID          string `xml:"SystemID,attr"`
-	SystemDescription string `xml:"SystemDescription,attr"`
-	TimeZoneOffset    string `xml:"TimeZoneOffset,attr"`
-	MetadataID        string `xml:"MetadataID,attr"`
+	SystemID          string `xml:"SystemID,attr,omitempty"`
+	SystemDescription string `xml:"SystemDescription,attr,omitempty"`
+	TimeZoneOffset    string `xml:"TimeZoneOffset,attr,omitempty"`
+	MetadataID        string `xml:"MetadataID,attr,omitempty"`
 
-	Comments          string   `xml:"COMMENTS"`
-	ResourceVersion   Version  `xml:"ResourceVersion"`
-	ResourceDate      DateTime `xml:"ResourceDate"`
-	ForeignKeyVersion Version  `xml:"ForeignKeyVersion"`
-	ForeignKeyDate    DateTime `xml:"ForeignKeyDate"`
-	FilterVersion     Version  `xml:"FilterVerision"`
-	FilterDate        DateTime `xml:"FilterDate"`
+	Comments          string   `xml:"COMMENTS,omitempty"`
+	ResourceVersion   Version  `xml:"ResourceVersion,omitempty"`
+	ResourceDate      DateTime `xml:"ResourceDate,omitempty"`
+	ForeignKeyVersion Version  `xml:"ForeignKeyVersion,omitempty"`
+	ForeignKeyDate    DateTime `xml:"ForeignKeyDate,omitempty"`
+	FilterVersion     Version  `xml:"FilterVerision,omitempty"`
+	FilterDate        DateTime `xml:"FilterDate,omitempty"`
 
-	MForeignKey MForeignKey `xml:"METADATA-FOREIGN_KEY"`
-	MResource   MResource   `xml:"METADATA-RESOURCE"`
-	MFilter     MFilter     `xml:"METADATA-FILTER"`
+	MForeignKey MForeignKey `xml:"METADATA-FOREIGN_KEY,omitempty"`
+	MResource   MResource   `xml:"METADATA-RESOURCE,omitempty"`
+	MFilter     MFilter     `xml:"METADATA-FILTER,omitempty"`
 }
