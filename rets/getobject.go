@@ -87,7 +87,7 @@ func (r *GetObjectResponse) ForEach(result GetObjectResult) error {
 			return err
 		}
 	}
-	return nil
+	// return nil
 }
 
 // Close ...

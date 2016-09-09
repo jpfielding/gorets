@@ -3,7 +3,6 @@ package rets
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
 	"io"
 
 	"context"
@@ -69,7 +68,6 @@ func (c *CompactSearchResult) ForEach(each EachRow) (bool, error) {
 			c.buf.Write(bytes)
 		}
 	}
-	return maxRows, errors.New("invalid exit from RETS stream")
 }
 
 // Close ...
