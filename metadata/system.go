@@ -31,7 +31,7 @@ type System struct {
 
 	Comments          string   `xml:"COMMENTS"`
 	ResourceVersion   Version  `xml:"ResourceVersion"`
-	ResourceDate      DateTime `xml:ResourceDate"`
+	ResourceDate      DateTime `xml:"ResourceDate"`
 	ForeignKeyVersion Version  `xml:"ForeignKeyVersion"`
 	ForeignKeyDate    DateTime `xml:"ForeignKeyDate"`
 	FilterVersion     Version  `xml:"FilterVerision"`

@@ -22,12 +22,12 @@ type MFilterType struct {
 	Date    DateTime `xml:"Date,attr"`
 	Version Version  `xml:"Version,attr"`
 
-	Filter []FilterType `"xml:FilterType"`
+	Filter []FilterType `xml:"FilterType"`
 }
 
 // FilterType ...
 type FilterType struct {
-	FilterTypeID RETSID    `xml:FilterTypeID`
-	ParentValue  PlainText `xml:ParentValue`
-	ChildValue   PlainText `xml:ChildValue`
+	FilterTypeID RETSID    `xml:"FilterTypeID"`
+	ParentValue  PlainText `xml:"ParentValue"`
+	ChildValue   PlainText `xml:"ChildValue"`
 }
