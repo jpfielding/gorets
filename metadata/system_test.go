@@ -29,7 +29,7 @@ func TestLoad(t *testing.T) {
 	body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
 	defer body.Close()
 	parser := xml.NewDecoder(body)
-	xml := StandardXML{}
+	xml := RETSResponseWrapper{}
 
 	err := parser.Decode(&xml)
 	if err != io.EOF {

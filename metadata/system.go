@@ -2,8 +2,8 @@ package metadata
 
 import "encoding/xml"
 
-// StandardXML is a mapping that can be used directly with an xml.Decoder to extract a full mapping
-type StandardXML struct {
+// RETSResponseWrapper is a mapping that can be used directly with an xml.Decoder to extract a full mapping
+type RETSResponseWrapper struct {
 	XMLName   xml.Name `xml:"RETS,omitempty"`
 	ReplyCode int      `xml:"ReplyCode,attr,omitempty"`
 	ReplyText string   `xml:"ReplyText,attr,omitempty"`
