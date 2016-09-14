@@ -4,14 +4,14 @@ import "encoding/xml"
 
 // StandardXML is a mapping that can be used directly with an xml.Decoder to extract a full mapping
 type StandardXML struct {
-	XMLName   xml.Name    `xml:"RETS,omitempty"`
-	ReplyCode int         `xml:"ReplyCode,attr,omitempty"`
-	ReplyText string      `xml:"ReplyText,attr,omitempty"`
-	Metadata  XMLMetadata `xml:"METADATA,omitempty"`
+	XMLName   xml.Name `xml:"RETS,omitempty"`
+	ReplyCode int      `xml:"ReplyCode,attr,omitempty"`
+	ReplyText string   `xml:"ReplyText,attr,omitempty"`
+	Metadata  Standard `xml:"METADATA,omitempty"`
 }
 
-// XMLMetadata ...
-type XMLMetadata struct {
+// Standard ...
+type Standard struct {
 	System MSystem `xml:"METADATA-SYSTEM,omitempty"`
 }
 
