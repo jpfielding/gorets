@@ -2,32 +2,34 @@ package metadata
 
 // MFilter ...
 type MFilter struct {
-	Date    DateTime `xml:"Date,attr,omitempty"`
-	Version Version  `xml:"Version,attr,omitempty"`
-	Filter  []Filter `xml:"Filter,omitempty"`
+	Date    DateTime `xml:",attr,omitempty" json:",omitempty"`
+	Version Version  `xml:",attr,omitempty" json:",omitempty"`
+	Filter  []Filter `xml:",omitempty" json:",omitempty"`
 }
 
 // Filter ...
 type Filter struct {
-	FilterID          RETSID   `xml:"FilterID,omitempty"`
-	ParentResource    RETSID   `xml:"ParentResource,omitempty"`
-	ParentLookupName  RETSName `xml:"ParentLookupName,omitempty"`
-	ChildResource     RETSID   `xml:"ChildResource,omitempty"`
-	ChildLookupName   RETSName `xml:"ChildLookupName,omitempty"`
-	NotShownByDefault Boolean  `xml:"NotShownByDefault,omitempty"`
+	FilterID          RETSID   `xml:",omitempty" json:",omitempty"`
+	ParentResource    RETSID   `xml:",omitempty" json:",omitempty"`
+	ParentLookupName  RETSName `xml:",omitempty" json:",omitempty"`
+	ChildResource     RETSID   `xml:",omitempty" json:",omitempty"`
+	ChildLookupName   RETSName `xml:",omitempty" json:",omitempty"`
+	NotShownByDefault Boolean  `xml:",omitempty" json:",omitempty"`
+
+	MFilterType MFilterType `xml:"METADATA-FILTER_TYPE,omitempty json:"METADATA-FILTER_TYPE,,omitempty"`
 }
 
 // MFilterType ...
 type MFilterType struct {
-	Date    DateTime `xml:"Date,attr,omitempty"`
-	Version Version  `xml:"Version,attr,omitempty"`
+	Date    DateTime `xml:",attr,omitempty"`
+	Version Version  `xml:",attr,omitempty"`
 
-	Filter []FilterType `xml:"FilterType,omitempty"`
+	FilterType []FilterType `xml:",omitempty" json:",omitempty"`
 }
 
 // FilterType ...
 type FilterType struct {
-	FilterTypeID RETSID    `xml:"FilterTypeID,omitempty"`
-	ParentValue  PlainText `xml:"ParentValue,omitempty"`
-	ChildValue   PlainText `xml:"ChildValue,omitempty"`
+	FilterTypeID RETSID    `xml:",omitempty" json:",omitempty"`
+	ParentValue  PlainText `xml:",omitempty" json:",omitempty"`
+	ChildValue   PlainText `xml:",omitempty" json:",omitempty"`
 }

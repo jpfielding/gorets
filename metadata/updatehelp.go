@@ -2,15 +2,15 @@ package metadata
 
 // MUpdateHelp ...
 type MUpdateHelp struct {
-	Date       DateTime     `xml:"Date,attr,omitempty"`
-	Version    Version      `xml:"Version,attr,omitempty"`
-	Resource   RETSID       `xml:"Resource,attr,omitempty"`
-	UpdateHelp []UpdateHelp `xml:"UpdateHelp,omitempty"`
+	Date       DateTime     `xml:",attr,omitempty json:",omitempty"`
+	Version    Version      `xml:",attr,omitempty json:",omitempty"`
+	Resource   RETSID       `xml:",attr,omitempty json:",omitempty"`
+	UpdateHelp []UpdateHelp `xml:",omitempty json:",omitempty"`
 }
 
 // UpdateHelp ...
 type UpdateHelp struct {
-	MetadataEntryID RETSID   `xml:"MetadataEntryID,omitempty"`
-	UpdateHelpID    RETSName `xml:"UpdateHelpID,omitempty"`
-	Value           Text     `xml:"Value,omitempty"`
+	MetadataEntryID RETSID   `xml:",omitempty json:",omitempty"`
+	UpdateHelpID    RETSName `xml:",omitempty json:",omitempty"`
+	Value           Text     `xml:",omitempty json:",omitempty"`
 }

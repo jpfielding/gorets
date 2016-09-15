@@ -2,46 +2,46 @@ package metadata
 
 // MTable ...
 type MTable struct {
-	Date     DateTime `xml:"Date,attr,omitempty"`
-	Version  Version  `xml:"Version,attr,omitempty"`
-	Resource RETSID   `xml:"Resource,attr,omitempty"`
-	Class    RETSID   `xml:"Class,attr,omitempty"`
-	Field    []Field  `xml:"Field,omitempty"`
+	Date     DateTime `xml:",attr,omitempty"`
+	Version  Version  `xml:",attr,omitempty"`
+	Resource RETSID   `xml:",attr,omitempty"`
+	Class    RETSID   `xml:",attr,omitempty"`
+	Field    []Field  `xml:",omitempty"`
 }
 
 // Field ...
 type Field struct {
-	MetadataEntryID    RETSID    `xml:"MetadataEntryID,omitempty"`
-	SystemName         RETSName  `xml:"SystemName,omitempty"`
-	StandardName       RETSName  `xml:"StandardName,omitempty"`
-	LongName           Text      `xml:"LongName,omitempty"`
-	DBName             AlphaNum  `xml:"DBName,omitempty"`
-	ShortName          Text      `xml:"ShortName,omitempty"`
-	MaximumLength      Numeric   `xml:"MaximumLength,omitempty"` // TODO limit to postive
-	DataType           string    `xml:"DataType,omitempty"`      // TODO limit to options
-	Precision          Numeric   `xml:"Precision,omitempty"`     // TODO limit to positive
-	Searchable         Boolean   `xml:"Searchable,omitempty"`
-	Interpretation     string    `xml:"Interpretation,omitempty"` // TODO limit to options
-	Alignment          string    `xml:"Alignment,omitempty"`      // TODO limit to options
-	UseSeparator       Boolean   `xml:"UseSeparator,omitempty"`   // TODO limit to options
-	EditMaskID         RETSNames `xml:"EditMaskID,omitempty"`
-	LookupName         RETSName  `xml:"LookupName,omitempty"`
-	MaxSelect          Numeric   `xml:"MaxSelect,omitempty"`
-	Units              string    `xml:"Units,omitempty"`
-	Index              Boolean   `xml:"Index,omitempty"`
-	Minimum            Numeric   `xml:"Minimum,omitempty"`
-	Maximum            Numeric   `xml:"Maxiumum,omitempty"`
-	Default            Numeric   `xml:"Default,omitempty"`
-	Required           Numeric   `xml:"Required,omitempty"`
-	SearchHelpID       RETSName  `xml:"SearchHelpID,omitempty"`
-	Unique             Boolean   `xml:"Unique,omitempty"`
-	ModTimeStamp       DateTime  `xml:"ModTimeStamp,omitempty"`
-	ForeignKeyName     RETSID    `xml:"ForeignKeyName,omitempty"`
-	ForeignField       RETSName  `xml:"ForeignField,omitempty"`
-	KeyQuery           Boolean   `xml:"KeyQuery,omitempty"`  // deprecated
-	KeySelect          Boolean   `xml:"KeySelect,omitempty"` // deprecated
-	InKeyIndex         Boolean   `xml:"InKeyIndex,omitempty"`
-	FilterParentField  RETSName  `xml:"FilterParentField,omitempty"`
-	DefaultSearchOrder Numeric   `xml:"DefaultSearchOrder,omitempty"`
-	Case               string    `xml:"Case,omitempty"` // TODO limit to known options
+	MetadataEntryID    RETSID    `xml:",omitempty" json:",omitempty"`
+	SystemName         RETSName  `xml:",omitempty" json:",omitempty"`
+	StandardName       RETSName  `xml:",omitempty" json:",omitempty"`
+	LongName           Text      `xml:",omitempty" json:",omitempty"`
+	DBName             AlphaNum  `xml:",omitempty" json:",omitempty"`
+	ShortName          Text      `xml:",omitempty" json:",omitempty"`
+	MaximumLength      Numeric   `xml:",omitempty" json:",omitempty"` // TODO limit to postive
+	DataType           string    `xml:",omitempty" json:",omitempty"` // TODO limit to options
+	Precision          Numeric   `xml:",omitempty" json:",omitempty"` // TODO limit to positive
+	Searchable         Boolean   `xml:",omitempty" json:",omitempty"`
+	Interpretation     string    `xml:",omitempty" json:",omitempty"` // TODO limit to options
+	Alignment          string    `xml:",omitempty" json:",omitempty"` // TODO limit to options
+	UseSeparator       Boolean   `xml:",omitempty" json:",omitempty"` // TODO limit to options
+	EditMaskID         RETSNames `xml:",omitempty" json:",omitempty"`
+	LookupName         RETSName  `xml:",omitempty" json:",omitempty"`
+	MaxSelect          Numeric   `xml:",omitempty" json:",omitempty"`
+	Units              string    `xml:",omitempty" json:",omitempty"`
+	Index              Boolean   `xml:",omitempty" json:",omitempty"`
+	Minimum            Numeric   `xml:",omitempty" json:",omitempty"`
+	Maximum            Numeric   `xml:",omitempty" json:",omitempty"`
+	Default            Numeric   `xml:",omitempty" json:",omitempty"`
+	Required           Numeric   `xml:",omitempty" json:",omitempty"`
+	SearchHelpID       RETSName  `xml:",omitempty" json:",omitempty"`
+	Unique             Boolean   `xml:",omitempty" json:",omitempty"`
+	ModTimeStamp       DateTime  `xml:",omitempty" json:",omitempty"`
+	ForeignKeyName     RETSID    `xml:",omitempty" json:",omitempty"`
+	ForeignField       RETSName  `xml:",omitempty" json:",omitempty"`
+	KeyQuery           Boolean   `xml:",omitempty" json:",omitempty"` // deprecated
+	KeySelect          Boolean   `xml:",omitempty" json:",omitempty"` // deprecated
+	InKeyIndex         Boolean   `xml:",omitempty" json:",omitempty"`
+	FilterParentField  RETSName  `xml:",omitempty" json:",omitempty"`
+	DefaultSearchOrder Numeric   `xml:",omitempty" json:",omitempty"`
+	Case               string    `xml:",omitempty" json:",omitempty"` // TODO limit to known options
 }

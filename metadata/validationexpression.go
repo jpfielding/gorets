@@ -2,18 +2,18 @@ package metadata
 
 // MValidationExpression ...
 type MValidationExpression struct {
-	Date     DateTime `xml:"Date,attr,omitempty"`
-	Version  Version  `xml:"Version,attr,omitempty"`
-	Resource RETSID   `xml:"Resource,attr,omitempty"`
+	Date     DateTime `xml:",attr,omitempty json:",omitempty"`
+	Version  Version  `xml:",attr,omitempty json:",omitempty"`
+	Resource RETSID   `xml:",attr,omitempty json:",omitempty"`
 
-	ValidationExpression []ValidationExpression `xml:"ValidationExpression,omitempty"`
+	ValidationExpression []ValidationExpression `xml:",omitempty json:",omitempty"`
 }
 
 // ValidationExpression ...
 type ValidationExpression struct {
-	MetadataEntryID          RETSID   `xml:"MetadataEntryID,omitempty"`
-	ValidationExpressionID   RETSName `xml:"ValidationExpressionID,omitempty"`
-	ValidationExpressionType AlphaNum `xml:"ValidationExpressionType,omitempty"`
-	Message                  Text     `xml:"Message,omitempty"`
-	IsCaseSensitive          Boolean  `xml:"IsCaseSensitive,omitempty"`
+	MetadataEntryID          RETSID   `xml:",omitempty json:",omitempty"`
+	ValidationExpressionID   RETSName `xml:",omitempty json:",omitempty"`
+	ValidationExpressionType AlphaNum `xml:",omitempty json:",omitempty"`
+	Message                  Text     `xml:",omitempty json:",omitempty"`
+	IsCaseSensitive          Boolean  `xml:",omitempty json:",omitempty"`
 }

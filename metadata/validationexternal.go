@@ -2,36 +2,38 @@ package metadata
 
 // MValidationExternal ...
 type MValidationExternal struct {
-	Date     DateTime `xml:"Date,attr,omitempty"`
-	Version  Version  `xml:"Version,attr,omitempty"`
-	Resource RETSID   `xml:"Resource,attr,omitempty"`
+	Date     DateTime `xml:",attr,omitempty json:",omitempty"`
+	Version  Version  `xml:",attr,omitempty json:",omitempty"`
+	Resource RETSID   `xml:",attr,omitempty json:",omitempty"`
 
-	ValidationExternal []ValidationExternal `xml:"ValidationExternal,omitempty"`
+	ValidationExternal []ValidationExternal `xml:",omitempty json:",omitempty"`
 }
 
 // ValidationExternal ...
 type ValidationExternal struct {
-	MetadataEntryID        RETSID   `xml:"MetadataEntryID,omitempty"`
-	ValidationExternalName RETSName `xml:"ValidationExternalName,omitempty"`
-	SearchResource         RETSName `xml:"SearchResource,omitempty"`
-	SearchClass            RETSName `xml:"SearchClass,omitempty"`
-	Date                   DateTime `xml:"Date,attr,omitempty"`
-	Version                Version  `xml:"Version,attr,omitempty"`
+	MetadataEntryID        RETSID   `xml:",omitempty json:",omitempty"`
+	ValidationExternalName RETSName `xml:",omitempty json:",omitempty"`
+	SearchResource         RETSName `xml:",omitempty json:",omitempty"`
+	SearchClass            RETSName `xml:",omitempty json:",omitempty"`
+	Date                   DateTime `xml:",attr,omitempty json:",omitempty"`
+	Version                Version  `xml:",attr,omitempty json:",omitempty"`
+
+	MValidationExternalType MValidationExternalType `xml:"METADATA-VALIDATION_EXTERNAL_TYPE,omitempty json:"METADATA-VALIDATION_EXTERNAL_TYPE,omitempty"`
 }
 
 // MValidationExternalType ...
 type MValidationExternalType struct {
-	Date                   DateTime                 `xml:"Date,attr,omitempty"`
-	Version                Version                  `xml:"Version,attr,omitempty"`
-	Resource               RETSID                   `xml:"Resource,attr,omitempty"`
-	ValidationExternalName RETSID                   `xml:"ValidationExternalName,attr,omitempty"`
-	ValidationExternalType []ValidationExternalType `xml:"ValidationExternalType,omitempty"`
+	Date                   DateTime                 `xml:",attr,omitempty json:",omitempty"`
+	Version                Version                  `xml:",attr,omitempty json:",omitempty"`
+	Resource               RETSID                   `xml:",attr,omitempty json:",omitempty"`
+	ValidationExternalName RETSID                   `xml:",attr,omitempty json:",omitempty"`
+	ValidationExternalType []ValidationExternalType `xml:",omitempty json:",omitempty"`
 }
 
 // ValidationExternalType ...
 type ValidationExternalType struct {
-	MetadataEntryID RETSID     `xml:"MetadataEntryID,omitempty"`
-	SearchField     PlainText  `xml:"SearchField,omitempty"`
-	DisplayField    PlainText  `xml:"DisplayField,omitempty"`
-	ResultFields    StringList `xml:"ResultFields,omitempty"` // TODO plaintext list
+	MetadataEntryID RETSID     `xml:",omitempty json:",omitempty"`
+	SearchField     PlainText  `xml:",omitempty json:",omitempty"`
+	DisplayField    PlainText  `xml:",omitempty json:",omitempty"`
+	ResultFields    StringList `xml:",omitempty json:",omitempty"` // TODO plaintext list
 }
