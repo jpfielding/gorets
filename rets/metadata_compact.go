@@ -1,12 +1,11 @@
 package rets
 
 import (
+	"context"
 	"encoding/xml"
 	"fmt"
 	"io"
 	"strings"
-
-	"golang.org/x/net/context"
 )
 
 // CompactMetadata ...
