@@ -16,7 +16,7 @@ type Filter struct {
 	ChildLookupName   RETSName `xml:",omitempty" json:",omitempty"`
 	NotShownByDefault Boolean  `xml:",omitempty" json:",omitempty"`
 
-	MFilterType MFilterType `xml:"METADATA-FILTER_TYPE,omitempty json:"METADATA-FILTER_TYPE,,omitempty"`
+	MFilterType MFilterType `xml:"METADATA-FILTER_TYPE,omitempty" json:"METADATA-FILTER_TYPE,omitempty"`
 }
 
 // MFilterType ...

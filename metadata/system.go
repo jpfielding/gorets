@@ -4,7 +4,7 @@ import "encoding/xml"
 
 // RETSResponseWrapper is a mapping that can be used directly with an xml.Decoder to extract a full mapping
 type RETSResponseWrapper struct {
-	XMLName   xml.Name `xml:"RETS,omitempty`
+	XMLName   xml.Name `xml:"RETS,omitempty"`
 	ReplyCode int      `xml:",attr,omitempty"`
 	ReplyText string   `xml:",attr,omitempty"`
 	Metadata  Standard `xml:"METADATA,omitempty"`
