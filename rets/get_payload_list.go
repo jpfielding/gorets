@@ -10,6 +10,8 @@ import (
 	"context"
 )
 
+// TODO redo this without channels
+
 // PayloadList ...
 type PayloadList struct {
 	Rets     RetsResponse
@@ -74,13 +76,13 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 			case xml.StartElement:
 				switch t.Name.Local {
 				case "RETSPayloadList":
-					mcd, err := ParseMetadataCompactDecoded(t, parser, delim)
+					cd, err := NewCompactData(t, parser, delim)
 					if err != nil {
 						fmt.Println("failed to decode: ", err)
 						list.Error = err
 						return
 					}
-					payloads <- *mcd
+					payloads <- cd
 				}
 			}
 		}

@@ -49,14 +49,18 @@ func TestParseResources(t *testing.T) {
 }
 
 func verifyParseResources(t *testing.T, cm CompactMetadata) {
-	resource := cm.find("METADATA-RESOURCE")[""]
-	testutils.Equals(t, "1.12.30", resource.Version)
-	testutils.Equals(t, len(resource.Rows), 2)
+	resource := cm.find("METADATA-RESOURCE")[0]
+
+	testutils.Equals(t, "1.12.30", resource.Attr["Version"])
+	testutils.Equals(t, len(resource.CompactRows), 2)
 
 	indexer := resource.Indexer()
-
-	testutils.Equals(t, "ActiveAgent", indexer("ResourceID", 0))
-	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate", 1))
+	var rows []Row
+	resource.Rows(func(i int, r Row) {
+		rows = append(rows, r)
+	})
+	testutils.Equals(t, "ActiveAgent", indexer("ResourceID", rows[0]))
+	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate", rows[1]))
 }
 
 var class = `<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -79,20 +83,24 @@ func TestParseClass(t *testing.T) {
 }
 
 func verifyParseClass(t *testing.T, cm CompactMetadata) {
-	classes := cm.find("METADATA-CLASS")
-	mdata := classes["Property"]
+	mdata := cm.find("METADATA-CLASS")[0]
 
-	testutils.Equals(t, mdata.Version, "1.12.29")
-	testutils.Equals(t, len(mdata.Rows), 6)
+	testutils.Equals(t, "Property", mdata.Attr["Resource"])
+	testutils.Equals(t, mdata.Attr["Version"], "1.12.29")
+	testutils.Equals(t, len(mdata.CompactRows), 6)
 
 	indexer := mdata.Indexer()
+	var row []Row
+	mdata.Rows(func(i int, r Row) {
+		row = append(row, r)
+	})
 
-	testutils.Equals(t, "RESO_PROP_2012_05", indexer("ClassName", 5))
-	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate", 0))
-	testutils.Equals(t, "MRIS Multi-Family", indexer("VisibleName", 2))
+	testutils.Equals(t, "RESO_PROP_2012_05", indexer("ClassName", row[5]))
+	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate", row[0]))
+	testutils.Equals(t, "MRIS Multi-Family", indexer("VisibleName", row[2]))
 }
 
-var table = `<METADATA-TABLE Resource="ActiveAgent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+var table = `<METADATA-TABLE Resource="Agent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	SystemName	StandardName	LongName	DBName	ShortName	MaximumLength	DataType	Precision	Searchable	Interpretation	Alignment	UseSeparator	EditMaskID	LookupName	MaxSelect	Units	Index	Minimum	Maximum	Default	Required	SearchHelpID	Unique	</COLUMNS>
 <DATA>	AgentListingServiceName		ListingServiceName	X49076033	ListingServiceName	4000	Character		1		Left	0					1			0			0	</DATA>
 <DATA>	AgentKey		AgentKey	X74130	AgentKey	15	Long	0	1	Number	Right	0					1			0			1	</DATA>
@@ -110,16 +118,21 @@ func TestParseTable(t *testing.T) {
 }
 
 func verifyParseTable(t *testing.T, cm CompactMetadata) {
-	tables := cm.find("METADATA-TABLE")
-	mdata := tables["ActiveAgent:ActiveAgent"]
+	mdata := cm.find("METADATA-TABLE")[0]
 
-	testutils.Equals(t, "1.12.29", mdata.Version)
-	testutils.Equals(t, len(mdata.Rows), 4)
+	testutils.Equals(t, "ActiveAgent", mdata.Attr["Class"])
+	testutils.Equals(t, "Agent", mdata.Attr["Resource"])
+	testutils.Equals(t, "1.12.29", mdata.Attr["Version"])
+	testutils.Equals(t, len(mdata.CompactRows), 4)
 
 	indexer := mdata.Indexer()
+	var row []Row
+	mdata.Rows(func(i int, r Row) {
+		row = append(row, r)
+	})
 
-	testutils.Equals(t, "AgentListingServiceName", indexer("SystemName", 0))
-	testutils.Equals(t, "0", indexer("Unique", 3))
+	testutils.Equals(t, "AgentListingServiceName", indexer("SystemName", row[0]))
+	testutils.Equals(t, "0", indexer("Unique", row[3]))
 }
 
 var lookup = `<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -140,16 +153,20 @@ func TestParseLookup(t *testing.T) {
 }
 
 func verifyParseLookup(t *testing.T, cm CompactMetadata) {
-	lookups := cm.find("METADATA-LOOKUP")
-	mdata := lookups["TaxHistoricalDesignation"]
+	mdata := cm.find("METADATA-LOOKUP")[0]
 
-	testutils.Equals(t, "1.12.29", mdata.Version)
-	testutils.Equals(t, len(mdata.Rows), 4)
+	testutils.Equals(t, "TaxHistoricalDesignation", mdata.Attr["Resource"])
+	testutils.Equals(t, "1.12.29", mdata.Attr["Version"])
+	testutils.Equals(t, len(mdata.CompactRows), 4)
 
 	indexer := mdata.Indexer()
+	var row []Row
+	mdata.Rows(func(i int, r Row) {
+		row = append(row, r)
+	})
 
-	testutils.Equals(t, "COUNTIES_OR_REGIONS", indexer("LookupName", 0))
-	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date", 3))
+	testutils.Equals(t, "COUNTIES_OR_REGIONS", indexer("LookupName", row[0]))
+	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date", row[3]))
 }
 
 var lookupType = `<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Lookup="COUNTIES_OR_REGIONS" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -169,16 +186,22 @@ func TestParseLookupType(t *testing.T) {
 	verifyParseLookupType(t, *ms)
 }
 func verifyParseLookupType(t *testing.T, cm CompactMetadata) {
-	lookupTypes := cm.find("METADATA-LOOKUP_TYPE")
-	mdata := lookupTypes["TaxHistoricalDesignation:COUNTIES_OR_REGIONS"]
+	mdata := cm.find("METADATA-LOOKUP_TYPE")[0]
 
-	testutils.Equals(t, "1.12.29", mdata.Version)
-	testutils.Equals(t, len(mdata.Rows), 4)
+	testutils.Equals(t, "TaxHistoricalDesignation", mdata.Attr["Resource"])
+	testutils.Equals(t, "COUNTIES_OR_REGIONS", mdata.Attr["Lookup"])
+
+	testutils.Equals(t, "1.12.29", mdata.Attr["Version"])
+	testutils.Equals(t, len(mdata.CompactRows), 4)
 
 	indexer := mdata.Indexer()
+	var row []Row
+	mdata.Rows(func(i int, r Row) {
+		row = append(row, r)
+	})
 
-	testutils.Equals(t, "BROOMFIELD-CO", indexer("LongValue", 2))
-	testutils.Equals(t, "CLARK", indexer("ShortValue", 3))
+	testutils.Equals(t, "BROOMFIELD-CO", indexer("LongValue", row[2]))
+	testutils.Equals(t, "CLARK", indexer("ShortValue", row[3]))
 }
 
 func TestParseMetadata(t *testing.T) {

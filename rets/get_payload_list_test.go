@@ -63,17 +63,17 @@ var payloadlist = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 
 func verifyCompactData(t *testing.T, pl *PayloadList, id string) {
 	payload := <-pl.Payloads
-	testutils.Equals(t, 6, len(payload.Columns))
+	testutils.Equals(t, 6, len(payload.Columns()))
 
 	testutils.Equals(t, id, payload.ID)
-	testutils.Equals(t, "A,B,C,D,E,F", strings.Join(payload.Columns, ","))
+	testutils.Equals(t, "A,B,C,D,E,F", strings.Join(payload.Columns(), ","))
 
 	counter := 0
-	for _, row := range payload.Rows {
-		testutils.Assert(t, strings.Join(row, ",") == "1,2,3,4,5,6", fmt.Sprintf("bad row %d: %s", counter, row))
+	payload.Rows(func(i int, r Row) {
+		testutils.Assert(t, strings.Join(r, ",") == "1,2,3,4,5,6", fmt.Sprintf("bad row %d: %s", counter, r))
 
 		testutils.Ok(t, pl.Error)
 		counter = counter + 1
-	}
+	})
 	testutils.Equals(t, 8, counter)
 }

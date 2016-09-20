@@ -3,10 +3,12 @@ package rets
 import (
 	"context"
 	"encoding/xml"
-	"fmt"
 	"io"
 	"strings"
 )
+
+// CompactMetadataDelim is the only delimiter option for compact metadata
+const CompactMetadataDelim = "	"
 
 // CompactMetadata ...
 type CompactMetadata struct {
@@ -15,33 +17,12 @@ type CompactMetadata struct {
 	Elements map[string][]CompactData
 }
 
-// CompactData is the common compact decoded structure
-type CompactData struct {
-	ID, Date, Version string
-	Columns           Row
-	Rows              []Row
-}
-
-// Indexer provices cached lookup for CompactData
-type Indexer func(col string, row int) string
-
-// Indexer create the cache
-func (cd *CompactData) Indexer() Indexer {
-	index := make(map[string]int)
-	for i, c := range cd.Columns {
-		index[c] = i
-	}
-	return func(col string, row int) string {
-		return cd.Rows[row][index[col]]
-	}
-}
-
-func (cm *CompactMetadata) find(name string) map[string]CompactData {
-	classes := make(map[string]CompactData)
+func (cm *CompactMetadata) find(name string) []CompactData {
+	var cds []CompactData
 	for _, cd := range cm.Elements[name] {
-		classes[cd.ID] = cd
+		cds = append(cds, cd)
 	}
-	return classes
+	return cds
 }
 
 // MSystem ...
@@ -107,65 +88,12 @@ func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 				metadata.System.ID = xms.System.SystemID
 				metadata.System.Description = xms.System.Description
 			default:
-				data, err := ParseMetadataCompactDecoded(t, parser, "	")
+				cd, err := NewCompactData(t, parser, CompactMetadataDelim)
 				if err != nil {
 					return nil, err
 				}
-				if data == nil {
-					continue
-				}
-				metadata.Elements[t.Name.Local] = append(metadata.Elements[t.Name.Local], *data)
+				metadata.Elements[cd.ID] = append(metadata.Elements[cd.ID], cd)
 			}
 		}
 	}
-}
-
-// ParseMetadataCompactDecoded ...
-func ParseMetadataCompactDecoded(start xml.StartElement, parser *xml.Decoder, delim string) (*CompactData, error) {
-	// XmlMetadataElement is the simple extraction tool for our data
-	type XMLMetadataElement struct {
-		Resource string `xml:"Resource,attr"`
-		/* only valid for table */
-		Class string `xml:"Class,attr"`
-		/* only valid for lookup_type */
-		Lookup  string   `xml:"Lookup,attr"`
-		Version string   `xml:"Version,attr"`
-		Date    string   `xml:"Date,attr"`
-		Columns string   `xml:"COLUMNS"`
-		Data    []string `xml:"DATA"`
-	}
-	xme := XMLMetadataElement{}
-	err := parser.DecodeElement(&xme, &start)
-	if err != nil {
-		fmt.Println("failed to decode: ", err)
-		return nil, err
-	}
-	if xme.Columns == "" {
-		return nil, nil
-	}
-	data := *extractMap(xme.Columns, xme.Data, delim)
-	data.Date = xme.Date
-	data.Version = xme.Version
-	data.ID = xme.Resource
-	if xme.Class != "" {
-		data.ID = xme.Resource + ":" + xme.Class
-	}
-	if xme.Lookup != "" {
-		data.ID = xme.Resource + ":" + xme.Lookup
-	}
-
-	return &data, nil
-}
-
-/** extract a map of fields from columns and rows */
-func extractMap(cols string, rows []string, delim string) *CompactData {
-	data := CompactData{}
-	// remove the first and last chars
-	data.Columns = CompactRow(cols).Parse(delim)
-	data.Rows = make([]Row, len(rows))
-	// create each
-	for i, line := range rows {
-		data.Rows[i] = CompactRow(line).Parse(delim)
-	}
-	return &data
 }
