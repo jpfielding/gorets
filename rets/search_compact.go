@@ -2,8 +2,11 @@ package rets
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/xml"
 	"io"
+	"strconv"
+	"strings"
 
 	"context"
 )
@@ -131,4 +134,30 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 			result.buf.Write(bytes)
 		}
 	}
+}
+
+// DelimiterTag holds the seperator for compact data
+type DelimiterTag xml.StartElement
+
+// Parse ...
+func (dt DelimiterTag) Parse() (string, error) {
+	del := dt.Attr[0].Value
+	pad := strings.Repeat("0", 2-len(del))
+	decoded, err := hex.DecodeString(pad + del)
+	if err != nil {
+		return "", err
+	}
+	return string(decoded), nil
+}
+
+// CountTag ...
+type CountTag xml.StartElement
+
+// Parse ...
+func (ct CountTag) Parse() (int, error) {
+	code, err := strconv.ParseInt(ct.Attr[0].Value, 10, 64)
+	if err != nil {
+		return -1, err
+	}
+	return int(code), nil
 }

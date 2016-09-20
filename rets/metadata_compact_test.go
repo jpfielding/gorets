@@ -49,7 +49,7 @@ func TestParseResources(t *testing.T) {
 }
 
 func verifyParseResources(t *testing.T, cm CompactMetadata) {
-	resource := cm.find("METADATA-RESOURCE")[0]
+	resource := cm.Elements["METADATA-RESOURCE"][0]
 
 	testutils.Equals(t, "1.12.30", resource.Attr["Version"])
 	testutils.Equals(t, len(resource.CompactRows), 2)
@@ -83,7 +83,7 @@ func TestParseClass(t *testing.T) {
 }
 
 func verifyParseClass(t *testing.T, cm CompactMetadata) {
-	mdata := cm.find("METADATA-CLASS")[0]
+	mdata := cm.Elements["METADATA-CLASS"][0]
 
 	testutils.Equals(t, "Property", mdata.Attr["Resource"])
 	testutils.Equals(t, mdata.Attr["Version"], "1.12.29")
@@ -118,7 +118,7 @@ func TestParseTable(t *testing.T) {
 }
 
 func verifyParseTable(t *testing.T, cm CompactMetadata) {
-	mdata := cm.find("METADATA-TABLE")[0]
+	mdata := cm.Elements["METADATA-TABLE"][0]
 
 	testutils.Equals(t, "ActiveAgent", mdata.Attr["Class"])
 	testutils.Equals(t, "Agent", mdata.Attr["Resource"])
@@ -153,7 +153,7 @@ func TestParseLookup(t *testing.T) {
 }
 
 func verifyParseLookup(t *testing.T, cm CompactMetadata) {
-	mdata := cm.find("METADATA-LOOKUP")[0]
+	mdata := cm.Elements["METADATA-LOOKUP"][0]
 
 	testutils.Equals(t, "TaxHistoricalDesignation", mdata.Attr["Resource"])
 	testutils.Equals(t, "1.12.29", mdata.Attr["Version"])
@@ -186,7 +186,7 @@ func TestParseLookupType(t *testing.T) {
 	verifyParseLookupType(t, *ms)
 }
 func verifyParseLookupType(t *testing.T, cm CompactMetadata) {
-	mdata := cm.find("METADATA-LOOKUP_TYPE")[0]
+	mdata := cm.Elements["METADATA-LOOKUP_TYPE"][0]
 
 	testutils.Equals(t, "TaxHistoricalDesignation", mdata.Attr["Resource"])
 	testutils.Equals(t, "COUNTIES_OR_REGIONS", mdata.Attr["Lookup"])

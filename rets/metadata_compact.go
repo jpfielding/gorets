@@ -17,14 +17,6 @@ type CompactMetadata struct {
 	Elements map[string][]CompactData
 }
 
-func (cm *CompactMetadata) find(name string) []CompactData {
-	var cds []CompactData
-	for _, cd := range cm.Elements[name] {
-		cds = append(cds, cd)
-	}
-	return cds
-}
-
 // MSystem ...
 type MSystem struct {
 	Date, Version   string
