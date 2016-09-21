@@ -79,3 +79,33 @@ func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 		}
 	}
 }
+
+var MetadataLookup = map[string]string{
+	"METADATA-SYSTEM":                     "SYSTEM",
+	"METADATA-FOREIGN_KEY":                "ForeignKey",
+	"METADATA-FILTER":                     "Filter",
+	"METADATA-FILTER_TYPE":                "FilterType",
+	"METADATA-RESOURCE":                   "Resource",
+	"METADATA-CLASS":                      "Class",
+	"METADATA-TABLE":                      "Field",
+	"METADATA-UPDATE":                     "Update",
+	"METADATA-UPDATE_TYPE":                "UpdateType",
+	"METADATA-COLUMN_GROUP_SET":           "ColumnGroupSet",
+	"METADATA-COLUMN_GROUP":               "ColumnGroup",
+	"METADATA-COLUMN_GROUP_CONTROL":       "ColumnGroupControl",
+	"METADATA-COLUMN_GROUP_TABLE":         "ColumnGroupTable",
+	"METADATA-COLUMN_GROUP_NORMALIZATION": "ColumnGroupNormalization",
+
+	"METADATA-OBJECT":                 "Object",
+	"METADATA-SEARCHHELP":             "SearchHelp",
+	"METADATA-EDITMASK":               "EditMask",
+	"METADATA-UPDATEHELP":             "UpdateHelp",
+	"METADATA-LOOKUP":                 "Lookup",
+	"METADATA-LOOKUP_TYPE":            "LookupType",
+	"METADATA-VALIDATION_LOOKUP":      "ValidationLookup",
+	"METADATA-VALIDATION_LOOKUP_TYPE": "ValidationLookupType",
+
+	"METADATA-VALIDATION_EXTERNAL":      "ValidationExternal",
+	"METADATA-VALIDATION_EXTERNAL_TYPE": "ValidationExternalType",
+	"METADATA-VALIDATION_EXPRESSION":    "ValidationExpression",
+}

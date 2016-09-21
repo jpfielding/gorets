@@ -47,7 +47,7 @@ var payloadlist = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 `
 
 /*func TestParseGetPayloadList(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(payloadlist)))
+	body := ioutil.NopCloser(strings.NewReader(payloadlist))
 
 	pl, err := parseGetPayloadList(body)
 	if err != nil {

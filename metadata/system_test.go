@@ -1,10 +1,10 @@
 package metadata
 
 import (
-	"bytes"
 	"encoding/xml"
 	"io"
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/jpfielding/gotest/testutils"
@@ -26,7 +26,7 @@ var raw = `<?xml version="1.0" encoding="utf-8"?>
 </RETS>`
 
 func TestLoad(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
+	body := ioutil.NopCloser(strings.NewReader(raw))
 	defer body.Close()
 	parser := xml.NewDecoder(body)
 	xml := RETSResponseWrapper{}
@@ -43,7 +43,7 @@ func TestLoad(t *testing.T) {
 }
 
 func TestSystem(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
+	body := ioutil.NopCloser(strings.NewReader(raw))
 	defer body.Close()
 
 	extractor := &Extractor{Body: body}

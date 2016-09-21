@@ -4,7 +4,6 @@ provides the searching core
 package rets
 
 import (
-	"bytes"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -39,7 +38,7 @@ var compactDecoded = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 `
 
 func TestEof(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte("")))
+	body := ioutil.NopCloser(strings.NewReader(""))
 
 	_, err := NewCompactSearchResult(body)
 	testutils.NotOk(t, err)
@@ -54,7 +53,7 @@ func TestBadChar(t *testing.T) {
 			<DATA>	1` + "\x0b" + `1	2	3	4		6	</DATA>
 
 			</RETS>`
-	body := ioutil.NopCloser(bytes.NewReader([]byte(rets)))
+	body := ioutil.NopCloser(strings.NewReader(rets))
 
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)
@@ -70,7 +69,7 @@ func TestBadChar(t *testing.T) {
 
 func TestNoEof(t *testing.T) {
 	rets := `<RETS ReplyCode="20201" ReplyText="No Records Found." ></RETS>`
-	body := ioutil.NopCloser(bytes.NewReader([]byte(rets)))
+	body := ioutil.NopCloser(strings.NewReader(rets))
 
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)
@@ -82,7 +81,7 @@ func TestEmbeddedRetsStatus(t *testing.T) {
 			<RETS ReplyCode="0" ReplyText="Operation Successful">
 			<RETS-STATUS ReplyCode="20201" ReplyText="No matching records were found" />
 			</RETS>`
-	body := ioutil.NopCloser(bytes.NewReader([]byte(rets)))
+	body := ioutil.NopCloser(strings.NewReader(rets))
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)
 	testutils.Equals(t, 20201, cr.RetsResponse.ReplyCode)
@@ -90,7 +89,7 @@ func TestEmbeddedRetsStatus(t *testing.T) {
 
 func TestParseSearchQuit(t *testing.T) {
 	noEnd := strings.Split(compactDecoded, "<MAXROWS/>")[0]
-	body := ioutil.NopCloser(bytes.NewReader([]byte(noEnd)))
+	body := ioutil.NopCloser(strings.NewReader(noEnd))
 
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)
@@ -109,7 +108,7 @@ func TestParseSearchQuit(t *testing.T) {
 }
 
 func TestParseCompact(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(compactDecoded)))
+	body := ioutil.NopCloser(strings.NewReader(compactDecoded))
 
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)

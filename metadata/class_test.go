@@ -1,8 +1,8 @@
 package metadata
 
 import (
-	"bytes"
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/jpfielding/gotest/testutils"
@@ -41,7 +41,7 @@ func TestClass(t *testing.T) {
     </METADATA>
     </RETS>`
 
-	body := ioutil.NopCloser(bytes.NewReader([]byte(raw)))
+	body := ioutil.NopCloser(strings.NewReader(raw))
 	defer body.Close()
 
 	extractor := &Extractor{Body: body}

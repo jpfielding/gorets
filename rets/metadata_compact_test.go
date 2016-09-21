@@ -4,8 +4,8 @@ parsing the 'login' action from RETS
 package rets
 
 import (
-	"bytes"
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	testutils "github.com/jpfielding/gotest/testutils"
@@ -20,7 +20,7 @@ var system = `<METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 
 </METADATA-SYSTEM>`
 
 func TestSystem(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + system + retsEnd)))
+	body := ioutil.NopCloser(strings.NewReader(retsStart + system + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
 	testutils.Ok(t, err)
@@ -40,7 +40,7 @@ var resource = `<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00
 </METADATA-RESOURCE>`
 
 func TestParseResources(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + resource + retsEnd)))
+	body := ioutil.NopCloser(strings.NewReader(retsStart + resource + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
 	testutils.Ok(t, err)
@@ -74,7 +74,7 @@ var class = `<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 
 `
 
 func TestParseClass(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + class + retsEnd)))
+	body := ioutil.NopCloser(strings.NewReader(retsStart + class + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
 	testutils.Ok(t, err)
@@ -109,7 +109,7 @@ var table = `<METADATA-TABLE Resource="Agent" Class="ActiveAgent" Version="1.12.
 `
 
 func TestParseTable(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + table + retsEnd)))
+	body := ioutil.NopCloser(strings.NewReader(retsStart + table + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
 	testutils.Ok(t, err)
@@ -144,7 +144,7 @@ var lookup = `<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12
 `
 
 func TestParseLookup(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + lookup + retsEnd)))
+	body := ioutil.NopCloser(strings.NewReader(retsStart + lookup + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
 	testutils.Ok(t, err)
@@ -178,7 +178,7 @@ var lookupType = `<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Look
 `
 
 func TestParseLookupType(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + lookupType + retsEnd)))
+	body := ioutil.NopCloser(strings.NewReader(retsStart + lookupType + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
 	testutils.Ok(t, err)
@@ -204,7 +204,7 @@ func verifyParseLookupType(t *testing.T, cm CompactMetadata) {
 }
 
 func TestParseMetadata(t *testing.T) {
-	body := ioutil.NopCloser(bytes.NewReader([]byte(retsStart + system + resource + class + table + lookup + lookupType + retsEnd)))
+	body := ioutil.NopCloser(strings.NewReader(retsStart + system + resource + class + table + lookup + lookupType + retsEnd))
 	ms, err := ParseMetadataCompactResult(body)
 	testutils.Ok(t, err)
 

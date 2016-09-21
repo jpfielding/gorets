@@ -4,10 +4,10 @@ provides the photo extraction core testing
 package rets
 
 import (
-	"bytes"
 	"io/ioutil"
 	"net/http"
 	"net/textproto"
+	"strings"
 	"testing"
 
 	testutils "github.com/jpfielding/gotest/testutils"
@@ -29,7 +29,7 @@ func TestGetObject(t *testing.T) {
 	response := GetObjectResponse{
 		response: &http.Response{
 			Header: header,
-			Body:   ioutil.NopCloser(bytes.NewReader([]byte(body))),
+			Body:   ioutil.NopCloser(strings.NewReader(body)),
 		},
 	}
 	defer response.Close()
@@ -120,7 +120,7 @@ func TestGetObjects(t *testing.T) {
 	response := GetObjectResponse{
 		response: &http.Response{
 			Header: headers,
-			Body:   ioutil.NopCloser(bytes.NewReader([]byte(multipartBody))),
+			Body:   ioutil.NopCloser(strings.NewReader(multipartBody)),
 		},
 	}
 	defer response.Close()
