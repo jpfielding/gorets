@@ -16,9 +16,7 @@ var retsEnd = `</RETS>`
 
 var system = `<METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <SYSTEM SystemID="SIRM" SystemDescription="MLS System"/>
-<COMMENTS>
-The System is provided to you by Systems.
-</COMMENTS>
+<COMMENTS>The System is provided to you by Systems.</COMMENTS>
 </METADATA-SYSTEM>`
 
 func TestSystem(t *testing.T) {
@@ -30,8 +28,9 @@ func TestSystem(t *testing.T) {
 }
 
 func verifySystem(t *testing.T, cm CompactMetadata) {
-	testutils.Assert(t, cm.System.Version == "1.12.30", "bad version")
-	testutils.Assert(t, cm.System.Comments == "The System is provided to you by Systems.", "bad comments")
+	testutils.Equals(t, "MLS System", cm.MSystem.System.Description)
+	testutils.Equals(t, "1.12.30", cm.MSystem.Version)
+	testutils.Equals(t, "The System is provided to you by Systems.", cm.MSystem.Comments)
 }
 
 var resource = `<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">

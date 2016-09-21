@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/xml"
 	"io"
-	"strings"
 )
 
 // CompactMetadataDelim is the only delimiter option for compact metadata
@@ -13,15 +12,22 @@ const CompactMetadataDelim = "	"
 // CompactMetadata ...
 type CompactMetadata struct {
 	Rets     RetsResponse
-	System   MSystem
+	MSystem  CompactMSystem
 	Elements map[string][]CompactData
 }
 
-// MSystem ...
-type MSystem struct {
-	Date, Version   string
-	ID, Description string
-	Comments        string
+// CompactMSystem ...
+type CompactMSystem struct {
+	Version  string        `xml:"Version,attr"`
+	Date     string        `xml:"Date,attr"`
+	Comments string        `xml:"COMMENTS"`
+	System   CompactSystem `xml:"SYSTEM"`
+}
+
+// CompactSystem ...
+type CompactSystem struct {
+	SystemID    string `xml:"SystemID,attr"`
+	Description string `xml:"SystemDescription,attr"`
 }
 
 // GetCompactMetadata ...
@@ -59,26 +65,10 @@ func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 				}
 				metadata.Rets = *rets
 			case "METADATA-SYSTEM":
-				type xmlSystem struct {
-					SystemID    string `xml:"SystemID,attr"`
-					Description string `xml:"SystemDescription,attr"`
-				}
-				type xmlMetadataSystem struct {
-					Version  string    `xml:"Version,attr"`
-					Date     string    `xml:"Date,attr"`
-					System   xmlSystem `xml:"SYSTEM"`
-					Comments string    `xml:"COMMENTS"`
-				}
-				xms := xmlMetadataSystem{}
-				err := parser.DecodeElement(&xms, &t)
+				err := parser.DecodeElement(&metadata.MSystem, &t)
 				if err != nil {
 					return nil, err
 				}
-				metadata.System.Version = xms.Version
-				metadata.System.Date = xms.Date
-				metadata.System.Comments = strings.TrimSpace(xms.Comments)
-				metadata.System.ID = xms.System.SystemID
-				metadata.System.Description = xms.System.Description
 			default:
 				cd, err := NewCompactData(t, parser, CompactMetadataDelim)
 				if err != nil {
