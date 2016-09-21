@@ -57,7 +57,7 @@ func TestBadChar(t *testing.T) {
 
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)
-	testutils.Equals(t, 0, cr.RetsResponse.ReplyCode)
+	testutils.Equals(t, 0, cr.RetsResponse.Code)
 	counter := 0
 	cr.ForEach(func(row Row, err error) error {
 		testutils.Ok(t, err)
@@ -73,7 +73,7 @@ func TestNoEof(t *testing.T) {
 
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)
-	testutils.Equals(t, 20201, cr.RetsResponse.ReplyCode)
+	testutils.Equals(t, 20201, cr.RetsResponse.Code)
 }
 
 func TestEmbeddedRetsStatus(t *testing.T) {
@@ -84,7 +84,7 @@ func TestEmbeddedRetsStatus(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(rets))
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)
-	testutils.Equals(t, 20201, cr.RetsResponse.ReplyCode)
+	testutils.Equals(t, 20201, cr.RetsResponse.Code)
 }
 
 func TestParseSearchQuit(t *testing.T) {
@@ -113,8 +113,8 @@ func TestParseCompact(t *testing.T) {
 	cr, err := NewCompactSearchResult(body)
 	testutils.Ok(t, err)
 
-	testutils.Assert(t, 0 == cr.RetsResponse.ReplyCode, "bad code")
-	testutils.Assert(t, "V2.7.0 2315: Success" == cr.RetsResponse.ReplyText, "bad text")
+	testutils.Assert(t, 0 == cr.RetsResponse.Code, "bad code")
+	testutils.Assert(t, "V2.7.0 2315: Success" == cr.RetsResponse.Text, "bad text")
 
 	testutils.Assert(t, 10 == int(cr.Count), "bad count")
 	testutils.Assert(t, 6 == len(cr.Columns), "bad header count")

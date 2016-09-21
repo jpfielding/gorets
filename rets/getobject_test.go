@@ -153,8 +153,8 @@ func TestGetObjects(t *testing.T) {
 	testutils.Equals(t, true, o4.RetsError)
 
 	testutils.Equals(t, "text/xml", o4.ContentType)
-	testutils.Equals(t, "There is no object with that Object-ID", o4.RetsMessage.ReplyText)
-	testutils.Equals(t, 20403, o4.RetsMessage.ReplyCode)
+	testutils.Equals(t, "There is no object with that Object-ID", o4.RetsMessage.Text)
+	testutils.Equals(t, 20403, o4.RetsMessage.Code)
 
 	o5 := objects[4]
 	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
@@ -177,6 +177,6 @@ func TestGetObjects(t *testing.T) {
 	testutils.Equals(t, "123457", o7.ContentID)
 	testutils.Equals(t, 7, o7.ObjectID)
 	testutils.Equals(t, "", string(o7.Blob))
-	testutils.Equals(t, "Found it!", o7.RetsMessage.ReplyText)
+	testutils.Equals(t, "Found it!", o7.RetsMessage.Text)
 
 }

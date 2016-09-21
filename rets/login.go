@@ -20,7 +20,7 @@ type LoginRequest struct {
 
 // CapabilityURLs ...
 type CapabilityURLs struct {
-	Response RetsResponse
+	Response Response
 
 	MemberName, User, Broker, MetadataVersion, MinMetadataVersion string
 	OfficeList                                                    []string
@@ -100,8 +100,8 @@ func parseCapability(body io.ReadCloser, url string) (*CapabilityURLs, error) {
 	c.ChangePassword = prependHost(url, values["changepassword"])
 
 	c.TimeoutSeconds, _ = strconv.ParseInt(values["timeoutseconds"], 10, strconv.IntSize)
-	c.Response.ReplyCode = rets.ReplyCode
-	c.Response.ReplyText = rets.ReplyText
+	c.Response.Code = rets.ReplyCode
+	c.Response.Text = rets.ReplyText
 
 	c.MemberName = values["membername"]
 	c.User = values["user"]

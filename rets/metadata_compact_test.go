@@ -5,6 +5,7 @@ package rets
 
 import (
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -18,6 +19,14 @@ var system = `<METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 
 <SYSTEM SystemID="SIRM" SystemDescription="MLS System"/>
 <COMMENTS>The System is provided to you by Systems.</COMMENTS>
 </METADATA-SYSTEM>`
+
+func TestToXML(t *testing.T) {
+	body := ioutil.NopCloser(strings.NewReader(retsStart + system + retsEnd))
+
+	cm, err := ParseMetadataCompactResult(body)
+	testutils.Ok(t, err)
+	cm.ToXML(os.Stdout)
+}
 
 func TestSystem(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + system + retsEnd))

@@ -7,14 +7,14 @@ import (
 	"strings"
 )
 
-// RetsResponse is the common wrapper details for each response
-type RetsResponse struct {
-	ReplyCode int
-	ReplyText string
+// Response is the common wrapper details for each response
+type Response struct {
+	Code int    `xml:"ReplyCode,attr"`
+	Text string `xml:"ReplyText,attr"`
 }
 
-// ParseRetsResponse ...
-func ParseRetsResponse(body io.ReadCloser) (*RetsResponse, error) {
+// ReadResponse  ...
+func ReadResponse(body io.ReadCloser) (*Response, error) {
 	parser := xml.NewDecoder(body)
 	for {
 		token, err := parser.Token()
@@ -26,15 +26,15 @@ func ParseRetsResponse(body io.ReadCloser) (*RetsResponse, error) {
 			// clear any accumulated data
 			switch t.Name.Local {
 			case "RETS", "RETS-STATUS":
-				return ParseRetsResponseTag(t)
+				return ParseResponse(t)
 			}
 		}
 	}
 }
 
-// ParseRetsResponseTag ...
-func ParseRetsResponseTag(start xml.StartElement) (*RetsResponse, error) {
-	rets := RetsResponse{}
+// ParseResponse ...
+func ParseResponse(start xml.StartElement) (*Response, error) {
+	rets := Response{}
 	attrs := make(map[string]string)
 	for _, v := range start.Attr {
 		attrs[strings.ToLower(v.Name.Local)] = v.Value
@@ -43,7 +43,7 @@ func ParseRetsResponseTag(start xml.StartElement) (*RetsResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	rets.ReplyCode = int(code)
-	rets.ReplyText = attrs["replytext"]
+	rets.Code = int(code)
+	rets.Text = attrs["replytext"]
 	return &rets, nil
 }

@@ -20,14 +20,14 @@ func NewObjectFromStream(header textproto.MIMEHeader, body io.ReadCloser) (*Obje
 	objectID, err := strconv.ParseInt(header.Get("Object-ID"), 10, 64)
 	if err != nil {
 		// Attempt to parse a Rets Response code (if it exists)
-		retsResp, parseErr := ParseRetsResponse(body)
+		resp, parseErr := ReadResponse(body)
 		if parseErr != nil {
 			return nil, err
 		}
 		// Include a GetObject (empty of content) so that its rets response can be retrieved
 		emptyResult := Object{
-			RetsMessage: retsResp,
-			RetsError:   retsResp.ReplyCode != 0,
+			RetsMessage: resp,
+			RetsError:   resp.Code != 0,
 		}
 		return &emptyResult, err
 	}
@@ -47,7 +47,7 @@ func NewObjectFromStream(header textproto.MIMEHeader, body io.ReadCloser) (*Obje
 
 	// 5.6.7
 	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
-	retsMsg, err := ParseRetsResponse(ioutil.NopCloser(bytes.NewReader([]byte(blob))))
+	retsMsg, err := ReadResponse(ioutil.NopCloser(bytes.NewReader(blob)))
 
 	// there is a rets message, stash it and wipe the content
 	if err == nil {
@@ -89,7 +89,7 @@ type Object struct {
 	Location string
 	/* 5.6.7 - because why would you want to use standard http errors when we can reinvent! */
 	RetsError   bool
-	RetsMessage *RetsResponse
+	RetsMessage *Response
 	/* 5.6.3 */
 	Preferred bool
 	/* 5.6.5 */

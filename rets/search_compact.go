@@ -22,7 +22,7 @@ func SearchCompact(requester Requester, ctx context.Context, r SearchRequest) (*
 
 // CompactSearchResult ...
 type CompactSearchResult struct {
-	RetsResponse RetsResponse
+	RetsResponse Response
 	Count        int
 	Delimiter    string
 	Columns      Row
@@ -83,7 +83,7 @@ func (c *CompactSearchResult) Close() error {
 
 // NewCompactSearchResult _always_ close this
 func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
-	rets := RetsResponse{}
+	rets := Response{}
 	parser := DefaultXMLDecoder(body, false)
 	result := &CompactSearchResult{
 		RetsResponse: rets,
@@ -102,7 +102,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 			result.buf.Reset()
 			switch t.Name.Local {
 			case "RETS", "RETS-STATUS":
-				rets, err := ParseRetsResponseTag(t)
+				rets, err := ParseResponse(t)
 				if err != nil {
 					return result, err
 				}

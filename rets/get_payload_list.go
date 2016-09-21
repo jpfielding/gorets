@@ -14,7 +14,7 @@ import (
 
 // PayloadList ...
 type PayloadList struct {
-	Rets     RetsResponse
+	Response Response
 	Error    error
 	Payloads <-chan CompactData
 }
@@ -97,11 +97,11 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 			elmt := xml.StartElement(t)
 			switch elmt.Name.Local {
 			case "RETS", "RETS-STATUS":
-				rets, err := ParseRetsResponseTag(elmt)
+				response, err := ParseResponse(elmt)
 				if err != nil {
 					return nil, err
 				}
-				list.Rets = *rets
+				list.Response = *response
 				go dataProcessing()
 				return &list, nil
 			case "DELIMITER":
