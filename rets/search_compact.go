@@ -22,10 +22,10 @@ func SearchCompact(requester Requester, ctx context.Context, r SearchRequest) (*
 
 // CompactSearchResult ...
 type CompactSearchResult struct {
-	RetsResponse Response
-	Count        int
-	Delimiter    string
-	Columns      Row
+	Response  Response
+	Count     int
+	Delimiter string
+	Columns   Row
 
 	body   io.ReadCloser
 	parser *xml.Decoder
@@ -86,9 +86,9 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 	rets := Response{}
 	parser := DefaultXMLDecoder(body, false)
 	result := &CompactSearchResult{
-		RetsResponse: rets,
-		body:         body,
-		parser:       parser,
+		Response: rets,
+		body:     body,
+		parser:   parser,
 	}
 	// extract the basic content before delving into the data
 	for {
@@ -106,7 +106,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 				if err != nil {
 					return result, err
 				}
-				result.RetsResponse = *rets
+				result.Response = *rets
 			case "COUNT":
 				result.Count, err = CountTag(t).Parse()
 				if err != nil {
