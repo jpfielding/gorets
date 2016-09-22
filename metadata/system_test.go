@@ -38,7 +38,7 @@ func TestLoad(t *testing.T) {
 	testutils.Equals(t, "Operation Successful", xml.ReplyText)
 	testutils.Equals(t, 0, xml.ReplyCode)
 
-	testutils.Equals(t, "ABBA", xml.Metadata.MSystem.System.SystemID)
+	testutils.Equals(t, "ABBA", xml.Metadata.MSystem.System.ID)
 	testutils.Equals(t, "Property", string(xml.Metadata.MSystem.System.MResource.Resource[0].ResourceID))
 }
 
@@ -58,6 +58,6 @@ func TestSystem(t *testing.T) {
 	if err != io.EOF {
 		testutils.Ok(t, err)
 	}
-	testutils.Equals(t, "ABBA", xml.System.SystemID)
+	testutils.Equals(t, "ABBA", xml.System.ID)
 	testutils.Equals(t, "Property", string(xml.System.MResource.Resource[0].ResourceID))
 }

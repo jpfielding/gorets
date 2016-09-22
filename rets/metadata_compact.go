@@ -35,7 +35,7 @@ func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 		case xml.StartElement:
 			switch t.Name.Local {
 			case "RETS", "RETS-STATUS":
-				rets, err := ParseResponse(t)
+				rets, err := ResponseTag(t).Parse()
 				if err != nil {
 					return nil, err
 				}

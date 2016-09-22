@@ -102,7 +102,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 			result.buf.Reset()
 			switch t.Name.Local {
 			case "RETS", "RETS-STATUS":
-				rets, err := ParseResponse(t)
+				rets, err := ResponseTag(t).Parse()
 				if err != nil {
 					return result, err
 				}
