@@ -76,6 +76,6 @@ type CompactMSystem struct {
 
 // CompactSystem ...
 type CompactSystem struct {
-	SystemID    string `xml:"SystemID,attr"`
+	ID          string `xml:"SystemID,attr"`
 	Description string `xml:"SystemDescription,attr"`
 }
