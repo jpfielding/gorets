@@ -76,6 +76,8 @@ type CompactMSystem struct {
 
 // CompactSystem ...
 type CompactSystem struct {
-	ID          string `xml:"SystemID,attr"`
-	Description string `xml:"SystemDescription,attr"`
+	ID             string `xml:"SystemID,attr"`
+	Description    string `xml:"SystemDescription,attr"`
+	TimeZoneOffset string `xml:",attr,omitempty"`
+	MetadataID     string `xml:",attr,omitempty"`
 }
