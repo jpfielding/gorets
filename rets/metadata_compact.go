@@ -89,17 +89,40 @@ func (cm CompactMetadata) ToXML(out io.Writer) error {
 	enc := xml.NewEncoder(out)
 	enc.Indent("  ", "    ")
 
-	rets := xml.Name{Local: "RETS"}
-	start := xml.StartElement{
-		Name: rets,
-		Attr: []xml.Attr{
-			xml.Attr{Name: xml.Name{Local: "ReplyCode"}, Value: fmt.Sprintf("%d", cm.Response.Code)},
-			xml.Attr{Name: xml.Name{Local: "ReplyText"}, Value: cm.Response.Text},
-		},
+	retsStart, retsEnd := startend("RETS", map[string]string{
+		"ReplyCode": fmt.Sprintf("%d", cm.Response.Code),
+		"ReplyText": cm.Response.Text,
+	})
+	enc.EncodeToken(retsStart)
+	msysStart, msysEnd := startend("METADATA-SYSTEM", map[string]string{
+		"Date":    cm.MSystem.Date,
+		"Version": cm.MSystem.Version,
+	})
+	enc.EncodeToken(msysStart)
+	sysStart, sysEnd := startend("SYSTEM", map[string]string{
+		"SystemID":          cm.MSystem.System.SystemID,
+		"SystemDescription": cm.MSystem.System.Description,
+	})
+	enc.EncodeToken(sysStart)
+	commentsStart, commentsEnd := startend("COMMENTS", map[string]string{})
+	enc.EncodeToken(commentsStart)
+	enc.EncodeToken(commentsEnd)
+
+	// INNNER
+
+	enc.EncodeToken(sysEnd)
+	enc.EncodeToken(msysEnd)
+	enc.EncodeToken(retsEnd)
+	return enc.Flush()
+}
+
+func startend(name string, attrs map[string]string) (xml.StartElement, xml.EndElement) {
+	elem := xml.Name{Local: name}
+	var attr []xml.Attr
+	for k, v := range attrs {
+		attr = append(attr, xml.Attr{Name: xml.Name{Local: k}, Value: v})
 	}
-	enc.EncodeToken(start)
-	defer enc.EncodeToken(xml.EndElement{rets})
-	return nil
+	return xml.StartElement{Name: elem, Attr: attr}, xml.EndElement{elem}
 }
 
 // MetadataLookup .. TODO figure out what to do with this
