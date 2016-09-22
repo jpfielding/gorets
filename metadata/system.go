@@ -12,7 +12,7 @@ type RETSResponseWrapper struct {
 
 // Standard ...
 type Standard struct {
-	System MSystem `xml:"METADATA-SYSTEM,omitempty" json:"METADATA-SYSTEM,omitempty"`
+	MSystem MSystem `xml:"METADATA-SYSTEM,omitempty" json:"METADATA-SYSTEM,omitempty"`
 }
 
 // MSystem ...
