@@ -39,6 +39,19 @@ func (cd CompactData) Rows(each func(i int, row Row)) {
 	}
 }
 
+// Map turns all rows into maps
+func (cd CompactData) Map() map[string]string {
+	index := cd.Indexer()
+	entries := map[string]string{}
+	cols := cd.Columns()
+	cd.Rows(func(i int, r Row) {
+		for _, c := range cols {
+			entries[c] = index(c, r)
+		}
+	})
+	return entries
+}
+
 // Indexer provices cached lookup for CompactData
 type Indexer func(col string, row Row) string
 
