@@ -39,8 +39,8 @@ func (cd CompactData) Rows(each func(i int, row Row)) {
 	}
 }
 
-// Map turns all rows into maps
-func (cd CompactData) Map() []map[string]string {
+// AsMaps turns all rows into maps
+func (cd CompactData) AsMaps() []map[string]string {
 	index := cd.Indexer()
 	cols := cd.Columns()
 	var entries []map[string]string
