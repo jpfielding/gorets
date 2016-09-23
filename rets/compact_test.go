@@ -9,6 +9,24 @@ import (
 	testutils "github.com/jpfielding/gotest/testutils"
 )
 
+func TestCompactEntry(t *testing.T) {
+	body := ioutil.NopCloser(strings.NewReader(compact))
+	decoder := DefaultXMLDecoder(body, false)
+	token, err := decoder.Token()
+	testutils.Ok(t, err)
+	start, ok := token.(xml.StartElement)
+	testutils.Assert(t, ok, "should be a start element")
+	cm, err := NewCompactData(start, decoder, "	")
+	type Test struct {
+		ResourceID, Standardname string
+	}
+	row1 := Test{}
+	maps := cm.AsMaps()
+	maps[0].SetFields(&row1)
+	testutils.Equals(t, "ActiveAgent", row1.ResourceID)
+	testutils.Equals(t, "ActiveAgent", row1.Standardname)
+}
+
 func TestCompactRowParsing(t *testing.T) {
 	var col = `	A	B	C	D	E	F	`
 	var row = `	1	2	3	4		6	`

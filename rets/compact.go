@@ -46,7 +46,10 @@ type CompactEntry map[string]string
 // SetFields ...
 func (ce CompactEntry) SetFields(target interface{}) {
 	for key, value := range ce {
-		e := reflect.ValueOf(target).Elem().FieldByName(key)
+		e := reflect.ValueOf(target).Elem().FieldByNameFunc(func(n string) bool {
+			// make this comparison case insensitive
+			return strings.ToLower(n) == strings.ToLower(key)
+		})
 		if e.IsValid() {
 			e.SetString(value)
 		}
