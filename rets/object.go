@@ -27,7 +27,7 @@ func NewObjectFromStream(header textproto.MIMEHeader, body io.ReadCloser) (*Obje
 		// Include a GetObject (empty of content) so that its rets response can be retrieved
 		emptyResult := Object{
 			RetsMessage: resp,
-			RetsError:   resp.Code != 0,
+			RetsError:   resp.Code != StatusOK,
 		}
 		return &emptyResult, err
 	}

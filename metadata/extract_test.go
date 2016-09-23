@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jpfielding/gorets/rets"
 	testutils "github.com/jpfielding/gotest/testutils"
 )
 
@@ -25,11 +26,11 @@ func TestNext(t *testing.T) {
 	defer body.Close()
 
 	extractor := &Extractor{Body: body}
-	rets, err := extractor.Open()
+	response, err := extractor.Open()
 
 	testutils.Ok(t, err)
-	testutils.Equals(t, "Operation successful.", rets.ReplyText)
-	testutils.Equals(t, 0, rets.ReplyCode)
+	testutils.Equals(t, "Operation successful.", response.ReplyText)
+	testutils.Equals(t, rets.StatusOK, response.ReplyCode)
 
 	next := func(resource, version, date string) func(*testing.T) {
 		return func(tt *testing.T) {

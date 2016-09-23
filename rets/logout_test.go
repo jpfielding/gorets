@@ -44,7 +44,7 @@ func TestProcessResponseBodyNoBilling(t *testing.T) {
 		t.Fail()
 	}
 
-	expected := &LogoutResponse{ReplyCode: 0, ReplyText: "Logging out", ConnectTime: 0, SignOffMessage: "Goodbye"}
+	expected := &LogoutResponse{ReplyCode: StatusOK, ReplyText: "Logging out", ConnectTime: 0, SignOffMessage: "Goodbye"}
 
 	testutils.Equals(t, expected, actual)
 }
@@ -64,7 +64,7 @@ func TestProcessResponseBodyNoConnectTime(t *testing.T) {
 		t.Fail()
 	}
 
-	expected := &LogoutResponse{ReplyCode: 0, ReplyText: "Logging out", Billing: "Im Billing You", SignOffMessage: "Goodbye"}
+	expected := &LogoutResponse{ReplyCode: StatusOK, ReplyText: "Logging out", Billing: "Im Billing You", SignOffMessage: "Goodbye"}
 
 	testutils.Equals(t, expected, actual)
 }

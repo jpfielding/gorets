@@ -154,7 +154,7 @@ func TestGetObjects(t *testing.T) {
 
 	testutils.Equals(t, "text/xml", o4.ContentType)
 	testutils.Equals(t, "There is no object with that Object-ID", o4.RetsMessage.Text)
-	testutils.Equals(t, 20403, o4.RetsMessage.Code)
+	testutils.Equals(t, StatusObjectNotFound, o4.RetsMessage.Code)
 
 	o5 := objects[4]
 	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
