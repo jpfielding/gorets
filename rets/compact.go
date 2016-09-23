@@ -2,6 +2,7 @@ package rets
 
 import (
 	"encoding/xml"
+	"reflect"
 	"strings"
 )
 
@@ -39,13 +40,26 @@ func (cd CompactData) Rows(each func(i int, row Row)) {
 	}
 }
 
+// CompactEntry ...
+type CompactEntry map[string]string
+
+// SetFields ...
+func (ce CompactEntry) SetFields(target interface{}) {
+	for key, value := range ce {
+		e := reflect.ValueOf(target).Elem().FieldByName(key)
+		if e.IsValid() {
+			e.SetString(value)
+		}
+	}
+}
+
 // AsMaps turns all rows into maps
-func (cd CompactData) AsMaps() []map[string]string {
+func (cd CompactData) AsMaps() []CompactEntry {
 	index := cd.Indexer()
 	cols := cd.Columns()
-	var entries []map[string]string
+	var entries []CompactEntry
 	cd.Rows(func(i int, r Row) {
-		entry := map[string]string{}
+		entry := CompactEntry{}
 		for _, c := range cols {
 			entry[c] = index(c, r)
 		}
