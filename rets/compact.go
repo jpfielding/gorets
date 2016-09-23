@@ -40,14 +40,16 @@ func (cd CompactData) Rows(each func(i int, row Row)) {
 }
 
 // Map turns all rows into maps
-func (cd CompactData) Map() map[string]string {
+func (cd CompactData) Map() []map[string]string {
 	index := cd.Indexer()
-	entries := map[string]string{}
 	cols := cd.Columns()
+	var entries []map[string]string
 	cd.Rows(func(i int, r Row) {
+		entry := map[string]string{}
 		for _, c := range cols {
-			entries[c] = index(c, r)
+			entry[c] = index(c, r)
 		}
+		entries = append(entries, entry)
 	})
 	return entries
 }
