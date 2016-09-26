@@ -17,7 +17,7 @@ type ValidationLookup struct {
 	Date                 DateTime `xml:",attr,omitempty" json:",omitempty"`
 	Version              Version  `xml:",attr,omitempty" json:",omitempty"`
 
-	MLookupType *MLookupType `xml:"METADATA-LOOKUP_TYPE,omitempty" json:"METADATA-LOOKUP_TYPE,omitempty"`
+	MValidationLookupType *MValidationLookupType `xml:"METADATA-VALIDATION_LOOKUP_TYPE,omitempty" json:"METADATA-LOOKUP_TYPE,omitempty"`
 }
 
 // MValidationLookupType ...
