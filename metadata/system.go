@@ -37,7 +37,7 @@ type System struct {
 	FilterVersion     Version  `xml:",omitempty" json:",omitempty"`
 	FilterDate        DateTime `xml:",omitempty" json:",omitempty"`
 
-	MForeignKey MForeignKey `xml:"METADATA-FOREIGN_KEY,omitempty" json:"METADATA-FOREIGN_KEY,omitempty"`
-	MResource   MResource   `xml:"METADATA-RESOURCE,omitempty" json:"METADATA-RESOURCE,omitempty"`
-	MFilter     MFilter     `xml:"METADATA-FILTER,omitempty" json:"METADATA-FILTER,omitempty"`
+	MForeignKey *MForeignKey `xml:"METADATA-FOREIGN_KEY,omitempty" json:"METADATA-FOREIGN_KEY,omitempty"`
+	MResource   *MResource   `xml:"METADATA-RESOURCE,omitempty" json:"METADATA-RESOURCE,omitempty"`
+	MFilter     *MFilter     `xml:"METADATA-FILTER,omitempty" json:"METADATA-FILTER,omitempty"`
 }

@@ -35,15 +35,15 @@ type Resource struct {
 	ValidationExternalDate      DateTime  `xml:",omitempty" json:",omitempty"`
 
 	// the resource children
-	MClass                MClass                `xml:"METADATA-CLASS,omitempty" json:"METADATA-CLASS,omitempty"`
-	MObject               MObject               `xml:"METADATA-OBJECT,omitempty" json:"METADATA-OBJECT,omitempty"`
-	MLookup               MLookup               `xml:"METADATA-LOOKUP,omitempty" json:"METADATA-LOOKUP,omitempty"`
-	MSearchHelp           MSearchHelp           `xml:"METADATA-SEARCH_HELP,omitempty" json:"METADATA-SEARCH_HELP,omitempty"`
-	MEditMask             MEditMask             `xml:"METADATA-EDIT_MASK,omitempty" json:"METADATA-EDIT_MASK,omitempty"`
-	MUpdateHelp           MUpdateHelp           `xml:"METADATA-UPDATE_HELP,omitempty" json:"METADATA-UPDATE,omitempty"`
-	MValidationExternal   MValidationExternal   `xml:"METADATA-VALIDATION_EXTERNAL,omitempty" json:"METADATA-VALIDATION_EXTERNAL,omitempty"`
-	MValidationExpression MValidationExpression `xml:"METADATA-VALIDATION_EXPRESSION,omitempty" json:"METADATA-VALIDATION_EXPRESSION,omitempty"`
+	MClass                *MClass                `xml:"METADATA-CLASS,omitempty" json:"METADATA-CLASS,omitempty"`
+	MObject               *MObject               `xml:"METADATA-OBJECT,omitempty" json:"METADATA-OBJECT,omitempty"`
+	MLookup               *MLookup               `xml:"METADATA-LOOKUP,omitempty" json:"METADATA-LOOKUP,omitempty"`
+	MSearchHelp           *MSearchHelp           `xml:"METADATA-SEARCH_HELP,omitempty" json:"METADATA-SEARCH_HELP,omitempty"`
+	MEditMask             *MEditMask             `xml:"METADATA-EDIT_MASK,omitempty" json:"METADATA-EDIT_MASK,omitempty"`
+	MUpdateHelp           *MUpdateHelp           `xml:"METADATA-UPDATE_HELP,omitempty" json:"METADATA-UPDATE,omitempty"`
+	MValidationExternal   *MValidationExternal   `xml:"METADATA-VALIDATION_EXTERNAL,omitempty" json:"METADATA-VALIDATION_EXTERNAL,omitempty"`
+	MValidationExpression *MValidationExpression `xml:"METADATA-VALIDATION_EXPRESSION,omitempty" json:"METADATA-VALIDATION_EXPRESSION,omitempty"`
 
 	// deprecated
-	MValidationLookup MValidationLookup `xml:"METADATA-VALIDATION_LOOKUP,omitempty" json:"METADATA-VALIDAITON_LOOKUP,omitempty"`
+	MValidationLookup *MValidationLookup `xml:"METADATA-VALIDATION_LOOKUP,omitempty" json:"METADATA-VALIDAITON_LOOKUP,omitempty"`
 }

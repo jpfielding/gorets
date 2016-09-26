@@ -18,7 +18,7 @@ type Lookup struct {
 	FilterID          RETSID    `xml:",omitempty" json:",omitempty"`
 	NotShowByDefault  Boolean   `xml:",omitempty" json:",omitempty"`
 
-	MLookupType MLookupType `xml:"METADATA-LOOKUP_TYPE,omitempty"`
+	MLookupType *MLookupType `xml:"METADATA-LOOKUP_TYPE,omitempty" json:"METADATA-LOOKUP_TYPE,omitempty"`
 }
 
 // MLookupType ...

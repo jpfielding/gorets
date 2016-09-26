@@ -18,7 +18,7 @@ type ValidationExternal struct {
 	Date                   DateTime `xml:",attr,omitempty" json:",omitempty"`
 	Version                Version  `xml:",attr,omitempty" json:",omitempty"`
 
-	MValidationExternalType MValidationExternalType `xml:"METADATA-VALIDATION_EXTERNAL_TYPE,omitempty" json:"METADATA-VALIDATION_EXTERNAL_TYPE,omitempty"`
+	MValidationExternalType *MValidationExternalType `xml:"METADATA-VALIDATION_EXTERNAL_TYPE,omitempty" json:"METADATA-VALIDATION_EXTERNAL_TYPE,omitempty"`
 }
 
 // MValidationExternalType ...

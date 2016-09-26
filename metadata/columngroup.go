@@ -18,9 +18,9 @@ type ColumnGroup struct {
 	ShortName         RETSName `xml:"omitempty" json:",omitempty"`
 	Description       Text     `xml:"omitempty" json:",omitempty"`
 
-	MColumnGroupControl       MColumnGroupControl       `xml:"METADATA-COLUMN_GROUP_CONTROL,omitempty" json:"METADATA-COLUMN_GROUP_CONTROL,omitempty"`
-	MColumnGroupTable         MColumnGroupTable         `xml:"METADATA-COLUMN_GROUP_TABLE,omitempty" json:"METADATA-COLUMN_GROUP_TABLE,omitempty"`
-	MColumnGroupNormalization MColumnGroupNormalization `xml:"METADATA-COLUMN_GROUP_NORMALIZATION,omitempty" json:"METADATA-COLUMN_GROUP_NORMALIZATION,omitempty"`
+	MColumnGroupControl       *MColumnGroupControl       `xml:"METADATA-COLUMN_GROUP_CONTROL,omitempty" json:"METADATA-COLUMN_GROUP_CONTROL,omitempty"`
+	MColumnGroupTable         *MColumnGroupTable         `xml:"METADATA-COLUMN_GROUP_TABLE,omitempty" json:"METADATA-COLUMN_GROUP_TABLE,omitempty"`
+	MColumnGroupNormalization *MColumnGroupNormalization `xml:"METADATA-COLUMN_GROUP_NORMALIZATION,omitempty" json:"METADATA-COLUMN_GROUP_NORMALIZATION,omitempty"`
 }
 
 // MColumnGroupControl ...

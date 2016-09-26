@@ -19,7 +19,7 @@ type Update struct {
 	UpdateTypeDate    DateTime  `xml:",omitempty" json:",omitempty"`
 	RequiresBegin     Boolean   `xml:",omitempty" json:",omitempty"`
 
-	MUpdateType MUpdateType `xml:"METADATA-UPDATE_TYPE,omitempty" json:"METADATA-UPDATE_TYPE,,omitempty"`
+	MUpdateType *MUpdateType `xml:"METADATA-UPDATE_TYPE,omitempty" json:"METADATA-UPDATE_TYPE,,omitempty"`
 }
 
 // MUpdateType ...

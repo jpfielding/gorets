@@ -28,8 +28,8 @@ type Class struct {
 	ColumnGroupSetVersion Version   `xml:",omitempty" json:",omitempty"`
 	ColumnGroupSetDate    DateTime  `xml:",omitempty" json:",omitempty"`
 
-	MTable          MTable          `xml:"METADATA-TABLE,omitempty" json:"METADATA-TABLE,omitempty"`
-	MUpdate         MUpdate         `xml:"METADATA-UPDATE,omitempty" json:"METADATA-UPDATE,omitempty"`
-	MColumnGroupSet MColumnGroupSet `xml:"METADATA-COLUMN_GROUP_SET,omitempty" json:"METADATA-COLUMN_GROUP_SET,omitempty"`
-	MColumnGroup    MColumnGroup    `xml:"METADATA-COLUMN_GROUP,omitempty" json:"METADATA-COLUMN_GROUP,omitempty"`
+	MTable          *MTable          `xml:"METADATA-TABLE,omitempty" json:"METADATA-TABLE,omitempty"`
+	MUpdate         *MUpdate         `xml:"METADATA-UPDATE,omitempty" json:"METADATA-UPDATE,omitempty"`
+	MColumnGroupSet *MColumnGroupSet `xml:"METADATA-COLUMN_GROUP_SET,omitempty" json:"METADATA-COLUMN_GROUP_SET,omitempty"`
+	MColumnGroup    *MColumnGroup    `xml:"METADATA-COLUMN_GROUP,omitempty" json:"METADATA-COLUMN_GROUP,omitempty"`
 }

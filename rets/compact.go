@@ -56,8 +56,8 @@ func (ce CompactEntry) SetFields(target interface{}) {
 	}
 }
 
-// AsMaps turns all rows into maps
-func (cd CompactData) AsMaps() []CompactEntry {
+// Entries turns all rows into maps
+func (cd CompactData) Entries() []CompactEntry {
 	index := cd.Indexer()
 	cols := cd.Columns()
 	var entries []CompactEntry

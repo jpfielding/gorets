@@ -17,11 +17,12 @@ func TestCompactEntry(t *testing.T) {
 	start, ok := token.(xml.StartElement)
 	testutils.Assert(t, ok, "should be a start element")
 	cm, err := NewCompactData(start, decoder, "	")
+	testutils.Ok(t, err)
 	type Test struct {
 		ResourceID, Standardname string
 	}
 	row1 := Test{}
-	maps := cm.AsMaps()
+	maps := cm.Entries()
 	maps[0].SetFields(&row1)
 	testutils.Equals(t, "ActiveAgent", row1.ResourceID)
 	testutils.Equals(t, "ActiveAgent", row1.Standardname)
