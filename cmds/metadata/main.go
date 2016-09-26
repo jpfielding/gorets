@@ -69,7 +69,7 @@ func main() {
 	}
 	out := os.Stdout
 	if *output != "" {
-		out, _ = os.Create(*output + "/metadata.json")
+		out, _ = os.Create(*output + "/metadata.xml")
 		defer out.Close()
 	}
 	io.Copy(out, reader)
