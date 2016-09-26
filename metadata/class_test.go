@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jpfielding/gorets/rets"
 	"github.com/jpfielding/gotest/testutils"
 )
 
@@ -45,11 +46,11 @@ func TestClass(t *testing.T) {
 	defer body.Close()
 
 	extractor := &Extractor{Body: body}
-	rets, err := extractor.Open()
+	response, err := extractor.Open()
 
 	testutils.Ok(t, err)
-	testutils.Equals(t, "Operation Successful", rets.ReplyText)
-	testutils.Equals(t, 0, rets.ReplyCode)
+	testutils.Equals(t, "Operation Successful", response.ReplyText)
+	testutils.Equals(t, rets.StatusOK, response.ReplyCode)
 
 	mclass := &MClass{}
 	err = extractor.DecodeNext("METADATA-CLASS", mclass)

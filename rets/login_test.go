@@ -39,7 +39,7 @@ func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
 	testutils.Ok(t, err)
 
 	testutils.Equals(t, urls.Response.Text, "V2.7.0 2315: Success")
-	testutils.Equals(t, urls.Response.Code, 0)
+	testutils.Equals(t, urls.Response.Code, StatusOK)
 	testutils.Equals(t, urls.Login, "http://server.com:6103/platinum/login")
 	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
 }
@@ -80,7 +80,7 @@ func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 	testutils.Ok(t, err)
 
 	testutils.Equals(t, urls.Response.Text, "V2.7.0 2315: Success")
-	testutils.Equals(t, urls.Response.Code, 0)
+	testutils.Equals(t, urls.Response.Code, StatusOK)
 	testutils.Equals(t, urls.Login, "http://server.com:6103/platinum/login")
 	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jpfielding/gorets/rets"
 	"github.com/jpfielding/gotest/testutils"
 )
 
@@ -36,7 +37,7 @@ func TestLoad(t *testing.T) {
 		testutils.Ok(t, err)
 	}
 	testutils.Equals(t, "Operation Successful", xml.ReplyText)
-	testutils.Equals(t, 0, xml.ReplyCode)
+	testutils.Equals(t, rets.StatusOK, xml.ReplyCode)
 
 	testutils.Equals(t, "ABBA", xml.Metadata.MSystem.System.ID)
 	testutils.Equals(t, "Property", string(xml.Metadata.MSystem.System.MResource.Resource[0].ResourceID))
@@ -47,11 +48,11 @@ func TestSystem(t *testing.T) {
 	defer body.Close()
 
 	extractor := &Extractor{Body: body}
-	rets, err := extractor.Open()
+	response, err := extractor.Open()
 
 	testutils.Ok(t, err)
-	testutils.Equals(t, "Operation Successful", rets.ReplyText)
-	testutils.Equals(t, 0, rets.ReplyCode)
+	testutils.Equals(t, "Operation Successful", response.ReplyText)
+	testutils.Equals(t, rets.StatusOK, response.ReplyCode)
 
 	xml := MSystem{}
 	err = extractor.DecodeNext("METADATA-SYSTEM", &xml)
