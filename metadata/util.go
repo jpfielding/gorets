@@ -14,7 +14,7 @@ func (fields FieldTransfer) To(target interface{}) {
 		val := reflect.ValueOf(target).Elem().FieldByNameFunc(func(n string) bool {
 			return strings.ToLower(n) == strings.ToLower(k)
 		})
-		if val.IsValid() {
+		if val.IsValid() && val.CanSet() {
 			val.SetString(v)
 		}
 	}

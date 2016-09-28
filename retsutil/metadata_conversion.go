@@ -5,6 +5,11 @@ import (
 	"github.com/jpfielding/gorets/rets"
 )
 
+// TODO need to restructure this to return the sub types and pass the
+// results back.  maybe a builder pattern?  maybe if done right an interface
+// for returning results could allow a hook into either providing
+// a function that allows incremental compact or standard loading for this?
+
 // AsStandard ...
 type AsStandard rets.CompactMetadata
 
