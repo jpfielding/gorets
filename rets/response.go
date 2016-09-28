@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+const (
+	// XMLElemRETS tag for RETS responses
+	XMLElemRETS = "RETS"
+	// XMLElemRETSStatus tag for RETS responses
+	XMLElemRETSStatus = "RETS-STATUS"
+)
+
 // Response is the common wrapper details for each response
 type Response struct {
 	Code int    `xml:"ReplyCode,attr"`
@@ -44,7 +51,7 @@ func ReadResponse(body io.ReadCloser) (*Response, error) {
 		case xml.StartElement:
 			// clear any accumulated data
 			switch t.Name.Local {
-			case "RETS", "RETS-STATUS":
+			case XMLElemRETS, XMLElemRETSStatus:
 				return ResponseTag(t).Parse()
 			}
 		}

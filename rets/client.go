@@ -11,6 +11,9 @@ import (
 )
 
 // const DefaultTimeout int = 300000
+const (
+	DefaultHTTPMethod = "GET"
+)
 
 // standard http header names
 const (

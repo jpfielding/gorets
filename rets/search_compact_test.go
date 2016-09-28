@@ -133,6 +133,7 @@ func TestParseCompact(t *testing.T) {
 		counter = counter + 1
 		return nil
 	})
+	testutils.Ok(t, err)
 
 	testutils.Assert(t, 8 == counter, "bad count")
 	testutils.Assert(t, maxRows, "bad max rows")

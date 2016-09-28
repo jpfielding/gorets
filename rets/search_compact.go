@@ -63,7 +63,7 @@ func (c *CompactSearchResult) ForEach(each EachRow) (bool, error) {
 				if err != nil {
 					return maxRows, err
 				}
-			case "RETS":
+			case XMLElemRETS, XMLElemRETSStatus:
 				return maxRows, nil
 			}
 		case xml.CharData:
@@ -83,12 +83,10 @@ func (c *CompactSearchResult) Close() error {
 
 // NewCompactSearchResult _always_ close this
 func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
-	rets := Response{}
 	parser := DefaultXMLDecoder(body, false)
 	result := &CompactSearchResult{
-		Response: rets,
-		body:     body,
-		parser:   parser,
+		body:   body,
+		parser: parser,
 	}
 	// extract the basic content before delving into the data
 	for {
@@ -101,12 +99,12 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 			// clear any accumulated data
 			result.buf.Reset()
 			switch t.Name.Local {
-			case "RETS", "RETS-STATUS":
-				rets, err := ResponseTag(t).Parse()
-				if err != nil {
-					return result, err
+			case XMLElemRETS, XMLElemRETSStatus:
+				resp, er := ResponseTag(t).Parse()
+				if er != nil {
+					return result, er
 				}
-				result.Response = *rets
+				result.Response = *resp
 			case "COUNT":
 				result.Count, err = CountTag(t).Parse()
 				if err != nil {
@@ -125,7 +123,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 			case "COLUMNS":
 				result.Columns = CompactRow(result.buf.String()).Parse(result.Delimiter)
 				return result, nil
-			case "RETS", "RETS-STATUS":
+			case XMLElemRETS, XMLElemRETSStatus:
 				// if there is only a RETS tag.. just exit
 				return result, nil
 			}

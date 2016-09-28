@@ -31,7 +31,7 @@ type CapabilityURLs struct {
 
 // Login ...
 func Login(requester Requester, ctx context.Context, r LoginRequest) (*CapabilityURLs, error) {
-	method := "GET"
+	method := DefaultHTTPMethod
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
@@ -123,7 +123,8 @@ func prependHost(login, other string) string {
 		return other
 	}
 
-	loginURL, err := url.Parse(login)
+	// TODO log or throw
+	loginURL, _ := url.Parse(login)
 	loginURL.Path = otherURL.Path
 
 	return loginURL.String()

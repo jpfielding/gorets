@@ -14,7 +14,7 @@ type GetRequest struct {
 
 // Get ...
 func Get(requester Requester, ctx context.Context, r GetRequest) error {
-	method := "GET"
+	method := DefaultHTTPMethod
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}

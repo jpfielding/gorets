@@ -32,7 +32,7 @@ func GetPayloadList(requester Requester, ctx context.Context, p PayloadListReque
 		values.Add("ID", p.ID)
 	}
 
-	method := "GET"
+	method := DefaultHTTPMethod
 	if p.HTTPMethod != "" {
 		method = p.HTTPMethod
 	}
@@ -96,7 +96,7 @@ func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
 		case xml.StartElement:
 			elmt := xml.StartElement(t)
 			switch elmt.Name.Local {
-			case "RETS", "RETS-STATUS":
+			case XMLElemRETS, XMLElemRETSStatus:
 				response, err := ResponseTag(elmt).Parse()
 				if err != nil {
 					return nil, err

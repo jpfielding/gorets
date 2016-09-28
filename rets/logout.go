@@ -27,7 +27,7 @@ type LogoutResponse struct {
 
 // Logout ...
 func Logout(requester Requester, ctx context.Context, r LogoutRequest) (*LogoutResponse, error) {
-	method := "GET"
+	method := DefaultHTTPMethod
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}

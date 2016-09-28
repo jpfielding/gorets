@@ -34,7 +34,7 @@ func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 		switch t := token.(type) {
 		case xml.StartElement:
 			switch t.Name.Local {
-			case "RETS", "RETS-STATUS":
+			case XMLElemRETS, XMLElemRETSStatus:
 				rets, err := ResponseTag(t).Parse()
 				if err != nil {
 					return nil, err

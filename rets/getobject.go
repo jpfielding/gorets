@@ -36,7 +36,7 @@ func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (*
 	optionalInt := OptionalIntValue(values)
 	optionalInt("Location", r.Location)
 
-	method := "GET"
+	method := DefaultHTTPMethod
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
 	}
