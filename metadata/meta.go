@@ -19,7 +19,7 @@ type MetaInfo struct {
 	Child []MetaInfo
 }
 
-// ID returns the id of the given elem for this metat's info
+// ID returns the id of the given elem for this meta's info
 func (mi MetaInfo) ID(sub interface{}) string {
 	if msub, ok := sub.(map[string]string); ok {
 		return msub[mi.SubID]
