@@ -1,9 +1,6 @@
 package retsutil
 
 import (
-	"reflect"
-	"strings"
-
 	"github.com/jpfielding/gorets/metadata"
 	"github.com/jpfielding/gorets/rets"
 )
@@ -355,7 +352,8 @@ func (cm AsStandard) SetObjects(resource *metadata.Resource) {
 // SetLookups ...
 func (cm AsStandard) SetLookups(resource *metadata.Resource) {
 	for _, cd := range cm.Elements[metadata.MetaLookup.Name] {
-		if cd.Attr["Resource"] != string(resource.ResourceID) {
+		resourceID := string(resource.ResourceID)
+		if cd.Attr["Resource"] != resourceID {
 			continue
 		}
 		resource.MLookup = &metadata.MLookup{}
@@ -363,15 +361,18 @@ func (cm AsStandard) SetLookups(resource *metadata.Resource) {
 		for _, entry := range cd.Entries() {
 			tmp := &metadata.Lookup{}
 			entry.SetFields(tmp)
-			cm.SetLookupTypes(tmp)
+			cm.SetLookupTypes(resourceID, tmp)
 			resource.MLookup.Lookup = append(resource.MLookup.Lookup, *tmp)
 		}
 	}
 }
 
 // SetLookupTypes ...
-func (cm AsStandard) SetLookupTypes(lookup *metadata.Lookup) {
+func (cm AsStandard) SetLookupTypes(resource string, lookup *metadata.Lookup) {
 	for _, cd := range cm.Elements[metadata.MetaLookupType.Name] {
+		if cd.Attr["Resource"] != resource {
+			continue
+		}
 		if cd.Attr["Lookup"] != string(lookup.LookupName) {
 			continue
 		}
@@ -471,17 +472,6 @@ func (cm AsStandard) SetValidationExternalTypes(resourceID string, validation *m
 			tmp := &metadata.ValidationExternalType{}
 			entry.SetFields(tmp)
 			validation.MValidationExternalType.ValidationExternalType = append(validation.MValidationExternalType.ValidationExternalType, *tmp)
-		}
-	}
-}
-
-func (cm AsStandard) setFields(foo interface{}, fields map[string]string) {
-	for k, v := range fields {
-		val := reflect.ValueOf(foo).Elem().FieldByNameFunc(func(n string) bool {
-			return strings.ToLower(n) == strings.ToLower(k)
-		})
-		if val.IsValid() {
-			val.SetString(v)
 		}
 	}
 }
