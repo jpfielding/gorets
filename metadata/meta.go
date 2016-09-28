@@ -33,6 +33,9 @@ func (mi MetaInfo) ID(sub interface{}) string {
 	return ""
 }
 
+// TODO consider adding the common attribute field names along with another
+// reflective func to pull all values from a struct into a map
+
 // MetaSystem ...
 var MetaSystem MetaInfo = MetaInfo{
 	Name:        "METADATA-SYSTEM",
