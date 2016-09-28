@@ -36,3 +36,15 @@ func TestMetaInfoIDMap(t *testing.T) {
 	testutils.Equals(t, "cn", MetaClass.ID(test))
 	testutils.Equals(t, "cgn", MetaColumnGroup.ID(test))
 }
+
+func TestSystemHierarchy(t *testing.T) {
+	count := func(MetaInfo) int { return 0 }
+	count = func(mi MetaInfo) int {
+		counter := 1
+		for _, c := range mi.Child {
+			counter = counter + count(c)
+		}
+		return counter
+	}
+	testutils.Equals(t, 25, count(MetaSystem))
+}
