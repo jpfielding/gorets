@@ -24,12 +24,12 @@ type SearchRequest struct {
 	URL,
 	Class,
 	SearchType,
-	Format,
+	Format, // 7.4.2 COMPACT | COMPACT-DECODED | STANDARD-XML
 	Select,
 	Query,
 	QueryType,
 	RestrictedIndicator,
-	Payload,
+	Payload, //The Client may request a specific XML format for the return set.
 	HTTPMethod string
 
 	Count,

@@ -19,10 +19,10 @@ func TestMetaInfoIDStruct(t *testing.T) {
 		ClassName:       "cn",
 		ColumnGroupName: "cgn",
 	}
-	testutils.Equals(t, "rid", MetaResource.ID(test))
-	testutils.Equals(t, "mid", MetaLookup.ID(test))
-	testutils.Equals(t, "cn", MetaClass.ID(test))
-	testutils.Equals(t, "cgn", MetaColumnGroup.ID(test))
+	testutils.Equals(t, "rid", MIResource.ID(test))
+	testutils.Equals(t, "mid", MILookup.ID(test))
+	testutils.Equals(t, "cn", MIClass.ID(test))
+	testutils.Equals(t, "cgn", MIColumnGroup.ID(test))
 }
 
 func TestMetaInfoIDMap(t *testing.T) {
@@ -32,10 +32,10 @@ func TestMetaInfoIDMap(t *testing.T) {
 		"ClassName":       "cn",
 		"ColumnGroupName": "cgn",
 	}
-	testutils.Equals(t, "rid", MetaResource.ID(test))
-	testutils.Equals(t, "mid", MetaLookup.ID(test))
-	testutils.Equals(t, "cn", MetaClass.ID(test))
-	testutils.Equals(t, "cgn", MetaColumnGroup.ID(test))
+	testutils.Equals(t, "rid", MIResource.ID(test))
+	testutils.Equals(t, "mid", MILookup.ID(test))
+	testutils.Equals(t, "cn", MIClass.ID(test))
+	testutils.Equals(t, "cgn", MIColumnGroup.ID(test))
 }
 
 func TestSystemHierarchyCount(t *testing.T) {
@@ -47,5 +47,5 @@ func TestSystemHierarchyCount(t *testing.T) {
 		}
 		return counter
 	}
-	testutils.Equals(t, 25, count(MetaSystem))
+	testutils.Equals(t, 25, count(MISystem))
 }

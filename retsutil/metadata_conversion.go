@@ -32,7 +32,7 @@ func (cm AsStandard) Convert() (*metadata.MSystem, error) {
 
 // SetForeignKeys ...
 func (cm AsStandard) SetForeignKeys(sys *metadata.System) {
-	for _, fk := range cm.Elements[metadata.MetaForeignKey.Name] {
+	for _, fk := range cm.Elements[metadata.MIForeignKey.Name] {
 		sys.MForeignKey = &metadata.MForeignKey{}
 		metadata.FieldTransfer(fk.Attr).To(sys.MForeignKey)
 		for _, entry := range fk.Entries() {
@@ -45,7 +45,7 @@ func (cm AsStandard) SetForeignKeys(sys *metadata.System) {
 
 // SetFilters ...
 func (cm AsStandard) SetFilters(sys *metadata.System) {
-	for _, cd := range cm.Elements[metadata.MetaFilter.Name] {
+	for _, cd := range cm.Elements[metadata.MIFilter.Name] {
 		sys.MFilter = &metadata.MFilter{}
 		metadata.FieldTransfer(cd.Attr).To(sys.MFilter)
 		for _, entry := range cd.Entries() {
@@ -59,7 +59,7 @@ func (cm AsStandard) SetFilters(sys *metadata.System) {
 
 // SetResources ...
 func (cm AsStandard) SetResources(sys *metadata.System) {
-	for _, cd := range cm.Elements[metadata.MetaResource.Name] {
+	for _, cd := range cm.Elements[metadata.MIResource.Name] {
 		sys.MResource = &metadata.MResource{}
 		metadata.FieldTransfer(cd.Attr).To(sys.MResource)
 		for _, entry := range cd.Entries() {
@@ -81,7 +81,7 @@ func (cm AsStandard) SetResources(sys *metadata.System) {
 
 // SetValidationExpressions ...
 func (cm AsStandard) SetValidationExpressions(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaValidationExpression.Name] {
+	for _, cd := range cm.Elements[metadata.MIValidationExpression.Name] {
 		resourceID := string(resource.ResourceID)
 		if cd.Attr["Resource"] != resourceID {
 			continue
@@ -98,7 +98,7 @@ func (cm AsStandard) SetValidationExpressions(resource *metadata.Resource) {
 
 // SetUpdateHelps ...
 func (cm AsStandard) SetUpdateHelps(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaUpdateHelp.Name] {
+	for _, cd := range cm.Elements[metadata.MIUpdateHelp.Name] {
 		resourceID := string(resource.ResourceID)
 		if cd.Attr["Resource"] != resourceID {
 			continue
@@ -115,7 +115,7 @@ func (cm AsStandard) SetUpdateHelps(resource *metadata.Resource) {
 
 // SetEditMasks ...
 func (cm AsStandard) SetEditMasks(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaEditMask.Name] {
+	for _, cd := range cm.Elements[metadata.MIEditMask.Name] {
 		resourceID := string(resource.ResourceID)
 		if cd.Attr["Resource"] != resourceID {
 			continue
@@ -132,7 +132,7 @@ func (cm AsStandard) SetEditMasks(resource *metadata.Resource) {
 
 // SetSearchHelps ...
 func (cm AsStandard) SetSearchHelps(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaSearchHelp.Name] {
+	for _, cd := range cm.Elements[metadata.MISearchHelp.Name] {
 		resourceID := string(resource.ResourceID)
 		if cd.Attr["Resource"] != resourceID {
 			continue
@@ -149,7 +149,7 @@ func (cm AsStandard) SetSearchHelps(resource *metadata.Resource) {
 
 // SetClasses ...
 func (cm AsStandard) SetClasses(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaClass.Name] {
+	for _, cd := range cm.Elements[metadata.MIClass.Name] {
 		resourceID := string(resource.ResourceID)
 		if cd.Attr["Resource"] != resourceID {
 			continue
@@ -170,7 +170,7 @@ func (cm AsStandard) SetClasses(resource *metadata.Resource) {
 
 // SetColumnGroups ...
 func (cm AsStandard) SetColumnGroups(resourceID string, class *metadata.Class) {
-	for _, cd := range cm.Elements[metadata.MetaColumnGroup.Name] {
+	for _, cd := range cm.Elements[metadata.MIColumnGroup.Name] {
 		if cd.Attr["Resource"] != resourceID {
 			continue
 		}
@@ -193,7 +193,7 @@ func (cm AsStandard) SetColumnGroups(resourceID string, class *metadata.Class) {
 
 // SetColumnGroupControls ...
 func (cm AsStandard) SetColumnGroupControls(resourceID, classID string, cg *metadata.ColumnGroup) {
-	for _, cd := range cm.Elements[metadata.MetaColumnGroupControl.Name] {
+	for _, cd := range cm.Elements[metadata.MIColumnGroupControl.Name] {
 		if cd.Attr["Resource"] != resourceID {
 			continue
 		}
@@ -215,7 +215,7 @@ func (cm AsStandard) SetColumnGroupControls(resourceID, classID string, cg *meta
 
 // SetColumnGroupTables ...
 func (cm AsStandard) SetColumnGroupTables(resourceID, classID string, cg *metadata.ColumnGroup) {
-	for _, cd := range cm.Elements[metadata.MetaColumnGroupTable.Name] {
+	for _, cd := range cm.Elements[metadata.MIColumnGroupTable.Name] {
 		if cd.Attr["Resource"] != resourceID {
 			continue
 		}
@@ -237,7 +237,7 @@ func (cm AsStandard) SetColumnGroupTables(resourceID, classID string, cg *metada
 
 // SetColumnGroupNormalizations ...
 func (cm AsStandard) SetColumnGroupNormalizations(resourceID, classID string, cg *metadata.ColumnGroup) {
-	for _, cd := range cm.Elements[metadata.MetaColumnGroupNormalization.Name] {
+	for _, cd := range cm.Elements[metadata.MIColumnGroupNormalization.Name] {
 		if cd.Attr["Resource"] != resourceID {
 			continue
 		}
@@ -259,7 +259,7 @@ func (cm AsStandard) SetColumnGroupNormalizations(resourceID, classID string, cg
 
 // SetColumnGroupSets ...
 func (cm AsStandard) SetColumnGroupSets(resource string, class *metadata.Class) {
-	for _, cd := range cm.Elements[metadata.MetaColumnGroupSet.Name] {
+	for _, cd := range cm.Elements[metadata.MIColumnGroupSet.Name] {
 		if cd.Attr["Resource"] != resource {
 			continue
 		}
@@ -278,7 +278,7 @@ func (cm AsStandard) SetColumnGroupSets(resource string, class *metadata.Class) 
 
 // SetUpdates ...
 func (cm AsStandard) SetUpdates(resource string, class *metadata.Class) {
-	for _, cd := range cm.Elements[metadata.MetaUpdate.Name] {
+	for _, cd := range cm.Elements[metadata.MIUpdate.Name] {
 		if cd.Attr["Resource"] != resource {
 			continue
 		}
@@ -299,7 +299,7 @@ func (cm AsStandard) SetUpdates(resource string, class *metadata.Class) {
 
 // SetUpdateTypes ...
 func (cm AsStandard) SetUpdateTypes(resource, class string, update *metadata.Update) {
-	for _, cd := range cm.Elements[metadata.MetaUpdateType.Name] {
+	for _, cd := range cm.Elements[metadata.MIUpdateType.Name] {
 		if cd.Attr["Resource"] != resource {
 			continue
 		}
@@ -321,7 +321,7 @@ func (cm AsStandard) SetUpdateTypes(resource, class string, update *metadata.Upd
 
 // SetTables ...
 func (cm AsStandard) SetTables(resource string, class *metadata.Class) {
-	for _, cd := range cm.Elements[metadata.MetaTable.Name] {
+	for _, cd := range cm.Elements[metadata.MITable.Name] {
 		if cd.Attr["Resource"] != resource {
 			continue
 		}
@@ -340,7 +340,7 @@ func (cm AsStandard) SetTables(resource string, class *metadata.Class) {
 
 // SetObjects ...
 func (cm AsStandard) SetObjects(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaObject.Name] {
+	for _, cd := range cm.Elements[metadata.MIObject.Name] {
 		if cd.Attr["Resource"] != string(resource.ResourceID) {
 			continue
 		}
@@ -356,7 +356,7 @@ func (cm AsStandard) SetObjects(resource *metadata.Resource) {
 
 // SetLookups ...
 func (cm AsStandard) SetLookups(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaLookup.Name] {
+	for _, cd := range cm.Elements[metadata.MILookup.Name] {
 		resourceID := string(resource.ResourceID)
 		if cd.Attr["Resource"] != resourceID {
 			continue
@@ -374,7 +374,7 @@ func (cm AsStandard) SetLookups(resource *metadata.Resource) {
 
 // SetLookupTypes ...
 func (cm AsStandard) SetLookupTypes(resource string, lookup *metadata.Lookup) {
-	for _, cd := range cm.Elements[metadata.MetaLookupType.Name] {
+	for _, cd := range cm.Elements[metadata.MILookupType.Name] {
 		if cd.Attr["Resource"] != resource {
 			continue
 		}
@@ -393,7 +393,7 @@ func (cm AsStandard) SetLookupTypes(resource string, lookup *metadata.Lookup) {
 
 // SetFilterTypes ...
 func (cm AsStandard) SetFilterTypes(filter *metadata.Filter) {
-	for _, cd := range cm.Elements[metadata.MetaFilterType.Name] {
+	for _, cd := range cm.Elements[metadata.MIFilterType.Name] {
 		if cd.Attr["Filter"] != string(filter.FilterID) {
 			continue
 		}
@@ -409,7 +409,7 @@ func (cm AsStandard) SetFilterTypes(filter *metadata.Filter) {
 
 // SetValidationLookups ...
 func (cm AsStandard) SetValidationLookups(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaValidationLookup.Name] {
+	for _, cd := range cm.Elements[metadata.MIValidationLookup.Name] {
 		resourceID := string(resource.ResourceID)
 		if cd.Attr["Resource"] != resourceID {
 			continue
@@ -427,7 +427,7 @@ func (cm AsStandard) SetValidationLookups(resource *metadata.Resource) {
 
 // SetValidationLookupTypes ...
 func (cm AsStandard) SetValidationLookupTypes(resourceID string, lookup *metadata.ValidationLookup) {
-	for _, cd := range cm.Elements[metadata.MetaValidationLookupType.Name] {
+	for _, cd := range cm.Elements[metadata.MIValidationLookupType.Name] {
 		if cd.Attr["Resource"] != resourceID {
 			continue
 		}
@@ -446,7 +446,7 @@ func (cm AsStandard) SetValidationLookupTypes(resourceID string, lookup *metadat
 
 // SetValidationExternals ...
 func (cm AsStandard) SetValidationExternals(resource *metadata.Resource) {
-	for _, cd := range cm.Elements[metadata.MetaValidationExternal.Name] {
+	for _, cd := range cm.Elements[metadata.MIValidationExternal.Name] {
 		resourceID := string(resource.ResourceID)
 		if cd.Attr["Resource"] != resourceID {
 			continue
@@ -464,7 +464,7 @@ func (cm AsStandard) SetValidationExternals(resource *metadata.Resource) {
 
 // SetValidationExternalTypes ...
 func (cm AsStandard) SetValidationExternalTypes(resourceID string, validation *metadata.ValidationExternal) {
-	for _, cd := range cm.Elements[metadata.MetaValidationExternalType.Name] {
+	for _, cd := range cm.Elements[metadata.MIValidationExternalType.Name] {
 		if cd.Attr["Resource"] != resourceID {
 			continue
 		}

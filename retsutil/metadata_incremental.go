@@ -17,8 +17,8 @@ func (ic *IncrementalCompact) Load(sess rets.Requester, ctx context.Context, url
 		req := rets.MetadataRequest{
 			URL:    url,
 			Format: "COMPACT",
-			MType:  metadata.MetaSystem.Name,
-			ID:     "0",
+			MType:  metadata.MISystem.Name,
+			ID:     id,
 		}
 		reader, er := rets.MetadataStream(sess, ctx, req)
 		if er != nil {
@@ -26,7 +26,7 @@ func (ic *IncrementalCompact) Load(sess rets.Requester, ctx context.Context, url
 		}
 		return rets.ParseMetadataCompactResult(reader)
 	}
-	msys, err := get("0", metadata.MetaSystem.Name)
+	msys, err := get("0", metadata.MISystem.Name)
 	if err != nil {
 		return err
 	}
