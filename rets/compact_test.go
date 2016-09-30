@@ -55,7 +55,7 @@ func TestParseCompactData(t *testing.T) {
 	testutils.Equals(t, "METADATA-ELEMENT", start.Name.Local)
 	cm, err := NewCompactData(start, decoder, "	")
 	testutils.Ok(t, err)
-	testutils.Equals(t, "METADATA-ELEMENT", cm.ID)
+	testutils.Equals(t, "METADATA-ELEMENT", cm.Element)
 	testutils.Equals(t, "Dog", cm.Attr["Cat"])
 	testutils.Equals(t, 2, len(cm.CompactRows))
 	testutils.Equals(t, 2, len(cm.Columns()))

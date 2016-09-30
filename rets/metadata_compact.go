@@ -26,9 +26,7 @@ func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 	for {
 		token, err := parser.Token()
 		if err != nil {
-			if err == io.EOF {
-				return &metadata, nil
-			}
+			// return io.EOF since we should have escaped cleanly with a RETS end tag
 			return nil, err
 		}
 		switch t := token.(type) {
@@ -50,7 +48,13 @@ func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 				if err != nil {
 					return nil, err
 				}
-				metadata.Elements[cd.ID] = append(metadata.Elements[cd.ID], cd)
+				metadata.Elements[cd.Element] = append(metadata.Elements[cd.Element], cd)
+			}
+		case xml.EndElement:
+			switch t.Name.Local {
+			case XMLElemRETS, XMLElemRETSStatus:
+				return &metadata, nil
+
 			}
 		}
 	}

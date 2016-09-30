@@ -9,7 +9,7 @@ import (
 // NewCompactData parses a CompactData from a start element
 func NewCompactData(start xml.StartElement, decoder *xml.Decoder, delim string) (CompactData, error) {
 	cd := CompactData{}
-	cd.ID = start.Name.Local
+	cd.Element = start.Name.Local
 	cd.Delimiter = delim
 	cd.Attr = map[string]string{}
 	for _, a := range start.Attr {
@@ -20,7 +20,7 @@ func NewCompactData(start xml.StartElement, decoder *xml.Decoder, delim string) 
 
 // CompactData is the common compact decoded structure
 type CompactData struct {
-	ID        string
+	Element   string
 	Delimiter string
 	Attr      map[string]string
 	// parse these values out with decode

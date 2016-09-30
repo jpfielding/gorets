@@ -65,7 +65,7 @@ func verifyCompactData(t *testing.T, pl *PayloadList, id string) {
 	payload := <-pl.Payloads
 	testutils.Equals(t, 6, len(payload.Columns()))
 
-	testutils.Equals(t, id, payload.ID)
+	testutils.Equals(t, id, payload.Element)
 	testutils.Equals(t, "A,B,C,D,E,F", strings.Join(payload.Columns(), ","))
 
 	counter := 0
