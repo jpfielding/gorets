@@ -182,7 +182,7 @@ var MIEditMask MetaInfo = MetaInfo{
 var MILookup MetaInfo = MetaInfo{
 	Name:        "METADATA-LOOKUP",
 	ContentName: "Lookup",
-	ContentID:   "MetadataEntryID",
+	ContentID:   "LookupName",
 	Child:       []MetaInfo{MILookupType},
 }
 

@@ -9,18 +9,20 @@ import (
 func TestMetaInfoIDStruct(t *testing.T) {
 	type TestStruct struct {
 		ResourceID      string
+		LookupName      string
 		MetadataEntryID string
 		ClassName       string
 		ColumnGroupName string
 	}
 	test := &TestStruct{
 		ResourceID:      "rid",
+		LookupName:      "ln",
 		MetadataEntryID: "mid",
 		ClassName:       "cn",
 		ColumnGroupName: "cgn",
 	}
 	testutils.Equals(t, "rid", MIResource.ID(test))
-	testutils.Equals(t, "mid", MILookup.ID(test))
+	testutils.Equals(t, "ln", MILookup.ID(test))
 	testutils.Equals(t, "cn", MIClass.ID(test))
 	testutils.Equals(t, "cgn", MIColumnGroup.ID(test))
 }
@@ -28,12 +30,13 @@ func TestMetaInfoIDStruct(t *testing.T) {
 func TestMetaInfoIDMap(t *testing.T) {
 	test := map[string]string{
 		"ResourceID":      "rid",
+		"LookupName":      "ln",
 		"MetadataEntryID": "mid",
 		"ClassName":       "cn",
 		"ColumnGroupName": "cgn",
 	}
 	testutils.Equals(t, "rid", MIResource.ID(test))
-	testutils.Equals(t, "mid", MILookup.ID(test))
+	testutils.Equals(t, "ln", MILookup.ID(test))
 	testutils.Equals(t, "cn", MIClass.ID(test))
 	testutils.Equals(t, "cgn", MIColumnGroup.ID(test))
 }
