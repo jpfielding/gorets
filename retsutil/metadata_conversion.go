@@ -467,7 +467,7 @@ func (cm AsStandard) MValidationLookupType(resource, validationLookup string) *m
 		if cd.Attr["Resource"] != resource {
 			continue
 		}
-		if cd.Attr["Lookup"] != validationLookup {
+		if cd.Attr["ValidationLookup"] != validationLookup {
 			continue
 		}
 		metadata.FieldTransfer(cd.Attr).To(&mvlt)
