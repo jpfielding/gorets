@@ -19,9 +19,8 @@ const (
 
 // TODO include standard names constants here
 
-// SearchRequest ...
-type SearchRequest struct {
-	URL,
+// SearchParams ...
+type SearchParams struct {
 	Class,
 	SearchType,
 	Format, // 7.4.2 COMPACT | COMPACT-DECODED | STANDARD-XML
@@ -29,13 +28,20 @@ type SearchRequest struct {
 	Query,
 	QueryType,
 	RestrictedIndicator,
-	Payload, //The Client may request a specific XML format for the return set.
-	HTTPMethod string
+	Payload string //The Client may request a specific XML format for the return set.
 
 	Count,
-	// TODO NONE is a valid option, this needs to be modified
-	Limit,
+	Limit, // <0 => "NONE"
 	Offset int
+}
+
+// SearchRequest ...
+type SearchRequest struct {
+	URL,
+	HTTPMethod string
+
+	SearchParams
+
 	BufferSize int // TODO unused atm
 }
 
