@@ -59,16 +59,18 @@ func main() {
 
 	fmt.Println("Search: ", capability.Search)
 	req := rets.SearchRequest{
-		URL:        capability.Search,
-		Select:     searchOpts.Select,
-		Query:      searchOpts.Query,
-		SearchType: searchOpts.Resource,
-		Class:      searchOpts.Class,
-		Format:     searchOpts.Format,
-		QueryType:  searchOpts.QueryType,
-		Count:      searchOpts.CountType,
-		Limit:      searchOpts.Limit,
-		// Offset:     -1,
+		URL: capability.Search,
+		SearchParams: rets.SearchParams{
+			Select:     searchOpts.Select,
+			Query:      searchOpts.Query,
+			SearchType: searchOpts.Resource,
+			Class:      searchOpts.Class,
+			Format:     searchOpts.Format,
+			QueryType:  searchOpts.QueryType,
+			Count:      searchOpts.CountType,
+			Limit:      searchOpts.Limit,
+			// Offset:     -1,
+		},
 	}
 
 	w := csv.NewWriter(os.Stdout)
