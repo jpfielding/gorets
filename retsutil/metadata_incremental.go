@@ -52,14 +52,19 @@ func (ic *IncrementalCompact) Load(sess rets.Requester, ctx context.Context, url
 	return nil
 }
 
-func (ic *IncrementalCompact) extractChildren(get cmgetter, idPath []string, mi metadata.MetaInfo) ([]rets.CompactData, error) {
+func (ic *IncrementalCompact) extractChildren(get cmgetter, path []string, mi metadata.MetaInfo) ([]rets.CompactData, error) {
 	var tmp []rets.CompactData
 	for _, child := range mi.Child {
-		cm, err := get(strings.Join(idPath, ":"), child.Name)
+		cm, err := get(strings.Join(path, ":"), child.Name)
 		if err != nil {
 			return tmp, err
 		}
-		if cm.Response.Code != rets.StatusOK {
+		// errors
+		switch cm.Response.Code {
+		case rets.StatusOK:
+		case rets.StatusUnknownMetadataType:
+			continue
+		default:
 			return tmp, errors.New(cm.Response.Text)
 		}
 		for _, cdata := range cm.Elements[child.Name] {
@@ -67,9 +72,8 @@ func (ic *IncrementalCompact) extractChildren(get cmgetter, idPath []string, mi 
 			//  recurse on each member of this cdata
 			for _, each := range cdata.Entries() {
 				var data map[string]string = each
-				idPath := append(idPath, child.ID(data))
 				// fmt.Printf("compact system: %v\n", compact)
-				cds, err := ic.extractChildren(get, idPath, child)
+				cds, err := ic.extractChildren(get, append(path, child.ID(data)), child)
 				if err != nil {
 					return tmp, err
 				}
