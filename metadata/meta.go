@@ -173,7 +173,7 @@ var MISearchHelp MetaInfo = MetaInfo{
 
 // MIEditMask ...
 var MIEditMask MetaInfo = MetaInfo{
-	Name:        "METADATA-EDIT_MASK",
+	Name:        "METADATA-EDITMASK",
 	ContentName: "EditMask",
 	ContentID:   "EditMaskID", // MIetadataEntryID also exists ...
 }
