@@ -62,7 +62,7 @@ func (ic *IncrementalCompact) extractChildren(get cmgetter, path []string, mi me
 		// errors
 		switch cm.Response.Code {
 		case rets.StatusOK:
-		case rets.StatusUnknownMetadataType:
+		case rets.StatusUnknownMetadataType, rets.StatusNoMetadataFound:
 			continue
 		default:
 			return tmp, errors.New(cm.Response.Text)
