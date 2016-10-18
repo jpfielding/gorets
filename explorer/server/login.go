@@ -10,7 +10,7 @@ import (
 	"github.com/jpfielding/gowirelog/wirelog"
 )
 
-// LoginRequest info to use the demo
+// LoginParams info to use the demo
 type LoginParams struct {
 	URL         string `json:"url"`
 	Username    string `json:"username"`
@@ -23,7 +23,7 @@ type LoginParams struct {
 // Login ...
 // input: LoginParams
 // output: rets.CapabilityURLS
-func Login(ctx context.Context, u User) func(http.ResponseWriter, *http.Request) {
+func Login(ctx context.Context, u *User) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p LoginParams
 		if r.Body == nil {
@@ -39,20 +39,20 @@ func Login(ctx context.Context, u User) func(http.ResponseWriter, *http.Request)
 		// start with the default Dialer from http.DefaultTransport
 		transport := wirelog.NewHTTPTransport()
 		// logging
-		if s.WireLogFile != "" {
+		if u.WireLogFile != "" {
 			err = wirelog.LogToFile(transport, u.WireLogFile, true, true)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return
 			}
-			xlog.Println("wire logging enabled:", c.WireLogFile)
+			fmt.Println("wire logging enabled:", u.WireLogFile)
 		}
-		req, err := gorets.DefaultSession(
+		requester, err := rets.DefaultSession(
 			p.Username,
 			p.Password,
 			p.UserAgent,
 			p.UserAgentPw,
-			p.RetsVersion,
+			p.Version,
 			transport,
 		)
 		if err != nil {
@@ -60,14 +60,13 @@ func Login(ctx context.Context, u User) func(http.ResponseWriter, *http.Request)
 			return
 		}
 		// TODO deal with contexts in the web appropriately
-		ctx := context.Background()
-		urls, err := rets.Login(s.Requester, ctx, p.URL)
+		urls, err := rets.Login(u.Requester, ctx, rets.LoginRequest{URL: p.URL})
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
 		}
 		json.NewEncoder(w).Encode(*urls)
-		u.URLs = urls
-		u.session = req
+		u.URLs = *urls
+		u.Requester = requester
 	}
 }

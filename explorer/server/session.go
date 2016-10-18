@@ -1,10 +1,11 @@
-package serverPANIC
+package server
 
 import (
 	"github.com/jpfielding/gorets/metadata"
 	"github.com/jpfielding/gorets/rets"
 )
 
+// User ...
 type User struct {
 	WireLogFile string
 	Metadata    metadata.MSystem // probably dont need to cache this in the long term

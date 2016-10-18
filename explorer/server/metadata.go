@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/jpfielding/gorets/metadata"
@@ -18,18 +17,23 @@ type MetadataResponse struct {
 // Metadata ...
 // input:
 // output: metadata.MSystem
-func Metadata(ctx context.Context, u User) func(http.ResponseWriter, *http.Request) {
+func Metadata(ctx context.Context, u *User) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if s.Request == nil {
+		if u.Requester == nil {
 			http.Error(w, "Not Logged in", 400)
 			return
 		}
 		compact := &retsutil.IncrementalCompact{}
-		err = compact.Load(s.Requester, ctx, u.URLs.GetMetadata)
+		err := compact.Load(u.Requester, ctx, u.URLs.GetMetadata)
 		if err != nil {
-			fmt.Println("extracting metadata", err)
+			http.Error(w, "metadata request failed", 400)
+			return
 		}
-		standard := retsutil.AsStandard(*compact).Convert()
+		standard, err := retsutil.AsStandard(*compact).Convert()
+		if err != nil {
+			http.Error(w, "metadata conversion failed", 400)
+			return
+		}
 		json.NewEncoder(w).Encode(standard)
 	}
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +21,7 @@ func main() {
 
 	// TODO this needs to be bound to a client cookie
 	user := &server.User{
-		WireLogFile: "/tmp/gorets/wire.log"
+		WireLogFile: "/tmp/gorets/wire.log",
 	}
 	// TODO deal with contexts in the web appropriately
 	ctx := context.Background()
