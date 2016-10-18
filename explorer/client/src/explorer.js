@@ -1,4 +1,6 @@
+var title = <h1>Test</h1>
+
 ReactDOM.render(
-  <h1>RETS Explorer!</h1>,
+  title,
   document.getElementById('explorer')
 );
