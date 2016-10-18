@@ -5,7 +5,7 @@ import (
 	"github.com/jpfielding/gorets/rets"
 )
 
-type Session struct {
+type User struct {
 	WireLogFile string
 	Metadata    metadata.MSystem // probably dont need to cache this in the long term
 	// Requester is user state

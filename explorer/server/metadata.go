@@ -18,12 +18,14 @@ type MetadataResponse struct {
 // Metadata ...
 // input:
 // output: metadata.MSystem
-func Metadata(s Session) func(http.ResponseWriter, *http.Request) {
+func Metadata(ctx context.Context, u User) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if s.Request == nil {
+			http.Error(w, "Not Logged in", 400)
+			return
+		}
 		compact := &retsutil.IncrementalCompact{}
-		// TODO deal with contexts in the web appropriately
-		ctx := context.Background()
-		err = compact.Load(s.Requester, ctx, s.URLs.GetMetadata)
+		err = compact.Load(s.Requester, ctx, u.URLs.GetMetadata)
 		if err != nil {
 			fmt.Println("extracting metadata", err)
 		}

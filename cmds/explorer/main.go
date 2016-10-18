@@ -19,12 +19,14 @@ func main() {
 	}
 
 	// TODO this needs to be bound to a client cookie
-	session := &server.Session{
+	user := &server.User{
 		WireLogFile: "/tmp/gorets/wire.log"
 	}
+	// TODO deal with contexts in the web appropriately
+	ctx := context.Background()
 	http.Handle("/", http.FileServer(http.Dir(reactPath)))
-	http.HandleFunc("/api/login", server.Login(session))
-	http.HandleFunc("/api/metadata", server.Metadata(session))
+	http.HandleFunc("/api/login", server.Login(ctx, user))
+	http.HandleFunc("/api/metadata", server.Metadata(ctx, user))
 
 	log.Println("Server starting: http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

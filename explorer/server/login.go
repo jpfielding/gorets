@@ -23,7 +23,7 @@ type LoginParams struct {
 // Login ...
 // input: LoginParams
 // output: rets.CapabilityURLS
-func Login(s Session) func(http.ResponseWriter, *http.Request) {
+func Login(ctx context.Context, u User) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p LoginParams
 		if r.Body == nil {
@@ -40,7 +40,7 @@ func Login(s Session) func(http.ResponseWriter, *http.Request) {
 		transport := wirelog.NewHTTPTransport()
 		// logging
 		if s.WireLogFile != "" {
-			err = wirelog.LogToFile(transport, s.WireLogFile, true, true)
+			err = wirelog.LogToFile(transport, u.WireLogFile, true, true)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return
@@ -66,8 +66,8 @@ func Login(s Session) func(http.ResponseWriter, *http.Request) {
 			http.Error(w, err.Error(), 400)
 			return
 		}
-		s.URLs = urls
-		s.session = req
 		json.NewEncoder(w).Encode(*urls)
+		u.URLs = urls
+		u.session = req
 	}
 }
