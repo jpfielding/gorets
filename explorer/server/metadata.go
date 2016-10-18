@@ -31,9 +31,9 @@ var options = map[string]MetadataRequestType{
 // Metadata ...
 // input: query param extraction=(|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL)
 // output: metadata.MSystem
-func Metadata(ctx context.Context, u *User) func(http.ResponseWriter, *http.Request) {
+func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if u.Requester == nil {
+		if c.Requester == nil {
 			http.Error(w, "Not Logged in", 400)
 			return
 		}
@@ -43,7 +43,7 @@ func Metadata(ctx context.Context, u *User) func(http.ResponseWriter, *http.Requ
 		}
 		if op, ok := options[extraction]; ok {
 			// lookup the operation for pulling metadata
-			standard, err := op(u.Requester, ctx, u.URLs.GetMetadata)
+			standard, err := op(c.Requester, ctx, c.URLs.GetMetadata)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return
