@@ -13,6 +13,11 @@ import (
 	"github.com/jpfielding/gorets/retsutil"
 )
 
+// MetadataParams ...
+type MetadataParams struct {
+	Extraction string // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
+}
+
 // MetadataResponse ...
 type MetadataResponse struct {
 	Metadata metadata.MSystem
@@ -29,19 +34,23 @@ var options = map[string]MetadataRequestType{
 }
 
 // Metadata ...
-// input: query param extraction=(|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL)
+// input: MetadataParams
 // output: metadata.MSystem
 func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var p MetadataParams
+		if r.Body != nil {
+			json.NewDecoder(r.Body).Decode(&p)
+		}
 		if c.Requester == nil {
 			http.Error(w, "Not Logged in", 400)
 			return
 		}
-		extraction := r.URL.Query().Get("extraction")
-		if extraction == "" {
-			extraction = "COMPACT"
+		fmt.Printf("params: %v\n", p)
+		if p.Extraction == "" {
+			p.Extraction = "COMPACT"
 		}
-		if op, ok := options[extraction]; ok {
+		if op, ok := options[p.Extraction]; ok {
 			// lookup the operation for pulling metadata
 			standard, err := op(c.Requester, ctx, c.URLs.GetMetadata)
 			if err != nil {
@@ -51,7 +60,7 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(standard)
 		} else {
-			http.Error(w, fmt.Sprintf("%s not supported", extraction), 400)
+			http.Error(w, fmt.Sprintf("%s not supported", p.Extraction), 400)
 			return
 		}
 	}
