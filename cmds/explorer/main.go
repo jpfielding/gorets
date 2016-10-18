@@ -15,9 +15,9 @@ func main() {
 	}
 	reactPath := os.Getenv("REACT_PATH")
 	if reactPath == "" {
-		reactPath = "./"
+		reactPath = "../../explorer/client"
 	}
-	http.Handle("/", http.FileServer(http.Dir(reactPath+"client")))
+	http.Handle("/", http.FileServer(http.Dir(reactPath)))
 	http.HandleFunc("/api/login", server.Login())
 
 	log.Println("Server starting: http://localhost:" + port)
