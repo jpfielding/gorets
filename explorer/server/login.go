@@ -35,7 +35,7 @@ func Login(ctx context.Context, u *User) func(http.ResponseWriter, *http.Request
 			http.Error(w, err.Error(), 400)
 			return
 		}
-		fmt.Println(p.Username)
+		fmt.Printf("params: %v\n", p)
 		// start with the default Dialer from http.DefaultTransport
 		transport := wirelog.NewHTTPTransport()
 		// logging
@@ -60,7 +60,7 @@ func Login(ctx context.Context, u *User) func(http.ResponseWriter, *http.Request
 			return
 		}
 		// TODO deal with contexts in the web appropriately
-		urls, err := rets.Login(u.Requester, ctx, rets.LoginRequest{URL: p.URL})
+		urls, err := rets.Login(requester, ctx, rets.LoginRequest{URL: p.URL})
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
