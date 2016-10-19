@@ -3,6 +3,10 @@ import MetadataService from 'services/MetadataService';
 
 export default class Explorer extends React.Component {
 
+  static propTypes = {
+    params: React.PropTypes.any,
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -18,9 +22,20 @@ export default class Explorer extends React.Component {
   }
 
   componentDidMount() {
-    console.log('Mounting');
+    if (this.props.params.connection) {
+      this.getMetadata(this.props.params.connection);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.params !== this.props.params && nextProps.params.connection) {
+      this.getMetadata(nextProps.params.connection);
+    }
+  }
+
+  getMetadata(connectionId) {
     MetadataService
-      .get()
+      .get(connectionId)
       .then(response => response.json())
       .then(json => {
         console.log(json);

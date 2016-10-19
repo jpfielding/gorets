@@ -1,5 +1,5 @@
 import React from 'react';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 import ReactDOM from 'react-dom';
 import App from 'components/App';
 import Home from 'components/containers/Home';
@@ -10,11 +10,12 @@ import NotFound from 'components/containers/NotFound';
 import 'styles/app.css';
 
 ReactDOM.render((
-  <Router history={browserHistory}>
+  <Router history={hashHistory}>
     <Route path="/" component={App}>
       <IndexRoute component={Home} />
       <Route path="connections" component={Connections} />
       <Route path="explorer" component={Explorer} />
+      <Route path="explorer/:connection" component={Explorer} />
       <Route path="*" component={NotFound} />
     </Route>
   </Router>

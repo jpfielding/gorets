@@ -31,8 +31,8 @@ export default class Connections extends React.Component {
 
   render() {
     return (
-      <div>
-        <h1>Connections</h1>
+      <div className="pa2">
+        <h1 className="f4">Add a connection</h1>
         <div className="flex flex-row justify-center">
           <div className="w-60">
             <Fieldset formValue={this.state.formValue}>
