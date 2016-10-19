@@ -43,7 +43,7 @@ type Object struct {
 // 	"2927498:2": {"ContentID":"2927498","ContentType":"image/jpeg","ObjectID":2},
 // 	"2927498:3": {"ContentID":"2927498","ContentType":"image/jpeg","ObjectID":3}
 // }
-func GetObject(conns map[string]Connection) func(http.ResponseWriter, *http.Request) {
+func GetObject() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p ObjectParams
 		if r.Body == nil {
@@ -57,7 +57,7 @@ func GetObject(conns map[string]Connection) func(http.ResponseWriter, *http.Requ
 		}
 		fmt.Printf("params: %v\n", p)
 
-		c := conns[p.ID]
+		c := ConnectionService{}.Load()[p.ID]
 		ctx := context.Background()
 		rq, err := c.Login(ctx)
 		if err != nil {

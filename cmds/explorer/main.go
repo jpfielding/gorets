@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/rpc"
+	"github.com/gorilla/rpc/json"
 	"github.com/jpfielding/gorets/explorer"
 )
 
@@ -22,10 +25,17 @@ func main() {
 
 	cors := explorer.NewCors("*")
 
-	http.HandleFunc("/api/login", explorer.Gzip(cors.Wrap(explorer.Connect(conns))))
-	http.HandleFunc("/api/metadata", explorer.Gzip(cors.Wrap(explorer.Metadata(conns))))
-	http.HandleFunc("/api/search", explorer.Gzip(cors.Wrap(explorer.Search(conns))))
-	http.HandleFunc("/api/object", explorer.Gzip(cors.Wrap(explorer.GetObject(conns))))
+	// first pass
+	http.HandleFunc("/api/login", explorer.Gzip(cors.Wrap(explorer.Connect())))
+	http.HandleFunc("/api/metadata", explorer.Gzip(cors.Wrap(explorer.Metadata())))
+	http.HandleFunc("/api/search", explorer.Gzip(cors.Wrap(explorer.Search())))
+	http.HandleFunc("/api/object", explorer.Gzip(cors.Wrap(explorer.GetObject())))
+
+	// newer gorilla rpc
+	s := rpc.NewServer()
+	s.RegisterCodec(json.NewCodec(), "application/json")
+	s.RegisterService(new(explorer.ConnectionService), "")
+	http.Handle("/rpc", handlers.CompressHandler(handlers.CORS()(s)))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))

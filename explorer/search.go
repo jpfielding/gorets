@@ -39,7 +39,7 @@ type SearchPage struct {
 //       ["3","33","333"],
 //   ]
 // }
-func Search(conns map[string]Connection) func(http.ResponseWriter, *http.Request) {
+func Search() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p SearchParams
 		if r.Body == nil {
@@ -58,7 +58,7 @@ func Search(conns map[string]Connection) func(http.ResponseWriter, *http.Request
 		if p.Format == "" {
 			p.Format = "COMPACT_DECODED"
 		}
-		c := conns[p.ID]
+		c := ConnectionService{}.Load()[p.ID]
 		req := rets.SearchRequest{
 			URL: c.URLs.Search,
 			SearchParams: rets.SearchParams{

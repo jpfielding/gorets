@@ -37,7 +37,7 @@ var options = map[string]MetadataRequestType{
 // Metadata ...
 // input: MetadataParams
 // output: metadata.MSystem
-func Metadata(conns map[string]Connection) func(http.ResponseWriter, *http.Request) {
+func Metadata() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p MetadataParams
 		if r.Body != nil {
@@ -45,7 +45,7 @@ func Metadata(conns map[string]Connection) func(http.ResponseWriter, *http.Reque
 		}
 		fmt.Printf("params: %v\n", p)
 
-		c := conns[p.ID]
+		c := ConnectionService{}.Load()[p.ID]
 		if JSONExist(c.MSystem()) {
 			standard := metadata.MSystem{}
 			JSONLoad(c.MSystem(), &standard)
