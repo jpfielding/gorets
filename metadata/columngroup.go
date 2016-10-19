@@ -76,8 +76,8 @@ type MColumnGroupNormalization struct {
 // ColumnGroupNormalization ...
 type ColumnGroupNormalization struct {
 	MetadataEntryID RETSID  `xml:",omitempty" json:",omitempty"`
-	TypeIdentifier  RETSID  `xml:"omitempty" json:",omitempty"`
-	Sequence        Numeric `xml:"omitempty" json:",omitempty"`
-	ColumnLabel     RETSID  `xml:"omitempty" json:",omitempty"`
-	SystemName      RETSID  `xml:"omitempty" json:",omitempty"`
+	TypeIdentifier  RETSID  `xml:",omitempty" json:",omitempty"`
+	Sequence        Numeric `xml:",omitempty" json:",omitempty"`
+	ColumnLabel     RETSID  `xml:",omitempty" json:",omitempty"`
+	SystemName      RETSID  `xml:",omitempty" json:",omitempty"`
 }
