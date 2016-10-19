@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jpfielding/gorets/explorer/server"
+	"github.com/jpfielding/gorets/explorer"
 )
 
 func main() {
@@ -20,16 +20,16 @@ func main() {
 	}
 
 	// TODO this needs to be bound to a client cookie
-	user := &server.User{
-		WireLogFile: "/tmp/gorets/wire.log",
+	conn := &explorer.Connection{
+		WireLogFile: "/tmp/gorets/wire.conn.log",
 	}
 	// TODO deal with contexts in the web appropriately
 	ctx := context.Background()
 	http.Handle("/", http.FileServer(http.Dir(reactPath)))
-	http.HandleFunc("/api/login", server.Login(ctx, user))
-	http.HandleFunc("/api/metadata", server.Metadata(ctx, user))
+	http.HandleFunc("/api/login", explorer.Login(ctx, conn))
+	http.HandleFunc("/api/metadata", explorer.Metadata(ctx, conn))
+	http.HandleFunc("/api/search", explorer.Search(ctx, conn))
 
 	log.Println("Server starting: http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
-	log.Println("Server start: http://localhost:" + port)
 }

@@ -1,4 +1,4 @@
-package server
+package explorer
 
 import (
 	"context"
@@ -23,7 +23,7 @@ type LoginParams struct {
 // Login ...
 // input: LoginParams
 // output: rets.CapabilityURLS
-func Login(ctx context.Context, u *User) func(http.ResponseWriter, *http.Request) {
+func Login(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p LoginParams
 		if r.Body == nil {
@@ -39,13 +39,13 @@ func Login(ctx context.Context, u *User) func(http.ResponseWriter, *http.Request
 		// start with the default Dialer from http.DefaultTransport
 		transport := wirelog.NewHTTPTransport()
 		// logging
-		if u.WireLogFile != "" {
-			err = wirelog.LogToFile(transport, u.WireLogFile, true, true)
+		if c.WireLogFile != "" {
+			err = wirelog.LogToFile(transport, c.WireLogFile, true, true)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return
 			}
-			fmt.Println("wire logging enabled:", u.WireLogFile)
+			fmt.Println("wire logging enabled:", c.WireLogFile)
 		}
 		requester, err := rets.DefaultSession(
 			p.Username,
@@ -59,14 +59,14 @@ func Login(ctx context.Context, u *User) func(http.ResponseWriter, *http.Request
 			http.Error(w, err.Error(), 400)
 			return
 		}
-		// TODO deal with contexts in the web appropriately
 		urls, err := rets.Login(requester, ctx, rets.LoginRequest{URL: p.URL})
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
 		}
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(*urls)
-		u.URLs = *urls
-		u.Requester = requester
+		c.URLs = *urls
+		c.Requester = requester
 	}
 }
