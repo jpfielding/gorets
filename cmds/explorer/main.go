@@ -11,7 +11,7 @@ import (
 
 func main() {
 	port := flag.String("port", "8000", "http port")
-	react := flag.String("react", "../../explorer/client", "ReactJS path")
+	react := flag.String("react", "../../explorer/client/build", "ReactJS path")
 
 	flag.Parse()
 
