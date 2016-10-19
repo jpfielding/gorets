@@ -5,3 +5,6 @@ out
 metadata/main/metadata.go
 vendor/
 glide.lock
+explorer/client/node_modules/*
+explorer/client/build/*
+explorer/client/npm-debug.log

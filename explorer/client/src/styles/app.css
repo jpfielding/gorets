@@ -1,0 +1,17 @@
+@import "tachyons";
+@import "tachyons-flexbox";
+
+:root {
+  --mainBackground: #f1f1f1;
+  --textColor: #444;
+}
+
+body {
+  background-color: var(--mainBackground);
+  color: var(--textColor);
+}
+
+.box {
+  width: 200px;
+  border: 1px solid black;
+}
