@@ -31,12 +31,12 @@ type SearchPage struct {
 // Search ...
 // input: SearchOptions
 // output: {
-//   "columns": {"a","b","c"},
-//   "rows": {
-//       {"1","11","111"},
-//       {"2","22","222"},
-//       {"3","33","333"},
-//   }
+//   "columns": ["a","b","c"],
+//   "rows": [
+//       ["1","11","111"],
+//       ["2","22","222"],
+//       ["3","33","333"],
+//   ]
 // }
 func Search(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +73,6 @@ func Search(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.
 			},
 		}
 
-		page := SearchPage{}
 		fmt.Printf("Querying : %v\n", req)
 		result, err := rets.SearchCompact(c.Requester, ctx, req)
 		defer result.Close()
@@ -81,17 +80,25 @@ func Search(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.
 			http.Error(w, err.Error(), 400)
 			return
 		}
-		page.Columns = result.Columns
-		_, err = result.ForEach(func(row rets.Row, err error) error {
-			page.Rows = append(page.Rows, row)
+		// opening the strea
+		w.Header().Set("Content-Type", "application/json")
+		enc := json.NewEncoder(w)
+		w.Write([]byte("{"))
+
+		w.Write([]byte("\n\"columns\": "))
+		enc.Encode(result.Columns)
+		w.Write([]byte("\n,\"rows\": ["))
+		comma := false
+		// too late to err in http here, need another solution
+		result.ForEach(func(row rets.Row, err error) error {
+			if comma {
+				w.Write([]byte(","))
+			}
+			enc.Encode(row)
+			comma = true
 			return nil
 		})
-		if err != nil {
-			http.Error(w, err.Error(), 400)
-			return
-		}
-		// TODO replace this with a streaming version
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(page)
+		w.Write([]byte("]"))
+		w.Write([]byte("}"))
 	}
 }

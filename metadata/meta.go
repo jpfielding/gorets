@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// MIetaInfo provides a meta level for metadata, yeah, sorry
+// MetaInfo provides a meta level for metadata, yeah, sorry
 type MetaInfo struct {
 	// Name is the outer element name
 	Name string
@@ -37,7 +37,7 @@ func (mi MetaInfo) ID(sub interface{}) string {
 // reflective func to pull all values from a struct into a map
 
 // MISystem ...
-var MISystem MetaInfo = MetaInfo{
+var MISystem = MetaInfo{
 	Name:        "METADATA-SYSTEM",
 	ContentName: "System",
 	ContentID:   "SystemID",
@@ -45,14 +45,14 @@ var MISystem MetaInfo = MetaInfo{
 }
 
 // MIForeignKey ...
-var MIForeignKey MetaInfo = MetaInfo{
+var MIForeignKey = MetaInfo{
 	Name:        "METADATA-FOREIGN_KEY",
 	ContentName: "ForeignKey",
 	ContentID:   "ForeignKeyID",
 }
 
 // MIFilter ...
-var MIFilter MetaInfo = MetaInfo{
+var MIFilter = MetaInfo{
 	Name:        "METADATA-FILTER",
 	ContentName: "Filter",
 	ContentID:   "FilterID",
@@ -60,14 +60,14 @@ var MIFilter MetaInfo = MetaInfo{
 }
 
 // MIFilterType ...
-var MIFilterType MetaInfo = MetaInfo{
+var MIFilterType = MetaInfo{
 	Name:        "METADATA-FILTER_TYPE",
 	ContentName: "FilterType",
 	ParentID:    "Filter", // FilterID of parent
 }
 
 // MIResource ...
-var MIResource MetaInfo = MetaInfo{
+var MIResource = MetaInfo{
 	Name:        "METADATA-RESOURCE",
 	ContentName: "Resource",
 	ContentID:   "ResourceID",
@@ -85,7 +85,7 @@ var MIResource MetaInfo = MetaInfo{
 }
 
 // MIClass ...
-var MIClass MetaInfo = MetaInfo{
+var MIClass = MetaInfo{
 	Name:        "METADATA-CLASS",
 	ContentName: "Class",
 	ContentID:   "ClassName",
@@ -93,21 +93,21 @@ var MIClass MetaInfo = MetaInfo{
 }
 
 // MITable ...
-var MITable MetaInfo = MetaInfo{
+var MITable = MetaInfo{
 	Name:        "METADATA-TABLE",
 	ContentName: "Field",
 	ContentID:   "MetadataEntryID",
 }
 
 // MIObject ...
-var MIObject MetaInfo = MetaInfo{
+var MIObject = MetaInfo{
 	Name:        "METADATA-OBJECT",
 	ContentName: "Object",
 	ContentID:   "MetadataEntryID",
 }
 
 // MIColumnGroup ...
-var MIColumnGroup MetaInfo = MetaInfo{
+var MIColumnGroup = MetaInfo{
 	Name:        "METADATA-COLUMN_GROUP",
 	ContentName: "ColumnGroup",
 	ContentID:   "ColumnGroupName",
@@ -115,35 +115,35 @@ var MIColumnGroup MetaInfo = MetaInfo{
 }
 
 // MIColumnGroupTable ...
-var MIColumnGroupTable MetaInfo = MetaInfo{
+var MIColumnGroupTable = MetaInfo{
 	Name:        "METADATA-COLUMN_GROUP_TABLE",
 	ContentName: "ColumnGroupTable",
 	ContentID:   "MetadataEntryID",
 }
 
 // MIColumnGroupControl ...
-var MIColumnGroupControl MetaInfo = MetaInfo{
+var MIColumnGroupControl = MetaInfo{
 	Name:        "METADATA-COLUMN_GROUP_CONTROL",
 	ContentName: "ColumnGroupControl",
 	ContentID:   "MetadataEntryID",
 }
 
 // MIColumnGroupNormalization ...
-var MIColumnGroupNormalization MetaInfo = MetaInfo{
+var MIColumnGroupNormalization = MetaInfo{
 	Name:        "METADATA-COLUMN_GROUP_NORMALIZATION",
 	ContentName: "ColumnGroupNormalization",
 	ContentID:   "MetadataEntryID",
 }
 
 // MIColumnGroupSet ...
-var MIColumnGroupSet MetaInfo = MetaInfo{
+var MIColumnGroupSet = MetaInfo{
 	Name:        "METADATA-COLUMN_GROUP_SET",
 	ContentName: "ColumnGroupSet",
 	ContentID:   "ColumnGroupSetName", // MIetadataEntryID also exists ...
 }
 
 // MIUpdate ...
-var MIUpdate MetaInfo = MetaInfo{
+var MIUpdate = MetaInfo{
 	Name:        "METADATA-UPDATE",
 	ContentName: "Update",
 	ContentID:   "MetadataEntryID",
@@ -151,35 +151,35 @@ var MIUpdate MetaInfo = MetaInfo{
 }
 
 // MIUpdateType ...
-var MIUpdateType MetaInfo = MetaInfo{
+var MIUpdateType = MetaInfo{
 	Name:        "METADATA-UPDATE_TYPE`",
 	ContentName: "UpdateType",
 	ParentID:    "Update",
 }
 
 // MIUpdateHelp ...
-var MIUpdateHelp MetaInfo = MetaInfo{
+var MIUpdateHelp = MetaInfo{
 	Name:        "METADATA-UPDATE_HELP`",
 	ContentName: "UpdateHelp",
 	ContentID:   "UpdateHelpID",
 }
 
 // MISearchHelp ...
-var MISearchHelp MetaInfo = MetaInfo{
+var MISearchHelp = MetaInfo{
 	Name:        "METADATA-SEARCH_HELP",
 	ContentName: "SearchHelp",
 	ContentID:   "MetadataEntryID",
 }
 
 // MIEditMask ...
-var MIEditMask MetaInfo = MetaInfo{
+var MIEditMask = MetaInfo{
 	Name:        "METADATA-EDITMASK",
 	ContentName: "EditMask",
 	ContentID:   "EditMaskID", // MIetadataEntryID also exists ...
 }
 
 // MILookup ...
-var MILookup MetaInfo = MetaInfo{
+var MILookup = MetaInfo{
 	Name:        "METADATA-LOOKUP",
 	ContentName: "Lookup",
 	ContentID:   "LookupName",
@@ -187,14 +187,14 @@ var MILookup MetaInfo = MetaInfo{
 }
 
 // MILookupType ...
-var MILookupType MetaInfo = MetaInfo{
+var MILookupType = MetaInfo{
 	Name:        "METADATA-LOOKUP_TYPE",
 	ContentName: "LookupType",
 	ParentID:    "Lookup",
 }
 
 // MIValidationExternal ...
-var MIValidationExternal MetaInfo = MetaInfo{
+var MIValidationExternal = MetaInfo{
 	Name:        "METADATA-VALIDATION_EXTERNAL",
 	ContentName: "ValidationExternal",
 	ContentID:   "ValidationExternalName", // MIetadataEntryID also exists ...
@@ -202,21 +202,21 @@ var MIValidationExternal MetaInfo = MetaInfo{
 }
 
 // MIValidationExternalType ...
-var MIValidationExternalType MetaInfo = MetaInfo{
+var MIValidationExternalType = MetaInfo{
 	Name:        "METADATA-VALIDATION_EXTERNAL_TYPE",
 	ContentName: "ValidationExternalType",
 	ContentID:   "MetadataEntryID",
 }
 
 // MIValidationExpression ...
-var MIValidationExpression MetaInfo = MetaInfo{
+var MIValidationExpression = MetaInfo{
 	Name:        "METADATA-VALIDATION_EXPRESSION",
 	ContentName: "ValidationExpression",
 	ContentID:   "ValidationExpressionID", // MIetadataEntryID also exists ...
 }
 
 // MIValidationLookup DEPRECATED
-var MIValidationLookup MetaInfo = MetaInfo{
+var MIValidationLookup = MetaInfo{
 	Name:        "METADATA-VALIDATION_LOOKUP",
 	ContentName: "ValidationLookup",
 	ContentID:   "ValidationLookupName", // MIetadataEntryID also exists ...
@@ -224,7 +224,7 @@ var MIValidationLookup MetaInfo = MetaInfo{
 }
 
 // MIValidationLookupType DEPRECATED
-var MIValidationLookupType MetaInfo = MetaInfo{
+var MIValidationLookupType = MetaInfo{
 	Name:        "METADATA-VALIDATION_LOOKUP_TYPE",
 	ContentName: "ValidationLookupType",
 	ParentID:    "ValidationLookup",
