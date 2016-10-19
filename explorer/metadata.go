@@ -44,9 +44,6 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 			json.NewDecoder(r.Body).Decode(&p)
 		}
 		fmt.Printf("params: %v\n", p)
-		if p.Extraction == "" {
-			p.Extraction = "COMPACT"
-		}
 
 		path := fmt.Sprintf("/tmp/gorets/%s/metadata.json", p.ID)
 		if JSONExist(path) {
@@ -58,6 +55,9 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 		}
 
 		if op, ok := options[p.Extraction]; ok {
+			if p.Extraction == "" {
+				p.Extraction = "COMPACT"
+			}
 			if c.Requester == nil {
 				http.Error(w, "Not Logged in", 400)
 				return
