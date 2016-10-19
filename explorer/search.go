@@ -27,6 +27,56 @@ type SearchParams struct {
 type SearchPage struct {
 	Columns rets.Row   `json:"columns"`
 	Rows    []rets.Row `json:"rows"`
+	MaxRows bool       `json:"maxrows"`
+}
+
+// SearchService ...
+type SearchService struct{}
+
+// Run ....
+func (ms SearchService) Run(r *http.Request, args *SearchParams, reply *SearchPage) error {
+	fmt.Printf("params: %v\n", args)
+	if args.QueryType == "" {
+		args.QueryType = "DQML2"
+	}
+	if args.Format == "" {
+		args.Format = "COMPACT_DECODED"
+	}
+	c := ConnectionService{}.Load()[args.ID]
+	req := rets.SearchRequest{
+		URL: c.URLs.Search,
+		SearchParams: rets.SearchParams{
+			Select:     args.Select,
+			Query:      args.Query,
+			SearchType: args.Resource,
+			Class:      args.Class,
+			Format:     args.Format,
+			QueryType:  args.QueryType,
+			Count:      args.CountType,
+			Limit:      args.Limit,
+			Offset:     args.Offset,
+		},
+	}
+
+	fmt.Printf("Querying : %v\n", req)
+	ctx := context.Background()
+	rqr, err := c.Login(ctx)
+	if err != nil {
+		return err
+	}
+	result, err := rets.SearchCompact(rqr, ctx, req)
+	defer result.Close()
+	if err != nil {
+		return nil
+	}
+	// opening the strea
+	reply.Columns = result.Columns
+	// too late to err in http here, need another solution
+	reply.MaxRows, err = result.ForEach(func(row rets.Row, err error) error {
+		reply.Rows = append(reply.Rows, row)
+		return err
+	})
+	return err
 }
 
 // Search ...
@@ -39,7 +89,7 @@ type SearchPage struct {
 //       ["3","33","333"],
 //   ]
 // }
-func Search(conns map[string]Connection) func(http.ResponseWriter, *http.Request) {
+func Search() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p SearchParams
 		if r.Body == nil {
@@ -58,7 +108,7 @@ func Search(conns map[string]Connection) func(http.ResponseWriter, *http.Request
 		if p.Format == "" {
 			p.Format = "COMPACT_DECODED"
 		}
-		c := conns[p.ID]
+		c := ConnectionService{}.Load()[p.ID]
 		req := rets.SearchRequest{
 			URL: c.URLs.Search,
 			SearchParams: rets.SearchParams{
