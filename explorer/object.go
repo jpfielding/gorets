@@ -20,18 +20,18 @@ type ObjectParams struct {
 
 // Object ...
 type Object struct {
-	ContentID,
-	ContentType string
-	ObjectID int
-	UID      string
-	Description,
-	SubDescription,
-	Location string
-	RetsError bool
+	ContentID      string `json:",omitempty"`
+	ContentType    string `json:",omitempty"`
+	ObjectID       int    `json:",omitempty"`
+	UID            string `json:",omitempty"`
+	Description    string `json:",omitempty"`
+	SubDescription string `json:",omitempty"`
+	Location       string `json:",omitempty"`
+	RetsError      bool   `json:",omitempty"`
 	// RetsMessage *rets.Response
-	Preferred  bool
-	ObjectData map[string]string
-	Blob       string
+	Preferred  bool              `json:",omitempty"`
+	ObjectData map[string]string `json:",omitempty"`
+	Blob       string            `json:",omitempty"`
 }
 
 // GetObject ...
@@ -63,12 +63,21 @@ func GetObject(ctx context.Context, c *Connection) func(http.ResponseWriter, *ht
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("{"))
+		defer w.Write([]byte("}"))
+		// open the json encoder
 		enc := json.NewEncoder(w)
 		defer response.Close()
+		comma := false
 		response.ForEach(func(o *rets.Object, err error) error {
+			if comma {
+				w.Write([]byte(","))
+			}
+			// translate
 			obj := Object{
 				ContentID:      o.ContentID,
 				ContentType:    o.ContentType,
+				ObjectID:       o.ObjectID,
 				UID:            o.UID,
 				Description:    o.Description,
 				SubDescription: o.SubDescription,
@@ -78,7 +87,9 @@ func GetObject(ctx context.Context, c *Connection) func(http.ResponseWriter, *ht
 				ObjectData:     o.ObjectData,
 				Blob:           base64.StdEncoding.EncodeToString(o.Blob),
 			}
+			w.Write([]byte(fmt.Sprintf("\"%s:%d\": ", o.ContentID, o.ObjectID)))
 			enc.Encode(obj)
+			comma = true
 			return err
 		})
 	}
