@@ -18,6 +18,8 @@ rules:
   no-console: 'off'
   dot-notation: 'off'
   max-len: ['error', 120]
+  jsx-a11y/href-no-hash: 'off'
+  react/prefer-stateless-function: 'off'
 
 settings:
   import/resolver:
