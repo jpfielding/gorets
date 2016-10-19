@@ -35,6 +35,9 @@ func main() {
 	s := rpc.NewServer()
 	s.RegisterCodec(json.NewCodec(), "application/json")
 	s.RegisterService(new(explorer.ConnectionService), "")
+	s.RegisterService(new(explorer.MetadataService), "")
+	s.RegisterService(new(explorer.SearchService), "")
+	s.RegisterService(new(explorer.ObjectService), "")
 	http.Handle("/rpc", handlers.CompressHandler(handlers.CORS()(s)))
 
 	log.Println("Server starting: http://localhost:" + *port)

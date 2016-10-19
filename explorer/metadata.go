@@ -13,25 +13,51 @@ import (
 	"github.com/jpfielding/gorets/retsutil"
 )
 
-// MetadataParams ...
-type MetadataParams struct {
+// MetadataService ...
+type MetadataService struct{}
+
+// MetadataGetParams ...
+type MetadataGetParams struct {
 	ID         string `json:"id"`
 	Extraction string // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
 }
 
-// MetadataResponse ...
-type MetadataResponse struct {
+// MetadataGetResponse ...
+type MetadataGetResponse struct {
 	Metadata metadata.MSystem
 }
 
-// MetadataRequestType is a typedef metadata extraction options
-type MetadataRequestType func(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error)
+// Get ....
+func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataGetResponse) error {
+	fmt.Printf("params: %v\n", args)
 
-// options for extracting metadata
-var options = map[string]MetadataRequestType{
-	"STANDARD-XML":        getStandardMetadata,
-	"COMPACT":             getCompactMetadata,
-	"COMPACT-INCREMENTAL": getCompactIncremental,
+	c := ConnectionService{}.Load()[args.ID]
+	if JSONExist(c.MSystem()) {
+		standard := metadata.MSystem{}
+		JSONLoad(c.MSystem(), &standard)
+		reply.Metadata = standard
+		return nil
+	}
+	op, ok := options[args.Extraction]
+	if !ok {
+		return fmt.Errorf("%s not supported", args.Extraction)
+	}
+	if args.Extraction == "" {
+		args.Extraction = "COMPACT"
+	}
+	// lookup the operation for pulling metadata
+	ctx := context.Background()
+	rqr, err := c.Login(ctx)
+	if err != nil {
+		return err
+	}
+	standard, err := op(rqr, ctx, c.URLs.GetMetadata)
+	if err != nil {
+		return err
+	}
+	reply.Metadata = *standard
+	JSONStore(c.MSystem(), &standard)
+	return nil
 }
 
 // Metadata ...
@@ -39,7 +65,7 @@ var options = map[string]MetadataRequestType{
 // output: metadata.MSystem
 func Metadata() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var p MetadataParams
+		var p MetadataGetParams
 		if r.Body != nil {
 			json.NewDecoder(r.Body).Decode(&p)
 		}
@@ -78,6 +104,16 @@ func Metadata() func(http.ResponseWriter, *http.Request) {
 			return
 		}
 	}
+}
+
+// MetadataRequestType is a typedef metadata extraction options
+type MetadataRequestType func(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error)
+
+// options for extracting metadata
+var options = map[string]MetadataRequestType{
+	"STANDARD-XML":        getStandardMetadata,
+	"COMPACT":             getCompactMetadata,
+	"COMPACT-INCREMENTAL": getCompactIncremental,
 }
 
 // TODO extract a common func and switch on the incoming param
