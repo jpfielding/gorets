@@ -52,7 +52,7 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 			p.Extraction = "COMPACT"
 		}
 
-		path := fmt.Sprintf("/tmp/gorets/%s/metdata.json", p.ID)
+		path := fmt.Sprintf("/tmp/gorets/%s/metadata.json", p.ID)
 		if JSONExist(path) {
 			standard := metadata.MSystem{}
 			JSONLoad(path, &standard)

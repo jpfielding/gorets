@@ -12,7 +12,7 @@ import (
 //JSONExist ...
 func JSONExist(filename string) bool {
 	_, err := os.Stat(filename)
-	return os.IsNotExist(err)
+	return !os.IsNotExist(err)
 }
 
 // JSONStore raw file storage
