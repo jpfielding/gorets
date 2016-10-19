@@ -43,10 +43,6 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 		if r.Body != nil {
 			json.NewDecoder(r.Body).Decode(&p)
 		}
-		if c.Requester == nil {
-			http.Error(w, "Not Logged in", 400)
-			return
-		}
 		fmt.Printf("params: %v\n", p)
 		if p.Extraction == "" {
 			p.Extraction = "COMPACT"
@@ -61,6 +57,10 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 		}
 
 		if op, ok := options[p.Extraction]; ok {
+			if c.Requester == nil {
+				http.Error(w, "Not Logged in", 400)
+				return
+			}
 			// lookup the operation for pulling metadata
 			standard, err := op(c.Requester, ctx, c.URLs.GetMetadata)
 			if err != nil {
