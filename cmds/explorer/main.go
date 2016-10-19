@@ -2,22 +2,18 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/jpfielding/gorets/explorer"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8000"
-	}
-	reactPath := os.Getenv("REACT_PATH")
-	if reactPath == "" {
-		reactPath = "../../explorer/client"
-	}
+	port := flag.String("port", "8000", "http port")
+	react := flag.String("react", "../../explorer/client", "ReactJS path")
+
+	flag.Parse()
 
 	// TODO this needs to be bound to a client cookie
 	conn := &explorer.Connection{
@@ -25,11 +21,11 @@ func main() {
 	}
 	// TODO deal with contexts in the web appropriately
 	ctx := context.Background()
-	http.Handle("/", http.FileServer(http.Dir(reactPath)))
+	http.Handle("/", http.FileServer(http.Dir(*react)))
 	http.HandleFunc("/api/login", explorer.Login(ctx, conn))
 	http.HandleFunc("/api/metadata", explorer.Metadata(ctx, conn))
 	http.HandleFunc("/api/search", explorer.Search(ctx, conn))
 
-	log.Println("Server starting: http://localhost:" + port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Println("Server starting: http://localhost:" + *port)
+	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
