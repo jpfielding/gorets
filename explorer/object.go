@@ -36,7 +36,12 @@ type Object struct {
 
 // GetObject ...
 // input: ObjectParams
-// output: []Objects
+// output: map[string]Object <- streaming
+// {
+// 	"2927498:1": {"ContentID":"2927498","ContentType":"image/jpeg","ObjectID":1},
+// 	"2927498:2": {"ContentID":"2927498","ContentType":"image/jpeg","ObjectID":2},
+// 	"2927498:3": {"ContentID":"2927498","ContentType":"image/jpeg","ObjectID":3}
+// }
 func GetObject(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p ObjectParams
@@ -64,7 +69,6 @@ func GetObject(ctx context.Context, c *Connection) func(http.ResponseWriter, *ht
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte("{"))
-		defer w.Write([]byte("}"))
 		// open the json encoder
 		enc := json.NewEncoder(w)
 		defer response.Close()
@@ -92,5 +96,6 @@ func GetObject(ctx context.Context, c *Connection) func(http.ResponseWriter, *ht
 			comma = true
 			return err
 		})
+		w.Write([]byte("}"))
 	}
 }
