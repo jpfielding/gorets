@@ -54,6 +54,7 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 			JSONLoad(path, &standard)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(&standard)
+			return
 		}
 
 		if op, ok := options[p.Extraction]; ok {
