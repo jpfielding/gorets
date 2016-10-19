@@ -1,4 +1,3 @@
-@import "tachyons";
 @import "tachyons-flexbox";
 
 :root {
@@ -11,7 +10,10 @@ body {
   color: var(--textColor);
 }
 
-.box {
-  width: 200px;
-  border: 1px solid black;
+.form-list {
+  list-style-type: none;
+
+  & label {
+    flex: 1 0 16rem;
+  }
 }
