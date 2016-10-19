@@ -25,6 +25,7 @@ func main() {
 	http.HandleFunc("/api/login", explorer.Login(ctx, conn))
 	http.HandleFunc("/api/metadata", explorer.Metadata(ctx, conn))
 	http.HandleFunc("/api/search", explorer.Search(ctx, conn))
+	http.HandleFunc("/api/object", explorer.GetObject(ctx, conn))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
