@@ -15,6 +15,7 @@ import (
 
 // MetadataParams ...
 type MetadataParams struct {
+	ID         string `json:"id"`
 	Extraction string // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
 }
 
@@ -50,6 +51,15 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 		if p.Extraction == "" {
 			p.Extraction = "COMPACT"
 		}
+
+		path := fmt.Sprintf("/tmp/gorets/%s/metdata.json", p.ID)
+		if JSONExist(path) {
+			standard := metadata.MSystem{}
+			JSONLoad(path, &standard)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(&standard)
+		}
+
 		if op, ok := options[p.Extraction]; ok {
 			// lookup the operation for pulling metadata
 			standard, err := op(c.Requester, ctx, c.URLs.GetMetadata)
@@ -59,6 +69,7 @@ func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *htt
 			}
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(standard)
+			JSONStore(path, &standard)
 		} else {
 			http.Error(w, fmt.Sprintf("%s not supported", p.Extraction), 400)
 			return
