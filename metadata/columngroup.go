@@ -14,9 +14,9 @@ type ColumnGroup struct {
 	MetadataEntryID   RETSID   `xml:",omitempty" json:",omitempty"`
 	ColumnGroupName   RETSID   `xml:",omitempty" json:",omitempty"`
 	ControlSystemName RETSID   `xml:",omitempty" json:",omitempty"`
-	LongName          RETSName `xml:"omitempty" json:",omitempty"`
-	ShortName         RETSName `xml:"omitempty" json:",omitempty"`
-	Description       Text     `xml:"omitempty" json:",omitempty"`
+	LongName          RETSName `xml:",omitempty" json:",omitempty"`
+	ShortName         RETSName `xml:",omitempty" json:",omitempty"`
+	Description       Text     `xml:",omitempty" json:",omitempty"`
 
 	MColumnGroupControl       *MColumnGroupControl       `xml:"METADATA-COLUMN_GROUP_CONTROL,omitempty" json:"METADATA-COLUMN_GROUP_CONTROL,omitempty"`
 	MColumnGroupTable         *MColumnGroupTable         `xml:"METADATA-COLUMN_GROUP_TABLE,omitempty" json:"METADATA-COLUMN_GROUP_TABLE,omitempty"`
@@ -53,14 +53,14 @@ type MColumnGroupTable struct {
 // ColumnGroupTable ...
 type ColumnGroupTable struct {
 	MetadataEntryID    RETSID   `xml:",omitempty" json:",omitempty"`
-	SystemName         RETSID   `xml:"omitempty" json:",omitempty"`
-	ColumnGroupSetName RETSID   `xml:"omitempty" json:",omitempty"`
-	LongName           RETSName `xml:"omitempty" json:",omitempty"`
-	ShortName          RETSName `xml:"omitempty" json:",omitempty"`
-	DisplayOrder       Numeric  `xml:"omitempty" json:",omitempty"`
-	DisplayLength      Numeric  `xml:"omitempty" json:",omitempty"`
-	DisplayHeight      Numeric  `xml:"omitempty" json:",omitempty"`
-	ImmediateRefresh   Boolean  `xml:"omitempty" json:",omitempty"`
+	SystemName         RETSID   `xml:",omitempty" json:",omitempty"`
+	ColumnGroupSetName RETSID   `xml:",omitempty" json:",omitempty"`
+	LongName           RETSName `xml:",omitempty" json:",omitempty"`
+	ShortName          RETSName `xml:",omitempty" json:",omitempty"`
+	DisplayOrder       Numeric  `xml:",omitempty" json:",omitempty"`
+	DisplayLength      Numeric  `xml:",omitempty" json:",omitempty"`
+	DisplayHeight      Numeric  `xml:",omitempty" json:",omitempty"`
+	ImmediateRefresh   Boolean  `xml:",omitempty" json:",omitempty"`
 }
 
 // MColumnGroupNormalization ...
