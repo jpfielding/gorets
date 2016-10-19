@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const cssnext = require('postcss-cssnext');
 const postcssFlexbugFixes = require('postcss-flexbugs-fixes');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const postcssImport = require("postcss-import")
+const postcssImport = require('postcss-import');
 
 
 const config = require(`./config/${env}`);
@@ -48,9 +48,6 @@ module.exports = {
     htmlPlugin,
     providePlugin,
     new ExtractTextPlugin('[name].css'),
-    // new CopyWebpackPlugin([
-    //   { from: 'src/index.mustache' },
-    // ]),
   ],
   externals: {
     react: 'window.React',
@@ -79,13 +76,10 @@ module.exports = {
           ],
         },
       },
-      // { test: /(page|manifest)\.json/i, loader: 'file?name=[name].[ext]' },
-      // { test: /\.json/i, loader: 'json-loader' },
-      // { test: /\.mustache$/i, loader: 'raw' },
-      { test: /\.css$/,
-        loader: ExtractTextPlugin.extract('style-loader', 'css-loader?minimize&-autoprefixer!postcss-loader') },
-      // { test: /\.(woff|woff2|svg|ico)$/i, loader: 'url?limit=10000' },
-      // { test: /\.(ttf|eot|jpe?g|png|gif)$/i, loader: 'file' },
+      {
+        test: /\.css$/,
+        loader: ExtractTextPlugin.extract('style-loader', 'css-loader?minimize&-autoprefixer!postcss-loader'),
+      },
     ],
   },
   postcss: () => (
