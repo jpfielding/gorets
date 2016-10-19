@@ -1,5 +1,6 @@
 import React from 'react';
 import MetadataService from 'services/MetadataService';
+import ReactDataGrid from 'react-data-grid';
 
 export default class Explorer extends React.Component {
 
@@ -52,6 +53,34 @@ export default class Explorer extends React.Component {
   }
 
   render() {
+    const { selectedClass } = this.state;
+    let tableBody;
+    if (selectedClass) {
+      const fields = selectedClass['METADATA-TABLE'].Field;
+      const fieldSet = (fields && fields.length > 0)
+        ? Object.keys(fields[0]).map((name) => ({
+          key: name,
+          name,
+          resizable: true,
+          width: 200,
+        }))
+        : [];
+
+      const rowGetter = (i) => fields[i];
+
+      tableBody = (
+        <div>
+          <ReactDataGrid
+            columns={fieldSet}
+            rowGetter={rowGetter}
+            rowsCount={fields.length}
+            minHeight={500}
+          />
+        </div>
+      );
+    } else {
+      tableBody = null;
+    }
     return (
       <div>
         <div className="fl w-100 w-30-ns no-list-style pa3">
@@ -75,6 +104,7 @@ export default class Explorer extends React.Component {
         </div>
         <div className="fl h-100 min-vh-100 w-100 w-70-ns pa3 bl-ns">
           <div className="f4">Table Continer</div>
+          {tableBody}
           <pre className="overflow-x-scroll">{JSON.stringify(this.state.selectedClass, null, '  ')}</pre>
         </div>
       </div>
