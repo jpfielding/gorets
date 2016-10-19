@@ -12,6 +12,7 @@ import (
 
 // LoginParams info to use the demo
 type LoginParams struct {
+	ID          string `json:"id"`
 	URL         string `json:"url"`
 	Username    string `json:"username"`
 	Password    string `json:"password"`
