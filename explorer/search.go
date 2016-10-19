@@ -11,6 +11,7 @@ import (
 
 // SearchParams ...
 type SearchParams struct {
+	ID        string `json:"id"`
 	Resource  string `json:"resource"`
 	Class     string `json:"class"`
 	Format    string `json:"format"`
@@ -38,7 +39,7 @@ type SearchPage struct {
 //       ["3","33","333"],
 //   ]
 // }
-func Search(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.Request) {
+func Search(conns map[string]Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p SearchParams
 		if r.Body == nil {
@@ -57,7 +58,7 @@ func Search(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.
 		if p.Format == "" {
 			p.Format = "COMPACT_DECODED"
 		}
-
+		c := conns[p.ID]
 		req := rets.SearchRequest{
 			URL: c.URLs.Search,
 			SearchParams: rets.SearchParams{
@@ -74,7 +75,13 @@ func Search(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.
 		}
 
 		fmt.Printf("Querying : %v\n", req)
-		result, err := rets.SearchCompact(c.Requester, ctx, req)
+		ctx := context.Background()
+		rqr, err := c.Login(ctx)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		result, err := rets.SearchCompact(rqr, ctx, req)
 		defer result.Close()
 		if err != nil {
 			http.Error(w, err.Error(), 400)

@@ -37,40 +37,42 @@ var options = map[string]MetadataRequestType{
 // Metadata ...
 // input: MetadataParams
 // output: metadata.MSystem
-func Metadata(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.Request) {
+func Metadata(conns map[string]Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p MetadataParams
 		if r.Body != nil {
 			json.NewDecoder(r.Body).Decode(&p)
 		}
 		fmt.Printf("params: %v\n", p)
-		if p.Extraction == "" {
-			p.Extraction = "COMPACT"
-		}
 
-		path := fmt.Sprintf("/tmp/gorets/%s/metadata.json", p.ID)
-		if JSONExist(path) {
+		c := conns[p.ID]
+		if JSONExist(c.MSystem()) {
 			standard := metadata.MSystem{}
-			JSONLoad(path, &standard)
+			JSONLoad(c.MSystem(), &standard)
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(&standard)
 			return
 		}
 
 		if op, ok := options[p.Extraction]; ok {
-			if c.Requester == nil {
-				http.Error(w, "Not Logged in", 400)
-				return
+			if p.Extraction == "" {
+				p.Extraction = "COMPACT"
 			}
 			// lookup the operation for pulling metadata
-			standard, err := op(c.Requester, ctx, c.URLs.GetMetadata)
+			ctx := context.Background()
+			r, err := c.Login(ctx)
+			if err != nil {
+				http.Error(w, err.Error(), 400)
+				return
+			}
+			standard, err := op(r, ctx, c.URLs.GetMetadata)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return
 			}
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(standard)
-			JSONStore(path, &standard)
+			JSONStore(c.MSystem(), &standard)
 		} else {
 			http.Error(w, fmt.Sprintf("%s not supported", p.Extraction), 400)
 			return
