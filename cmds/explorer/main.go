@@ -22,10 +22,13 @@ func main() {
 	// TODO deal with contexts in the web appropriately
 	ctx := context.Background()
 	http.Handle("/", http.FileServer(http.Dir(*react)))
-	http.HandleFunc("/api/login", explorer.Login(ctx, conn))
-	http.HandleFunc("/api/metadata", explorer.Metadata(ctx, conn))
-	http.HandleFunc("/api/search", explorer.Search(ctx, conn))
-	http.HandleFunc("/api/object", explorer.GetObject(ctx, conn))
+
+	cors := explorer.NewCors("*")
+
+	http.HandleFunc("/api/login", cors.Wrap(explorer.Login(ctx, conn)))
+	http.HandleFunc("/api/metadata", cors.Wrap(explorer.Metadata(ctx, conn)))
+	http.HandleFunc("/api/search", cors.Wrap(explorer.Search(ctx, conn)))
+	http.HandleFunc("/api/object", cors.Wrap(explorer.GetObject(ctx, conn)))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
