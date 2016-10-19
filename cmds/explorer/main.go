@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"log"
 	"net/http"
@@ -16,19 +15,17 @@ func main() {
 	flag.Parse()
 
 	// TODO this needs to be bound to a client cookie
-	conn := &explorer.Connection{
-		WireLogFile: "/tmp/gorets/wire.conn.log",
-	}
-	// TODO deal with contexts in the web appropriately
-	ctx := context.Background()
+	conns := map[string]explorer.Connection{}
+	explorer.JSONLoad("/tmp/gorets/connections.json", &conns)
+
 	http.Handle("/", http.FileServer(http.Dir(*react)))
 
 	cors := explorer.NewCors("*")
 
-	http.HandleFunc("/api/login", explorer.Gzip(cors.Wrap(explorer.Login(ctx, conn))))
-	http.HandleFunc("/api/metadata", explorer.Gzip(cors.Wrap(explorer.Metadata(ctx, conn))))
-	http.HandleFunc("/api/search", explorer.Gzip(cors.Wrap(explorer.Search(ctx, conn))))
-	http.HandleFunc("/api/object", explorer.Gzip(cors.Wrap(explorer.GetObject(ctx, conn))))
+	http.HandleFunc("/api/login", explorer.Gzip(cors.Wrap(explorer.Connect(conns))))
+	http.HandleFunc("/api/metadata", explorer.Gzip(cors.Wrap(explorer.Metadata(conns))))
+	http.HandleFunc("/api/search", explorer.Gzip(cors.Wrap(explorer.Search(conns))))
+	http.HandleFunc("/api/object", explorer.Gzip(cors.Wrap(explorer.GetObject(conns))))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))

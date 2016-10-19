@@ -12,9 +12,10 @@ import (
 
 // ObjectParams ...
 type ObjectParams struct {
+	ID       string `json:"id"`
 	Resource string `json:"resource"`
 	Type     string `json:"type"`
-	ID       string `json:"id"`
+	ObjectID string `json:"objectid"`
 	Location int    `json:"location"` // setting to 1 requests the URL to the photo
 }
 
@@ -42,7 +43,7 @@ type Object struct {
 // 	"2927498:2": {"ContentID":"2927498","ContentType":"image/jpeg","ObjectID":2},
 // 	"2927498:3": {"ContentID":"2927498","ContentType":"image/jpeg","ObjectID":3}
 // }
-func GetObject(ctx context.Context, c *Connection) func(http.ResponseWriter, *http.Request) {
+func GetObject(conns map[string]Connection) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p ObjectParams
 		if r.Body == nil {
@@ -56,12 +57,19 @@ func GetObject(ctx context.Context, c *Connection) func(http.ResponseWriter, *ht
 		}
 		fmt.Printf("params: %v\n", p)
 
+		c := conns[p.ID]
+		ctx := context.Background()
+		rq, err := c.Login(ctx)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
 		// warning, this does _all_ of the photos
-		response, err := rets.GetObjects(c.Requester, ctx, rets.GetObjectRequest{
+		response, err := rets.GetObjects(rq, ctx, rets.GetObjectRequest{
 			URL:      c.URLs.GetObject,
 			Resource: p.Resource,
 			Type:     p.Type,
-			ID:       p.ID,
+			ID:       p.ObjectID,
 		})
 		if err != nil {
 			http.Error(w, err.Error(), 400)
