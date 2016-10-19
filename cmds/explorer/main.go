@@ -25,10 +25,10 @@ func main() {
 
 	cors := explorer.NewCors("*")
 
-	http.HandleFunc("/api/login", cors.Wrap(explorer.Login(ctx, conn)))
-	http.HandleFunc("/api/metadata", cors.Wrap(explorer.Metadata(ctx, conn)))
-	http.HandleFunc("/api/search", cors.Wrap(explorer.Search(ctx, conn)))
-	http.HandleFunc("/api/object", cors.Wrap(explorer.GetObject(ctx, conn)))
+	http.HandleFunc("/api/login", explorer.Gzip(cors.Wrap(explorer.Login(ctx, conn))))
+	http.HandleFunc("/api/metadata", explorer.Gzip(cors.Wrap(explorer.Metadata(ctx, conn))))
+	http.HandleFunc("/api/search", explorer.Gzip(cors.Wrap(explorer.Search(ctx, conn))))
+	http.HandleFunc("/api/object", explorer.Gzip(cors.Wrap(explorer.GetObject(ctx, conn))))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
