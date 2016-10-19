@@ -17,3 +17,24 @@ body {
     flex: 1 0 16rem;
   }
 }
+
+.no-list-style {
+  & ul {
+    list-style-type: none;
+    & li {
+      list-style-type: none;
+    }
+  }
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.metadata-class-name {
+
+}
