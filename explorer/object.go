@@ -47,13 +47,13 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 
 	c := (&ConnectionService{}).Load()[args.ID]
 	ctx := context.Background()
-	rq, err := c.Login(ctx)
+	sess, urls, err := c.Login(ctx)
 	if err != nil {
 		return err
 	}
 	// warning, this does _all_ of the photos
-	response, err := rets.GetObjects(rq, ctx, rets.GetObjectRequest{
-		URL:      c.URLs.GetObject,
+	response, err := rets.GetObjects(sess, ctx, rets.GetObjectRequest{
+		URL:      urls.GetObject,
 		Resource: args.Resource,
 		Type:     args.Type,
 		ID:       args.ObjectID,

@@ -42,8 +42,10 @@ func (ms SearchService) Run(r *http.Request, args *SearchParams, reply *SearchPa
 		args.Format = "COMPACT_DECODED"
 	}
 	c := (&ConnectionService{}).Load()[args.ID]
+	ctx := context.Background()
+	sess, urls, err := c.Login(ctx)
 	req := rets.SearchRequest{
-		URL: c.URLs.Search,
+		URL: urls.Search,
 		SearchParams: rets.SearchParams{
 			Select:     args.Select,
 			Query:      args.Query,
@@ -58,12 +60,10 @@ func (ms SearchService) Run(r *http.Request, args *SearchParams, reply *SearchPa
 	}
 
 	fmt.Printf("Querying : %v\n", req)
-	ctx := context.Background()
-	rqr, err := c.Login(ctx)
 	if err != nil {
 		return err
 	}
-	result, err := rets.SearchCompact(rqr, ctx, req)
+	result, err := rets.SearchCompact(sess, ctx, req)
 	defer result.Close()
 	if err != nil {
 		return nil

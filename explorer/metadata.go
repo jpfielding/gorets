@@ -31,11 +31,11 @@ func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply 
 	fmt.Printf("metadat head params: %v\n", args)
 	c := (&ConnectionService{}).Load()[args.ID]
 	ctx := context.Background()
-	rqr, err := c.Login(ctx)
+	rqr, urls, err := c.Login(ctx)
 	if err != nil {
 		return err
 	}
-	head, err := head(rqr, ctx, c.URLs.GetMetadata)
+	head, err := head(rqr, ctx, urls.GetMetadata)
 	if err != nil {
 		return err
 	}
@@ -69,11 +69,11 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	}
 	// lookup the operation for pulling metadata
 	ctx := context.Background()
-	rqr, err := c.Login(ctx)
+	sess, urls, err := c.Login(ctx)
 	if err != nil {
 		return err
 	}
-	standard, err := op(rqr, ctx, c.URLs.GetMetadata)
+	standard, err := op(sess, ctx, urls.GetMetadata)
 	if err != nil {
 		return err
 	}
@@ -109,12 +109,12 @@ func Metadata() func(http.ResponseWriter, *http.Request) {
 			}
 			// lookup the operation for pulling metadata
 			ctx := context.Background()
-			r, err := c.Login(ctx)
+			sess, urls, err := c.Login(ctx)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return
 			}
-			standard, err := op(r, ctx, c.URLs.GetMetadata)
+			standard, err := op(sess, ctx, urls.GetMetadata)
 			if err != nil {
 				http.Error(w, err.Error(), 400)
 				return

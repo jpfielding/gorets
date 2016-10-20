@@ -21,7 +21,7 @@ type Connection struct {
 	// Requester is user state
 	requester rets.Requester
 	// URLs need this to know where to route requests
-	URLs *rets.CapabilityURLs `json:"-"`
+	urls *rets.CapabilityURLs
 }
 
 // Wirelog path
@@ -34,8 +34,8 @@ func (c *Connection) MSystem() string {
 	return fmt.Sprintf("/tmp/gorets/%s/metadata.json", c.ID)
 }
 
-// Requester ...
-func (c *Connection) Requester() (rets.Requester, error) {
+// session ...
+func (c *Connection) session() (rets.Requester, error) {
 	if c.requester != nil {
 		return c.requester, nil
 	}
@@ -59,18 +59,23 @@ func (c *Connection) Requester() (rets.Requester, error) {
 	return r, err
 }
 
+// Active tells whether this connection is considered to be in use
+func (c *Connection) Active() bool {
+	return c.urls != nil
+}
+
 //Login ...
-func (c *Connection) Login(ctx context.Context) (rets.Requester, error) {
-	r, err := c.Requester()
+func (c *Connection) Login(ctx context.Context) (rets.Requester, *rets.CapabilityURLs, error) {
+	r, err := c.session()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	if c.URLs != nil {
-		return r, nil
+	if c.urls != nil {
+		return r, c.urls, nil
 	}
 	fmt.Printf("login: %v\n", c.URL)
 	urls, err := rets.Login(r, ctx, rets.LoginRequest{URL: c.URL})
-	c.URLs = urls
-	return r, err
+	c.urls = urls
+	return r, urls, err
 
 }

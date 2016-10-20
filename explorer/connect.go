@@ -41,9 +41,8 @@ func (cs ConnectionService) List(r *http.Request, args *ConnectionListArgs, repl
 	for _, v := range cs.Load() {
 		// if we want to filter on active
 		if args.Active != nil {
-			active := v.URLs != nil
 			// do they have matching state
-			if *args.Active != active {
+			if *args.Active != v.Active() {
 				continue
 			}
 		}
@@ -55,14 +54,14 @@ func (cs ConnectionService) List(r *http.Request, args *ConnectionListArgs, repl
 // AddConnectionArgs ..
 type AddConnectionArgs struct {
 	Connection Connection
-	Test       bool
+	Test       *bool `json:"test,omitempty"`
 }
 
 // Add ....
 func (cs ConnectionService) Add(r *http.Request, args *AddConnectionArgs, reply *struct{}) error {
-	if args.Test {
+	if args.Test != nil && *args.Test {
 		ctx := context.Background()
-		if _, err := args.Connection.Login(ctx); err != nil {
+		if _, _, err := args.Connection.Login(ctx); err != nil {
 			return err
 		}
 	}
@@ -89,7 +88,7 @@ func Connect() func(http.ResponseWriter, *http.Request) {
 		}
 		fmt.Printf("params: %v\n", p)
 		ctx := context.Background()
-		_, err = p.Login(ctx)
+		_, urls, err := p.Login(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
@@ -98,8 +97,7 @@ func Connect() func(http.ResponseWriter, *http.Request) {
 		cs.Load()
 		cs.connections[p.ID] = p
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(p.URLs)
-
+		json.NewEncoder(w).Encode(urls)
 		cs.Stash()
 
 	}
