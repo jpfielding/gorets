@@ -14,7 +14,7 @@ type ConnectionService struct {
 
 // Load ...
 func (cs *ConnectionService) Load() map[string]Connection {
-	if len(cs.connections) == 0 {
+	if cs.connections == nil {
 		cs.connections = make(map[string]Connection)
 		JSONLoad("/tmp/gorets/connections.json", &cs.connections)
 	}
