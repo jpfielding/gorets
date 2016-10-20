@@ -30,11 +30,11 @@ func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply 
 	fmt.Printf("metadat head params: %v\n", args)
 	c := (&ConnectionService{}).Load()[args.ID]
 	ctx := context.Background()
-	rqr, urls, err := c.Login(ctx)
+	sess, urls, err := c.Login(ctx)
 	if err != nil {
 		return err
 	}
-	head, err := head(rqr, ctx, urls.GetMetadata)
+	head, err := head(sess, ctx, urls.GetMetadata)
 	if err != nil {
 		return err
 	}
