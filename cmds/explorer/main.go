@@ -23,13 +23,9 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir(*react)))
 
-	cors := explorer.NewCors("*")
-
-	// first pass
-	http.HandleFunc("/api/login", explorer.Gzip(cors.Wrap(explorer.Connect())))
-	http.HandleFunc("/api/metadata", explorer.Gzip(cors.Wrap(explorer.Metadata())))
-	http.HandleFunc("/api/search", explorer.Gzip(cors.Wrap(explorer.Search())))
-	http.HandleFunc("/api/object", explorer.Gzip(cors.Wrap(explorer.GetObject())))
+	// TODO remove when migrated over
+	http.HandleFunc("/api/login", cors(explorer.Connect()))
+	http.HandleFunc("/api/metadata", cors(explorer.Metadata()))
 
 	// gorilla rpc
 	s := rpc.NewServer()
@@ -38,8 +34,25 @@ func main() {
 	s.RegisterService(new(explorer.MetadataService), "")
 	s.RegisterService(new(explorer.SearchService), "")
 	s.RegisterService(new(explorer.ObjectService), "")
+	// http.Handle("/rpc", handlers.CORS()(s))
 	http.Handle("/rpc", handlers.CompressHandler(handlers.CORS()(s)))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
+}
+
+// TODO kill this when custom handlers go away
+func cors(wrapped func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if origin := r.Header.Get("Origin"); origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		}
+		// Stop here if its Preflighted OPTIONS request
+		if r.Method == "OPTIONS" {
+			return
+		}
+		wrapped(w, r)
+	}
 }
