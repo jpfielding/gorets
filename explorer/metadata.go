@@ -28,9 +28,9 @@ type MetadataHeadParams struct {
 // Head ....
 func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply *MetadataResponse) error {
 	fmt.Printf("metadat head params: %v\n", args)
-	c := (&ConnectionService{}).Load()[args.ID]
+	s := sessions.Open(args.ID)
 	ctx := context.Background()
-	sess, urls, err := c.Login(ctx)
+	sess, urls, err := s.Login(ctx)
 	if err != nil {
 		return err
 	}
@@ -52,10 +52,11 @@ type MetadataGetParams struct {
 func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataResponse) error {
 	fmt.Printf("metadata get params: %v\n", args)
 
-	c := (&ConnectionService{}).Load()[args.ID]
-	if JSONExist(c.MSystem()) {
+	s := sessions.Open(args.ID)
+	fmt.Printf("connections params for %s %v\n", args.ID, s.Connection)
+	if JSONExist(s.MSystem()) {
 		standard := metadata.MSystem{}
-		JSONLoad(c.MSystem(), &standard)
+		JSONLoad(s.MSystem(), &standard)
 		reply.Metadata = standard
 		return nil
 	}
@@ -68,7 +69,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		return fmt.Errorf("%s not supported", args.Extraction)
 	}
 	ctx := context.Background()
-	sess, urls, err := c.Login(ctx)
+	sess, urls, err := s.Login(ctx)
 	if err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	}
 	reply.Metadata = *standard
 	// TODO bg this
-	JSONStore(c.MSystem(), &standard)
+	JSONStore(s.MSystem(), &standard)
 	return nil
 }
 
