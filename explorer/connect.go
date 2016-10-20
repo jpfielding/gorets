@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/jpfielding/gorets/rets"
 )
 
 var connections map[string]Connection
@@ -49,6 +51,28 @@ func (cs ConnectionService) List(r *http.Request, args *ConnectionListArgs, repl
 		}
 		reply.Connections = append(reply.Connections, v)
 	}
+	return nil
+}
+
+// DeleteConnectionArgs ..
+type DeleteConnectionArgs struct {
+	ID     string `json:"id"`
+	Logout bool   `json:"logout"`
+}
+
+// Delete ...
+func (cs ConnectionService) Delete(r *http.Request, args *DeleteConnectionArgs, reply *struct{}) error {
+	if c, ok := cs.Load()[args.ID]; ok {
+		if c.Active() && args.Logout {
+			ctx := context.Background()
+			sess, urls, err := c.Login(ctx)
+			if err != nil {
+				rets.Logout(sess, ctx, rets.LogoutRequest{URL: urls.Logout})
+			}
+		}
+	}
+	delete(connections, args.ID)
+	cs.Stash()
 	return nil
 }
 
