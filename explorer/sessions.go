@@ -3,6 +3,7 @@ package explorer
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/jpfielding/gorets/rets"
 	"github.com/jpfielding/gowirelog/wirelog"
@@ -12,12 +13,12 @@ import (
 var sessions = Sessions{}
 
 // Sessions ...
-type Sessions map[string]Session
+type Sessions map[string]*Session
 
 // Open ...
-func (s Sessions) Open(id string) Session {
+func (s Sessions) Open(id string) *Session {
 	if _, ok := s[id]; !ok {
-		s[id] = Session{Connection: connections[id]}
+		s[id] = &Session{Connection: connections[id]}
 	}
 	return s[id]
 }
@@ -26,9 +27,7 @@ func (s Sessions) Open(id string) Session {
 type Session struct {
 	Connection Connection
 	// Requester is user state
-	requester rets.Requester
-	// URLs need this to know where to route requests
-	urls *rets.CapabilityURLs
+	transport *http.Transport
 }
 
 // Wirelog path
@@ -43,17 +42,17 @@ func (c *Session) MSystem() string {
 
 // session ...
 func (c *Session) session() (rets.Requester, error) {
-	if c.requester != nil {
-		return c.requester, nil
+	if c.transport == nil {
+		// start with the default Dialer from http.DefaultTransport
+		transport := wirelog.NewHTTPTransport()
+		// logging
+		err := wirelog.LogToFile(transport, c.Wirelog(), true, true)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println("wire logging enabled:", c.Wirelog())
+		c.transport = transport
 	}
-	// start with the default Dialer from http.DefaultTransport
-	transport := wirelog.NewHTTPTransport()
-	// logging
-	err := wirelog.LogToFile(transport, c.Wirelog(), true, true)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("wire logging enabled:", c.Wirelog())
 	conn := c.Connection
 	r, err := rets.DefaultSession(
 		conn.Username,
@@ -61,29 +60,30 @@ func (c *Session) session() (rets.Requester, error) {
 		conn.UserAgent,
 		conn.UserAgentPw,
 		conn.Version,
-		transport,
+		c.transport,
 	)
-	c.requester = r
 	return r, err
 }
 
 // Active tells whether this connection is considered to be in use
 func (c *Session) Active() bool {
-	return c.urls != nil
+	return c.transport != nil
 }
 
-//Login ...
-func (c *Session) Login(ctx context.Context) (rets.Requester, *rets.CapabilityURLs, error) {
+// Close is a closer
+func (c *Session) Close() error {
+	// TODO see if we can close the file handle for the wirelog
+	c.transport = nil
+	return nil
+}
+
+// Exec ...
+func (c *Session) Exec(ctx context.Context, op func(rets.Requester, rets.CapabilityURLs, error) error) error {
 	r, err := c.session()
 	if err != nil {
-		return nil, nil, err
+		return err
 	}
-	if c.urls != nil {
-		return r, c.urls, nil
-	}
-	fmt.Printf("login: %v\n", c.Connection.URL)
 	urls, err := rets.Login(r, ctx, rets.LoginRequest{URL: c.Connection.URL})
-	c.urls = urls
-	return r, urls, err
-
+	defer rets.Logout(r, ctx, rets.LogoutRequest{URL: urls.Logout})
+	return op(r, *urls, err)
 }
