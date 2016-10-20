@@ -16,14 +16,8 @@ import (
 // MetadataService ...
 type MetadataService struct{}
 
-// MetadataGetParams ...
-type MetadataGetParams struct {
-	ID         string `json:"id"`
-	Extraction string // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
-}
-
-// MetadataGetResponse ...
-type MetadataGetResponse struct {
+// MetadataResponse ...
+type MetadataResponse struct {
 	Metadata metadata.MSystem
 }
 
@@ -33,7 +27,7 @@ type MetadataHeadParams struct {
 }
 
 // Head ....
-func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply *MetadataGetResponse) error {
+func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply *MetadataResponse) error {
 	fmt.Printf("params: %v\n", args)
 	c := ConnectionService{}.Load()[args.ID]
 	ctx := context.Background()
@@ -49,8 +43,14 @@ func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply 
 	return nil
 }
 
+// MetadataGetParams ...
+type MetadataGetParams struct {
+	ID         string `json:"id"`
+	Extraction string // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
+}
+
 // Get ....
-func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataGetResponse) error {
+func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataResponse) error {
 	fmt.Printf("params: %v\n", args)
 
 	c := ConnectionService{}.Load()[args.ID]
