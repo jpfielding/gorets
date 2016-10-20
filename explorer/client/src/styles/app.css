@@ -46,3 +46,12 @@ a {
     outline: 0 !important;
   }
 }
+
+.react-grid-Toolbar {
+  background-color: var(--mainBackground);
+  border: none;
+}
+
+.form-control.input-sm {
+  width: 100%;
+}

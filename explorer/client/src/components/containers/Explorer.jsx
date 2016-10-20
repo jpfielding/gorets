@@ -10,6 +10,11 @@ export default class Explorer extends React.Component {
 
   static propTypes = {
     params: React.PropTypes.any,
+    connection: React.PropTypes.any,
+  }
+
+  static defaultProps = {
+    connection: { id: null },
   }
 
   static emptyMetadata = {
@@ -63,8 +68,12 @@ export default class Explorer extends React.Component {
       .get(connectionId)
       .then(response => response.json())
       .then(json => {
+        if (json.error !== null) {
+          this.setState({ metadata: Explorer.emptyMetadata });
+          return;
+        }
         this.setState({
-          metadata: json,
+          metadata: json.result.Metadata,
         });
       });
   }
@@ -110,14 +119,16 @@ export default class Explorer extends React.Component {
         for (let i = rows.length - 1; i >= 0; i--) {
           const row = rows[i];
           const val = row[filterObj.column.key] || '';
-          const stringVal = String(val);
-          if (stringVal.indexOf(filterObj.filterTerm) === -1) {
+          const stringVal = String(val).toLowerCase();
+          if (stringVal.indexOf(filterObj.filterTerm.toLowerCase()) === -1) {
             newRows.splice(i, 1);
           }
         }
       }
     });
-    this.setState({ selectedClassRows: newRows });
+    if (newRows.length > 0) {
+      this.setState({ selectedClassRows: newRows });
+    }
   }
 
   render() {
