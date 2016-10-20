@@ -55,14 +55,24 @@ type AddConnectionArgs struct {
 	Test       bool       `json:"test"`
 }
 
+// AddConnectionReply ...
+type AddConnectionReply struct {
+	ID     string `json:"id"`
+	Tested bool   `json:"tested"`
+	Active bool   `json:"active"`
+}
+
 // Add ....
-func (cs ConnectionService) Add(r *http.Request, args *AddConnectionArgs, reply *struct{}) error {
+func (cs ConnectionService) Add(r *http.Request, args *AddConnectionArgs, reply *AddConnectionReply) error {
 	if args.Test {
 		ctx := context.Background()
 		if _, _, err := args.Connection.Login(ctx); err != nil {
 			return err
 		}
+		reply.Tested = true
+		reply.Active = args.Connection.Active()
 	}
+	reply.ID = args.Connection.ID
 	cs.Load()
 	cs.connections[args.Connection.ID] = args.Connection
 	cs.Stash()
