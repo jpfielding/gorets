@@ -107,8 +107,8 @@ func (cs ConnectionService) Add(r *http.Request, args *AddConnectionArgs, reply 
 	s := &Session{Connection: args.Connection}
 	if args.Test {
 		ctx := context.Background()
-		err := s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
-			return err
+		err := s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
+			return nil
 		})
 		if err != nil {
 			return err

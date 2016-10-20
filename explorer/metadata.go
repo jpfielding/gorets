@@ -30,10 +30,7 @@ func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply 
 	fmt.Printf("metadat head params: %v\n", args)
 	s := sessions.Open(args.ID)
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
-		if err != nil {
-			return err
-		}
+	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		head, err := head(r, ctx, u.GetMetadata)
 		if err != nil {
 			return err
@@ -70,10 +67,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		return fmt.Errorf("%s not supported", args.Extraction)
 	}
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
-		if err != nil {
-			return err
-		}
+	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		standard, err := op(r, ctx, u.GetMetadata)
 		reply.Metadata = *standard
 		// bg this

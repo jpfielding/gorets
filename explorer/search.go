@@ -44,7 +44,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 	s := sessions.Open(args.ID)
 	fmt.Printf("%v\n", s.Connection)
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
+	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		req := rets.SearchRequest{
 			URL: u.Search,
 			SearchParams: rets.SearchParams{
@@ -60,9 +60,6 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 			},
 		}
 		fmt.Printf("Querying : %v\n", req)
-		if err != nil {
-			return err
-		}
 		result, err := rets.SearchCompact(r, ctx, req)
 		defer result.Close()
 		if err != nil {
