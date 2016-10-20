@@ -39,9 +39,7 @@ func main() {
 		handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "HEAD"}),
 		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
 	)
-	http.Handle("/rpc", cors(s))
-	// http.Handle("/rpc", cors(s))
-	// http.Handle("/rpc", handlers.CompressHandler(cors(s)))
+	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
