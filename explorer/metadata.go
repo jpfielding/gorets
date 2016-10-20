@@ -30,16 +30,17 @@ func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply 
 	fmt.Printf("metadat head params: %v\n", args)
 	s := sessions.Open(args.ID)
 	ctx := context.Background()
-	sess, urls, err := s.Login(ctx)
-	if err != nil {
+	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
+		if err != nil {
+			return err
+		}
+		head, err := head(r, ctx, u.GetMetadata)
+		if err != nil {
+			return err
+		}
+		reply.Metadata = *head
 		return err
-	}
-	head, err := head(sess, ctx, urls.GetMetadata)
-	if err != nil {
-		return err
-	}
-	reply.Metadata = *head
-	return nil
+	})
 }
 
 // MetadataGetParams ...
@@ -69,18 +70,18 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		return fmt.Errorf("%s not supported", args.Extraction)
 	}
 	ctx := context.Background()
-	sess, urls, err := s.Login(ctx)
-	if err != nil {
+	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
+		if err != nil {
+			return err
+		}
+		standard, err := op(r, ctx, u.GetMetadata)
+		reply.Metadata = *standard
+		// bg this
+		go func() {
+			JSONStore(s.MSystem(), &standard)
+		}()
 		return err
-	}
-	standard, err := op(sess, ctx, urls.GetMetadata)
-	if err != nil {
-		return err
-	}
-	reply.Metadata = *standard
-	// TODO bg this
-	JSONStore(s.MSystem(), &standard)
-	return nil
+	})
 }
 
 // MetadataRequestType is a typedef metadata extraction options

@@ -47,38 +47,36 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 
 	s := sessions.Open(args.ID)
 	ctx := context.Background()
-	sess, urls, err := s.Login(ctx)
-	if err != nil {
-		return err
-	}
-	// warning, this does _all_ of the photos
-	response, err := rets.GetObjects(sess, ctx, rets.GetObjectRequest{
-		URL:      urls.GetObject,
-		Resource: args.Resource,
-		Type:     args.Type,
-		ID:       args.ObjectID,
-	})
-	if err != nil {
-		return err
-	}
-	// open the json encoder
-	defer response.Close()
-	return response.ForEach(func(o *rets.Object, err error) error {
-		// translate
-		obj := Object{
-			ContentID:      o.ContentID,
-			ContentType:    o.ContentType,
-			ObjectID:       o.ObjectID,
-			UID:            o.UID,
-			Description:    o.Description,
-			SubDescription: o.SubDescription,
-			Location:       o.Location,
-			RetsError:      o.RetsError,
-			Preferred:      o.Preferred,
-			ObjectData:     o.ObjectData,
-			Blob:           o.Blob,
+	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
+		// warning, this does _all_ of the photos
+		response, err := rets.GetObjects(r, ctx, rets.GetObjectRequest{
+			URL:      u.GetObject,
+			Resource: args.Resource,
+			Type:     args.Type,
+			ID:       args.ObjectID,
+		})
+		if err != nil {
+			return err
 		}
-		reply.Objects = append(reply.Objects, obj)
-		return err
+		// open the json encoder
+		defer response.Close()
+		return response.ForEach(func(o *rets.Object, err error) error {
+			// translate
+			obj := Object{
+				ContentID:      o.ContentID,
+				ContentType:    o.ContentType,
+				ObjectID:       o.ObjectID,
+				UID:            o.UID,
+				Description:    o.Description,
+				SubDescription: o.SubDescription,
+				Location:       o.Location,
+				RetsError:      o.RetsError,
+				Preferred:      o.Preferred,
+				ObjectData:     o.ObjectData,
+				Blob:           o.Blob,
+			}
+			reply.Objects = append(reply.Objects, obj)
+			return err
+		})
 	})
 }

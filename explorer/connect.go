@@ -80,11 +80,7 @@ func (cs ConnectionService) Delete(r *http.Request, args *DeleteConnectionArgs, 
 	connections.Stash()
 	if session, ok := sessions[args.ID]; !ok {
 		if session.Active() && args.Logout {
-			ctx := context.Background()
-			sess, urls, err := session.Login(ctx)
-			if err != nil {
-				rets.Logout(sess, ctx, rets.LogoutRequest{URL: urls.Logout})
-			}
+			sessions[args.ID].Close()
 			delete(sessions, args.ID)
 		}
 		return nil
@@ -108,17 +104,21 @@ type AddConnectionReply struct {
 
 // Add ....
 func (cs ConnectionService) Add(r *http.Request, args *AddConnectionArgs, reply *AddConnectionReply) error {
-	session := Session{Connection: args.Connection}
+	s := &Session{Connection: args.Connection}
 	if args.Test {
 		ctx := context.Background()
-		if _, _, err := session.Login(ctx); err != nil {
+		err := s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
+			return err
+		})
+		if err != nil {
 			return err
 		}
 		reply.Tested = true
 	}
 	connections[args.Connection.ID] = args.Connection
 	connections.Stash()
-	reply.Active = session.Active()
-	reply.ID = args.Connection.ID
+	sessions[s.Connection.ID] = s
+	reply.Active = s.Active()
+	reply.ID = s.Connection.ID
 	return nil
 }

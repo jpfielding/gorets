@@ -49,37 +49,37 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 	s := sessions.Open(args.ID)
 	fmt.Printf("%v\n", s.Connection)
 	ctx := context.Background()
-	sess, urls, err := s.Login(ctx)
-	req := rets.SearchRequest{
-		URL: urls.Search,
-		SearchParams: rets.SearchParams{
-			Select:     args.Params.Select,
-			Query:      args.Params.Query,
-			SearchType: args.Params.Resource,
-			Class:      args.Params.Class,
-			Format:     args.Params.Format,
-			QueryType:  args.Params.QueryType,
-			Count:      args.Params.CountType,
-			Limit:      args.Params.Limit,
-			Offset:     args.Params.Offset,
-		},
-	}
-
-	fmt.Printf("Querying : %v\n", req)
-	if err != nil {
-		return err
-	}
-	result, err := rets.SearchCompact(sess, ctx, req)
-	defer result.Close()
-	if err != nil {
-		return nil
-	}
-	// opening the strea
-	reply.Columns = result.Columns
-	// too late to err in http here, need another solution
-	reply.MaxRows, err = result.ForEach(func(row rets.Row, err error) error {
-		reply.Rows = append(reply.Rows, row)
+	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
+		req := rets.SearchRequest{
+			URL: u.Search,
+			SearchParams: rets.SearchParams{
+				Select:     args.Params.Select,
+				Query:      args.Params.Query,
+				SearchType: args.Params.Resource,
+				Class:      args.Params.Class,
+				Format:     args.Params.Format,
+				QueryType:  args.Params.QueryType,
+				Count:      args.Params.CountType,
+				Limit:      args.Params.Limit,
+				Offset:     args.Params.Offset,
+			},
+		}
+		fmt.Printf("Querying : %v\n", req)
+		if err != nil {
+			return err
+		}
+		result, err := rets.SearchCompact(r, ctx, req)
+		defer result.Close()
+		if err != nil {
+			return nil
+		}
+		// opening the strea
+		reply.Columns = result.Columns
+		// too late to err in http here, need another solution
+		reply.MaxRows, err = result.ForEach(func(row rets.Row, err error) error {
+			reply.Rows = append(reply.Rows, row)
+			return err
+		})
 		return err
 	})
-	return err
 }
