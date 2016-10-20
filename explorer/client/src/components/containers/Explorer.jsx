@@ -2,6 +2,10 @@ import React from 'react';
 import MetadataService from 'services/MetadataService';
 import ReactDataGrid from 'react-data-grid';
 
+const ReactDataGridPlugins = require('react-data-grid/addons');
+
+const Toolbar = ReactDataGridPlugins.Toolbar;
+
 export default class Explorer extends React.Component {
 
   static propTypes = {
@@ -23,6 +27,7 @@ export default class Explorer extends React.Component {
       selectedClass: null,
       defaultRows: [],
       selectedClassRows: [],
+      filters: {},
     };
     this.handleGridSort = this.handleGridSort.bind(this);
   }
@@ -41,6 +46,11 @@ export default class Explorer extends React.Component {
         metadata: Explorer.emptyMetadata,
       });
     }
+  }
+
+  onClearFilters = () => {
+    // all filters removed
+    this.setState({ filters: {} });
   }
 
   getMetadata(connectionId) {
@@ -69,30 +79,52 @@ export default class Explorer extends React.Component {
 
   handleGridSort(sortColumn, sortDirection) {
     const comparer = (a, b) => {
+      const aVal = a[sortColumn] ? String(a[sortColumn]).toLowerCase() : '';
+      const bVal = b[sortColumn] ? String(b[sortColumn]).toLowerCase() : '';
       if (sortDirection === 'ASC') {
-        if (a[sortColumn] && b[sortColumn] && typeof a[sortColumn] === 'string') {
-          return (a[sortColumn].toLowerCase() > b[sortColumn].toLowerCase()) ? 1 : -1;
-        }
-        return (a[sortColumn] > b[sortColumn]) ? 1 : -1;
+        return (aVal > bVal) ? 1 : -1;
       } else if (sortDirection === 'DESC') {
-        if (a[sortColumn] && b[sortColumn] && typeof a[sortColumn] === 'string') {
-          return (a[sortColumn].toLowerCase() < b[sortColumn].toLowerCase()) ? 1 : -1;
-        }
-        return (a[sortColumn] < b[sortColumn]) ? 1 : -1;
+        return (aVal < bVal) ? 1 : -1;
       }
       return null;
     };
     const rows = sortDirection === 'NONE'
-      ? this.state.defaultRows
+      ? this.state.selectedClassRows
       : this.state.selectedClassRows.sort(comparer);
     this.setState({ selectedClassRows: rows });
   }
 
+  handleFilterChange = (filter) => {
+    const newFilters = Object.assign({}, this.state.filters);
+    if (filter.filterTerm) {
+      newFilters[filter.column.key] = filter;
+    } else {
+      delete newFilters[filter.column.key];
+    }
+    this.setState({ filters: newFilters });
+    const rows = this.state.defaultRows;
+    const newRows = [...rows];
+    Object.keys(newFilters).forEach(newFilter => {
+      const filterObj = newFilters[newFilter];
+      if (filterObj.filterTerm) {
+        for (let i = rows.length - 1; i >= 0; i--) {
+          const row = rows[i];
+          const val = row[filterObj.column.key] || '';
+          const stringVal = String(val);
+          if (stringVal.indexOf(filterObj.filterTerm) === -1) {
+            newRows.splice(i, 1);
+          }
+        }
+      }
+    });
+    this.setState({ selectedClassRows: newRows });
+  }
+
   render() {
-    const { selectedClass } = this.state;
+    const { selectedClassRows } = this.state;
     let tableBody;
-    if (selectedClass) {
-      const fields = selectedClass['METADATA-TABLE'].Field;
+    if (selectedClassRows) {
+      const fields = selectedClassRows;
       const availableFields = [];
       fields.forEach(field => {
         Object.keys(field).forEach(key => {
@@ -109,6 +141,7 @@ export default class Explorer extends React.Component {
           resizable: true,
           width: 200,
           sortable: true,
+          filterable: true,
         }))
         : [];
 
@@ -122,6 +155,9 @@ export default class Explorer extends React.Component {
             rowGetter={rowGetter}
             rowsCount={fields.length}
             minHeight={500}
+            toolbar={<Toolbar enableFilter />}
+            onAddFilter={this.handleFilterChange}
+            onClearFilters={this.onClearFilters}
           />
         </div>
       );
