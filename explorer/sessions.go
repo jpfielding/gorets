@@ -28,6 +28,8 @@ type Session struct {
 	Connection Connection
 	// Requester is user state
 	transport *http.Transport
+	requester rets.Requester
+	urls      rets.CapabilityURLs
 }
 
 // Wirelog path
@@ -40,8 +42,8 @@ func (c *Session) MSystem() string {
 	return fmt.Sprintf("/tmp/gorets/%s/metadata.json", c.Connection.ID)
 }
 
-// session ...
-func (c *Session) session() (rets.Requester, error) {
+// create ...
+func (c *Session) create() (rets.Requester, error) {
 	if c.transport == nil {
 		// start with the default Dialer from http.DefaultTransport
 		transport := wirelog.NewHTTPTransport()
@@ -78,12 +80,16 @@ func (c *Session) Close() error {
 }
 
 // Exec ...
-func (c *Session) Exec(ctx context.Context, op func(rets.Requester, rets.CapabilityURLs, error) error) error {
-	r, err := c.session()
-	if err != nil {
-		return err
+func (c *Session) Exec(ctx context.Context, op func(rets.Requester, rets.CapabilityURLs) error) error {
+	if c.requester == nil {
+		r, err := c.create()
+		urls, err := rets.Login(r, ctx, rets.LoginRequest{URL: c.Connection.URL})
+		if err != nil {
+			return err
+		}
+		c.requester = r
+		c.urls = *urls
+		// defer rets.Logout(r, ctx, rets.LogoutRequest{URL: urls.Logout})
 	}
-	urls, err := rets.Login(r, ctx, rets.LoginRequest{URL: c.Connection.URL})
-	defer rets.Logout(r, ctx, rets.LogoutRequest{URL: urls.Logout})
-	return op(r, *urls, err)
+	return op(c.requester, c.urls)
 }

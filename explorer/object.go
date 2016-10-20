@@ -47,7 +47,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 
 	s := sessions.Open(args.ID)
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs, err error) error {
+	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		// warning, this does _all_ of the photos
 		response, err := rets.GetObjects(r, ctx, rets.GetObjectRequest{
 			URL:      u.GetObject,
