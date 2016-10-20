@@ -93,8 +93,17 @@ export default class Explorer extends React.Component {
     let tableBody;
     if (selectedClass) {
       const fields = selectedClass['METADATA-TABLE'].Field;
+      const availableFields = [];
+      fields.forEach(field => {
+        Object.keys(field).forEach(key => {
+          if (availableFields.includes(key)) {
+            return;
+          }
+          availableFields.push(key);
+        });
+      });
       const fieldSet = (fields && fields.length > 0)
-        ? Object.keys(fields[0]).map((name) => ({
+        ? availableFields.map((name) => ({
           key: name,
           name,
           resizable: true,
