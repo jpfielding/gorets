@@ -1,15 +1,19 @@
 import React from 'react';
 import MetadataService from 'services/MetadataService';
+import { Fieldset, Field, createValue } from 'react-forms';
+import { withRouter } from 'react-router';
 import ReactDataGrid from 'react-data-grid';
 
 const ReactDataGridPlugins = require('react-data-grid/addons');
 
 const Toolbar = ReactDataGridPlugins.Toolbar;
 
-export default class Explorer extends React.Component {
+class Explorer extends React.Component {
 
   static propTypes = {
     params: React.PropTypes.any,
+    location: React.PropTypes.any,
+    router: React.PropTypes.any,
     connection: React.PropTypes.any,
     setSelectedConnection: React.PropTypes.func.isRequired,
   }
@@ -28,14 +32,22 @@ export default class Explorer extends React.Component {
 
   constructor(props) {
     super(props);
+    const searchForm = createValue({
+      value: null,
+      onChange: this.searchInputsChange.bind(this),
+    });
     this.state = {
       metadata: Explorer.emptyMetadata,
       selectedClass: null,
       defaultRows: [],
       selectedClassRows: [],
+      selectedFieldSet: [],
       filters: {},
+      searchForm,
     };
     this.handleGridSort = this.handleGridSort.bind(this);
+    this.onCellSelected = this.onCellSelected.bind(this);
+    this.submitSearchForm = this.submitSearchForm.bind(this);
   }
 
   componentDidMount() {
@@ -56,8 +68,23 @@ export default class Explorer extends React.Component {
   }
 
   onClearFilters = () => {
-    // all filters removed
     this.setState({ filters: {} });
+  }
+
+  onCellSelected(coordinates) {
+    const row = this.state.selectedClassRows[coordinates.rowIdx];
+    const selectedKey = 'SystemName';
+    const selectedVal = row[selectedKey];
+    const { searchForm } = this.state;
+    if (searchForm.value === null) {
+      searchForm.value = {};
+    }
+    let currentSearchVal = searchForm.value['columns'] || '';
+    if (currentSearchVal !== '') {
+      currentSearchVal = `${currentSearchVal},`;
+    }
+    searchForm.value['columns'] = `${currentSearchVal}${selectedVal}`;
+    this.setState({ searchForm });
   }
 
   getMetadata(connectionId) {
@@ -80,11 +107,27 @@ export default class Explorer extends React.Component {
       });
   }
 
+  searchInputsChange(searchForm) {
+    this.setState({ searchForm });
+  }
+
   metadataClassClick(selectedClass) {
+    const defaultRows = selectedClass['METADATA-TABLE'].Field;
+    const selectedClassRows = selectedClass['METADATA-TABLE'].Field;
+    const selectedFieldSet = [];
+    defaultRows.forEach(field => {
+      Object.keys(field).forEach(key => {
+        if (selectedFieldSet.includes(key)) {
+          return;
+        }
+        selectedFieldSet.push(key);
+      });
+    });
     this.setState({
       selectedClass,
-      defaultRows: selectedClass['METADATA-TABLE'].Field,
-      selectedClassRows: selectedClass['METADATA-TABLE'].Field,
+      defaultRows,
+      selectedClassRows,
+      selectedFieldSet,
     });
   }
 
@@ -133,8 +176,15 @@ export default class Explorer extends React.Component {
     }
   }
 
+  submitSearchForm() {
+    this.props.router.push({
+      ...this.props.location,
+      pathname: '/search',
+      query: Object.assign({}, this.state.searchForm.value),
+    });
+  }
+
   renderSelectedClassDescription(clazz) {
-    console.log(clazz);
     return (
       <span>
         {clazz.ClassName} - <span className="f6 moon-gray">{clazz.Description}</span>
@@ -146,17 +196,8 @@ export default class Explorer extends React.Component {
     const { selectedClassRows, selectedClass } = this.state;
     let tableBody;
     if (selectedClassRows) {
-      const fields = selectedClassRows;
-      const availableFields = [];
-      fields.forEach(field => {
-        Object.keys(field).forEach(key => {
-          if (availableFields.includes(key)) {
-            return;
-          }
-          availableFields.push(key);
-        });
-      });
-      const fieldSet = (fields && fields.length > 0)
+      const availableFields = this.state.selectedFieldSet;
+      const fieldSet = (selectedClassRows && selectedClassRows.length > 0)
         ? availableFields.map((name) => ({
           key: name,
           name,
@@ -166,9 +207,7 @@ export default class Explorer extends React.Component {
           filterable: true,
         }))
         : [];
-
-      const rowGetter = (i) => fields[i];
-
+      const rowGetter = (i) => selectedClassRows[i];
       tableBody = (
         <div>
           {selectedClass
@@ -184,11 +223,12 @@ export default class Explorer extends React.Component {
             onGridSort={this.handleGridSort}
             columns={fieldSet}
             rowGetter={rowGetter}
-            rowsCount={fields.length}
+            rowsCount={selectedClassRows.length}
             minHeight={500}
             toolbar={<Toolbar enableFilter />}
             onAddFilter={this.handleFilterChange}
             onClearFilters={this.onClearFilters}
+            onCellSelected={this.onCellSelected}
           />
         </div>
       );
@@ -221,8 +261,11 @@ export default class Explorer extends React.Component {
             ? (
               <div>
                 { tableBody }
-                <input type="text" onChange={this.setSearchText} placeholder="Columns" />
-                <input type="text" onChange={this.setSearchText} placeholder="Query" />
+                <Fieldset formValue={this.state.searchForm}>
+                  <Field select="columns" label="Columns" />
+                  <Field select="query" label="Query" />
+                  <button onClick={this.submitSearchForm}>Submit</button>
+                </Fieldset>
               </div>
             )
             : <h1 className="f4">Please select a class to explore</h1>
@@ -232,3 +275,5 @@ export default class Explorer extends React.Component {
     );
   }
 }
+
+export default withRouter(Explorer);

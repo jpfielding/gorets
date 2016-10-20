@@ -66,12 +66,12 @@ export default class App extends React.Component {
 
   render() {
     let { children } = this.props;
-    if (children.props.connection) {
-      children = React.cloneElement(children, {
-        connection: this.state.selectedConnection,
-        setSelectedConnection: this.setSelectedConnection,
-      });
-    }
+    // if (children.props.connection) {
+    children = React.cloneElement(children, {
+      connection: this.state.selectedConnection,
+      setSelectedConnection: this.setSelectedConnection,
+    });
+    // }
     return (
       <div className="helvetica">
         <nav className="pa3 bg-dark-blue">
