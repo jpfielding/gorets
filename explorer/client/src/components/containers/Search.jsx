@@ -3,6 +3,7 @@ import MetadataService from 'services/MetadataService';
 import StorageCache from 'util/StorageCache';
 import { withRouter } from 'react-router';
 import some from 'lodash/some';
+import ReactDataGrid from 'react-data-grid';
 
 class Search extends React.Component {
 
@@ -22,7 +23,7 @@ class Search extends React.Component {
         query: null,
       },
       searchHistory: StorageCache.getFromCache() || [],
-      searchResults: [],
+      searchResults: {},
     };
     this.search = this.search.bind(this);
   }
@@ -55,6 +56,26 @@ class Search extends React.Component {
       });
   }
 
+  renderSearchResultsTable() {
+    const { searchResults } = this.state;
+    if (!searchResults.result) {
+      return null;
+    }
+    const rowGetter = (i) => searchResults.result.rows[i];
+    const columns = searchResults.result.columns.map((column, index) => ({
+      key: index,
+      name: column,
+      resizable: true,
+    }));
+    return (
+      <ReactDataGrid
+        columns={columns}
+        rowGetter={rowGetter}
+        rowsCount={searchResults.result.rows.length}
+      />
+    );
+  }
+
   render() {
     return (
       <div>
@@ -76,9 +97,10 @@ class Search extends React.Component {
           </ul>
         </div>
         <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
-          <div>Search parameters:
+          {this.renderSearchResultsTable()}
+          {/* <div>Search parameters:
             <pre className="f6 code">{JSON.stringify(this.state, null, '  ')}</pre>
-          </div>
+          </div> */}
         </div>
       </div>
     );
