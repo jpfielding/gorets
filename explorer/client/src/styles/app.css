@@ -39,3 +39,10 @@ body {
 .metadata-class-name {
 
 }
+
+a {
+  outline: 0 !important;
+  &:active, &:active, &:focus {
+    outline: 0 !important;
+  }
+}

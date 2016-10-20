@@ -8,16 +8,18 @@ export default class Explorer extends React.Component {
     params: React.PropTypes.any,
   }
 
+  static emptyMetadata = {
+    System: {
+      'METADATA-RESOURCE': {
+        Resource: [],
+      },
+    },
+  };
+
   constructor(props) {
     super(props);
     this.state = {
-      metadata: {
-        System: {
-          'METADATA-RESOURCE': {
-            Resource: [],
-          },
-        },
-      },
+      metadata: Explorer.emptyMetadata,
       selectedClass: null,
     };
   }
@@ -31,10 +33,17 @@ export default class Explorer extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.params !== this.props.params && nextProps.params.connection) {
       this.getMetadata(nextProps.params.connection);
+    } else {
+      this.setState({
+        metadata: Explorer.emptyMetadata,
+      });
     }
   }
 
   getMetadata(connectionId) {
+    this.setState({
+      selectedClass: null,
+    });
     MetadataService
       .get(connectionId)
       .then(response => response.json())
@@ -103,9 +112,9 @@ export default class Explorer extends React.Component {
           </ul>
         </div>
         <div className="fl h-100 min-vh-100 w-100 w-70-ns pa3 bl-ns">
-          <div className="f4">Table Continer</div>
-          {tableBody}
-          <pre className="overflow-x-scroll">{JSON.stringify(this.state.selectedClass, null, '  ')}</pre>
+          {
+            tableBody || <h1 className="f4">Please select a class to explore</h1>
+          }
         </div>
       </div>
     );

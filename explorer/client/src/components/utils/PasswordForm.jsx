@@ -1,5 +1,5 @@
 import React from 'react';
-import { withFormValue } from 'react-forms';
+import { WithFormValue } from 'react-forms';
 
 /* eslint-disable jsx-a11y/label-has-for */
 class Field extends React.Component {
@@ -18,4 +18,5 @@ class Field extends React.Component {
   }
 }
 
-export default withFormValue(Field);
+/* eslint-disable */
+export default WithFormValue(Field);

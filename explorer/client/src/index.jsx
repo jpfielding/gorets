@@ -14,8 +14,9 @@ ReactDOM.render((
     <Route path="/" component={App}>
       <IndexRoute component={Home} />
       <Route path="connections" component={Connections} />
-      <Route path="explorer" component={Explorer} />
-      <Route path="explorer/:connection" component={Explorer} />
+      <Route path="explorer" component={Explorer}>
+        <Route path=":connection" component={Explorer} />
+      </Route>
       <Route path="*" component={NotFound} />
     </Route>
   </Router>

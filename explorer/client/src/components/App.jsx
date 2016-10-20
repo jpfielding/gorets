@@ -22,14 +22,35 @@ export default class App extends React.Component {
     return (
       <div className="helvetica">
         <nav className="pa3 bg-dark-blue">
-          <Link to="/" title="Home" className="link fw2 moon-gray b f4 dib mr3">RETS Explorer</Link>
-          <Link to="/connections" title="Connections" className="link moon-gray f6 dib mr3">Connections</Link>
-          <Link to="/explorer" title="Explorer" className="link moon-gray f6 dib mr3">Explorer</Link>
+          <Link
+            to="/"
+            title="Home"
+            activeStyle={{ color: 'white' }}
+            className="link fw2 moon-gray b f4 dib mr3"
+          >
+            RETS Explorer
+          </Link>
+          <Link
+            to="/connections"
+            title="Connections"
+            activeStyle={{ color: 'white' }}
+            className="link moon-gray f6 dib mr3"
+          >
+            Connections
+          </Link>
+          <Link
+            to="/explorer"
+            title="Explorer"
+            activeStyle={{ color: 'white' }}
+            className="link moon-gray f6 dib mr3"
+          >
+            Explorer
+          </Link>
         </nav>
-        <div className="pv2 pl3 bb">
-          <span>Connections: </span>
+        <div className="pv2 pl3 bb v-mid flex flex-row align-center">
+          <span className="f6 mr3">Connections: </span>
           {this.state.connections.map(connection =>
-            <Link to={`/explorer/${connection.id}`} title={connection.id} className="link f6 dib mr3">
+            <Link to={`/explorer/${connection.id}`} title={connection.id} className="link f6 dib mr2">
               {connection.id}
             </Link>
           )}
