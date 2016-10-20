@@ -12,9 +12,18 @@ class Search extends React.Component {
     router: React.PropTypes.any,
   }
 
+  static emptyMetadata = {
+    System: {
+      'METADATA-RESOURCE': {
+        Resource: [],
+      },
+    },
+  };
+
   constructor(props) {
     super(props);
     this.state = {
+      metadata: Search.emptyMetadata,
       searchParams: {
         id: null,
         resource: null,
@@ -54,6 +63,53 @@ class Search extends React.Component {
           searchHistory,
         });
       });
+    MetadataService
+      .get(searchParams.id)
+      .then(response => response.json())
+      .then(json => {
+        if (json.error !== null) {
+          this.setState({ metadata: Search.emptyMetadata });
+          return;
+        }
+        console.log(json.result.Metadata);
+        this.setState({
+          metadata: json.result.Metadata,
+        });
+      });
+  }
+
+  renderObjectMetadata() {
+    const resources = this.state.metadata.System['METADATA-RESOURCE'].Resource || [];
+    let selectedResource;
+    resources.forEach(resource => {
+      if (resource.ResourceID === this.state.searchParams.class) {
+        selectedResource = resource;
+      }
+    });
+    if (!selectedResource) {
+      return null;
+    }
+    const keyField = selectedResource.KeyField;
+    const metadataObjects = selectedResource['METADATA-OBJECT']['Object'];
+    if (metadataObjects.length === 0) {
+      return null;
+    }
+    const columns = [{
+      key: 'ObjectType',
+      name: keyField,
+    }];
+    const rowGetter = (i) => metadataObjects[i];
+    return (
+      <div>
+        <ReactDataGrid
+          columns={columns}
+          rowGetter={rowGetter}
+          rowsCount={metadataObjects.length}
+          minHeight={200}
+        />
+        {/* <pre className="f6 code">{JSON.stringify({ keyField, metadataObjects }, null, '  ')}</pre> */}
+      </div>
+    );
   }
 
   renderSearchResultsTable() {
@@ -97,7 +153,12 @@ class Search extends React.Component {
           </ul>
         </div>
         <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
-          {this.renderSearchResultsTable()}
+          <div>
+            <div className="b mb2">Search Results</div>
+            {this.renderSearchResultsTable()}
+            <div className="b mv2">Object Metadata Types</div>
+            {this.renderObjectMetadata()}
+          </div>
           {/* <div>Search parameters:
             <pre className="f6 code">{JSON.stringify(this.state, null, '  ')}</pre>
           </div> */}

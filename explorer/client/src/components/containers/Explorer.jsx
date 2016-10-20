@@ -103,6 +103,7 @@ class Explorer extends React.Component {
           this.setState({ metadata: Explorer.emptyMetadata });
           return;
         }
+        console.log(json.result.Metadata);
         this.setState({
           metadata: json.result.Metadata,
         });
