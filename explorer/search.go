@@ -10,12 +10,7 @@ import (
 
 // SearchArgs ...
 type SearchArgs struct {
-	ID     string       `json:"id"`
-	Params SearchParams `json:"params"`
-}
-
-// SearchParams ...
-type SearchParams struct {
+	ID        string `json:"id"`
 	Resource  string `json:"resource"`
 	Class     string `json:"class"`
 	Format    string `json:"format"`
@@ -40,11 +35,11 @@ type SearchService struct{}
 // Run ....
 func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage) error {
 	fmt.Printf("search run params: %v\n", args)
-	if args.Params.QueryType == "" {
-		args.Params.QueryType = "DQML2"
+	if args.QueryType == "" {
+		args.QueryType = "DQML2"
 	}
-	if args.Params.Format == "" {
-		args.Params.Format = "COMPACT_DECODED"
+	if args.Format == "" {
+		args.Format = "COMPACT_DECODED"
 	}
 	s := sessions.Open(args.ID)
 	fmt.Printf("%v\n", s.Connection)
@@ -53,15 +48,15 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 		req := rets.SearchRequest{
 			URL: u.Search,
 			SearchParams: rets.SearchParams{
-				Select:     args.Params.Select,
-				Query:      args.Params.Query,
-				SearchType: args.Params.Resource,
-				Class:      args.Params.Class,
-				Format:     args.Params.Format,
-				QueryType:  args.Params.QueryType,
-				Count:      args.Params.CountType,
-				Limit:      args.Params.Limit,
-				Offset:     args.Params.Offset,
+				Select:     args.Select,
+				Query:      args.Query,
+				SearchType: args.Resource,
+				Class:      args.Class,
+				Format:     args.Format,
+				QueryType:  args.QueryType,
+				Count:      args.CountType,
+				Limit:      args.Limit,
+				Offset:     args.Offset,
 			},
 		}
 		fmt.Printf("Querying : %v\n", req)
