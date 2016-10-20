@@ -98,6 +98,14 @@ export default class App extends React.Component {
           >
             Explorer
           </Link>
+          <Link
+            to="/search"
+            title="Search"
+            activeStyle={{ color: 'white' }}
+            className="link red f6 dib mr3"
+          >
+            Search
+          </Link>
         </nav>
         <div className="pv2 pl3 bb v-mid flex flex-row align-center overflow-x-scroll">
           <span className="f6 mr3">Active Connection:

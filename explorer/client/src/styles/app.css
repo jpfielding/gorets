@@ -20,6 +20,7 @@ body {
 }
 
 .no-list-style {
+  list-style-type: none;
   & ul {
     list-style-type: none;
     & li {
