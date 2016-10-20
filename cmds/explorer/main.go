@@ -24,8 +24,8 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir(*react)))
 
 	// TODO remove when migrated over
-	http.HandleFunc("/api/login", cors(explorer.Connect()))
-	http.HandleFunc("/api/metadata", cors(explorer.Metadata()))
+	http.HandleFunc("/api/login", custom(explorer.Connect()))
+	http.HandleFunc("/api/metadata", custom(explorer.Metadata()))
 
 	// gorilla rpc
 	s := rpc.NewServer()
@@ -36,20 +36,21 @@ func main() {
 	s.RegisterService(new(explorer.ObjectService), "")
 
 	cors := handlers.CORS(
-		handlers.AllowedMethods([]string{"POST", "GET", "OPTIONS", "PUT", "DELETE"}),
-		handlers.ExposedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
-		handlers.AllowedOriginValidator(func(origin string) bool {
-			return true
-		}),
+		handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "HEAD"}),
+		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
+		// handlers.AllowedOriginValidator(func(origin string) bool {
+		// 	return true
+		// }),
 	)
-	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
-
+	http.Handle("/rpc", cors(s))
+	// http.Handle("/rpc", cors(s))
+	// http.Handle("/rpc", handlers.CompressHandler(cors(s)))
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
 
 // TODO kill this when custom handlers go away
-func cors(wrapped func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+func custom(wrapped http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if origin := r.Header.Get("Origin"); origin != "" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
@@ -60,6 +61,6 @@ func cors(wrapped func(http.ResponseWriter, *http.Request)) func(http.ResponseWr
 		if r.Method == "OPTIONS" {
 			return
 		}
-		wrapped(w, r)
+		wrapped.ServeHTTP(w, r)
 	}
 }
