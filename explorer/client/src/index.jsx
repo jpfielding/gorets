@@ -5,6 +5,7 @@ import App from 'components/App';
 import Home from 'components/containers/Home';
 import Connections from 'components/containers/Connections';
 import Explorer from 'components/containers/Explorer';
+import Search from 'components/containers/Search';
 import NotFound from 'components/containers/NotFound';
 
 import 'styles/app.css';
@@ -17,6 +18,7 @@ ReactDOM.render((
       <Route path="explorer" component={Explorer}>
         <Route path=":connection" component={Explorer} />
       </Route>
+      <Route path="search" component={Search} />
       <Route path="*" component={NotFound} />
     </Route>
   </Router>
