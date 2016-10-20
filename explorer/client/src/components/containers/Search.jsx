@@ -1,12 +1,14 @@
 import React from 'react';
 import MetadataService from 'services/MetadataService';
 import StorageCache from 'util/StorageCache';
+import { withRouter } from 'react-router';
 import some from 'lodash/some';
 
-export default class Search extends React.Component {
+class Search extends React.Component {
 
   static propTypes = {
     location: React.PropTypes.any,
+    router: React.PropTypes.any,
   }
 
   constructor(props) {
@@ -22,10 +24,18 @@ export default class Search extends React.Component {
       searchHistory: StorageCache.getFromCache() || [],
       searchResults: [],
     };
+    this.search = this.search.bind(this);
   }
 
   componentWillMount() {
-    const searchParams = this.props.location.query;
+    this.search(this.props.location.query);
+  }
+
+  search(searchParams) {
+    this.props.router.push({
+      ...this.props.location,
+      query: searchParams,
+    });
     this.setState({
       searchParams,
     });
@@ -53,9 +63,14 @@ export default class Search extends React.Component {
           <pre className="f6 code">{JSON.stringify(this.state.searchParams, null, '  ')}</pre>
           <div className="b">Search History</div>
           <ul className="pa0 ma0 no-list-style">
-            {this.state.searchHistory.map(search =>
+            {this.state.searchHistory.map(params =>
               <li>
-                <pre className="f6 code">{JSON.stringify(search, null, '  ')}</pre>
+                <pre
+                  className="f6 code clickable"
+                  onClick={() => this.search(params)}
+                >
+                  { JSON.stringify(params, null, '  ') }
+                </pre>
               </li>
             )}
           </ul>
@@ -70,3 +85,5 @@ export default class Search extends React.Component {
   }
 
 }
+
+export default withRouter(Search);
