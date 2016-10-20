@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
+import ConnectionService from 'services/ConnectionService';
 
 export default class App extends React.Component {
 
@@ -16,6 +17,15 @@ export default class App extends React.Component {
         id: 'test',
       }],
     };
+  }
+
+  componentDidMount() {
+    ConnectionService
+      .getConnectionList()
+      .then(res => res.json())
+      .then((json) => {
+        console.log('Connection List: ', json);
+      });
   }
 
   render() {
