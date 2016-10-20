@@ -8,26 +8,40 @@ import (
 	"github.com/jpfielding/gorets/rets"
 )
 
-var connections map[string]Connection
+// TODO review GLOBAL state even though its a 'resource'
+var connections = Connections{}.Load()
 
-// ConnectionService ...
-type ConnectionService struct {
-}
+// Connections ...
+type Connections map[string]Connection
 
 // Load ...
-func (cs *ConnectionService) Load() map[string]Connection {
-	if connections == nil {
+func (cs Connections) Load() Connections {
+	if len(cs) == 0 {
 		fmt.Println("loading connections")
-		connections = make(map[string]Connection)
-		JSONLoad("/tmp/gorets/connections.json", &connections)
+		JSONLoad("/tmp/gorets/connections.json", &cs)
 	}
-	return connections
+	fmt.Printf("found %d connections\n", len(cs))
+	return cs
 }
 
 // Stash ..
-func (cs *ConnectionService) Stash() {
-	JSONStore("/tmp/gorets/connections.json", &connections)
+func (cs Connections) Stash() {
+	JSONStore("/tmp/gorets/connections.json", cs)
 }
+
+// Connection ...
+type Connection struct {
+	ID          string `json:"id"`
+	URL         string `json:"url"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	UserAgent   string `json:"user-agent"`
+	UserAgentPw string `json:"user-agent-pw"`
+	Version     string `json:"rets-version"`
+}
+
+// ConnectionService ...
+type ConnectionService struct{}
 
 // ConnectionList ...
 type ConnectionList struct {
@@ -41,11 +55,11 @@ type ConnectionListArgs struct {
 
 // List ....
 func (cs ConnectionService) List(r *http.Request, args *ConnectionListArgs, reply *ConnectionList) error {
-	for _, v := range cs.Load() {
+	for _, v := range connections {
 		// if we want to filter on active
 		if args.Active != nil {
 			// do they have matching state
-			if *args.Active != v.Active() {
+			if _, ok := sessions[v.ID]; *args.Active != ok {
 				continue
 			}
 		}
@@ -62,17 +76,20 @@ type DeleteConnectionArgs struct {
 
 // Delete ...
 func (cs ConnectionService) Delete(r *http.Request, args *DeleteConnectionArgs, reply *struct{}) error {
-	if c, ok := cs.Load()[args.ID]; ok {
-		if c.Active() && args.Logout {
+	delete(connections, args.ID)
+	connections.Stash()
+	if session, ok := sessions[args.ID]; !ok {
+		if session.Active() && args.Logout {
 			ctx := context.Background()
-			sess, urls, err := c.Login(ctx)
+			sess, urls, err := session.Login(ctx)
 			if err != nil {
 				rets.Logout(sess, ctx, rets.LogoutRequest{URL: urls.Logout})
 			}
+			delete(sessions, args.ID)
 		}
+		return nil
 	}
-	delete(connections, args.ID)
-	cs.Stash()
+
 	return nil
 }
 
@@ -91,17 +108,17 @@ type AddConnectionReply struct {
 
 // Add ....
 func (cs ConnectionService) Add(r *http.Request, args *AddConnectionArgs, reply *AddConnectionReply) error {
+	session := Session{Connection: args.Connection}
 	if args.Test {
 		ctx := context.Background()
-		if _, _, err := args.Connection.Login(ctx); err != nil {
+		if _, _, err := session.Login(ctx); err != nil {
 			return err
 		}
 		reply.Tested = true
 	}
-	cs.Load()
 	connections[args.Connection.ID] = args.Connection
-	cs.Stash()
-	reply.Active = args.Connection.Active()
+	connections.Stash()
+	reply.Active = session.Active()
 	reply.ID = args.Connection.ID
 	return nil
 }

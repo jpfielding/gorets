@@ -21,5 +21,5 @@ import:
     ref:     0e597359079aff7eb6e1df1bb0a73d1c68d6ee63
   - package: github.com/gorilla/rpc
   - package: github.com/gorilla/handlers
-
+  - package: github.com/gorilla/sessions
 

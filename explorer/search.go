@@ -46,9 +46,10 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 	if args.Params.Format == "" {
 		args.Params.Format = "COMPACT_DECODED"
 	}
-	c := (&ConnectionService{}).Load()[args.ID]
+	s := sessions.Open(args.ID)
+	fmt.Printf("%v\n", s.Connection)
 	ctx := context.Background()
-	sess, urls, err := c.Login(ctx)
+	sess, urls, err := s.Login(ctx)
 	req := rets.SearchRequest{
 		URL: urls.Search,
 		SearchParams: rets.SearchParams{

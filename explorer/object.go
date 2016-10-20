@@ -45,9 +45,9 @@ type ObjectService struct{}
 func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects) error {
 	fmt.Printf("object get params: %v\n", args)
 
-	c := (&ConnectionService{}).Load()[args.ID]
+	s := sessions.Open(args.ID)
 	ctx := context.Background()
-	sess, urls, err := c.Login(ctx)
+	sess, urls, err := s.Login(ctx)
 	if err != nil {
 		return err
 	}
