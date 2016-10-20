@@ -27,6 +27,7 @@ type SearchPage struct {
 	Columns rets.Row   `json:"columns"`
 	Rows    []rets.Row `json:"rows"`
 	MaxRows bool       `json:"maxrows"`
+	Count   int        `json:"count"`
 }
 
 // SearchService ...
@@ -72,6 +73,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 			reply.Rows = append(reply.Rows, row)
 			return err
 		})
+		reply.Count = result.Count
 		return err
 	})
 }
