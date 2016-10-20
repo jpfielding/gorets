@@ -59,14 +59,14 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		reply.Metadata = standard
 		return nil
 	}
+	// lookup the operation for pulling metadata
+	if args.Extraction == "" {
+		args.Extraction = "COMPACT"
+	}
 	op, ok := options[args.Extraction]
 	if !ok {
 		return fmt.Errorf("%s not supported", args.Extraction)
 	}
-	if args.Extraction == "" {
-		args.Extraction = "COMPACT"
-	}
-	// lookup the operation for pulling metadata
 	ctx := context.Background()
 	sess, urls, err := c.Login(ctx)
 	if err != nil {
@@ -77,6 +77,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		return err
 	}
 	reply.Metadata = *standard
+	// TODO bg this
 	JSONStore(c.MSystem(), &standard)
 	return nil
 }
