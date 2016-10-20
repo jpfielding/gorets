@@ -31,7 +31,7 @@ func main() {
 	http.HandleFunc("/api/search", explorer.Gzip(cors.Wrap(explorer.Search())))
 	http.HandleFunc("/api/object", explorer.Gzip(cors.Wrap(explorer.GetObject())))
 
-	// newer gorilla rpc
+	// gorilla rpc
 	s := rpc.NewServer()
 	s.RegisterCodec(json.NewCodec(), "application/json")
 	s.RegisterService(new(explorer.ConnectionService), "")

@@ -27,6 +27,28 @@ type MetadataGetResponse struct {
 	Metadata metadata.MSystem
 }
 
+// MetadataHeadParams ...
+type MetadataHeadParams struct {
+	ID string `json:"id"`
+}
+
+// Head ....
+func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply *MetadataGetResponse) error {
+	fmt.Printf("params: %v\n", args)
+	c := ConnectionService{}.Load()[args.ID]
+	ctx := context.Background()
+	rqr, err := c.Login(ctx)
+	if err != nil {
+		return err
+	}
+	head, err := head(rqr, ctx, c.URLs.GetMetadata)
+	if err != nil {
+		return err
+	}
+	reply.Metadata = *head
+	return nil
+}
+
 // Get ....
 func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataGetResponse) error {
 	fmt.Printf("params: %v\n", args)
@@ -111,15 +133,15 @@ type MetadataRequestType func(requester rets.Requester, ctx context.Context, url
 
 // options for extracting metadata
 var options = map[string]MetadataRequestType{
-	"STANDARD-XML":        getStandardMetadata,
-	"COMPACT":             getCompactMetadata,
-	"COMPACT-INCREMENTAL": getCompactIncremental,
+	"STANDARD-XML":        fullViaStandard,
+	"COMPACT":             fullViaCompact,
+	"COMPACT-INCREMENTAL": fullViaCompactIncremental,
 }
 
 // TODO extract a common func and switch on the incoming param
 
-// getCompactIncremental retrieve the RETS Compact metadata from the server
-func getCompactIncremental(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
+// fullViaCompactIncremental retrieve the RETS Compact metadata from the server
+func fullViaCompactIncremental(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
 	compact := &retsutil.IncrementalCompact{}
 	err := compact.Load(requester, ctx, url)
 	if err != nil {
@@ -128,8 +150,8 @@ func getCompactIncremental(requester rets.Requester, ctx context.Context, url st
 	return retsutil.AsStandard(*compact).Convert()
 }
 
-// getCompactMetadata retrieve the RETS Compact metadata from the server
-func getCompactMetadata(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
+// fullViaCompact retrieve the RETS Compact metadata from the server
+func fullViaCompact(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
 	reader, err := rets.MetadataStream(requester, ctx, rets.MetadataRequest{
 		URL:    url,
 		Format: "COMPACT",
@@ -147,13 +169,34 @@ func getCompactMetadata(requester rets.Requester, ctx context.Context, url strin
 	return retsutil.AsStandard(*compact).Convert()
 }
 
-// getStandardMetadata ...
-func getStandardMetadata(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
+// fullViaStandard ...
+func fullViaStandard(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
 	reader, err := rets.MetadataStream(requester, ctx, rets.MetadataRequest{
 		URL:    url,
 		Format: "STANDARD-XML",
 		MType:  "METADATA-SYSTEM",
 		ID:     "*",
+	})
+	defer reader.Close()
+	if err != nil {
+		return nil, err
+	}
+	parser := xml.NewDecoder(reader)
+	rets := metadata.RETSResponseWrapper{}
+	err = parser.Decode(&rets)
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+	return &rets.Metadata.MSystem, err
+}
+
+// head ...
+func head(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
+	reader, err := rets.MetadataStream(requester, ctx, rets.MetadataRequest{
+		URL:    url,
+		Format: "COMPACT",
+		MType:  "METADATA-SYSTEM",
+		ID:     "0",
 	})
 	defer reader.Close()
 	if err != nil {
