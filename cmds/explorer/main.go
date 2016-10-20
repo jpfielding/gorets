@@ -36,19 +36,3 @@ func main() {
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
-
-// TODO kill this when custom handlers go away
-func custom(wrapped http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if origin := r.Header.Get("Origin"); origin != "" {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-		}
-		// Stop here if its Preflighted OPTIONS request
-		if r.Method == "OPTIONS" {
-			return
-		}
-		wrapped.ServeHTTP(w, r)
-	}
-}
