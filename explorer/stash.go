@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,9 +10,11 @@ import (
 	"path"
 )
 
+// GZIP the output
+
 //JSONExist ...
 func JSONExist(filename string) bool {
-	_, err := os.Stat(filename)
+	_, err := os.Stat(filename + ".gz")
 	return !os.IsNotExist(err)
 }
 
@@ -27,24 +30,24 @@ func JSONStore(filename string, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	// TODO verify key order on output raw json  (alphabetical by design????)
-	row, err := json.Marshal(data)
+	raw, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 	// formatted
 	var out bytes.Buffer
-	json.Indent(&out, row, "", "\t")
-	_, err = out.WriteTo(f)
+	json.Indent(&out, raw, "", "\t")
+	z := gzip.NewWriter(f)
+	_, err = out.WriteTo(z)
 	if err != nil {
 		return err
 	}
-	err = f.Close()
+	err = z.Close()
 	if err != nil {
 		return err
 	}
-	err = os.Rename(f.Name(), filename)
+	f.Close()
+	err = os.Rename(f.Name(), filename+".gz")
 	if err != nil {
 		return err
 	}
@@ -54,12 +57,16 @@ func JSONStore(filename string, data interface{}) error {
 
 // JSONLoad raw file load
 func JSONLoad(filename string, data interface{}) error {
-	file, err := os.Open(filename)
+	file, err := os.Open(filename + ".gz")
 	defer file.Close()
 	if err != nil {
 		return err
 	}
-	blob, err := ioutil.ReadAll(file)
+	gz, err := gzip.NewReader(file)
+	if err != nil {
+		return err
+	}
+	blob, err := ioutil.ReadAll(gz)
 	err = json.Unmarshal(blob, data)
 	if err != nil {
 		return err
