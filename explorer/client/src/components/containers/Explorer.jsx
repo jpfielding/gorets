@@ -11,6 +11,7 @@ export default class Explorer extends React.Component {
   static propTypes = {
     params: React.PropTypes.any,
     connection: React.PropTypes.any,
+    setSelectedConnection: React.PropTypes.func.isRequired,
   }
 
   static defaultProps = {
@@ -45,6 +46,7 @@ export default class Explorer extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.params !== this.props.params && nextProps.params.connection) {
+      this.props.setSelectedConnection(nextProps.params.connection);
       this.getMetadata(nextProps.params.connection);
     } else {
       this.setState({
@@ -131,8 +133,16 @@ export default class Explorer extends React.Component {
     }
   }
 
+  renderSelectedClassDescription(clazz) {
+    return (
+      <div>
+        {clazz.ClassName} - <span className="f6 moon-gray">{clazz.Description}</span>
+      </div>
+    );
+  }
+
   render() {
-    const { selectedClassRows } = this.state;
+    const { selectedClassRows, selectedClass } = this.state;
     let tableBody;
     if (selectedClassRows) {
       const fields = selectedClassRows;
@@ -160,6 +170,10 @@ export default class Explorer extends React.Component {
 
       tableBody = (
         <div>
+          {selectedClass
+            ? this.renderSelectedClassDescription(selectedClass)
+            : null
+          }
           <ReactDataGrid
             onGridSort={this.handleGridSort}
             columns={fieldSet}
@@ -188,7 +202,7 @@ export default class Explorer extends React.Component {
                       onClick={() => this.metadataClassClick(mClass)}
                       className="clickable metadata-class-name"
                     >
-                      {mClass.ClassName}
+                      {this.renderSelectedClassDescription(mClass)}
                     </li>
                   )}
                 </ul>

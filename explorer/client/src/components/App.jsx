@@ -7,6 +7,7 @@ export default class App extends React.Component {
 
   static propTypes = {
     children: React.PropTypes.any,
+    params: React.PropTypes.any,
   }
 
   constructor(props) {
@@ -18,9 +19,15 @@ export default class App extends React.Component {
       connectionAutocompleteField: '',
     };
     this.establishConnection = this.establishConnection.bind(this);
+    this.setSelectedConnection = this.setSelectedConnection.bind(this);
   }
 
   componentDidMount() {
+    if (this.props.params.connection) {
+      this.setSelectedConnection({
+        id: this.props.params.connection,
+      });
+    }
     ConnectionService
       .getConnectionList()
       .then(res => res.json())
@@ -33,6 +40,14 @@ export default class App extends React.Component {
       .then((json) => {
         this.setState({ activeConnections: json.result.connections || [] });
       });
+  }
+
+  setSelectedConnection(connection) {
+    if (typeof connection === 'string') {
+      this.setState({ selectedConnection: { id: connection } });
+      return;
+    }
+    this.setState({ selectedConnection: connection });
   }
 
   establishConnection(connection) {
@@ -52,7 +67,10 @@ export default class App extends React.Component {
   render() {
     let { children } = this.props;
     if (children.props.connection) {
-      children = React.cloneElement(children, { connection: this.state.selectedConnection });
+      children = React.cloneElement(children, {
+        connection: this.state.selectedConnection,
+        setSelectedConnection: this.setSelectedConnection,
+      });
     }
     return (
       <div className="helvetica">
