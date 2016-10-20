@@ -79,11 +79,11 @@ class Explorer extends React.Component {
     if (searchForm.value === null) {
       searchForm.value = {};
     }
-    let currentSearchVal = searchForm.value['columns'] || '';
+    let currentSearchVal = searchForm.value['select'] || '';
     if (currentSearchVal !== '') {
       currentSearchVal = `${currentSearchVal},`;
     }
-    searchForm.value['columns'] = `${currentSearchVal}${selectedVal}`;
+    searchForm.value['select'] = `${currentSearchVal}${selectedVal}`;
     this.setState({ searchForm });
   }
 
@@ -180,7 +180,12 @@ class Explorer extends React.Component {
     this.props.router.push({
       ...this.props.location,
       pathname: '/search',
-      query: Object.assign({}, this.state.searchForm.value),
+      query: Object.assign({}, {
+        ...this.state.searchForm.value,
+        id: this.props.connection.id,
+        resource: this.state.selectedClass['METADATA-TABLE'].Resource,
+        class: this.state.selectedClass.ClassName,
+      }),
     });
   }
 
@@ -262,7 +267,7 @@ class Explorer extends React.Component {
               <div>
                 { tableBody }
                 <Fieldset formValue={this.state.searchForm}>
-                  <Field select="columns" label="Columns" />
+                  <Field select="select" label="Columns" />
                   <Field select="query" label="Query" />
                   <button onClick={this.submitSearchForm}>Submit</button>
                 </Fieldset>
