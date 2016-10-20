@@ -28,7 +28,7 @@ type MetadataHeadParams struct {
 
 // Head ....
 func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply *MetadataResponse) error {
-	fmt.Printf("params: %v\n", args)
+	fmt.Printf("metadat head params: %v\n", args)
 	c := (&ConnectionService{}).Load()[args.ID]
 	ctx := context.Background()
 	rqr, err := c.Login(ctx)
@@ -51,7 +51,7 @@ type MetadataGetParams struct {
 
 // Get ....
 func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataResponse) error {
-	fmt.Printf("params: %v\n", args)
+	fmt.Printf("metadata get params: %v\n", args)
 
 	c := (&ConnectionService{}).Load()[args.ID]
 	if JSONExist(c.MSystem()) {
@@ -94,7 +94,6 @@ func Metadata() func(http.ResponseWriter, *http.Request) {
 		fmt.Printf("metadata params: %v\n", p)
 
 		c := (&ConnectionService{}).Load()[p.ID]
-		fmt.Printf("checking metadata: %v\n", p)
 		if JSONExist(c.MSystem()) {
 			fmt.Printf("loading metadata: %v\n", p)
 			standard := metadata.MSystem{}
@@ -105,7 +104,6 @@ func Metadata() func(http.ResponseWriter, *http.Request) {
 		}
 
 		if op, ok := options[p.Extraction]; ok {
-			fmt.Printf("extracting metadata: %v\n", p)
 			if p.Extraction == "" {
 				p.Extraction = "COMPACT"
 			}

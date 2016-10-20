@@ -34,7 +34,7 @@ type SearchService struct{}
 
 // Run ....
 func (ms SearchService) Run(r *http.Request, args *SearchParams, reply *SearchPage) error {
-	fmt.Printf("params: %v\n", args)
+	fmt.Printf("search run params: %v\n", args)
 	if args.QueryType == "" {
 		args.QueryType = "DQML2"
 	}

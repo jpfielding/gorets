@@ -43,7 +43,7 @@ type ObjectService struct{}
 
 // Get ....
 func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects) error {
-	fmt.Printf("params: %v\n", args)
+	fmt.Printf("object get params: %v\n", args)
 
 	c := (&ConnectionService{}).Load()[args.ID]
 	ctx := context.Background()
