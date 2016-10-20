@@ -31,6 +31,17 @@ type ConnectionList struct {
 	Connections []Connection
 }
 
+// Active ....
+func (cs ConnectionService) Active(r *http.Request, args *struct{}, reply *ConnectionList) error {
+	for _, v := range cs.Load() {
+		if v.requester == nil {
+			continue
+		}
+		reply.Connections = append(reply.Connections, v)
+	}
+	return nil
+}
+
 // List ....
 func (cs ConnectionService) List(r *http.Request, args *struct{}, reply *ConnectionList) error {
 	for _, v := range cs.Load() {
