@@ -101,7 +101,9 @@ export default class App extends React.Component {
           </Link>
         </nav>
         <div className="pv2 pl3 bb v-mid flex flex-row align-center overflow-x-scroll">
-          <span className="f6 mr3">Active Connection: {this.state.selectedConnection.id}</span>
+          <span className="f6 mr3">Active Connection:
+            <span className="b"> {this.state.selectedConnection.id}</span>
+          </span>
           <Autocomplete
             value={this.state.connectionAutocompleteField}
             inputProps={{

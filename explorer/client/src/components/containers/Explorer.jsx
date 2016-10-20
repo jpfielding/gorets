@@ -134,10 +134,11 @@ export default class Explorer extends React.Component {
   }
 
   renderSelectedClassDescription(clazz) {
+    console.log(clazz);
     return (
-      <div>
+      <span>
         {clazz.ClassName} - <span className="f6 moon-gray">{clazz.Description}</span>
-      </div>
+      </span>
     );
   }
 
@@ -171,7 +172,12 @@ export default class Explorer extends React.Component {
       tableBody = (
         <div>
           {selectedClass
-            ? this.renderSelectedClassDescription(selectedClass)
+            ? (
+              <span>
+                <span className="b">{selectedClass['METADATA-TABLE'].Resource} </span>
+                {this.renderSelectedClassDescription(selectedClass)}
+              </span>
+            )
             : null
           }
           <ReactDataGrid
@@ -191,7 +197,7 @@ export default class Explorer extends React.Component {
     }
     return (
       <div>
-        <div className="fl w-100 w-30-ns no-list-style pa3">
+        <div className="fl h-100-ns w-100 w-20-ns no-list-style pa3 overflow-x-scroll nowrap">
           <ul className="pa0 ma0">
             {this.state.metadata.System['METADATA-RESOURCE'].Resource.map((resource) =>
               <li className="mb2">
@@ -210,9 +216,15 @@ export default class Explorer extends React.Component {
             )}
           </ul>
         </div>
-        <div className="fl h-100 min-vh-100 w-100 w-70-ns pa3 bl-ns">
+        <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
           { this.state.defaultRows.length > 0
-            ? tableBody
+            ? (
+              <div>
+                { tableBody }
+                <input type="text" onChange={this.setSearchText} placeholder="Columns" />
+                <input type="text" onChange={this.setSearchText} placeholder="Query" />
+              </div>
+            )
             : <h1 className="f4">Please select a class to explore</h1>
           }
         </div>
