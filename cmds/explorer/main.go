@@ -38,9 +38,6 @@ func main() {
 	cors := handlers.CORS(
 		handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "HEAD"}),
 		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
-		// handlers.AllowedOriginValidator(func(origin string) bool {
-		// 	return true
-		// }),
 	)
 	http.Handle("/rpc", cors(s))
 	// http.Handle("/rpc", cors(s))
