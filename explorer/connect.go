@@ -2,31 +2,34 @@ package explorer
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 )
 
+var connections map[string]Connection
+
 // ConnectionService ...
 type ConnectionService struct {
-	connections map[string]Connection
 }
 
 // Load ...
 func (cs *ConnectionService) Load() map[string]Connection {
-	if cs.connections == nil {
-		cs.connections = make(map[string]Connection)
-		JSONLoad("/tmp/gorets/connections.json", &cs.connections)
+	if connections == nil {
+		fmt.Println("loading connections")
+		connections = make(map[string]Connection)
+		JSONLoad("/tmp/gorets/connections.json", &connections)
 	}
-	return cs.connections
+	return connections
 }
 
 // Stash ..
 func (cs *ConnectionService) Stash() {
-	JSONStore("/tmp/gorets/connections.json", &cs.connections)
+	JSONStore("/tmp/gorets/connections.json", &connections)
 }
 
 // ConnectionList ...
 type ConnectionList struct {
-	Connections []Connection
+	Connections []Connection `json:"connections"`
 }
 
 // ConnectionListArgs ...
@@ -70,11 +73,11 @@ func (cs ConnectionService) Add(r *http.Request, args *AddConnectionArgs, reply 
 			return err
 		}
 		reply.Tested = true
-		reply.Active = args.Connection.Active()
 	}
-	reply.ID = args.Connection.ID
 	cs.Load()
-	cs.connections[args.Connection.ID] = args.Connection
+	connections[args.Connection.ID] = args.Connection
 	cs.Stash()
+	reply.Active = args.Connection.Active()
+	reply.ID = args.Connection.ID
 	return nil
 }
