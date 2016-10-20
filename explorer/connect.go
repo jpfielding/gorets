@@ -31,20 +31,22 @@ type ConnectionList struct {
 	Connections []Connection
 }
 
-// Active ....
-func (cs ConnectionService) Active(r *http.Request, args *struct{}, reply *ConnectionList) error {
-	for _, v := range cs.Load() {
-		if v.requester == nil {
-			continue
-		}
-		reply.Connections = append(reply.Connections, v)
-	}
-	return nil
+// ConnectionListArgs ...
+type ConnectionListArgs struct {
+	Active *bool `json:"active,omitempty"`
 }
 
 // List ....
-func (cs ConnectionService) List(r *http.Request, args *struct{}, reply *ConnectionList) error {
+func (cs ConnectionService) List(r *http.Request, args *ConnectionListArgs, reply *ConnectionList) error {
 	for _, v := range cs.Load() {
+		// if we want to filter on active
+		if args.Active != nil {
+			active := v.URLs != nil
+			// do they have matching state
+			if *args.Active != active {
+				continue
+			}
+		}
 		reply.Connections = append(reply.Connections, v)
 	}
 	return nil
