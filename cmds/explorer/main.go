@@ -17,15 +17,7 @@ func main() {
 
 	flag.Parse()
 
-	// TODO this needs to be bound to a client cookie
-	conns := map[string]explorer.Connection{}
-	explorer.JSONLoad("/tmp/gorets/connections.json", &conns)
-
 	http.Handle("/", http.FileServer(http.Dir(*react)))
-
-	// TODO remove when migrated over
-	http.HandleFunc("/api/login", custom(explorer.Connect()))
-	http.HandleFunc("/api/metadata", custom(explorer.Metadata()))
 
 	// gorilla rpc
 	s := rpc.NewServer()
@@ -40,6 +32,7 @@ func main() {
 		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
 	)
 	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
+
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }

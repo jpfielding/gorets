@@ -2,7 +2,6 @@ package explorer
 
 import (
 	"context"
-	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -80,53 +79,6 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	reply.Metadata = *standard
 	JSONStore(c.MSystem(), &standard)
 	return nil
-}
-
-// Metadata ...
-// input: MetadataParams
-// output: metadata.MSystem
-func Metadata() func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var p MetadataGetParams
-		if r.Body != nil {
-			json.NewDecoder(r.Body).Decode(&p)
-		}
-		fmt.Printf("metadata params: %v\n", p)
-
-		c := (&ConnectionService{}).Load()[p.ID]
-		if JSONExist(c.MSystem()) {
-			fmt.Printf("loading metadata: %v\n", p)
-			standard := metadata.MSystem{}
-			JSONLoad(c.MSystem(), &standard)
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(&standard)
-			return
-		}
-
-		if op, ok := options[p.Extraction]; ok {
-			if p.Extraction == "" {
-				p.Extraction = "COMPACT"
-			}
-			// lookup the operation for pulling metadata
-			ctx := context.Background()
-			sess, urls, err := c.Login(ctx)
-			if err != nil {
-				http.Error(w, err.Error(), 400)
-				return
-			}
-			standard, err := op(sess, ctx, urls.GetMetadata)
-			if err != nil {
-				http.Error(w, err.Error(), 400)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(standard)
-			JSONStore(c.MSystem(), &standard)
-		} else {
-			http.Error(w, fmt.Sprintf("%s not supported", p.Extraction), 400)
-			return
-		}
-	}
 }
 
 // MetadataRequestType is a typedef metadata extraction options
