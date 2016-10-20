@@ -1,6 +1,6 @@
 import React from 'react';
 import MetadataService from 'services/MetadataService';
-import { Fieldset, Field, createValue } from 'react-forms';
+import { Fieldset, Field, createValue, Input } from 'react-forms';
 import { withRouter } from 'react-router';
 import ReactDataGrid from 'react-data-grid';
 
@@ -33,7 +33,9 @@ class Explorer extends React.Component {
   constructor(props) {
     super(props);
     const searchForm = createValue({
-      value: null,
+      value: {
+        query: '(TIMESTAMP=1900-01-01T00:00:00+)',
+      },
       onChange: this.searchInputsChange.bind(this),
     });
     this.state = {
@@ -267,8 +269,12 @@ class Explorer extends React.Component {
               <div>
                 { tableBody }
                 <Fieldset formValue={this.state.searchForm}>
-                  <Field select="select" label="Columns" />
-                  <Field select="query" label="Query" />
+                  <Field select="select" label="Columns">
+                    <Input className="w-100" />
+                  </Field>
+                  <Field select="query" label="Query">
+                    <Input className="w-100" />
+                  </Field>
                   <button onClick={this.submitSearchForm}>Submit</button>
                 </Fieldset>
               </div>

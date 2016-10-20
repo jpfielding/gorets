@@ -74,12 +74,11 @@ export default class App extends React.Component {
     // }
     return (
       <div className="helvetica">
-        <nav className="pa3 bg-dark-blue">
+        <nav className="pa3 bg-black">
           <Link
             to="/"
             title="Home"
-            activeStyle={{ color: 'white' }}
-            className="link fw2 moon-gray b f4 dib mr3"
+            className="link fw2 red b f4 dib mr3"
           >
             RETS Explorer
           </Link>
@@ -87,7 +86,7 @@ export default class App extends React.Component {
             to="/connections"
             title="Connections"
             activeStyle={{ color: 'white' }}
-            className="link moon-gray f6 dib mr3"
+            className="link red f6 dib mr3"
           >
             Connections
           </Link>
@@ -95,7 +94,7 @@ export default class App extends React.Component {
             to="/explorer"
             title="Explorer"
             activeStyle={{ color: 'white' }}
-            className="link moon-gray f6 dib mr3"
+            className="link red f6 dib mr3"
           >
             Explorer
           </Link>
