@@ -13,15 +13,16 @@ type ConnectionService struct {
 }
 
 // Load ...
-func (cs ConnectionService) Load() map[string]Connection {
+func (cs *ConnectionService) Load() map[string]Connection {
 	if len(cs.connections) == 0 {
+		cs.connections = make(map[string]Connection)
 		JSONLoad("/tmp/gorets/connections.json", &cs.connections)
 	}
 	return cs.connections
 }
 
 // Stash ..
-func (cs ConnectionService) Stash() {
+func (cs *ConnectionService) Stash() {
 	JSONStore("/tmp/gorets/connections.json", &cs.connections)
 }
 

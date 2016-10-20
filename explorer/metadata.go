@@ -29,7 +29,7 @@ type MetadataHeadParams struct {
 // Head ....
 func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply *MetadataResponse) error {
 	fmt.Printf("params: %v\n", args)
-	c := ConnectionService{}.Load()[args.ID]
+	c := (&ConnectionService{}).Load()[args.ID]
 	ctx := context.Background()
 	rqr, err := c.Login(ctx)
 	if err != nil {
@@ -53,7 +53,7 @@ type MetadataGetParams struct {
 func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataResponse) error {
 	fmt.Printf("params: %v\n", args)
 
-	c := ConnectionService{}.Load()[args.ID]
+	c := (&ConnectionService{}).Load()[args.ID]
 	if JSONExist(c.MSystem()) {
 		standard := metadata.MSystem{}
 		JSONLoad(c.MSystem(), &standard)
@@ -91,10 +91,12 @@ func Metadata() func(http.ResponseWriter, *http.Request) {
 		if r.Body != nil {
 			json.NewDecoder(r.Body).Decode(&p)
 		}
-		fmt.Printf("params: %v\n", p)
+		fmt.Printf("metadata params: %v\n", p)
 
-		c := ConnectionService{}.Load()[p.ID]
+		c := (&ConnectionService{}).Load()[p.ID]
+		fmt.Printf("checking metadata: %v\n", p)
 		if JSONExist(c.MSystem()) {
+			fmt.Printf("loading metadata: %v\n", p)
 			standard := metadata.MSystem{}
 			JSONLoad(c.MSystem(), &standard)
 			w.Header().Set("Content-Type", "application/json")
@@ -103,6 +105,7 @@ func Metadata() func(http.ResponseWriter, *http.Request) {
 		}
 
 		if op, ok := options[p.Extraction]; ok {
+			fmt.Printf("extracting metadata: %v\n", p)
 			if p.Extraction == "" {
 				p.Extraction = "COMPACT"
 			}

@@ -41,7 +41,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchParams, reply *SearchPa
 	if args.Format == "" {
 		args.Format = "COMPACT_DECODED"
 	}
-	c := ConnectionService{}.Load()[args.ID]
+	c := (&ConnectionService{}).Load()[args.ID]
 	req := rets.SearchRequest{
 		URL: c.URLs.Search,
 		SearchParams: rets.SearchParams{

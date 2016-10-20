@@ -34,8 +34,15 @@ func main() {
 	s.RegisterService(new(explorer.MetadataService), "")
 	s.RegisterService(new(explorer.SearchService), "")
 	s.RegisterService(new(explorer.ObjectService), "")
-	// http.Handle("/rpc", handlers.CORS()(s))
-	http.Handle("/rpc", handlers.CompressHandler(handlers.CORS()(s)))
+
+	cors := handlers.CORS(
+		handlers.AllowedMethods([]string{"POST", "GET", "OPTIONS", "PUT", "DELETE"}),
+		handlers.ExposedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
+		handlers.AllowedOriginValidator(func(origin string) bool {
+			return true
+		}),
+	)
+	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
