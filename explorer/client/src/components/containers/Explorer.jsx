@@ -21,7 +21,10 @@ export default class Explorer extends React.Component {
     this.state = {
       metadata: Explorer.emptyMetadata,
       selectedClass: null,
+      defaultRows: [],
+      selectedClassRows: [],
     };
+    this.handleGridSort = this.handleGridSort.bind(this);
   }
 
   componentDidMount() {
@@ -43,12 +46,13 @@ export default class Explorer extends React.Component {
   getMetadata(connectionId) {
     this.setState({
       selectedClass: null,
+      defaultRows: null,
+      selectedClassRows: [],
     });
     MetadataService
       .get(connectionId)
       .then(response => response.json())
       .then(json => {
-        console.log(json);
         this.setState({
           metadata: json,
         });
@@ -58,7 +62,30 @@ export default class Explorer extends React.Component {
   metadataClassClick(selectedClass) {
     this.setState({
       selectedClass,
+      defaultRows: selectedClass['METADATA-TABLE'].Field,
+      selectedClassRows: selectedClass['METADATA-TABLE'].Field,
     });
+  }
+
+  handleGridSort(sortColumn, sortDirection) {
+    const comparer = (a, b) => {
+      if (sortDirection === 'ASC') {
+        if (a[sortColumn] && b[sortColumn] && typeof a[sortColumn] === 'string') {
+          return (a[sortColumn].toLowerCase() > b[sortColumn].toLowerCase()) ? 1 : -1;
+        }
+        return (a[sortColumn] > b[sortColumn]) ? 1 : -1;
+      } else if (sortDirection === 'DESC') {
+        if (a[sortColumn] && b[sortColumn] && typeof a[sortColumn] === 'string') {
+          return (a[sortColumn].toLowerCase() < b[sortColumn].toLowerCase()) ? 1 : -1;
+        }
+        return (a[sortColumn] < b[sortColumn]) ? 1 : -1;
+      }
+      return null;
+    };
+    const rows = sortDirection === 'NONE'
+      ? this.state.defaultRows
+      : this.state.selectedClassRows.sort(comparer);
+    this.setState({ selectedClassRows: rows });
   }
 
   render() {
@@ -72,6 +99,7 @@ export default class Explorer extends React.Component {
           name,
           resizable: true,
           width: 200,
+          sortable: true,
         }))
         : [];
 
@@ -80,6 +108,7 @@ export default class Explorer extends React.Component {
       tableBody = (
         <div>
           <ReactDataGrid
+            onGridSort={this.handleGridSort}
             columns={fieldSet}
             rowGetter={rowGetter}
             rowsCount={fields.length}

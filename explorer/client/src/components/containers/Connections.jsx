@@ -1,6 +1,6 @@
 import React from 'react';
 import { Fieldset, Field, createValue } from 'react-forms';
-import LoginService from 'services/LoginService';
+import ConnectionService from 'services/ConnectionService';
 import PasswordForm from 'components/utils/PasswordForm';
 
 export default class Connections extends React.Component {
@@ -20,7 +20,7 @@ export default class Connections extends React.Component {
 
   onSubmit = () => {
     console.log('Submitting: ', this.state.formValue.value);
-    LoginService
+    ConnectionService
       .login(this.state.formValue.value)
       .then(response => {
         console.log(response);
