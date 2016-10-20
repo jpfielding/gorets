@@ -56,7 +56,7 @@ export default class Explorer extends React.Component {
   getMetadata(connectionId) {
     this.setState({
       selectedClass: null,
-      defaultRows: null,
+      defaultRows: [],
       selectedClassRows: [],
     });
     MetadataService
@@ -186,8 +186,9 @@ export default class Explorer extends React.Component {
           </ul>
         </div>
         <div className="fl h-100 min-vh-100 w-100 w-70-ns pa3 bl-ns">
-          {
-            tableBody || <h1 className="f4">Please select a class to explore</h1>
+          { this.state.defaultRows.length > 0
+            ? tableBody
+            : <h1 className="f4">Please select a class to explore</h1>
           }
         </div>
       </div>
