@@ -19,6 +19,9 @@ type Sessions map[string]*Session
 // Open ...
 func (s Sessions) Open(id string) *Session {
 	if _, ok := s[id]; !ok {
+		if _, ok = connections[id]; !ok {
+			return nil
+		}
 		s[id] = &Session{Connection: connections[id]}
 	}
 	return s[id]
