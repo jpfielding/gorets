@@ -31,7 +31,11 @@ func main() {
 		handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "HEAD"}),
 		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
 	)
+	// rpc calls
 	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
+
+	// websocket wire logs
+	http.Handle("/wirelog", explorer.WireLogSocket(explorer.DefaultUpgrader))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
