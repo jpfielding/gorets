@@ -22,6 +22,7 @@ type WireLogPageRequest struct {
 type WireLogPage struct {
 	ID     string `json:"id"`
 	Offset int64  `json:"offset"`
+	Length int    `json:"length"`
 	Size   int64  `json:"size"`
 	Chunk  string `json:"chunk"`
 }
@@ -64,7 +65,7 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 				wirelog.Seek(req.Offset, 0)
 			}
 			stat, _ := wirelog.Stat()
-			chunk := make([]byte, upgrader.WriteBufferSize/2)
+			chunk := make([]byte, upgrader.WriteBufferSize)
 			len, err := wirelog.Read(chunk)
 			if len == 0 || err == io.EOF {
 				return
@@ -73,7 +74,8 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			// figure out which part of which file to send back
 			page := WireLogPage{
 				ID:     req.ID,
-				Offset: req.Offset + int64(len),
+				Offset: req.Offset,
+				Length: len,
 				Size:   stat.Size(),
 				Chunk:  string(chunk[0:len]),
 			}
