@@ -3,6 +3,7 @@ package explorer
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -41,8 +42,6 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			log.Println(err)
 			return
 		}
-		var sess *Session
-		var wirelog *os.File
 		for {
 			// read in the next message
 			messageType, msg, err := conn.NextReader()
@@ -55,12 +54,11 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			}
 			req := WireLogPageRequest{}
 			json.NewDecoder(msg).Decode(&req)
+			fmt.Printf("wirelog request: %v\n", req)
+			sess := sessions.Open(req.ID)
+			// TODO look into keeping the file open
 			// load up the file we are streaming
-			if sess == nil {
-				sess = sessions[req.ID]
-				wirelog, err = os.Open(sess.Wirelog())
-				defer wirelog.Close()
-			}
+			wirelog, err := os.Open(sess.Wirelog())
 			// optionally set a starting point
 			if req.Offset > 0 {
 				wirelog.Seek(req.Offset, 0)
@@ -71,6 +69,7 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			if len == 0 || err == io.EOF {
 				return
 			}
+			wirelog.Close()
 			// figure out which part of which file to send back
 			page := WireLogPage{
 				ID:     req.ID,
