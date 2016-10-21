@@ -71,7 +71,6 @@ class Search extends React.Component {
           this.setState({ metadata: Search.emptyMetadata });
           return;
         }
-        console.log(json.result.Metadata);
         this.setState({
           metadata: json.result.Metadata,
         });
@@ -86,10 +85,14 @@ class Search extends React.Component {
         selectedResource = resource;
       }
     });
-    if (!selectedResource) {
+    const { searchResults } = this.state;
+    if (!selectedResource || !searchResults.result) {
       return null;
     }
     const keyField = selectedResource.KeyField;
+    if (!searchResults.result.columns.includes(keyField)) {
+      return null;
+    }
     const metadataObjects = selectedResource['METADATA-OBJECT']['Object'];
     if (metadataObjects.length === 0) {
       return null;
@@ -101,11 +104,13 @@ class Search extends React.Component {
     const rowGetter = (i) => metadataObjects[i];
     return (
       <div>
+        <div className="b mv2">Object Metadata Types</div>
         <ReactDataGrid
           columns={columns}
           rowGetter={rowGetter}
+          rowHeight={35}
           rowsCount={metadataObjects.length}
-          minHeight={200}
+          minHeight={(metadataObjects.length + 1) * 35}
         />
         {/* <pre className="f6 code">{JSON.stringify({ keyField, metadataObjects }, null, '  ')}</pre> */}
       </div>
@@ -156,7 +161,6 @@ class Search extends React.Component {
           <div>
             <div className="b mb2">Search Results</div>
             {this.renderSearchResultsTable()}
-            <div className="b mv2">Object Metadata Types</div>
             {this.renderObjectMetadata()}
           </div>
           {/* <div>Search parameters:
