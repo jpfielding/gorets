@@ -42,6 +42,7 @@ func (c *CompactSearchResult) ForEach(each EachRow) (bool, error) {
 	for {
 		token, err := c.parser.Token()
 		if err != nil {
+			// dont catch io.EOF here since a clean read should never see it
 			if err = each(nil, err); err != nil {
 				return maxRows, err
 			}

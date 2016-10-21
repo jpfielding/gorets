@@ -61,6 +61,9 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 		// open the json encoder
 		defer response.Close()
 		return response.ForEach(func(o *rets.Object, err error) error {
+			if o == nil {
+				return err
+			}
 			// translate
 			obj := Object{
 				ContentID:      o.ContentID,
@@ -76,7 +79,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 				Blob:           o.Blob,
 			}
 			reply.Objects = append(reply.Objects, obj)
-			return err
+			return nil
 		})
 	})
 }
