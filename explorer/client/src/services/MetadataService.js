@@ -54,17 +54,4 @@ export default class MetadataService {
       }),
     });
   }
-    // {"id": 1,
-    // "method": "ObjectService.Get",
-    // "params": [
-    // {
-    //         "id": "aartx",
-    //         "resource": "ActiveAgent",
-    //         "type": "Photo",
-    //         "objectid": "<KeyFieldValue>:*,<KeyFieldValue>:0",
-    //         "location": 0
-    // }
-    // ]
-    // }
-
 }
