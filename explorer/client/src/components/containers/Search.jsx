@@ -24,6 +24,8 @@ class Search extends React.Component {
     super(props);
     this.state = {
       metadata: Search.emptyMetadata,
+      searchRows: [],
+      searchColumns: [],
       searchParams: {
         id: null,
         resource: null,
@@ -35,10 +37,48 @@ class Search extends React.Component {
       searchResults: {},
     };
     this.search = this.search.bind(this);
+    this.onSearchResultCellSelected = this.onSearchResultCellSelected.bind(this);
   }
 
   componentWillMount() {
     this.search(this.props.location.query);
+  }
+
+  onSearchResultCellSelected(coordinates) {
+    const { searchResults } = this.state;
+    const rows = searchResults.result.rows;
+    const selectedRow = rows[coordinates.rowIdx];
+    const selectedVal = selectedRow[coordinates.idx];
+    console.log(selectedVal);
+  }
+
+  setAvailableObjectsState() {
+    const resources = this.state.metadata.System['METADATA-RESOURCE'].Resource || [];
+    let selectedResource;
+    resources.forEach(resource => {
+      if (resource.ResourceID === this.state.searchParams.class) {
+        selectedResource = resource;
+      }
+    });
+    const { searchResults } = this.state;
+    if (!selectedResource || !searchResults.result) {
+      return;
+    }
+    const keyField = selectedResource.KeyField;
+    if (!searchResults.result.columns.includes(keyField)) {
+      return;
+    }
+    const metadataObjects = selectedResource['METADATA-OBJECT']['Object'];
+    if (metadataObjects.length === 0) {
+      return;
+    }
+    this.setState({
+      searchRows: metadataObjects,
+      searchColumns: [{
+        key: 'ObjectType',
+        name: keyField,
+      }],
+    });
   }
 
   search(searchParams) {
@@ -62,6 +102,7 @@ class Search extends React.Component {
           searchResults: json,
           searchHistory,
         });
+        this.setAvailableObjectsState();
       });
     MetadataService
       .get(searchParams.id)
@@ -74,45 +115,26 @@ class Search extends React.Component {
         this.setState({
           metadata: json.result.Metadata,
         });
+        this.setAvailableObjectsState();
       });
   }
 
   renderObjectMetadata() {
-    const resources = this.state.metadata.System['METADATA-RESOURCE'].Resource || [];
-    let selectedResource;
-    resources.forEach(resource => {
-      if (resource.ResourceID === this.state.searchParams.class) {
-        selectedResource = resource;
-      }
-    });
-    const { searchResults } = this.state;
-    if (!selectedResource || !searchResults.result) {
+    const { searchRows, searchColumns } = this.state;
+    if (searchRows.length === 0 || searchColumns.length === 0) {
       return null;
     }
-    const keyField = selectedResource.KeyField;
-    if (!searchResults.result.columns.includes(keyField)) {
-      return null;
-    }
-    const metadataObjects = selectedResource['METADATA-OBJECT']['Object'];
-    if (metadataObjects.length === 0) {
-      return null;
-    }
-    const columns = [{
-      key: 'ObjectType',
-      name: keyField,
-    }];
-    const rowGetter = (i) => metadataObjects[i];
+    const rowGetter = (i) => searchRows[i];
     return (
       <div>
         <div className="b mv2">Object Metadata Types</div>
         <ReactDataGrid
-          columns={columns}
+          columns={searchColumns}
           rowGetter={rowGetter}
           rowHeight={35}
-          rowsCount={metadataObjects.length}
-          minHeight={(metadataObjects.length + 1) * 35}
+          rowsCount={searchRows.length}
+          minHeight={(searchRows.length + 1) * 35}
         />
-        {/* <pre className="f6 code">{JSON.stringify({ keyField, metadataObjects }, null, '  ')}</pre> */}
       </div>
     );
   }
@@ -133,6 +155,7 @@ class Search extends React.Component {
         columns={columns}
         rowGetter={rowGetter}
         rowsCount={searchResults.result.rows.length}
+        onCellSelected={this.onSearchResultCellSelected}
       />
     );
   }
@@ -164,7 +187,7 @@ class Search extends React.Component {
             {this.renderObjectMetadata()}
           </div>
           {/* <div>Search parameters:
-            <pre className="f6 code">{JSON.stringify(this.state, null, '  ')}</pre>
+            <pre className="f6 code">{JSON.stringify(this.state.searchColumns, null, '  ')}</pre>
           </div> */}
         </div>
       </div>
