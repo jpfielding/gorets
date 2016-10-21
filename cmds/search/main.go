@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -88,6 +89,16 @@ func main() {
 		result, err := rets.SearchCompact(session, ctx, req)
 		if err != nil {
 			panic(err)
+		}
+		switch result.Response.Code {
+		case rets.StatusOK:
+			// we got some daters
+		case rets.StatusNoRecords:
+			return
+		case rets.StatusSearchError:
+			fallthrough
+		default: // shit hit the fan
+			panic(errors.New(result.Response.Text))
 		}
 		w.Write(result.Columns)
 		count := 0
