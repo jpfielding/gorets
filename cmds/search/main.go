@@ -82,23 +82,28 @@ func main() {
 	}
 	defer w.Flush()
 
-	for hasMoreRows := true; hasMoreRows; {
+	// loop over all the pages we need
+	for {
 		fmt.Printf("Querying next page: %v\n", req)
 		result, err := rets.SearchCompact(session, ctx, req)
-		defer result.Close()
 		if err != nil {
 			panic(err)
 		}
 		w.Write(result.Columns)
 		count := 0
-		hasMoreRows, err = result.ForEach(func(row rets.Row, err error) error {
+		hasMoreRows, err := result.ForEach(func(row rets.Row, err error) error {
 			w.Write(row)
 			count++
-			return nil
+			return err
 		})
-		if hasMoreRows {
-			req.Offset = req.Offset + count
+		result.Close()
+		if err != nil {
+			panic(err)
 		}
+		if !hasMoreRows {
+			return
+		}
+		req.Offset = req.Offset + count
 	}
 }
 
