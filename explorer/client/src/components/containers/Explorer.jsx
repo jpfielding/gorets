@@ -164,6 +164,8 @@ class Explorer extends React.Component {
     Object.keys(newFilters).forEach(newFilter => {
       const filterObj = newFilters[newFilter];
       if (filterObj.filterTerm) {
+        console.log(filterObj.filterTerm);
+        console.log('rowLen: ', rows.length);
         for (let i = rows.length - 1; i >= 0; i--) {
           const row = rows[i];
           const val = row[filterObj.column.key] || '';
