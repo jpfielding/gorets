@@ -104,8 +104,9 @@ class Search extends React.Component {
         <ReactDataGrid
           columns={columns}
           rowGetter={rowGetter}
+          rowHeight={35}
           rowsCount={metadataObjects.length}
-          minHeight={200}
+          minHeight={(metadataObjects.length + 1) * 35}
         />
         {/* <pre className="f6 code">{JSON.stringify({ keyField, metadataObjects }, null, '  ')}</pre> */}
       </div>
