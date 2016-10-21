@@ -19,7 +19,8 @@ ReactDOM.render((
       <Route path="explorer" component={Explorer}>
         <Route path=":connection" component={Explorer} />
       </Route>
-      <Route path="search" component={Search}>
+      <Route path="search">
+        <IndexRoute component={Search} />
         <Route path="metadata" component={SearchMetadata} />
       </Route>
       <Route path="*" component={NotFound} />

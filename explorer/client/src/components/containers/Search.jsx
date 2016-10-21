@@ -24,8 +24,10 @@ class Search extends React.Component {
     super(props);
     this.state = {
       metadata: Search.emptyMetadata,
-      searchRows: [],
-      searchColumns: [],
+      metadataRows: [],
+      metadataColumns: [],
+      searchResultColumns: [],
+      searchResultRows: [],
       searchParams: {
         id: null,
         resource: null,
@@ -45,14 +47,61 @@ class Search extends React.Component {
   }
 
   onSearchResultCellSelected(coordinates) {
-    const { searchResults } = this.state;
-    const rows = searchResults.result.rows;
-    const selectedRow = rows[coordinates.rowIdx];
+    const {
+      searchResultRows,
+      searchResultColumns,
+      metadataRows,
+      metadataColumns,
+      searchParams,
+    } = this.state;
+    const selectedRow = searchResultRows[coordinates.rowIdx];
     const selectedVal = selectedRow[coordinates.idx];
-    console.log(selectedVal);
+    const selectedColumn = searchResultColumns[coordinates.idx].name;
+    const selectableMetdataColumns = metadataColumns.map(x => x.name);
+    if (selectableMetdataColumns.includes(selectedColumn)) {
+      const availableObjectTypes = metadataRows.map(x => x.ObjectType);
+      this.props.router.push({
+        ...this.props.location,
+        pathname: '/search/metadata',
+        query: {
+          id: searchParams.id,
+          resource: searchParams.class,
+          keyFieldValue: selectedColumn,
+          types: availableObjectTypes.join(','),
+        },
+      });
+      // this.props.router.push({
+      //   ...this.props.location,
+      //   pathname: '/search',
+      //   query: Object.assign({}, {
+      //     ...this.state.searchForm.value,
+      //     id: this.props.connection.id,
+      //     resource: this.state.selectedClass['METADATA-TABLE'].Resource,
+      //     class: this.state.selectedClass.ClassName,
+      //   }),
+      // });
+      console.log(selectedVal, selectedColumn, availableObjectTypes);
+    }
   }
 
   setAvailableObjectsState() {
+    // Search Results table setup
+    const { searchResults } = this.state;
+    if (!searchResults.result) {
+      return;
+    }
+    // const rowGetter = (i) => searchResults.result.rows[i];
+    const searchResultColumns = searchResults.result.columns.map((column, index) => ({
+      key: index,
+      name: column,
+      resizable: true,
+    }));
+    const searchResultRows = searchResults.result.rows;
+    this.setState({
+      searchResultColumns,
+      searchResultRows,
+    });
+    // Object metadata table setup
     const resources = this.state.metadata.System['METADATA-RESOURCE'].Resource || [];
     let selectedResource;
     resources.forEach(resource => {
@@ -60,8 +109,7 @@ class Search extends React.Component {
         selectedResource = resource;
       }
     });
-    const { searchResults } = this.state;
-    if (!selectedResource || !searchResults.result) {
+    if (!selectedResource) {
       return;
     }
     const keyField = selectedResource.KeyField;
@@ -73,8 +121,8 @@ class Search extends React.Component {
       return;
     }
     this.setState({
-      searchRows: metadataObjects,
-      searchColumns: [{
+      metadataRows: metadataObjects,
+      metadataColumns: [{
         key: 'ObjectType',
         name: keyField,
       }],
@@ -120,41 +168,36 @@ class Search extends React.Component {
   }
 
   renderObjectMetadata() {
-    const { searchRows, searchColumns } = this.state;
-    if (searchRows.length === 0 || searchColumns.length === 0) {
+    const { metadataRows, metadataColumns } = this.state;
+    if (metadataRows.length === 0 || metadataColumns.length === 0) {
       return null;
     }
-    const rowGetter = (i) => searchRows[i];
+    const rowGetter = (i) => metadataRows[i];
     return (
       <div>
         <div className="b mv2">Object Metadata Types</div>
         <ReactDataGrid
-          columns={searchColumns}
+          columns={metadataColumns}
           rowGetter={rowGetter}
           rowHeight={35}
-          rowsCount={searchRows.length}
-          minHeight={(searchRows.length + 1) * 35}
+          rowsCount={metadataRows.length}
+          minHeight={(metadataRows.length + 1) * 35}
         />
       </div>
     );
   }
 
   renderSearchResultsTable() {
-    const { searchResults } = this.state;
-    if (!searchResults.result) {
+    const { searchResultRows, searchResultColumns } = this.state;
+    if (searchResultRows.length === 0 || searchResultColumns.length === 0) {
       return null;
     }
-    const rowGetter = (i) => searchResults.result.rows[i];
-    const columns = searchResults.result.columns.map((column, index) => ({
-      key: index,
-      name: column,
-      resizable: true,
-    }));
+    const rowGetter = (i) => searchResultRows[i];
     return (
       <ReactDataGrid
-        columns={columns}
+        columns={searchResultColumns}
         rowGetter={rowGetter}
-        rowsCount={searchResults.result.rows.length}
+        rowsCount={searchResultRows.length}
         onCellSelected={this.onSearchResultCellSelected}
       />
     );
@@ -187,7 +230,7 @@ class Search extends React.Component {
             {this.renderObjectMetadata()}
           </div>
           {/* <div>Search parameters:
-            <pre className="f6 code">{JSON.stringify(this.state.searchColumns, null, '  ')}</pre>
+            <pre className="f6 code">{JSON.stringify(this.state.metadataColumns, null, '  ')}</pre>
           </div> */}
         </div>
       </div>
