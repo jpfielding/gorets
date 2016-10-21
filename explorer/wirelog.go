@@ -56,11 +56,11 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			// read in the next message
 			messageType, msg, err := conn.NextReader()
 			if err != nil {
-				conn.WriteMessage(messageType, []byte(err.Error()))
+				conn.WriteMessage(messageType, []byte(fmt.Sprintf("{'error':'%v'}", err)))
 				return
 			}
 			if messageType != websocket.TextMessage {
-				conn.WriteMessage(messageType, []byte("'error': 'wrong message type'"))
+				conn.WriteMessage(messageType, []byte("{'error': 'wrong message type'}"))
 				return
 			}
 			req := WireLogPageRequest{}
@@ -94,9 +94,8 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 				}
 				return conn.WriteMessage(messageType, page.Bytes())
 			})
-			// any lingering errors?
 			if err != nil {
-				conn.WriteMessage(messageType, []byte(err.Error()))
+				conn.WriteMessage(messageType, []byte(fmt.Sprintf("{'error':'%v'}", err)))
 				return
 			}
 		}
