@@ -29,7 +29,6 @@ class SearchMetadata extends React.Component {
   }
 
   getObjectMetadata(type) {
-    console.log(type);
     const { searchParams } = this.state;
     MetadataService
       .getObjectMetadata({
@@ -47,10 +46,24 @@ class SearchMetadata extends React.Component {
       });
   }
 
+  renderPicture(obj) {
+    if (!obj.ContentType.startsWith('image/')) {
+      return null;
+    }
+    if (obj.location) {
+      return <img src={`data:image/png;base64,${obj.location}`} alt="pic" />;
+    }
+    if (obj.Blob) {
+      return <img src={`data:image/png;base64,${obj.Blob}`} alt="pic" />;
+    }
+    return null;
+  }
+
   render() {
-    const { searchParams } = this.state;
+    const { searchParams, objectMetadata } = this.state;
+    const hasResult = (objectMetadata.result && objectMetadata.result['Objects'].length > 0);
     return (
-      <div>
+      <div className="pa2">
         <div>
           <span className="b">Connection: </span>
           {searchParams.id}
@@ -70,6 +83,16 @@ class SearchMetadata extends React.Component {
               {type}
             </button>
           )}
+        </div>
+        <div>
+          {hasResult
+            ? (
+              objectMetadata.result['Objects'].map(obj =>
+                this.renderPicture(obj)
+              )
+            )
+            : null
+          }
         </div>
         <pre className="code f6">
           {JSON.stringify(this.state, null, '  ')}

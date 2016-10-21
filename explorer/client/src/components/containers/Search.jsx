@@ -66,21 +66,10 @@ class Search extends React.Component {
         query: {
           id: searchParams.id,
           resource: searchParams.class,
-          keyFieldValue: selectedColumn,
+          keyFieldValue: selectedVal,
           types: availableObjectTypes.join(','),
         },
       });
-      // this.props.router.push({
-      //   ...this.props.location,
-      //   pathname: '/search',
-      //   query: Object.assign({}, {
-      //     ...this.state.searchForm.value,
-      //     id: this.props.connection.id,
-      //     resource: this.state.selectedClass['METADATA-TABLE'].Resource,
-      //     class: this.state.selectedClass.ClassName,
-      //   }),
-      // });
-      console.log(selectedVal, selectedColumn, availableObjectTypes);
     }
   }
 
@@ -90,11 +79,11 @@ class Search extends React.Component {
     if (!searchResults.result) {
       return;
     }
-    // const rowGetter = (i) => searchResults.result.rows[i];
     const searchResultColumns = searchResults.result.columns.map((column, index) => ({
       key: index,
       name: column,
       resizable: true,
+      width: 150,
     }));
     const searchResultRows = searchResults.result.rows;
     this.setState({
@@ -105,7 +94,7 @@ class Search extends React.Component {
     const resources = this.state.metadata.System['METADATA-RESOURCE'].Resource || [];
     let selectedResource;
     resources.forEach(resource => {
-      if (resource.ResourceID === this.state.searchParams.class) {
+      if (resource.ResourceID === this.state.searchParams.resource) {
         selectedResource = resource;
       }
     });
@@ -146,6 +135,7 @@ class Search extends React.Component {
           searchHistory.push(searchParams);
           StorageCache.putInCache(searchHistory, 60);
         }
+        console.log(json);
         this.setState({
           searchResults: json,
           searchHistory,
@@ -163,6 +153,7 @@ class Search extends React.Component {
         this.setState({
           metadata: json.result.Metadata,
         });
+        console.log('meta: ', json.result.Metadata);
         this.setAvailableObjectsState();
       });
   }
@@ -229,9 +220,9 @@ class Search extends React.Component {
             {this.renderSearchResultsTable()}
             {this.renderObjectMetadata()}
           </div>
-          {/* <div>Search parameters:
+          <div>Search parameters:
             <pre className="f6 code">{JSON.stringify(this.state.metadataColumns, null, '  ')}</pre>
-          </div> */}
+          </div>
         </div>
       </div>
     );
