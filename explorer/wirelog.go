@@ -27,12 +27,19 @@ type WireLogPage struct {
 	Chunk  string `json:"chunk"`
 }
 
-// DefaultUpgrader ...
-var DefaultUpgrader = websocket.Upgrader{
+// Bytes ...
+func (w WireLogPage) Bytes() []byte {
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(w)
+	return buf.Bytes()
+}
+
+// WirelogUpgrader ...
+var WirelogUpgrader = websocket.Upgrader{
 	CheckOrigin:       func(r *http.Request) bool { return true },
 	EnableCompression: true,
-	ReadBufferSize:    1024,
-	WriteBufferSize:   1024,
+	ReadBufferSize:    256,
+	WriteBufferSize:   4096,
 }
 
 // WireLogSocket provides access to wire logs as websocket data
@@ -43,45 +50,53 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			log.Println(err)
 			return
 		}
+		// dont fill up the whole buffer
+		buffer := make([]byte, upgrader.WriteBufferSize-128)
 		for {
 			// read in the next message
 			messageType, msg, err := conn.NextReader()
 			if err != nil {
+				conn.WriteMessage(messageType, []byte(err.Error()))
 				return
 			}
 			if messageType != websocket.TextMessage {
-				log.Println("wrong message type")
+				conn.WriteMessage(messageType, []byte("'error': 'wrong message type'"))
 				return
 			}
 			req := WireLogPageRequest{}
 			json.NewDecoder(msg).Decode(&req)
 			fmt.Printf("wirelog request: %v\n", req)
+			// find the source for this message
 			sess := sessions.Open(req.ID)
-			// TODO look into keeping the file open
-			// load up the file we are streaming
-			wirelog, err := os.Open(sess.Wirelog())
-			// optionally set a starting point
-			if req.Offset > 0 {
-				wirelog.Seek(req.Offset, 0)
-			}
-			stat, _ := wirelog.Stat()
-			chunk := make([]byte, upgrader.WriteBufferSize)
-			len, err := wirelog.Read(chunk)
-			if len == 0 || err == io.EOF {
-				return
-			}
-			wirelog.Close()
-			// figure out which part of which file to send back
-			page := WireLogPage{
-				ID:     req.ID,
-				Offset: req.Offset,
-				Length: len,
-				Size:   stat.Size(),
-				Chunk:  string(chunk[0:len]),
-			}
-			var buf bytes.Buffer
-			json.NewEncoder(&buf).Encode(page)
-			if err = conn.WriteMessage(messageType, buf.Bytes()); err != nil {
+			err = sess.ReadWirelog(func(f *os.File, err error) error {
+				if err != nil {
+					return err
+				}
+				stat, _ := f.Stat()
+				// the noop message
+				page := WireLogPage{
+					ID:     req.ID,
+					Offset: req.Offset,
+					Length: 0,
+					Size:   stat.Size(),
+					Chunk:  "",
+				}
+				// offset over runs the file size
+				if req.Offset < stat.Size() {
+					// set a starting point
+					f.Seek(req.Offset, 0)
+					len, er := f.Read(buffer)
+					// if we read something... send it back
+					if len != 0 && er != io.EOF {
+						page.Length = len
+						page.Chunk = string(buffer[0:len])
+					}
+				}
+				return conn.WriteMessage(messageType, page.Bytes())
+			})
+			// any lingering errors?
+			if err != nil {
+				conn.WriteMessage(messageType, []byte(err.Error()))
 				return
 			}
 		}

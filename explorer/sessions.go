@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/jpfielding/gorets/rets"
 	"github.com/jpfielding/gowirelog/wirelog"
@@ -30,6 +31,16 @@ type Session struct {
 	transport *http.Transport
 	requester rets.Requester
 	urls      rets.CapabilityURLs
+}
+
+// ReadWirelog ...
+func (c *Session) ReadWirelog(fun func(*os.File, error) error) error {
+	f, err := os.Open(c.Wirelog())
+	defer f.Close()
+	if e := fun(f, err); e != nil {
+		return e
+	}
+	return nil
 }
 
 // Wirelog path
