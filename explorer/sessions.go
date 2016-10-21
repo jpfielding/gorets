@@ -30,7 +30,7 @@ func (s Sessions) Open(id string) *Session {
 // Session ...
 type Session struct {
 	Connection Connection
-	// Requester is user state
+	// things is user state
 	transport *http.Transport
 	requester rets.Requester
 	urls      rets.CapabilityURLs
