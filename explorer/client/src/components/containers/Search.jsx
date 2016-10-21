@@ -131,8 +131,9 @@ class Search extends React.Component {
       .then(res => res.json())
       .then(json => {
         const searchHistory = StorageCache.getFromCache() || [];
+        // StorageCache.clearAll();
         if (!some(searchHistory, searchParams)) {
-          searchHistory.push(searchParams);
+          searchHistory.unshift(searchParams);
           StorageCache.putInCache(searchHistory, 60);
         }
         console.log(json);

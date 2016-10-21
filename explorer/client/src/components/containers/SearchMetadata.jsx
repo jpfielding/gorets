@@ -47,6 +47,9 @@ class SearchMetadata extends React.Component {
   }
 
   renderPicture(obj) {
+    if (obj.RetsError) {
+      return <div className="b mv3">An error occured</div>;
+    }
     if (!obj.ContentType.startsWith('image/')) {
       return null;
     }
