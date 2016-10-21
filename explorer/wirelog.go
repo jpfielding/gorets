@@ -50,14 +50,17 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			log.Println(err)
 			return
 		}
+		// dont fill up the whole buffer
+		buffer := make([]byte, upgrader.WriteBufferSize-128)
 		for {
 			// read in the next message
 			messageType, msg, err := conn.NextReader()
 			if err != nil {
+				conn.WriteMessage(messageType, []byte(err.Error()))
 				return
 			}
 			if messageType != websocket.TextMessage {
-				log.Println("wrong message type")
+				conn.WriteMessage(messageType, []byte("'error': 'wrong message type'"))
 				return
 			}
 			req := WireLogPageRequest{}
@@ -65,31 +68,35 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			fmt.Printf("wirelog request: %v\n", req)
 			// find the source for this message
 			sess := sessions.Open(req.ID)
-			// TODO look into keeping the file open
-			wirelog, err := os.Open(sess.Wirelog())
-			stat, _ := wirelog.Stat()
-			// the noop message
-			page := WireLogPage{
-				ID:     req.ID,
-				Offset: req.Offset,
-				Length: 0,
-				Size:   stat.Size(),
-				Chunk:  "",
-			}
-			// offset over runs the file size
-			if req.Offset < stat.Size() {
-				// optionally set a starting point
-				wirelog.Seek(req.Offset, 0)
-				chunk := make([]byte, upgrader.WriteBufferSize-128)
-				len, er := wirelog.Read(chunk)
-				// if we read something... send it back
-				if len != 0 && er != io.EOF {
-					page.Length = len
-					page.Chunk = string(chunk[0:len])
+			err = sess.ReadWirelog(func(f *os.File, err error) error {
+				if err != nil {
+					return err
 				}
-			}
-			wirelog.Close()
-			if err = conn.WriteMessage(messageType, page.Bytes()); err != nil {
+				stat, _ := f.Stat()
+				// the noop message
+				page := WireLogPage{
+					ID:     req.ID,
+					Offset: req.Offset,
+					Length: 0,
+					Size:   stat.Size(),
+					Chunk:  "",
+				}
+				// offset over runs the file size
+				if req.Offset < stat.Size() {
+					// set a starting point
+					f.Seek(req.Offset, 0)
+					len, er := f.Read(buffer)
+					// if we read something... send it back
+					if len != 0 && er != io.EOF {
+						page.Length = len
+						page.Chunk = string(buffer[0:len])
+					}
+				}
+				return conn.WriteMessage(messageType, page.Bytes())
+			})
+			// any lingering errors?
+			if err != nil {
+				conn.WriteMessage(messageType, []byte(err.Error()))
 				return
 			}
 		}
