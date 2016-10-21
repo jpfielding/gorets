@@ -56,18 +56,22 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			// read in the next message
 			messageType, msg, err := conn.NextReader()
 			if err != nil {
-				conn.WriteMessage(messageType, []byte(err.Error()))
-				return
+				conn.WriteMessage(messageType, []byte(fmt.Sprintf("{'error':'%v'}", err)))
+				continue
 			}
 			if messageType != websocket.TextMessage {
-				conn.WriteMessage(messageType, []byte("'error': 'wrong message type'"))
-				return
+				conn.WriteMessage(messageType, []byte("{'error': 'wrong message type'}"))
+				continue
 			}
 			req := WireLogPageRequest{}
 			json.NewDecoder(msg).Decode(&req)
 			fmt.Printf("wirelog request: %v\n", req)
 			// find the source for this message
 			sess := sessions.Open(req.ID)
+			if sess == nil {
+				conn.WriteMessage(messageType, []byte("{'error': 'id not found'}"))
+				continue
+			}
 			err = sess.ReadWirelog(func(f *os.File, err error) error {
 				if err != nil {
 					return err
@@ -94,10 +98,9 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 				}
 				return conn.WriteMessage(messageType, page.Bytes())
 			})
-			// any lingering errors?
 			if err != nil {
-				conn.WriteMessage(messageType, []byte(err.Error()))
-				return
+				conn.WriteMessage(messageType, []byte(fmt.Sprintf("{'error':'%v'}", err)))
+				continue
 			}
 		}
 	}
