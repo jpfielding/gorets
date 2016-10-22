@@ -1,9 +1,11 @@
 package rets
 
 import (
+	"encoding/xml"
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"context"
 )
@@ -95,4 +97,16 @@ func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io
 		return nil, err
 	}
 	return DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType)), nil
+}
+
+// CountTag ...
+type CountTag xml.StartElement
+
+// Parse ...
+func (ct CountTag) Parse() (int, error) {
+	code, err := strconv.ParseInt(ct.Attr[0].Value, 10, 64)
+	if err != nil {
+		return -1, err
+	}
+	return int(code), nil
 }
