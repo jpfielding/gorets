@@ -274,8 +274,8 @@ type SecureDate struct {
 //     </Brokerage>
 //     <Franchise>
 //         <Name>Advanced</Name>
-// </Franchise>
-// <Builder>
+//     </Franchise>
+//    <Builder>
 //         <Name>Building Builders</Name>
 //         <Phone>999-999-9998</Phone>
 //         <Fax>999-999-9999</Fax>
