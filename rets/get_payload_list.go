@@ -2,7 +2,6 @@ package rets
 
 import (
 	"encoding/xml"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -10,106 +9,109 @@ import (
 	"context"
 )
 
-// TODO redo this without channels
-
-// PayloadList ...
-type PayloadList struct {
-	Response Response
-	Error    error
-	Payloads <-chan CompactData
-}
-
 // PayloadListRequest ...
 type PayloadListRequest struct {
 	URL, HTTPMethod, ID string
 }
 
 // GetPayloadList ...
-func GetPayloadList(requester Requester, ctx context.Context, p PayloadListRequest) (*PayloadList, error) {
-	// required
-	values := url.Values{}
-	if p.ID == "" {
-		values.Add("ID", p.ID)
+func GetPayloadList(requester Requester, ctx context.Context, r PayloadListRequest) (PayloadList, error) {
+	url, err := url.Parse(r.URL)
+	if err != nil {
+		return PayloadList{}, err
 	}
+	values := url.Query()
+	// required
+	values.Add("ID", r.ID)
 
 	method := DefaultHTTPMethod
-	if p.HTTPMethod != "" {
-		method = p.HTTPMethod
+	if r.HTTPMethod != "" {
+		method = r.HTTPMethod
 	}
-	// TODO use a URL object then properly append to it
-	req, err := http.NewRequest(method, p.URL+"?"+values.Encode(), nil)
+	url.RawQuery = values.Encode()
+
+	req, err := http.NewRequest(method, url.String(), nil)
 	if err != nil {
-		return nil, err
+		return PayloadList{}, err
 	}
 
 	resp, err := requester(ctx, req)
 	if err != nil {
-		return nil, err
+		return PayloadList{}, err
 	}
 	defer resp.Body.Close()
 
-	return parseGetPayloadList(resp.Body)
+	return NewPayloadList(resp.Body)
 }
 
-func parseGetPayloadList(body io.ReadCloser) (*PayloadList, error) {
-	payloads := make(chan CompactData)
-	parser := xml.NewDecoder(body)
+// PayloadList ...
+type PayloadList struct {
+	Response Response
 
-	list := PayloadList{
-		Payloads: payloads,
-	}
-	delim := "	"
-	// backgroundable processing of the data into our buffer
-	dataProcessing := func() {
-		// this channel needs to be closed or the caller can infinite loop
-		defer close(payloads)
-		// this is the web socket that needs addressed
-		defer body.Close()
-		// extract the data
-		for {
-			token, err := parser.Token()
-			if err != nil {
-				list.Error = err
-				break
-			}
-			switch t := token.(type) {
-			case xml.StartElement:
-				switch t.Name.Local {
-				case "RETSPayloadList":
-					cd, err := NewCompactData(t, parser, delim)
-					if err != nil {
-						fmt.Println("failed to decode: ", err)
-						list.Error = err
-						return
-					}
-					payloads <- cd
+	body   io.ReadCloser
+	parser *xml.Decoder
+	delim  string
+}
+
+// EachPayload ...
+type EachPayload func(CompactData, error) error
+
+// ForEach ...
+func (pl PayloadList) ForEach(each EachPayload) error {
+	defer pl.body.Close()
+
+	for {
+		token, err := pl.parser.Token()
+		if err != nil {
+			return err
+		}
+		switch t := token.(type) {
+		case xml.StartElement:
+			switch t.Name.Local {
+			case "RETSPayloadList":
+				err := each(NewCompactData(t, pl.parser, pl.delim))
+				if err != nil {
+					return err
 				}
 			}
+		case xml.EndElement:
+			switch t.Name.Local {
+			case XMLElemRETS, XMLElemRETSStatus:
+				return nil
+			}
 		}
+	}
+}
+
+// NewPayloadList parse a stream and reads PayloadLists
+func NewPayloadList(body io.ReadCloser) (PayloadList, error) {
+	parser := xml.NewDecoder(body)
+
+	// return a composite result and offer walk/close options
+	pl := PayloadList{
+		body:   body,
+		parser: parser,
 	}
 	for {
 		token, err := parser.Token()
 		if err != nil {
-			return nil, err
+			return pl, err
 		}
 		switch t := token.(type) {
 		case xml.StartElement:
-			elmt := xml.StartElement(t)
-			switch elmt.Name.Local {
+			switch t.Name.Local {
 			case XMLElemRETS, XMLElemRETSStatus:
-				response, err := ResponseTag(elmt).Parse()
+				rets, er := ResponseTag(t).Parse()
 				if err != nil {
-					return nil, err
+					return pl, er
 				}
-				list.Response = *response
-				go dataProcessing()
-				return &list, nil
+				pl.Response = *rets
+				return pl, nil
 			case "DELIMITER":
-				decoded, err := DelimiterTag(elmt).Parse()
+				pl.delim, err = DelimiterTag(t).Parse()
 				if err != nil {
-					return nil, err
+					return pl, err
 				}
-				delim = decoded
 			}
 		}
 	}
