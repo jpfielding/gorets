@@ -9,16 +9,12 @@ import (
 
 // GetRequest ...
 type GetRequest struct {
-	URL, HTTPMethod string
+	URL string
 }
 
-// Get ...
+// Get gets an arbitrary file from the server or performs an arbitrary action, specified by URI
 func Get(requester Requester, ctx context.Context, r GetRequest) error {
-	method := DefaultHTTPMethod
-	if r.HTTPMethod != "" {
-		method = r.HTTPMethod
-	}
-	req, err := http.NewRequest(method, r.URL, nil)
+	req, err := http.NewRequest("GET", r.URL, nil)
 	if err != nil {
 		return err
 	}
