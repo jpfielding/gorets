@@ -1,9 +1,10 @@
 package rets
 
 import (
-	"bytes"
 	"encoding/xml"
 	"io"
+
+	"github.com/jpfielding/gominidom/minidom"
 
 	"context"
 )
@@ -20,39 +21,36 @@ func StandardXMLSearch(requester Requester, ctx context.Context, r SearchRequest
 // StandardXMLSearchResult ...
 type StandardXMLSearchResult struct {
 	Response Response
-	Count    int
-	XMLData  XMLData
 
 	body   io.ReadCloser
 	parser *xml.Decoder
-	buf    bytes.Buffer
 }
 
-// EachEntry is the user hook to receive each element
-type EachEntry func(row map[string]string, err error) error
-
-// ForEach returns MaxRows and any error that 'each' wont handle
-func (c *StandardXMLSearchResult) ForEach(each EachEntry) (bool, error) {
+// ForEach returns Count and MaxRows and any error that 'each' wont handle
+func (c *StandardXMLSearchResult) ForEach(elem string, each minidom.EachDOM) (int, bool, error) {
 	defer c.body.Close()
-	maxRows := false
-	// need to capture maxrows
-	c.XMLData.StartFunc = func(t xml.StartElement) {
-		if t.Name.Local == "MAXROWS" {
-			maxRows = true
-		}
+	count := 0
+	maxrows := false
+	md := minidom.MiniDom{
+		StartFunc: func(start xml.StartElement) {
+			switch start.Name.Local {
+			case "COUNT":
+				count, _ = CountTag(start).Parse()
+			case "MAXROWS":
+				maxrows = true
+			}
+		},
+		// quit on the the xml tag
+		EndFunc: func(end xml.EndElement) bool {
+			switch end.Name.Local {
+			case XMLElemRETS, XMLElemRETSStatus:
+				return true
+			}
+			return false
+		},
 	}
-	// make sure we exit cleanly
-	c.XMLData.EndFunc = func(t xml.EndElement) bool {
-		switch t.Name.Local {
-		case XMLElemRETS, XMLElemRETSStatus:
-			return true
-		}
-		return false
-	}
-	err := c.XMLData.Walk(c.parser, func(data map[string]string, err error) error {
-		return each(data, err)
-	})
-	return maxRows, err
+	err := md.Walk(c.parser, elem, each)
+	return count, maxrows, err
 }
 
 // Close closesthe connection
@@ -64,13 +62,9 @@ func (c *StandardXMLSearchResult) Close() error {
 }
 
 // NewStandardXMLSearchResult returns an XML search result handler to listen to elements
-func NewStandardXMLSearchResult(body io.ReadCloser, elem string, repeatElems ...string) (*StandardXMLSearchResult, error) {
+func NewStandardXMLSearchResult(body io.ReadCloser) (*StandardXMLSearchResult, error) {
 	parser := DefaultXMLDecoder(body, false)
 	result := &StandardXMLSearchResult{
-		XMLData: XMLData{
-			Prefix:      elem,
-			RepeatElems: repeatElems,
-		},
 		body:   body,
 		parser: parser,
 	}
@@ -82,24 +76,11 @@ func NewStandardXMLSearchResult(body io.ReadCloser, elem string, repeatElems ...
 		}
 		switch t := token.(type) {
 		case xml.StartElement:
-			// clear any accumulated data
-			result.buf.Reset()
 			switch t.Name.Local {
 			case XMLElemRETS, XMLElemRETSStatus:
-				resp, er := ResponseTag(t).Parse()
-				if er != nil {
-					return result, er
-				}
+				resp, err := ResponseTag(t).Parse()
 				result.Response = *resp
-			case "COUNT":
-				result.Count, err = CountTag(t).Parse()
 				return result, err
-			}
-		case xml.EndElement:
-			switch t.Name.Local {
-			case XMLElemRETS, XMLElemRETSStatus:
-				// if there is only a RETS tag.. just exit
-				return result, nil
 			}
 		}
 	}

@@ -4,6 +4,8 @@ provides the searching core
 package rets
 
 import (
+	"encoding/xml"
+	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -18,99 +20,108 @@ func TestSearchXMLEof(t *testing.T) {
 }
 
 func TestSearchXMLBadChar(t *testing.T) {
+	type Listing struct {
+		Row string
+	}
 	rets := `<?xml version="1.0" encoding="UTF-8" ?>
 			<RETS ReplyCode="0" ReplyText="Operation Successful">
-			<COUNT Records="1" />
+			<COUNT Records="5" />
 			<Listings>
 			<PropertyListing>
-			<Row>bad` + "\x0b" + `row</Row>
+				<Row>bad` + "\x0b" + `row</Row>
+			</PropertyListing>
+			<PropertyListing>
+				<Row>good row</Row>
 			</PropertyListing>
 			</Listings>
 			<MAXROWS/>
 			</RETS>`
 	body := ioutil.NopCloser(strings.NewReader(rets))
 
-	cr, err := NewStandardXMLSearchResult(body, "PropertyListing")
+	cr, err := NewStandardXMLSearchResult(body)
 	testutils.Ok(t, err)
 	testutils.Equals(t, StatusOK, cr.Response.Code)
-	testutils.Equals(t, 1, cr.Count)
-	counter := 0
-	maxRows, err := cr.ForEach(func(row map[string]string, err error) error {
-		testutils.Equals(t, "bad row", row["Row"])
-		counter = counter + 1
+	var listings []Listing
+	count, maxRows, err := cr.ForEach("PropertyListing", func(elem io.ReadCloser, err error) error {
+		listing := Listing{}
+		xml.NewDecoder(elem).Decode(&listing)
+		listings = append(listings, listing)
 		return err
 	})
 	testutils.Ok(t, err)
 	testutils.Equals(t, true, maxRows)
-	testutils.Equals(t, 1, counter)
-}
-
-func TestSearchXMLNoEof(t *testing.T) {
-	rets := `<RETS ReplyCode="20201" ReplyText="No Records Found." ></RETS>`
-	body := ioutil.NopCloser(strings.NewReader(rets))
-
-	cr, err := NewStandardXMLSearchResult(body, "PropertyListing")
-	testutils.Ok(t, err)
-	testutils.Equals(t, StatusNoRecords, cr.Response.Code)
-}
-
-func TestSearchXMLEmbeddedRetsStatus(t *testing.T) {
-	rets := `<?xml version="1.0" encoding="UTF-8" ?>
-			<RETS ReplyCode="0" ReplyText="Operation Successful">
-			<RETS-STATUS ReplyCode="20201" ReplyText="No matching records were found" />
-			</RETS>`
-	body := ioutil.NopCloser(strings.NewReader(rets))
-	cr, err := NewStandardXMLSearchResult(body, "PropertyListing")
-	testutils.Ok(t, err)
-	testutils.Equals(t, StatusNoRecords, cr.Response.Code)
+	testutils.Equals(t, 5, count)
+	testutils.Equals(t, 2, len(listings))
+	testutils.Equals(t, "bad row", listings[0].Row)
+	testutils.Equals(t, "good row", listings[1].Row)
 }
 
 func TestSearchXMLParseSearchQuit(t *testing.T) {
-	noEnd := strings.Split(standardXML, "<Commerical>")[0]
+	noEnd := strings.Split(standardXML, "Commercial")[0]
 	body := ioutil.NopCloser(strings.NewReader(noEnd))
 
-	cr, err := NewStandardXMLSearchResult(body, "PropertyListing")
+	cr, err := NewStandardXMLSearchResult(body)
 	testutils.Ok(t, err)
 
-	rowsFound := 0
-	cr.ForEach(func(data map[string]string, err error) error {
-		if err != nil {
-			testutils.Assert(t, strings.Contains(err.Error(), "EOF"), "found something not eof")
-			return err
-		}
-		testutils.Assert(t, len(data) > 0, "should have something")
-		rowsFound++
-		return nil
+	var listings [][]byte
+	count, maxRows, err := cr.ForEach("PropertyListing", func(elem io.ReadCloser, err error) error {
+		tmp, _ := ioutil.ReadAll(elem)
+		listings = append(listings, tmp)
+		return err
 	})
-	testutils.Equals(t, 1, rowsFound)
+	testutils.NotOk(t, err)
+	testutils.Equals(t, false, maxRows)
+	testutils.Equals(t, 10, count)
+	testutils.Equals(t, 1, len(listings))
 }
 
-func TestSearchXMLParseCompact(t *testing.T) {
+func TestSearchXML(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(standardXML))
 
-	cr, err := NewStandardXMLSearchResult(body, "PropertyListing")
+	cr, err := NewStandardXMLSearchResult(body)
 	testutils.Ok(t, err)
 
-	testutils.Equals(t, StatusOK, cr.Response.Code)
-	testutils.Equals(t, "Operation successful.", cr.Response.Text)
-
-	testutils.Equals(t, 10, int(cr.Count))
-
-	counter := 0
-	var datas []map[string]string
-	maxRows, err := cr.ForEach(func(row map[string]string, err error) error {
-		datas = append(datas, row)
-		counter++
+	var listings []io.ReadCloser
+	count, maxRows, err := cr.ForEach("PropertyListing", func(elem io.ReadCloser, err error) error {
+		listings = append(listings, elem)
 		return err
 	})
 	testutils.Ok(t, err)
-
-	testutils.Equals(t, 2, counter)
-	testutils.Equals(t, datas[0]["Business/RESIOWNS"], "Private Owned")
-	testutils.Equals(t, datas[0]["Listing/ListingRid"], "6798")
-	testutils.Equals(t, datas[1]["Business/RESIOWNS"], "Business Owned")
-	testutils.Equals(t, datas[1]["Listing/ListingRid"], "1234")
 	testutils.Equals(t, true, maxRows)
+	testutils.Equals(t, 10, count)
+	testutils.Equals(t, 2, len(listings))
+}
+
+func TestSearchXMLComplex(t *testing.T) {
+	type Listing struct {
+		Business      string  `xml:"Business>RESIOWNS"`
+		Approved      bool    `xml:"Listing>Approved"`
+		MLS           string  `xml:"Listing>MLS"`
+		Disclaimer    string  `xml:"Listing>Disclaimer"`
+		Status        string  `xml:"Listing>Status"`
+		ListingPrice  float64 `xml:"Listing>Price>ListingPrice"`
+		OriginalPrice float64 `xml:"Listing>Price>OriginalPrice"`
+		SellPrice     float64 `xml:"Listing>Price>SellingPrice"`
+	}
+	body := ioutil.NopCloser(strings.NewReader(standardXML))
+
+	cr, err := NewStandardXMLSearchResult(body)
+	testutils.Ok(t, err)
+
+	var listings []Listing
+	count, maxRows, err := cr.ForEach("PropertyListing", func(elem io.ReadCloser, err error) error {
+		if err != nil {
+			return err
+		}
+		listing := Listing{}
+		xml.NewDecoder(elem).Decode(&listing)
+		listings = append(listings, listing)
+		return err
+	})
+	testutils.Ok(t, err)
+	testutils.Equals(t, true, maxRows)
+	testutils.Equals(t, 10, count)
+	testutils.Equals(t, 2, len(listings))
 }
 
 var standardXML = `<?xml version="1.0" encoding="utf-8"?>
@@ -138,19 +149,9 @@ var standardXML = `<?xml version="1.0" encoding="utf-8"?>
               <OriginalPrice>1200000.00</OriginalPrice>
               <SellingPrice>0.00</SellingPrice>
             </Price>
-          </Listing>
-          <Property>
-            <PropertySubtype1>Single Family Residence</PropertySubtype1>
-            <PropertyType>Residential</PropertyType>
-            <Characteristics>
-              <Acres>34.0000</Acres>
-              <LotMeasurement>Acres</LotMeasurement>
-              <LotSizeSource>(Owner)</LotSizeSource>
-              <LotSquareFootage>1481040.00</LotSquareFootage>
-              <RESIROAD>Public</RESIROAD>
-            </Characteristics>
-          </Property>
 		  </PropertyListing>
+	  </Residential>
+	  <Commercial>
 		<PropertyListing>
           <Business>
             <RESIOWNS>Business Owned</RESIOWNS>
@@ -170,20 +171,8 @@ var standardXML = `<?xml version="1.0" encoding="utf-8"?>
               <OriginalPrice>1200000.00</OriginalPrice>
               <SellingPrice>0.00</SellingPrice>
             </Price>
-          </Listing>
-          <Property>
-            <PropertySubtype1>Single Family Residence</PropertySubtype1>
-            <PropertyType>Residential</PropertyType>
-            <Characteristics>
-              <Acres>34.0000</Acres>
-              <LotMeasurement>Acres</LotMeasurement>
-              <LotSizeSource>(Owner)</LotSizeSource>
-              <LotSquareFootage>1481040.00</LotSquareFootage>
-              <RESIROAD>Public</RESIROAD>
-            </Characteristics>
-          </Property>
 		  </PropertyListing>
-		  </Residential>
+		</Commercial>
       </REProperties>
     </REData>
 	<MAXROWS/>
