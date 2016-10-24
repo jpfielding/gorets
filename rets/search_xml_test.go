@@ -151,8 +151,6 @@ var standardXML = `<?xml version="1.0" encoding="utf-8"?>
             </Characteristics>
           </Property>
 		  </PropertyListing>
-        </Residential>
-		<Commerical>
 		<PropertyListing>
           <Business>
             <RESIOWNS>Business Owned</RESIOWNS>
@@ -185,7 +183,7 @@ var standardXML = `<?xml version="1.0" encoding="utf-8"?>
             </Characteristics>
           </Property>
 		  </PropertyListing>
-		</Commercial>
+		  </Residential>
       </REProperties>
     </REData>
 	<MAXROWS/>

@@ -3,7 +3,6 @@ package rets
 import (
 	"bytes"
 	"encoding/xml"
-	"fmt"
 	"io"
 
 	"context"
@@ -39,7 +38,6 @@ func (c *StandardXMLSearchResult) ForEach(each EachEntry) (bool, error) {
 	// need to capture maxrows
 	c.XMLData.StartFunc = func(t xml.StartElement) {
 		if t.Name.Local == "MAXROWS" {
-			fmt.Println("found MAXROWS!!!!!")
 			maxRows = true
 		}
 	}
