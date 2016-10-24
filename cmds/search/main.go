@@ -52,15 +52,33 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	capability, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
+	urls, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
 	if err != nil {
 		panic(err)
 	}
-	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: capability.Logout})
+	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: urls.Logout})
 
-	fmt.Println("Search: ", capability.Search)
+	if urls.GetPayloadList != "" {
+		fmt.Println("Payloads: ", urls.GetPayloadList)
+		payloads, err := rets.GetPayloadList(session, ctx, rets.PayloadListRequest{
+			URL: urls.GetPayloadList,
+			ID:  fmt.Sprintf("%s:%s", searchOpts.Resource, searchOpts.Class),
+		})
+		if err != nil {
+			panic(err)
+		}
+		err = payloads.ForEach(func(payload rets.CompactData, err error) error {
+			fmt.Printf("%v\n", payload)
+			return err
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	fmt.Println("Search: ", urls.Search)
 	req := rets.SearchRequest{
-		URL: capability.Search,
+		URL: urls.Search,
 		SearchParams: rets.SearchParams{
 			Select:     searchOpts.Select,
 			Query:      searchOpts.Query,
@@ -123,6 +141,7 @@ type SearchOptions struct {
 	Resource  string `json:"resource"`
 	Class     string `json:"class"`
 	Format    string `json:"format"`
+	Payload   string `json:"payload"`
 	QueryType string `json:"query-type"`
 	CountType int    `json:"count-type"`
 	Limit     int    `json:"limit"`
@@ -135,6 +154,7 @@ func (o *SearchOptions) SetFlags() {
 	flag.StringVar(&o.Resource, "resource", "Property", "Resource for the search")
 	flag.StringVar(&o.Class, "class", "Residential", "Subtype of resource")
 	flag.StringVar(&o.Format, "format", "COMPACT-DECODED", "Format for the RETS response")
+	flag.StringVar(&o.Payload, "payload", "", "Requested payload format")
 	flag.StringVar(&o.QueryType, "query-type", "DMQL2", "Query type (defaults to DMQL2)")
 	flag.StringVar(&o.Select, "select", "", "Fields to be returned")
 	flag.StringVar(&o.Query, "dmql", "(ModificationTimestamp=2000-01-01T00:00:00+)", "DMQL for the results")

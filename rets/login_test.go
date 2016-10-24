@@ -30,6 +30,9 @@ func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
 	Logout=http://server.com:6103/platinum/logout
 	GetMetadata=http://server.com:6103/platinum/getmetadata
 	ChangePassword=http://server.com:6103/platinum/changepassword
+	X-SampleLinks=/rets2_2/Links
+	X-SupportSite=http://flexmls.com/rets/
+	X-NotificationFeed=http://example.com/atom/feed/private/atom.xml
 	</RETS-RESPONSE>
 	</RETS>`
 	urls, err := parseCapability(
@@ -42,6 +45,7 @@ func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
 	testutils.Equals(t, urls.Response.Code, StatusOK)
 	testutils.Equals(t, urls.Login, "http://server.com:6103/platinum/login")
 	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
+	testutils.Equals(t, "http://example.com/atom/feed/private/atom.xml", urls.AdditionalURLs["X-NotificationFeed"])
 }
 
 func TestPrependHost(t *testing.T) {
@@ -71,6 +75,9 @@ func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 	Logout=/platinum/logout
 	GetMetadata=/platinum/getmetadata
 	ChangePassword=/platinum/changepassword
+	X-SampleLinks=/rets2_2/Links
+	X-SupportSite=http://flexmls.com/rets/
+	X-NotificationFeed=http://example.com/atom/feed/private/atom.xml
 	</RETS-RESPONSE>
 	</RETS>`
 	urls, err := parseCapability(
@@ -83,4 +90,5 @@ func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 	testutils.Equals(t, urls.Response.Code, StatusOK)
 	testutils.Equals(t, urls.Login, "http://server.com:6103/platinum/login")
 	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
+	testutils.Equals(t, "http://server.com:6103/rets2_2/Links", urls.AdditionalURLs["X-SampleLinks"])
 }

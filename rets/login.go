@@ -22,11 +22,27 @@ type LoginRequest struct {
 type CapabilityURLs struct {
 	Response Response
 
-	MemberName, User, Broker, MetadataVersion, MinMetadataVersion string
-	OfficeList                                                    []string
-	TimeoutSeconds                                                int64
+	MemberName,
+	User,
+	Broker,
+	MetadataVersion,
+	MinMetadataVersion string
+	OfficeList     []string
+	TimeoutSeconds int64
+	// X-urls
+	AdditionalURLs map[string]string
 	// urls for web calls
-	Login, Action, Search, Get, GetObject, Logout, GetMetadata, ChangePassword string
+	Action,
+	ChangePassword,
+	GetMetadata,
+	GetObject,
+	Login,
+	LoginComplete,
+	Logout,
+	Search,
+	Update,
+	PostObject,
+	GetPayloadList string
 }
 
 // Login ...
@@ -76,6 +92,9 @@ func parseCapability(body io.ReadCloser, url string) (*CapabilityURLs, error) {
 	reader := bufio.NewReader(strings.NewReader(rets.Response))
 	scanner := bufio.NewScanner(reader)
 
+	c := CapabilityURLs{
+		AdditionalURLs: map[string]string{},
+	}
 	values := map[string]string{}
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -83,21 +102,27 @@ func parseCapability(body io.ReadCloser, url string) (*CapabilityURLs, error) {
 			continue
 		}
 		kv := strings.Split(line, "=")
+		// AdditionalURLs
+		if strings.HasPrefix(kv[0], "X-") {
+			c.AdditionalURLs[kv[0]] = prependHost(url, kv[1])
+		}
 		// force it to lower case so we can find them in the map
 		key := strings.ToLower(strings.TrimSpace(kv[0]))
 		value := strings.TrimSpace(kv[1])
 		values[key] = value
 	}
 
-	c := CapabilityURLs{}
-	c.Login = prependHost(url, values["login"])
 	c.Action = prependHost(url, values["action"])
-	c.Search = prependHost(url, values["search"])
-	c.Get = prependHost(url, values["get"])
-	c.GetObject = prependHost(url, values["getobject"])
-	c.Logout = prependHost(url, values["logout"])
-	c.GetMetadata = prependHost(url, values["getmetadata"])
 	c.ChangePassword = prependHost(url, values["changepassword"])
+	c.GetMetadata = prependHost(url, values["getmetadata"])
+	c.GetObject = prependHost(url, values["getobject"])
+	c.Login = prependHost(url, values["login"])
+	c.LoginComplete = prependHost(url, values["logincomplete"])
+	c.Logout = prependHost(url, values["logout"])
+	c.Search = prependHost(url, values["search"])
+	c.Update = prependHost(url, values["update"])
+	c.PostObject = prependHost(url, values["postobject"])
+	c.GetPayloadList = prependHost(url, values["getpayloadlist"])
 
 	c.TimeoutSeconds, _ = strconv.ParseInt(values["timeoutseconds"], 10, strconv.IntSize)
 	c.Response.Code = rets.ReplyCode
@@ -114,6 +139,9 @@ func parseCapability(body io.ReadCloser, url string) (*CapabilityURLs, error) {
 }
 
 func prependHost(login, other string) string {
+	if other == "" {
+		return ""
+	}
 	otherURL, err := url.Parse(other)
 	// todo do something with this err or kill it
 	if err != nil {
