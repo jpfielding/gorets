@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"io"
-	"strconv"
 	"strings"
 
 	"context"
@@ -118,9 +117,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 				}
 			}
 		case xml.EndElement:
-			elmt := xml.EndElement(t)
-			name := elmt.Name.Local
-			switch name {
+			switch t.Name.Local {
 			case "COLUMNS":
 				result.Columns = CompactRow(result.buf.String()).Parse(result.Delimiter)
 				return result, nil
@@ -147,16 +144,4 @@ func (dt DelimiterTag) Parse() (string, error) {
 		return "", err
 	}
 	return string(decoded), nil
-}
-
-// CountTag ...
-type CountTag xml.StartElement
-
-// Parse ...
-func (ct CountTag) Parse() (int, error) {
-	code, err := strconv.ParseInt(ct.Attr[0].Value, 10, 64)
-	if err != nil {
-		return -1, err
-	}
-	return int(code), nil
 }

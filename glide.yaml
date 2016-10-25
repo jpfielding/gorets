@@ -14,11 +14,9 @@ import:
     - /encoding
     - /transform
   - package: github.com/jpfielding/gotest
-    ref:     9af298f44dfd4448f39984a38ee176cfff9f774f
   - package: github.com/jpfielding/gofilters
-    ref:     74f6f1cc130f1275420877f77a44145c7739c836
   - package: github.com/jpfielding/gowirelog
-    ref:     0e597359079aff7eb6e1df1bb0a73d1c68d6ee63
+  - package: github.com/jpfielding/gominidom
   - package: github.com/gorilla/rpc
   - package: github.com/gorilla/handlers
   - package: github.com/gorilla/websocket
