@@ -12,8 +12,8 @@ import (
 	"context"
 )
 
-// GetObjects ...
-func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (*GetObjectResponse, error) {
+// PrepGetObjects creates an http.Request from a GetObjectRequest
+func PrepGetObjects(r GetObjectRequest) (*http.Request, error) {
 	url, err := url.Parse(r.URL)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,12 @@ func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (*
 
 	url.RawQuery = values.Encode()
 
-	req, err := http.NewRequest(method, url.String(), nil)
+	return http.NewRequest(method, url.String(), nil)
+}
+
+// GetObjects ...
+func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (*GetObjectResponse, error) {
+	req, err := PrepGetObjects(r)
 	if err != nil {
 		return nil, err
 	}
