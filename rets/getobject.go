@@ -101,10 +101,8 @@ func (r *GetObjectResponse) Close() error {
 // GetObjectResult ...
 type GetObjectResult func(*Object, error) error
 
-// GetObjectRequest ...
-type GetObjectRequest struct {
-	/* 5.3 */
-	URL, HTTPMethod,
+// GetObjectParams
+type GetObjectParams struct {
 	Resource,
 	Type,
 	UID,
@@ -114,4 +112,12 @@ type GetObjectRequest struct {
 	ObjectData []string
 	/* 5.4.1 */
 	Location int
+}
+
+// GetObjectRequest ...
+type GetObjectRequest struct {
+	/* 5.3 */
+	URL,
+	HTTPMethod string
+	GetObjectParams
 }
