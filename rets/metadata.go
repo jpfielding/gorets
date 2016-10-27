@@ -14,8 +14,8 @@ type MetadataRequest struct {
 	URL, HTTPMethod, Format, MType, ID string
 }
 
-// MetadataStream ...
-func MetadataStream(requester Requester, ctx context.Context, r MetadataRequest) (io.ReadCloser, error) {
+// PrepMetadataRequest creates an http.Request from a MetadataRequest
+func PrepMetadataRequest(r MetadataRequest) (*http.Request, error) {
 	url, err := url.Parse(r.URL)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,12 @@ func MetadataStream(requester Requester, ctx context.Context, r MetadataRequest)
 
 	url.RawQuery = values.Encode()
 
-	req, err := http.NewRequest(method, url.String(), nil)
+	return http.NewRequest(method, url.String(), nil)
+}
+
+// MetadataStream ...
+func MetadataStream(requester Requester, ctx context.Context, r MetadataRequest) (io.ReadCloser, error) {
+	req, err := PrepMetadataRequest(r)
 	if err != nil {
 		return nil, err
 	}

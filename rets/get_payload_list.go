@@ -14,11 +14,11 @@ type PayloadListRequest struct {
 	URL, HTTPMethod, ID string
 }
 
-// GetPayloadList ...
-func GetPayloadList(requester Requester, ctx context.Context, r PayloadListRequest) (PayloadList, error) {
+// PrepGetPayloadList creates an http.Request from a PayloadListRequest
+func PrepGetPayloadList(r PayloadListRequest) (*http.Request, error) {
 	url, err := url.Parse(r.URL)
 	if err != nil {
-		return PayloadList{}, err
+		return nil, err
 	}
 	values := url.Query()
 	// required
@@ -30,7 +30,12 @@ func GetPayloadList(requester Requester, ctx context.Context, r PayloadListReque
 	}
 	url.RawQuery = values.Encode()
 
-	req, err := http.NewRequest(method, url.String(), nil)
+	return http.NewRequest(method, url.String(), nil)
+}
+
+// GetPayloadList ...
+func GetPayloadList(requester Requester, ctx context.Context, r PayloadListRequest) (PayloadList, error) {
+	req, err := PrepGetPayloadList(r)
 	if err != nil {
 		return PayloadList{}, err
 	}
