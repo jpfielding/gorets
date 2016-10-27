@@ -50,10 +50,12 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		// warning, this does _all_ of the photos
 		response, err := rets.GetObjects(r, ctx, rets.GetObjectRequest{
-			URL:      u.GetObject,
-			Resource: args.Resource,
-			Type:     args.Type,
-			ID:       args.ObjectID,
+			URL: u.GetObject,
+			GetObjectParams: rets.GetObjectParams{
+				Resource: args.Resource,
+				Type:     args.Type,
+				ID:       args.ObjectID,
+			},
 		})
 		if err != nil {
 			return err

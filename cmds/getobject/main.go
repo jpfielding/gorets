@@ -61,10 +61,12 @@ func main() {
 	fmt.Println("GetObject: ", capability.GetObject)
 	// warning, this does _all_ of the photos
 	response, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
-		URL:      capability.GetObject,
-		Resource: getOptions.Resource,
-		Type:     getOptions.Type,
-		ID:       getOptions.ID,
+		URL: capability.GetObject,
+		GetObjectParams: rets.GetObjectParams{
+			Resource: getOptions.Resource,
+			Type:     getOptions.Type,
+			ID:       getOptions.ID,
+		},
 	})
 	if err != nil {
 		panic(err)

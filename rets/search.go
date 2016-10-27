@@ -1,9 +1,11 @@
 package rets
 
 import (
+	"encoding/xml"
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"context"
 )
@@ -45,8 +47,8 @@ type SearchRequest struct {
 	BufferSize int // TODO unused atm
 }
 
-// SearchStream ...
-func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io.ReadCloser, error) {
+// PrepSearchRequest creates an http.Request from a SearchRequest
+func PrepSearchRequest(r SearchRequest) (*http.Request, error) {
 	url, err := url.Parse(r.URL)
 	if err != nil {
 		return nil, err
@@ -85,7 +87,12 @@ func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io
 
 	url.RawQuery = values.Encode()
 
-	req, err := http.NewRequest(method, url.String(), nil)
+	return http.NewRequest(method, url.String(), nil)
+}
+
+// SearchStream ...
+func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io.ReadCloser, error) {
+	req, err := PrepSearchRequest(r)
 	if err != nil {
 		return nil, err
 	}
@@ -95,4 +102,16 @@ func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io
 		return nil, err
 	}
 	return DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType)), nil
+}
+
+// CountTag ...
+type CountTag xml.StartElement
+
+// Parse ...
+func (ct CountTag) Parse() (int, error) {
+	code, err := strconv.ParseInt(ct.Attr[0].Value, 10, 64)
+	if err != nil {
+		return -1, err
+	}
+	return int(code), nil
 }

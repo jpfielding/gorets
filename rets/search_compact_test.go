@@ -37,14 +37,14 @@ var compactDecoded = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 </RETS>
 `
 
-func TestEof(t *testing.T) {
+func TestSearchCompactEof(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(""))
 
 	_, err := NewCompactSearchResult(body)
 	testutils.NotOk(t, err)
 }
 
-func TestBadChar(t *testing.T) {
+func TestSearchCompactBadChar(t *testing.T) {
 	rets := `<?xml version="1.0" encoding="UTF-8" ?>
 			<RETS ReplyCode="0" ReplyText="Operation Successful">
 			<COUNT Records="1" />
@@ -67,7 +67,7 @@ func TestBadChar(t *testing.T) {
 	})
 }
 
-func TestNoEof(t *testing.T) {
+func TestSearchCompactNoEof(t *testing.T) {
 	rets := `<RETS ReplyCode="20201" ReplyText="No Records Found." ></RETS>`
 	body := ioutil.NopCloser(strings.NewReader(rets))
 
@@ -76,7 +76,7 @@ func TestNoEof(t *testing.T) {
 	testutils.Equals(t, StatusNoRecords, cr.Response.Code)
 }
 
-func TestEmbeddedRetsStatus(t *testing.T) {
+func TestSearchCompactEmbeddedRetsStatus(t *testing.T) {
 	rets := `<?xml version="1.0" encoding="UTF-8" ?>
 			<RETS ReplyCode="0" ReplyText="Operation Successful">
 			<RETS-STATUS ReplyCode="20201" ReplyText="No matching records were found" />
@@ -87,7 +87,7 @@ func TestEmbeddedRetsStatus(t *testing.T) {
 	testutils.Equals(t, StatusNoRecords, cr.Response.Code)
 }
 
-func TestParseSearchQuit(t *testing.T) {
+func TestSearchCompactParseSearchQuit(t *testing.T) {
 	noEnd := strings.Split(compactDecoded, "<MAXROWS/>")[0]
 	body := ioutil.NopCloser(strings.NewReader(noEnd))
 
@@ -107,7 +107,7 @@ func TestParseSearchQuit(t *testing.T) {
 	testutils.Equals(t, 8, rowsFound)
 }
 
-func TestParseCompact(t *testing.T) {
+func TestSearchCompactParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(compactDecoded))
 
 	cr, err := NewCompactSearchResult(body)

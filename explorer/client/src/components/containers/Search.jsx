@@ -65,7 +65,7 @@ class Search extends React.Component {
         pathname: '/search/metadata',
         query: {
           id: searchParams.id,
-          resource: searchParams.class,
+          resource: searchParams.resource,
           keyFieldValue: selectedVal,
           types: availableObjectTypes.join(','),
         },
