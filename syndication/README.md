@@ -1,4 +1,4 @@
-gorets
+RESO Syndication
 ======
 
 RETS syndication in Go
@@ -6,11 +6,12 @@ RETS syndication in Go
 The attempt is to meet 2012-03 compliance.
 
 Based on the
+
 http://www.reso.org/schemas-for-syndication/
 
+and Chris Ridenour's work mapping syndication.
+
 Find us at gophers.slack.com#gorets
-
-
 
 ```
 	in := doms := ioutil.NopCloser(...)
