@@ -1253,11 +1253,11 @@ type Listing struct {
 	// should be used.
 	AlternatePrices *[]AlternatePrice `xml:"AlernatePrices,omitempty" json:",omitempty"`
 	// The URL for the original listing.
-	ListingUrl string `xml:"ListingURL"`
+	ListingURL string `xml:"ListingURL"`
 	// Name of the listing provider
 	ProviderName string `xml:"ProviderName"`
 	// URL of the listing provider
-	ProviderUrl string `xml:"ProviderURL"`
+	ProviderURL string `xml:"ProviderURL"`
 	// The source of the listing information
 	//
 	// Possible values:
