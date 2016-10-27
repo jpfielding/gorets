@@ -9,9 +9,9 @@ import (
 // EachListing listens to a function that walks listings
 type EachListing func(Listing, error) error
 
-// FromMinidom creates an adapter to be used with something that walks a large stream
+// ToListing creates an adapter to be used with something that walks a large stream
 // and segments it into smaller doms
-func FromMinidom(each EachListing) func(io.ReadCloser, error) error {
+func ToListing(each EachListing) func(io.ReadCloser, error) error {
 	return func(body io.ReadCloser, err error) error {
 		if err != nil {
 			return err
@@ -22,9 +22,9 @@ func FromMinidom(each EachListing) func(io.ReadCloser, error) error {
 	}
 }
 
-// RetsSyndicationListings is a top level element for sharing a
+// Listings is a top level element for sharing a
 // collection of listings.
-type RetsSyndicationListings struct {
+type Listings struct {
 	// The unique id, or key for this collection of listings.
 	ListingsKey string `xml:"listingsKey,attr"`
 	// The version number for this schema.
