@@ -21,13 +21,17 @@ Find us at gophers.slack.com#gorets
 	md := minidom.MiniDom{
 			StartFunc: func(start xml.StartElement) {
 				switch start.Name.Local {
-				case "RETS":
+				case "Listings":
 					for _, v := range start.Attr {
 						switch v.Name.Local {
-						case "Listings":
-							parser.DecodeElement(&listings, &start)
-						case "Dislaimer":
-							listings.Disclaimer = start.Value
+						case "listingsKey":
+							listings.ListingsKey = v.Value
+						case "version":
+							listings.version = v.Value
+						case "versionTimestamp":
+							listings.VersionTimestamp = v.Value
+						case "lang":
+							listings.Language = v.Value
 						}
 					}
 				}
