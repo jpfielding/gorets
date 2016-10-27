@@ -36,11 +36,9 @@ Find us at gophers.slack.com#gorets
 			EndFunc: minidom.QuitAt("Listings"),
 		}
 	}
-	err := md.Walk(parser, "Listing", func(segment io.ReadCloser, err error) error {
-		tmp := Listing{}
-		xml.NewDecoder(segment).Decode(&tmp)
+	err := md.Walk(parser, "Listing", ToListing(func(l Listing, err error) error {
 		// .... process the listing here
 		return err
-	})
+	}))
 
 ```
