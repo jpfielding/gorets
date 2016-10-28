@@ -14,8 +14,8 @@ and Chris Ridenour's work mapping syndication (http://github.com/cridenour)
 Find us at gophers.slack.com#gorets
 
 ```
-	in := doms := ioutil.NopCloser(...)
-	parser := xml.NewDecoder(listings)
+	in := ioutil.NopCloser(...)
+	parser := xml.NewDecoder(in)
 	listings := Listings{}
 
 	// minidom isnt necessary but its crazy useful for massive streams
