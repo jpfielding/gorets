@@ -46,6 +46,9 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 	fmt.Printf("object get params: %v\n", args)
 
 	s := sessions.Open(args.ID)
+	if s == nil {
+		return fmt.Errorf("no source found for %s", args.ID)
+	}
 	ctx := context.Background()
 	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		// warning, this does _all_ of the photos

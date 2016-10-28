@@ -46,7 +46,7 @@ func PrepGetObjects(r GetObjectRequest) (*http.Request, error) {
 	return http.NewRequest(method, url.String(), nil)
 }
 
-// GetObjects ...
+// GetObjects sends the GetObject request
 func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (*GetObjectResponse, error) {
 	req, err := PrepGetObjects(r)
 	if err != nil {
@@ -60,7 +60,7 @@ func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (*
 	return &GetObjectResponse{response: resp}, nil
 }
 
-// GetObjectResponse ...
+// GetObjectResponse is the response holder for processing GetObject requests
 type GetObjectResponse struct {
 	response *http.Response
 }
@@ -103,10 +103,10 @@ func (r *GetObjectResponse) Close() error {
 	return r.response.Body.Close()
 }
 
-// GetObjectResult ...
+// GetObjectResult is the callback walking func for retrieving objets
 type GetObjectResult func(*Object, error) error
 
-// GetObjectParams
+// GetObjectParams holds the parameters for GetObject requests
 type GetObjectParams struct {
 	Resource,
 	Type,

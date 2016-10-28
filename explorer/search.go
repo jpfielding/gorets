@@ -14,12 +14,12 @@ type SearchArgs struct {
 	Resource  string `json:"resource"`
 	Class     string `json:"class"`
 	Format    string `json:"format"`
-	QueryType string `json:"query-type"`
+	Select    string `json:"select"`
 	CountType int    `json:"count-type"`
 	Offset    int    `json:"offset"`
 	Limit     int    `json:"limit"`
 	Query     string `json:"query"`
-	Select    string `json:"select"`
+	QueryType string `json:"query-type"`
 }
 
 // SearchPage ...
@@ -43,6 +43,9 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 		args.Format = "COMPACT_DECODED"
 	}
 	s := sessions.Open(args.ID)
+	if s == nil {
+		return fmt.Errorf("no source found for %s", args.ID)
+	}
 	fmt.Printf("%v\n", s.Connection)
 	ctx := context.Background()
 	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {

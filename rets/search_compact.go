@@ -106,7 +106,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 				}
 				result.Response = *resp
 			case "COUNT":
-				result.Count, err = CountTag(t).Parse()
+				result.Count, err = countTag(t).Parse()
 				if err != nil {
 					return result, err
 				}

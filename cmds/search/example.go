@@ -7,8 +7,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jpfielding/gorets/cmds/common"
@@ -88,23 +90,30 @@ func main() {
 			QueryType:  searchOpts.QueryType,
 			Count:      searchOpts.CountType,
 			Limit:      searchOpts.Limit,
-			// Offset:     -1,
 		},
 	}
+	if strings.HasPrefix(req.SearchParams.Format, "COMPACT") {
+		processCompact(session, ctx, req, output)
+	} else {
+		processXML(session, ctx, req, searchOpts.ElementName, output)
+	}
+}
 
-	w := csv.NewWriter(os.Stdout)
+func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest, elem string, output *string) {
+	w := os.Stdout
 	if *output != "" {
 		os.MkdirAll(*output, 0777)
-		f, _ := os.Create(*output + "/results.csv")
+		f, _ := os.Create(*output + "/results.xml")
 		defer f.Close()
-		w = csv.NewWriter(f)
 	}
-	defer w.Flush()
 
 	// loop over all the pages we need
 	for {
 		fmt.Printf("Querying next page: %v\n", req)
-		result, err := rets.SearchCompact(session, ctx, req)
+		if elem == "" {
+			elem = "Listing"
+		}
+		result, err := rets.StandardXMLSearch(sess, ctx, req)
 		if err != nil {
 			panic(err)
 		}
@@ -118,9 +127,67 @@ func main() {
 		default: // shit hit the fan
 			panic(errors.New(result.Response.Text))
 		}
-		w.Write(result.Columns)
 		count := 0
+		_, more, err := result.ForEach(elem, func(row io.ReadCloser, err error) error {
+			if err != nil {
+				return err
+			}
+			count++
+			io.Copy(w, row)
+			return err
+		})
+		if err != nil {
+			panic(err)
+		}
+		result.Close()
+		if err != nil {
+			panic(err)
+		}
+		if !more {
+			return
+		}
+		if req.Offset == 0 {
+			req.Offset = 1
+		}
+		req.Offset = req.Offset + count
+	}
+}
+
+func processCompact(sess rets.Requester, ctx context.Context, req rets.SearchRequest, output *string) {
+	w := csv.NewWriter(os.Stdout)
+	if *output != "" {
+		os.MkdirAll(*output, 0777)
+		f, _ := os.Create(*output + "/results.csv")
+		defer f.Close()
+		w = csv.NewWriter(f)
+	}
+	defer w.Flush()
+
+	// loop over all the pages we need
+	for {
+		fmt.Printf("Querying next page: %v\n", req)
+		result, err := rets.SearchCompact(sess, ctx, req)
+		if err != nil {
+			panic(err)
+		}
+		switch result.Response.Code {
+		case rets.StatusOK:
+			// we got some daters
+		case rets.StatusNoRecords:
+			return
+		case rets.StatusSearchError:
+			fallthrough
+		default: // shit hit the fan
+			panic(errors.New(result.Response.Text))
+		}
+		count := 0
+		if count == 0 {
+			w.Write(result.Columns)
+		}
 		hasMoreRows, err := result.ForEach(func(row rets.Row, err error) error {
+			if err != nil {
+				return err
+			}
 			w.Write(row)
 			count++
 			return err
@@ -132,21 +199,32 @@ func main() {
 		if !hasMoreRows {
 			return
 		}
+		if req.Offset == 0 {
+			req.Offset = 1
+		}
 		req.Offset = req.Offset + count
 	}
 }
 
 // SearchOptions ...
 type SearchOptions struct {
-	Resource  string `json:"resource"`
-	Class     string `json:"class"`
-	Format    string `json:"format"`
-	Payload   string `json:"payload"`
-	QueryType string `json:"query-type"`
-	CountType int    `json:"count-type"`
-	Limit     int    `json:"limit"`
+	Resource string `json:"resource"`
+	Class    string `json:"class"`
+
+	Format string `json:"format"`
+	Select string `json:"select"`
+
 	Query     string `json:"query"`
-	Select    string `json:"select"`
+	QueryType string `json:"query-type"`
+
+	Payload string `json:"payload"`
+
+	// necessary for xml formats and extracting the sub dom
+	ElementName string `json:"element-name"`
+
+	// StandardNames *int   string `json:"standard-names"`
+	CountType int `json:"count-type"`
+	Limit     int `json:"limit"`
 }
 
 // SetFlags ...

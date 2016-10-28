@@ -10,41 +10,54 @@ import (
 	"context"
 )
 
+// Count is the type of serverside count response that should be included
 const (
 	// CountNone dont include a count
-	CountNone = 0
+	CountNone = iota
 	// CountIncluded include a count after the data
-	CountIncluded = 1
+	CountIncluded = iota
 	// CountOnly returns only the count
-	CountOnly = 2
+	CountOnly = iota
 )
 
-// TODO include standard names constants here
+const (
+	// StandardNames requests normalized naming
+	StandardNames = iota
+	// SystemNames (the default) requests whatever field names are used by the server
+	SystemNames = iota
+)
 
-// SearchParams ...
+// SearchParams is the configuration for creating a SearchReqeust
 type SearchParams struct {
-	Class,
-	SearchType,
-	Format, // 7.4.2 COMPACT | COMPACT-DECODED | STANDARD-XML
-	Select,
-	Query,
-	QueryType,
-	RestrictedIndicator,
+	SearchType, // Property
+	Class string // Residential
+
+	Format, // 7.4.2 COMPACT | COMPACT-DECODED | STANDARD-XML | STANDARD-XML:dtd-version
+	Select string
+
+	// Payload should not be used with the format,select pair
 	Payload string //The Client may request a specific XML format for the return set.
 
-	Count,
-	Limit, // <0 => "NONE"
+	// Query should be in the format specified by QueryType
+	Query,
+	QueryType string // DMQL2 is the standard option
+
+	// RestrictedIndicator is the symbol to be used for fields that are blanked serverside (e.g. ####)
+	RestrictedIndicator string
+
+	StandardNames int // (0|1|)
+	Count         int // (|0|1|2)
+	Limit         int // <0 => "NONE"
+	// Offset is properly started at 1, or left blank and assumed to have been 1
 	Offset int
 }
 
-// SearchRequest ...
+// SearchRequest holds the information needed to send a RETS request
 type SearchRequest struct {
 	URL,
 	HTTPMethod string
 
 	SearchParams
-
-	BufferSize int // TODO unused atm
 }
 
 // PrepSearchRequest creates an http.Request from a SearchRequest
@@ -62,15 +75,20 @@ func PrepSearchRequest(r SearchRequest) (*http.Request, error) {
 	optionalString := OptionalStringValue(values)
 	optionalString("Format", r.Format)
 	optionalString("Select", r.Select)
+	optionalString("Payload", r.Payload)
 	optionalString("Query", r.Query)
 	optionalString("QueryType", r.QueryType)
 	optionalString("RestrictedIndicator", r.RestrictedIndicator)
-	optionalString("Payload", r.Payload)
 
 	optionalInt := OptionalIntValue(values)
-	optionalInt("Count", r.Count)
+	if r.Count > 0 {
+		optionalInt("Count", r.Count)
+	}
 	if r.Offset > 0 {
 		optionalInt("Offset", r.Offset)
+	}
+	if r.StandardNames > 0 {
+		optionalInt("StandardNames", r.StandardNames)
 	}
 	// limit is unique in that it can send a value of "NONE"
 	switch {
@@ -90,7 +108,7 @@ func PrepSearchRequest(r SearchRequest) (*http.Request, error) {
 	return http.NewRequest(method, url.String(), nil)
 }
 
-// SearchStream ...
+// SearchStream returns the raw stream from the RETS server response
 func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io.ReadCloser, error) {
 	req, err := PrepSearchRequest(r)
 	if err != nil {
@@ -104,11 +122,11 @@ func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io
 	return DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType)), nil
 }
 
-// CountTag ...
-type CountTag xml.StartElement
+// countTag wraps an xml.StartElement to extract response Count information
+type countTag xml.StartElement
 
 // Parse ...
-func (ct CountTag) Parse() (int, error) {
+func (ct countTag) Parse() (int, error) {
 	code, err := strconv.ParseInt(ct.Attr[0].Value, 10, 64)
 	if err != nil {
 		return -1, err

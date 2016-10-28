@@ -51,6 +51,9 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	fmt.Printf("metadata get params: %v\n", args)
 
 	s := sessions.Open(args.ID)
+	if s == nil {
+		return fmt.Errorf("no source found for %s", args.ID)
+	}
 	fmt.Printf("connections params for %s %v\n", args.ID, s.Connection)
 	if JSONExist(s.MSystem()) {
 		standard := metadata.MSystem{}
