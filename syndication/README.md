@@ -22,19 +22,14 @@ Find us at gophers.slack.com#gorets
 	md := minidom.MiniDom{
 			StartFunc: func(start xml.StartElement) {
 				switch start.Name.Local {
-				case "Listings":
+					attrs := map[string]string{}
 					for _, v := range start.Attr {
-						switch v.Name.Local {
-						case "listingsKey":
-							listings.ListingsKey = v.Value
-						case "version":
-							listings.version = v.Value
-						case "versionTimestamp":
-							listings.VersionTimestamp = v.Value
-						case "lang":
-							listings.Language = v.Value
-						}
+						attrs[v.Name.Local] = v.Value
 					}
+					listings.ListingsKey = attrs["listingsKey"]
+					listings.Version = attrs["version"]
+					listings.VersionTimestamp = attrs["versionTimestamp"]
+					listings.Language = attrs["lang"]
 				}
 			},
 			// quit on the the xml tag
