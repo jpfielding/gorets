@@ -27,7 +27,7 @@ type StandardXMLSearchResult struct {
 }
 
 // ForEach returns Count and MaxRows and any error that 'each' wont handle
-func (c *StandardXMLSearchResult) ForEach(elem string, each minidom.EachDOM) (int, bool, error) {
+func (c *StandardXMLSearchResult) ForEach(match minidom.Matcher, each minidom.EachDOM) (int, bool, error) {
 	defer c.body.Close()
 	count := 0
 	maxrows := false
@@ -49,7 +49,7 @@ func (c *StandardXMLSearchResult) ForEach(elem string, each minidom.EachDOM) (in
 			return false
 		},
 	}
-	err := md.Walk(c.parser, elem, each)
+	err := md.Walk(c.parser, match, each)
 	return count, maxrows, err
 }
 

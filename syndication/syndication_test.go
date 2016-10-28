@@ -34,7 +34,7 @@ func TestSimple(t *testing.T) {
 		// quit on the the xml tag
 		EndFunc: minidom.QuitAt("Listings"),
 	}
-	err := md.Walk(parser, "Listing", ToListing(func(l Listing, err error) error {
+	err := md.Walk(parser, minidom.ByName("Listing"), ToListing(func(l Listing, err error) error {
 		listings.Listings = append(listings.Listings, l)
 		return err
 	}))

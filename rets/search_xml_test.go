@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jpfielding/gominidom/minidom"
 	testutils "github.com/jpfielding/gotest/testutils"
 )
 
@@ -42,7 +43,7 @@ func TestSearchXMLBadChar(t *testing.T) {
 	testutils.Ok(t, err)
 	testutils.Equals(t, StatusOK, cr.Response.Code)
 	var listings []Listing
-	count, maxRows, err := cr.ForEach("PropertyListing", func(elem io.ReadCloser, err error) error {
+	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
 		listing := Listing{}
 		xml.NewDecoder(elem).Decode(&listing)
 		listings = append(listings, listing)
@@ -64,7 +65,7 @@ func TestSearchXMLParseSearchQuit(t *testing.T) {
 	testutils.Ok(t, err)
 
 	var listings [][]byte
-	count, maxRows, err := cr.ForEach("PropertyListing", func(elem io.ReadCloser, err error) error {
+	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
 		tmp, _ := ioutil.ReadAll(elem)
 		listings = append(listings, tmp)
 		return err
@@ -82,7 +83,7 @@ func TestSearchXML(t *testing.T) {
 	testutils.Ok(t, err)
 
 	var listings []io.ReadCloser
-	count, maxRows, err := cr.ForEach("PropertyListing", func(elem io.ReadCloser, err error) error {
+	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
 		listings = append(listings, elem)
 		return err
 	})
@@ -109,7 +110,7 @@ func TestSearchXMLComplex(t *testing.T) {
 	testutils.Ok(t, err)
 
 	var listings []Listing
-	count, maxRows, err := cr.ForEach("PropertyListing", func(elem io.ReadCloser, err error) error {
+	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
 		if err != nil {
 			return err
 		}

@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -104,15 +106,20 @@ func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest
 	if *output != "" {
 		os.MkdirAll(*output, 0777)
 		f, _ := os.Create(*output + "/results.xml")
+		w = f
 		defer f.Close()
 	}
 
+	if elem == "" {
+		elem = ".*Listing$"
+	}
+	rgx, _ := regexp.Compile(elem)
+	match := func(t xml.StartElement) bool {
+		return rgx.MatchString(t.Name.Local)
+	}
 	// loop over all the pages we need
 	for {
 		fmt.Printf("Querying next page: %v\n", req)
-		if elem == "" {
-			elem = "Listing"
-		}
 		result, err := rets.StandardXMLSearch(sess, ctx, req)
 		if err != nil {
 			panic(err)
@@ -128,7 +135,7 @@ func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest
 			panic(errors.New(result.Response.Text))
 		}
 		count := 0
-		_, more, err := result.ForEach(elem, func(row io.ReadCloser, err error) error {
+		_, more, err := result.ForEach(match, func(row io.ReadCloser, err error) error {
 			if err != nil {
 				return err
 			}
