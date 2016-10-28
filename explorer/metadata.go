@@ -9,7 +9,7 @@ import (
 
 	"github.com/jpfielding/gorets/metadata"
 	"github.com/jpfielding/gorets/rets"
-	"github.com/jpfielding/gorets/retsutil"
+	"github.com/jpfielding/gorets/util"
 )
 
 // MetadataService ...
