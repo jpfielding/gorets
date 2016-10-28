@@ -9,7 +9,7 @@ Based on the
 
 http://www.reso.org/schemas-for-syndication/
 
-and Chris Ridenour's work mapping syndication.
+and Chris Ridenour's work mapping syndication (http://github.com/cridenour)
 
 Find us at gophers.slack.com#gorets
 

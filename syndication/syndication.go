@@ -22,6 +22,8 @@ func ToListing(each EachListing) func(io.ReadCloser, error) error {
 	}
 }
 
+// initial Syndication mappings courtesy of http://github.com/cridenour
+
 // Listings is a top level element for sharing a
 // collection of listings.
 type Listings struct {
@@ -220,17 +222,17 @@ type PriceWithFrequency struct {
 	// Annually
 	// Seasonal
 	//
-	Frequency string `xml:"http://rets.org/xsd/RETSCommons currencyPeriod,attr"`
+	Frequency string `xml:"http://rets.org/xsd/RETSCommons currencyPeriod,attr,omitempty"`
 	// The NAR Information Security Guidelines class.
 	// Possible values: Public, Confidential, Secret
 	// Default: Confidential
-	SecurityClass string `xml:"http://rets.org/xsd/RETSCommons isgSecurityClass,attr"`
+	SecurityClass string `xml:"http://rets.org/xsd/RETSCommons isgSecurityClass,attr,omitempty"`
 	// The currency code.
 
 	// This document uses the three character ASCII currency code
 	// values defined in ISO 4217.
 	// Default: USD
-	Currency string `xml:"http://rets.org/xsd/RETSCommons currencyCode,attr"`
+	Currency string `xml:"http://rets.org/xsd/RETSCommons currencyCode,attr,omitempty"`
 	// Price inherits from a nullable decimal in XSD.
 	Value string `xml:",chardata"`
 }
@@ -424,7 +426,7 @@ type Participant struct {
 	// key field for the participant.
 	ID *string `xml:"ParticipantId,omitempty" json:",omitempty"`
 	// List of participant codes
-	Codes *[]ParticipantCode `xml:"ParticipantCode,omitempty" json:",omitempty"`
+	Codes []ParticipantCode `xml:"ParticipantCode,omitempty" json:",omitempty"`
 	// First Name
 	FirstName *string `xml:"FirstName,omitempty" json:",omitempty"`
 	// Last Name
@@ -448,9 +450,9 @@ type Participant struct {
 	// Address
 	Address *Address `xml:"Address,omitempty" json:",omitempty"`
 	// A collection of licenses for the participant
-	Licenses *[]License `xml:"Licenses>License,omitempty" json:",omitempty"`
+	Licenses []License `xml:"Licenses>License,omitempty" json:",omitempty"`
 	// Allow for value/description pair as an open bucket for extensibility.
-	AdditionalInfo *[]ValueDescription `xml:"ParticipantAdditionalInformation,omitempty" json:",omitempty"`
+	AdditionalInfo []ValueDescription `xml:"ParticipantAdditionalInformation,omitempty" json:",omitempty"`
 }
 
 // OfficeCode is an application defined encoding for the office.
@@ -472,23 +474,23 @@ type Office struct {
 	// The well-known identifier for the
 	// office. It is not necessarily the
 	// key field for the office.
-	ID          string        `xml:"OfficeId"`
-	Level       *string       `xml:"Level,omitempty" json:",omitempty"`
-	OfficeCodes *[]OfficeCode `xml:"OfficeCode,omitempty" json:",omitempty"`
+	ID          string       `xml:"OfficeId"`
+	Level       *string      `xml:"Level,omitempty" json:",omitempty"`
+	OfficeCodes []OfficeCode `xml:"OfficeCode,omitempty" json:",omitempty"`
 	// The name of the office.
 	// For example, "Le Page Westside"
 	Name          *string `xml:"Name,omitempty" json:",omitempty"`
 	CorporateName *string `xml:"CorporateName,omitempty" json:",omitempty"`
 	BrokerID      *string `xml:"BrokerId,omitempty" json:",omitempty"`
 	// The identifier for the main office of any type of group of offices
-	MainOfficeID   *string             `xml:"MainOfficeId,omitempty" json:",omitempty"`
-	Phone          *string             `xml:"PhoneNumber,omitempty" json:",omitempty"`
-	Fax            *string             `xml:"Fax,omitempty" json:",omitempty"`
-	Addresss       *Address            `xml:"Address,omitempty" json:",omitempty"`
-	Email          *string             `xml:"OfficeEmail,omitempty" json:",omitempty"`
-	Website        *string             `xml:"Website,omitempty" json:",omitempty"`
-	Logo           *string             `xml:"OfficeLogoURL,omitempty" json:",omitempty"`
-	AdditionalInfo *[]ValueDescription `xml:"OfficeAdditionalInformation,omitempty" json:",omitempty"`
+	MainOfficeID   *string            `xml:"MainOfficeId,omitempty" json:",omitempty"`
+	Phone          *string            `xml:"PhoneNumber,omitempty" json:",omitempty"`
+	Fax            *string            `xml:"Fax,omitempty" json:",omitempty"`
+	Addresss       *Address           `xml:"Address,omitempty" json:",omitempty"`
+	Email          *string            `xml:"OfficeEmail,omitempty" json:",omitempty"`
+	Website        *string            `xml:"Website,omitempty" json:",omitempty"`
+	Logo           *string            `xml:"OfficeLogoURL,omitempty" json:",omitempty"`
+	AdditionalInfo []ValueDescription `xml:"OfficeAdditionalInformation,omitempty" json:",omitempty"`
 }
 
 // Business ...
@@ -542,7 +544,7 @@ type Community struct {
 	// planned developments, time-share projects,
 	Subdivision *SecureString `xml:"http://rets.org/xsd/RETSCommons Subdivision,omitempty" json:",omitempty"`
 	// The collection of schools for a given property.
-	Schools *[]School `xml:"http://rets.org/xsd/RETSCommons Schools>School,omitempty" json:",omitempty"`
+	Schools []School `xml:"http://rets.org/xsd/RETSCommons Schools>School,omitempty" json:",omitempty"`
 	// The name of the development, neighborhood or
 	// association in which the property is located.
 	Name *SecureString `xml:"http://rets.org/xsd/RETSCommons CommunityName,omitempty" json:",omitempty"`
@@ -551,7 +553,7 @@ type Community struct {
 	// in each household are 55 or older. May include items such as:
 	// assisted living, senior center, etc.
 	SeniorCommunity *SecureString `xml:"http://rets.org/xsd/RETSCommons SeniorCommunity,omitempty" json:",omitempty"`
-	Structures      *[]Structure  `xml:"http://rets.org/xsd/RETSCommons ExistingStructures>ExistingStructure,omitempty" json:",omitempty"`
+	Structures      []Structure   `xml:"http://rets.org/xsd/RETSCommons ExistingStructures>ExistingStructure,omitempty" json:",omitempty"`
 }
 
 // Neighborhood has a name and optional description
@@ -585,7 +587,7 @@ type Location struct {
 	// The total number of units in the building of the listing
 	BuildingUnitCount *int `xml:"BuildingUnitCount,omitempty" json:",omitempty"`
 	// Neighborhood the property is located in
-	Neighborhoods *[]Neighborhood `xml:"Neighborhoods>Neighborhood,omitempty" json:",omitempty"`
+	Neighborhoods []Neighborhood `xml:"Neighborhoods>Neighborhood,omitempty" json:",omitempty"`
 }
 
 // OpenHouse ...
@@ -604,8 +606,10 @@ type Tax struct {
 	Description string `xml:"TaxDescription"`
 }
 
-// Expense ... TODO
+// Expense ...
 type Expense struct {
+	Category string              `xml:"ExpenseCategory,omitempty" json:",omitempty"`
+	Value    *PriceWithFrequency `xml:"ExpenseValue,omitempty" json:",omitempty"`
 }
 
 // Characteristics ...
@@ -714,7 +718,7 @@ type Characteristics struct {
 	// None
 	// Other
 	//
-	Appliances *[]OtherChoice `xml:"Appliances>Appliance,omitempty" json:",omitempty"`
+	Appliances []OtherChoice `xml:"Appliances>Appliance,omitempty" json:",omitempty"`
 	// Description of the architectural design of the property listed.
 	//
 	// Possibile values:
@@ -816,7 +820,7 @@ type Characteristics struct {
 	// Other
 	// None
 	//
-	CoolingSystems *[]OtherChoice `xml:"CoolingSystems>CoolingSystem,omitempty" json:",omitempty"`
+	CoolingSystems []OtherChoice `xml:"CoolingSystems>CoolingSystem,omitempty" json:",omitempty"`
 	// Indicates whether or not the property listed has one or more decks.
 	HasDeck *bool `xml:"HasDeck,omitempty" json:",omitempty"`
 	// Indicates whether or not the property listed has disabled access ramps,
@@ -875,7 +879,7 @@ type Characteristics struct {
 	// Other
 	// None
 	//
-	ExteriorTypes *[]OtherChoice `xml:"ExteriorTypes>ExteriorType,omitempty" json:",omitempty"`
+	ExteriorTypes []OtherChoice `xml:"ExteriorTypes>ExteriorType,omitempty" json:",omitempty"`
 	// Indicates whether or not the listed property has a fireplace.
 	HasFireplace *bool `xml:"HasFireplace,omitempty" json:",omitempty"`
 	// Collection of floor coverings.
@@ -918,7 +922,7 @@ type Characteristics struct {
 	// Other
 	// None
 	//
-	FloorCoverings *[]OtherChoice `xml:"FloorCoverings>FloorCovering,omitempty" json:",omitempty"`
+	FloorCoverings []OtherChoice `xml:"FloorCoverings>FloorCovering,omitempty" json:",omitempty"`
 	// Indicates whether or not a garden is located on the listed property.
 	HasGarden *bool `xml:"HasGarden,omitempty" json:",omitempty"`
 	// Indicates whether the listed property has gated entry.
@@ -947,7 +951,7 @@ type Characteristics struct {
 	// Other
 	// None
 	//
-	HeatingFuels *[]OtherChoice `xml:"HeatingFuels>HeatingFuel,omitempty" json:",omitempty"`
+	HeatingFuels []OtherChoice `xml:"HeatingFuels>HeatingFuel,omitempty" json:",omitempty"`
 	// Types of heating system.
 	//
 	// Possible values:
@@ -983,7 +987,7 @@ type Characteristics struct {
 	// Unknown
 	// Other
 	// None
-	HeatingSystems *[]OtherChoice `xml:"HeatingSystems>HeatingSystem,omitempty" json:",omitempty"`
+	HeatingSystems []OtherChoice `xml:"HeatingSystems>HeatingSystem,omitempty" json:",omitempty"`
 	// Indicates whether the property has one or more hot tubs or spas.
 	HasHotTubSpa *bool `xml:"HasHotTubSpa,omitempty" json:",omitempty"`
 	// Indicates whether the property has an intercom.
@@ -1059,7 +1063,7 @@ type Characteristics struct {
 	// Other
 	// None
 	//
-	ParkingTypes *[]OtherChoice `xml:"ParkingTypes>ParkingType,omitempty" json:",omitempty"`
+	ParkingTypes []OtherChoice `xml:"ParkingTypes>ParkingType,omitempty" json:",omitempty"`
 	// Indicates whether the property has one or more patios.
 	HasPatio *bool `xml:"HasPatio,omitempty" json:",omitempty"`
 	// Indicates whether the property has one or more ponds.
@@ -1101,7 +1105,7 @@ type Characteristics struct {
 	// Unknown
 	// Other
 	//
-	RoofTypes *[]OtherChoice `xml:"RoofTypes>RoofType,omitempty" json:",omitempty"`
+	RoofTypes []OtherChoice `xml:"RoofTypes>RoofType,omitempty" json:",omitempty"`
 	// Indicates the number of rooms.
 	RoomCount *int `xml:"RoomCount,omitempty" json:",omitempty"`
 	// Collection of rooms in the property.
@@ -1169,7 +1173,7 @@ type Characteristics struct {
 	// Unknown
 	// Other
 	//
-	Rooms *[]OtherChoice `xml:"Rooms>Room,omitempty" json:",omitempty"`
+	Rooms []OtherChoice `xml:"Rooms>Room,omitempty" json:",omitempty"`
 	// Indicates whether the property has one or more
 	// RV Parking spot or area.
 	HasRVParking *bool `xml:"HasRVParking,omitempty" json:",omitempty"`
@@ -1216,7 +1220,7 @@ type Characteristics struct {
 	// Water
 	// Other
 	//
-	ViewTypes *[]OtherChoice `xml:"ViewTypes>ViewType,omitempty" json:",omitempty"`
+	ViewTypes []OtherChoice `xml:"ViewTypes>ViewType,omitempty" json:",omitempty"`
 	// Indicates whether the property is on the waterfront: ocean or lake.
 	IsWaterfront *bool `xml:"IsWaterfront,omitempty" json:",omitempty"`
 	// Indicates whether the property has one or more wet bars.
@@ -1231,7 +1235,7 @@ type Characteristics struct {
 	// Allow for value/description pair as an open bucket
 	// for extensibility. This allows addition of features,
 	// remarks, etc.
-	AdditionalInfo *[]ValueDescription `xml:"AdditionInformation,omitempty" json:",omitempty"`
+	AdditionalInfo []ValueDescription `xml:"AdditionInformation,omitempty" json:",omitempty"`
 }
 
 // Listing is a top level element for sharing a single listing.
@@ -1251,7 +1255,7 @@ type Listing struct {
 	//
 	// Wherever possible, the ISO 4217 standard currency code values
 	// should be used.
-	AlternatePrices *[]AlternatePrice `xml:"AlernatePrices,omitempty" json:",omitempty"`
+	AlternatePrices []AlternatePrice `xml:"AlernatePrices,omitempty" json:",omitempty"`
 	// The URL for the original listing.
 	ListingURL string `xml:"ListingURL"`
 	// Name of the listing provider
@@ -1363,7 +1367,7 @@ type Listing struct {
 	// type.
 	MarketingInformation *MarketingInformation `xml:"MarketingInformation,omitempty" json:",omitempty"`
 	// A collection of photos for the property.
-	Photos *[]Media `xml:"Photos>Photo,omitempty" json:",omitempty"`
+	Photos []Media `xml:"Photos>Photo,omitempty" json:",omitempty"`
 	// Indicates whether or not the address may be publicly disclosed.
 	DiscloseAddress *bool `xml:"DiscloseAddress,omitempty" json:",omitempty"`
 	// Indicates if the listing is a short sale.
@@ -1428,14 +1432,14 @@ type Listing struct {
 	//
 	ForeclosureStatus *OtherChoice `xml:"ForeclosureStatus,omitempty" json:",omitempty"`
 	// A collection of all the participants in a listing.
-	Participants *[]Participant `xml:"ListingParticipants>Participant,omitempty" json:",omitempty"`
+	Participants []Participant `xml:"ListingParticipants>Participant,omitempty" json:",omitempty"`
 	// A collection of all the virtual tours for a listing.
-	VirtualTours *[]Media `xml:"VirtualTours>VirtualTour,omitempty" json:",omitempty"`
+	VirtualTours []Media `xml:"VirtualTours>VirtualTour,omitempty" json:",omitempty"`
 	// A collection of all the videos for a listing.
 	// Does not include virtual tours or photos.
-	Videos *[]Media `xml:"Videos>Video,omitempty" json:",omitempty"`
+	Videos []Media `xml:"Videos>Video,omitempty" json:",omitempty"`
 	// The collection of offices associated with the listing.
-	Offices *[]Office `xml:"Offices>Office,omitempty" json:",omitempty"`
+	Offices []Office `xml:"Offices>Office,omitempty" json:",omitempty"`
 	// The brokerage for the listing.
 	Brokerage *Business `xml:"Brokerage,omitempty" json:",omitempty"`
 	// The franchise for the listing.
@@ -1447,9 +1451,9 @@ type Listing struct {
 	// The information about the geographic location of the property.
 	Location *Location `xml:"Location,omitempty" json:",omitempty"`
 	// A collection of all the open houses for a property.
-	OpenHouses *[]OpenHouse `xml:"OpenHouses>OpenHouse,omitempty" json:",omitempty"`
+	OpenHouses []OpenHouse `xml:"OpenHouses>OpenHouse,omitempty" json:",omitempty"`
 	// A collection of all the taxes reported for a property.
-	Taxes *[]Tax `xml:"Taxes>Tax,omitempty" json:",omitempty"`
+	Taxes []Tax `xml:"Taxes>Tax,omitempty" json:",omitempty"`
 	// A collection of all the additional fees for a property.
 	//
 	// Each element has an enumerated description and a
@@ -1487,7 +1491,7 @@ type Listing struct {
 
 	// In the case of the Other annotation, the value (description)
 	// is contained in the attribute of the element
-	Expenses *[]Expense `xml:"Expenses>Expense,omitempty" json:",omitempty"`
+	Expenses []Expense `xml:"Expenses>Expense,omitempty" json:",omitempty"`
 	// The disclaimer string for a specific listing
 	Disclaimer SecureString `xml:"Disclaimer"`
 }
