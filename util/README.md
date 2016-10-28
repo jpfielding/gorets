@@ -1,10 +1,10 @@
-RESO Syndication
+RETS Utilities
 ======
 
 RETS utilities for
 
 - pull compact metadata incrementally
-- converting comact metaadata to StandardXML 
+- converting comact metaadata to StandardXML
 
 ```
 	compact := &retsutil.IncrementalCompact{}
