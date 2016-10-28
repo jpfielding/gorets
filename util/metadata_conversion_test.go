@@ -1,4 +1,4 @@
-package retsutil
+package util
 
 import (
 	"io/ioutil"
