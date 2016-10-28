@@ -31,6 +31,8 @@ func TestSimple(t *testing.T) {
 						listings.Language = v.Value
 					}
 				}
+			case "Disclaimer":
+				parser.DecodeElement(listings.Disclaimer, &start)
 			}
 		},
 		// quit on the the xml tag
@@ -43,7 +45,7 @@ func TestSimple(t *testing.T) {
 	testutils.Ok(t, err)
 	testutils.Equals(t, 1, len(listings.Listings))
 	testutils.Equals(t, "http://www.somemls.com/lisings/1234567890", listings.Listings[0].ListingURL)
-
+	testutils.Equals(t, "New Light Fixtures", *((*listings.Listings[0].Photos)[1].Caption))
 }
 
 var example = `<Listings xmlns="http://rets.org/xsd/Syndication/2012-03" xmlns:commons="http://rets.org/xsd/RETSCommons" xmlns:schemaLocation="http://rets.org/xsd/Syndication/2012-03/Syndication.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" listingsKey="2012-03-06T22:14:47" version="0.96" versionTimestamp="2012-02-07T03:00:00Z" xml:lang="en-us">
