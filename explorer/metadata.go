@@ -95,12 +95,12 @@ var options = map[string]MetadataRequestType{
 
 // fullViaCompactIncremental retrieve the RETS Compact metadata from the server
 func fullViaCompactIncremental(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
-	compact := &retsutil.IncrementalCompact{}
+	compact := &util.IncrementalCompact{}
 	err := compact.Load(requester, ctx, url)
 	if err != nil {
 		return nil, err
 	}
-	return retsutil.AsStandard(*compact).Convert()
+	return util.AsStandard(*compact).Convert()
 }
 
 // fullViaCompact retrieve the RETS Compact metadata from the server
@@ -119,7 +119,7 @@ func fullViaCompact(requester rets.Requester, ctx context.Context, url string) (
 	if err != nil {
 		return nil, err
 	}
-	return retsutil.AsStandard(*compact).Convert()
+	return util.AsStandard(*compact).Convert()
 }
 
 // fullViaStandard ...
