@@ -2,7 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router';
 import MetadataService from 'services/MetadataService';
 
-class SearchMetadata extends React.Component {
+class Objects extends React.Component {
 
   static propTypes = {
     location: React.PropTypes.any,
@@ -106,4 +106,4 @@ class SearchMetadata extends React.Component {
 
 }
 
-export default withRouter(SearchMetadata);
+export default withRouter(Objects);

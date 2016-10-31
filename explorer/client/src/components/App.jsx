@@ -105,6 +105,14 @@ export default class App extends React.Component {
             className="link red f6 dib mr3"
           >
             Search
+        </Link>
+            <Link
+              to="/objects"
+              title="Objects"
+              activeStyle={{ color: 'white' }}
+              className="link red f6 dib mr3"
+            >
+              Objects
           </Link>
         </nav>
         <div className="pv2 pl3 bb v-mid flex flex-row align-center overflow-x-scroll">

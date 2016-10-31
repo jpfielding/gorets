@@ -62,7 +62,7 @@ class Search extends React.Component {
       const availableObjectTypes = metadataRows.map(x => x.ObjectType);
       this.props.router.push({
         ...this.props.location,
-        pathname: '/search/metadata',
+        pathname: '/objects',
         query: {
           id: searchParams.id,
           resource: searchParams.resource,
