@@ -25,7 +25,7 @@ config.json:
 }
 ```
 
-[Example Search](cmds/search/main.go)
+[Example Search](cmds/search/example.go)
 ```
 go run cmds/search/*.go -config-file ~/gorets/config.json -search-options ~/gorets/search.json -output /tmp/
 
@@ -42,7 +42,7 @@ search.json:
 }
 
 ```
-[Example GetObject](cmds/getobject/main.go)
+[Example GetObject](cmds/getobject/example.go)
 ```
 go run cmds/getobject/*.go -config-file ~/gorets/config.json -object-options ~/gorets/getobject.json -output /tmp/
 
@@ -53,7 +53,7 @@ getobject.json:
 	"id": "1330918:*,1555397:*"
 }
 ```
-[Example Metadata](cmds/metadata/main.go)
+[Example Metadata](cmds/metadata/example.go)
 ```
 go run cmds/metadata/*.go -config-file ~/gorets/config.json -metadata-options ~/gorets/metadata.json -output /tmp
 
