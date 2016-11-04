@@ -105,14 +105,14 @@ export default class App extends React.Component {
             className="link red f6 dib mr3"
           >
             Search
-        </Link>
-            <Link
-              to="/objects"
-              title="Objects"
-              activeStyle={{ color: 'white' }}
-              className="link red f6 dib mr3"
-            >
-              Objects
+          </Link>
+          <Link
+            to="/objects"
+            title="Objects"
+            activeStyle={{ color: 'white' }}
+            className="link red f6 dib mr3"
+          >
+            Objects
           </Link>
         </nav>
         <div className="pv2 pl3 bb v-mid flex flex-row align-center overflow-x-scroll">
@@ -132,10 +132,12 @@ export default class App extends React.Component {
             }
             onChange={(event, value) => this.setState({ connectionAutocompleteField: value })}
             onSelect={(value, connection) => {
+              console.log('selected', value);
               this.setState({ connectionAutocompleteField: value });
               this.setState({ selectedConnection: connection });
               this.establishConnection(connection);
             }}
+            sortItems={(a, b) => (a.id.toLowerCase() <= b.id.toLowerCase() ? -1 : 1)}
             getItemValue={(item) => item.id}
             renderItem={(item, isHighlighted) => (
               <div
