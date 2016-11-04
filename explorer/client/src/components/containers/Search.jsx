@@ -37,14 +37,32 @@ class Search extends React.Component {
       },
       searchHistory: StorageCache.getFromCache() || [],
       searchResults: {},
+      selectedIndexes: [],
     };
     this.search = this.search.bind(this);
     this.onSearchResultCellSelected = this.onSearchResultCellSelected.bind(this);
+    this.onRowsSelected = this.onRowsSelected.bind(this);
+    this.onRowsDeselected = this.onRowsDeselected.bind(this);
   }
 
   componentWillMount() {
     this.search(this.props.location.query);
   }
+
+  onRowsSelected(rows) {
+    console.log(rows);
+    this.setState({
+      selectedIndexes: this.state.selectedIndexes.concat(rows.map(r => r.rowIdx)),
+    });
+  }
+
+  onRowsDeselected(rows) {
+    const rowIndexes = rows.map(r => r.rowIdx);
+    this.setState({
+      selectedIndexes: this.state.selectedIndexes.filter(i => rowIndexes.indexOf(i) === -1),
+    });
+  }
+
 
   onSearchResultCellSelected(coordinates) {
     const {
@@ -190,7 +208,15 @@ class Search extends React.Component {
         columns={searchResultColumns}
         rowGetter={rowGetter}
         rowsCount={searchResultRows.length}
-        onCellSelected={this.onSearchResultCellSelected}
+        rowSelection={{
+          showCheckbox: true,
+          enableShiftSelect: true,
+          onRowsSelected: this.onRowsSelected,
+          onRowsDeselected: this.onRowsDeselected,
+          selectBy: {
+            indexes: this.state.selectedIndexes,
+          },
+        }}
       />
     );
   }
