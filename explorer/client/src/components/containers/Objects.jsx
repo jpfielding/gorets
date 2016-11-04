@@ -14,7 +14,7 @@ class Objects extends React.Component {
       searchParams: {
         id: null,
         resource: null,
-        keyFieldValue: null,
+        ids: null,
         types: null,
       },
       objectMetadata: {},
@@ -30,12 +30,17 @@ class Objects extends React.Component {
 
   getObjectMetadata(type) {
     const { searchParams } = this.state;
+    const contentId = searchParams.ids.split(',').map(
+        // avoiding other lint issues
+        i => [i, '*'].join(':')
+    ).join(',');
+
     MetadataService
       .getObjectMetadata({
         id: searchParams.id,
         resource: searchParams.resource,
         type,
-        objectid: `${searchParams.keyFieldValue}:*`,
+        objectid: contentId,
       })
       .then((res) => res.json())
       .then(json => {
