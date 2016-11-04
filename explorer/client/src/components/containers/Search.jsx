@@ -83,15 +83,15 @@ class Search extends React.Component {
     }
     const resource = resources[0];
     const keyField = resource.KeyField;
-    if (!searchResultColumns.filter(c => (c.column === keyField))) {
+    const keyFieldCols = searchResultColumns.filter(c => (c.name === keyField));
+    if (keyFieldCols.length === 0) {
       console.log('key field not found', keyField, searchResultColumns);
       return;
     }
+    const keyFieldCol = keyFieldCols[0];
     const selectedRows = selectedIndexes.map(i => searchResultRows[i]);
-    // TODO need to get the index dynamically
-    const keyFieldIndex = 0;
     console.log('rows', selectedRows);
-    const ids = selectedRows.map(r => r[keyFieldIndex]);
+    const ids = selectedRows.map(r => r[keyFieldCol.key]);
     if (ids.length === 0) {
       console.log('no selected ids', selectedIndexes);
       return;
