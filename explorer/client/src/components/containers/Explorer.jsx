@@ -34,7 +34,7 @@ class Explorer extends React.Component {
     super(props);
     const searchForm = createValue({
       value: {
-        query: '(TIMESTAMP=1900-01-01T00:00:00+)',
+        query: '(TIMESTAMP=2016-10-01T00:00:00+)',
       },
       onChange: this.searchInputsChange.bind(this),
     });
