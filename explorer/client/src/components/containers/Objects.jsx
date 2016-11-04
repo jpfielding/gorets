@@ -17,7 +17,7 @@ class Objects extends React.Component {
         ids: null,
         types: null,
       },
-      objectMetadata: {},
+      objects: {},
     };
   }
 
@@ -25,10 +25,10 @@ class Objects extends React.Component {
     this.setState({
       searchParams: this.props.location.query,
     });
-    this.getObjectMetadata = this.getObjectMetadata.bind(this);
+    this.getObjects = this.getObjects.bind(this);
   }
 
-  getObjectMetadata(type) {
+  getObjects(type) {
     const { searchParams } = this.state;
     const contentId = searchParams.ids.split(',').map(
         // avoiding other lint issues
@@ -36,7 +36,7 @@ class Objects extends React.Component {
     ).join(',');
 
     MetadataService
-      .getObjectMetadata({
+      .getObjects({
         id: searchParams.id,
         resource: searchParams.resource,
         type,
@@ -46,7 +46,7 @@ class Objects extends React.Component {
       .then(json => {
         console.log(json);
         this.setState({
-          objectMetadata: json,
+          objects: json,
         });
       });
   }
@@ -68,8 +68,8 @@ class Objects extends React.Component {
   }
 
   render() {
-    const { searchParams, objectMetadata } = this.state;
-    const hasResult = (objectMetadata.result && objectMetadata.result['Objects'].length > 0);
+    const { searchParams, objects } = this.state;
+    const hasResult = (objects.result && objects.result['Objects'].length > 0);
     return (
       <div className="pa2">
         <div>
@@ -87,7 +87,7 @@ class Objects extends React.Component {
         <div>
           <span className="b">Available Types: </span>
           {searchParams.types.split(',').map(type =>
-            <button className="link" onClick={() => this.getObjectMetadata(type)}>
+            <button className="link" onClick={() => this.getObjects(type)}>
               {type}
             </button>
           )}
@@ -95,7 +95,7 @@ class Objects extends React.Component {
         <div>
           {hasResult
             ? (
-              objectMetadata.result['Objects'].map(obj =>
+              objects.result['Objects'].map(obj =>
                 this.renderPicture(obj)
               )
             )

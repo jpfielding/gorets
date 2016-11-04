@@ -37,7 +37,7 @@ export default class MetadataService {
     });
   }
 
-  static getObjectMetadata(params) {
+  static getObjects(params) {
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {
