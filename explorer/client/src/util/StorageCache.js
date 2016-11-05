@@ -21,9 +21,8 @@ class StorageCache {
     this.storage.removeItem(this.versioned(key));
   }
 
-  readCache(k) {
-    const key = this.versioned(k);
-    const storedRaw = this.storage.getItem(key);
+  readCache(versionedkey) {
+    const storedRaw = this.storage.getItem(versionedkey);
     const decompressedRaw = LZString.decompressFromUTF16(storedRaw);
     if (decompressedRaw) {
       return JSON.parse(decompressedRaw);
