@@ -73,7 +73,7 @@ class Objects extends React.Component {
     if (obj.location) {
       return (
         <li className="pa0 ma0 no-list-style">
-          ${this.renderObjectInfo(obj)}
+          {this.renderObjectInfo(obj)}
           <img src={`data:image/png;base64,${obj.location}`} alt="pic" />
         </li>
       );
@@ -81,7 +81,7 @@ class Objects extends React.Component {
     if (obj.Blob) {
       return (
         <li className="pa0 ma0 no-list-style">
-          ${this.renderObjectInfo(obj)}
+          {this.renderObjectInfo(obj)}
           <img src={`data:image/png;base64,${obj.Blob}`} alt="pic" />
         </li>
       );
