@@ -1,5 +1,6 @@
 import React from 'react';
 import MetadataService from 'services/MetadataService';
+import StorageCache from 'util/StorageCache';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
 import { withRouter } from 'react-router';
 import ReactDataGrid from 'react-data-grid';
@@ -90,6 +91,16 @@ class Metadata extends React.Component {
   }
 
   getMetadata(connectionId) {
+    const ck = `${connectionId}-metadata`;
+    const md = StorageCache.getFromCache(ck);
+    if (md) {
+      console.log('loaded metadata from local cache');
+      this.setState({
+        metadata: md,
+      });
+      return;
+    }
+    console.log('no metadata cached');
     this.setState({
       selectedClass: null,
       defaultRows: [],
@@ -107,6 +118,7 @@ class Metadata extends React.Component {
         this.setState({
           metadata: json.result.Metadata,
         });
+        StorageCache.putInCache(ck, json.result.Metadata, 60);
       });
   }
 

@@ -33,7 +33,7 @@ class Search extends React.Component {
         select: null,
         query: null,
       },
-      searchHistory: StorageCache.getFromCache() || [],
+      searchHistory: [],
       searchResults: {},
       selectedIndexes: [],
     };
@@ -145,18 +145,25 @@ class Search extends React.Component {
       ...this.props.location,
       query: searchParams,
     });
+    // search history cache key used for storage
+    const sck = `${searchParams.id}-search-history`;
+    const searchHistory = StorageCache.getFromCache(sck) || [];
     this.setState({
       searchParams,
+      searchHistory,
     });
+    console.log('source id:', searchParams.id);
+    if (searchParams === undefined || searchParams.id === undefined) {
+      return;
+    }
+    console.log('cache key found', sck);
     MetadataService
       .search(searchParams)
       .then(res => res.json())
       .then(json => {
-        const searchHistory = StorageCache.getFromCache() || [];
-        // StorageCache.clearAll();
         if (!some(searchHistory, searchParams)) {
           searchHistory.unshift(searchParams);
-          StorageCache.putInCache(searchHistory, 60);
+          StorageCache.putInCache(sck, searchHistory, 720);
         }
         console.log(json);
         this.setState({
@@ -165,20 +172,29 @@ class Search extends React.Component {
         });
         this.setAvailableObjectsState();
       });
-    MetadataService
-      .get(searchParams.id)
-      .then(response => response.json())
-      .then(json => {
-        if (json.error !== null) {
-          this.setState({ metadata: Search.emptyMetadata });
-          return;
-        }
-        this.setState({
-          metadata: json.result.Metadata,
-        });
-        console.log('meta: ', json.result.Metadata);
-        this.setAvailableObjectsState();
+    const mck = `${searchParams.id}-metadata`;
+    const md = StorageCache.getFromCache(mck);
+    if (md) {
+      this.setState({
+        metadata: md,
       });
+    } else {
+      MetadataService
+        .get(searchParams.id)
+        .then(response => response.json())
+        .then(json => {
+          if (json.error !== null) {
+            this.setState({ metadata: Search.emptyMetadata });
+            return;
+          }
+          this.setState({
+            metadata: json.result.Metadata,
+          });
+          console.log('meta: ', json.result.Metadata);
+          StorageCache.putInCache(mck, json.result.Metadata, 60);
+          this.setAvailableObjectsState();
+        });
+    }
   }
 
   renderSearchResultsTable() {
