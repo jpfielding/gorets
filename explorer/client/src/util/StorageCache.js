@@ -58,7 +58,6 @@ class StorageCache {
       value: item,
     })));
     console.log('item stored in cache', key, item);
-    this.printCache();
     return item;
   }
 

@@ -57,8 +57,12 @@ class Objects extends React.Component {
         <tr><td>Content ID</td><td>{obj.ContentID}</td></tr>
         <tr><td>Content Type</td><td>{obj.ContentType}</td></tr>
         <tr><td>Object ID</td><td>{obj.ObjectID}</td></tr>
-        <tr><td>Location</td><td>{obj.Location}</td></tr>
+        <tr><td>UID</td><td>{obj.UID}</td></tr>
         <tr><td>Description</td><td>{obj.Description}</td></tr>
+        <tr><td>SubDescription</td><td>{obj.SubDescription}</td></tr>
+        <tr><td>Location</td><td>{obj.Location}</td></tr>
+        <tr><td>Preferred</td><td>{obj.Preferred}</td></tr>
+        <tr><td>ObjectData</td><td>{obj.ObjectData}</td></tr>
       </table>
     );
   }
