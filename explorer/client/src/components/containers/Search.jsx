@@ -24,8 +24,6 @@ class Search extends React.Component {
     super(props);
     this.state = {
       metadata: Search.emptyMetadata,
-      objectTypeRows: [],
-      objectTypeCols: [],
       searchResultColumns: [],
       searchResultRows: [],
       searchParams: {
@@ -40,7 +38,6 @@ class Search extends React.Component {
       selectedIndexes: [],
     };
     this.search = this.search.bind(this);
-    this.onObjectOptionSelected = this.onObjectOptionSelected.bind(this);
     this.onRowsSelected = this.onRowsSelected.bind(this);
     this.onRowsDeselected = this.onRowsDeselected.bind(this);
   }
@@ -63,26 +60,14 @@ class Search extends React.Component {
   }
 
 
-  onObjectOptionSelected(coordinates) {
+  getObjects() {
     const {
-      metadata,
       searchResultRows,
       searchResultColumns,
-      objectTypeRows,
       searchParams,
       selectedIndexes,
     } = this.state;
-    console.log('object selected', coordinates);
-    // TODO extract keyfield value
-    const resources = metadata.System['METADATA-RESOURCE'].Resource.filter(
-        r => (r.ResourceID === searchParams.resource)
-    );
-    if (resources.length === 0) {
-      console.log('could not find resource');
-      return;
-    }
-    const resource = resources[0];
-    const keyField = resource.KeyField;
+    const keyField = this.getResource().KeyField;
     const keyFieldCols = searchResultColumns.filter(c => (c.name === keyField));
     if (keyFieldCols.length === 0) {
       console.log('key field not found', keyField, searchResultColumns);
@@ -104,9 +89,20 @@ class Search extends React.Component {
         id: searchParams.id,
         resource: searchParams.resource,
         ids: ids.join(','),
-        types: objectTypeRows[coordinates.idx].ObjectType,
+        types: this.getObjectTypes().join(','),
       },
     });
+  }
+
+  getObjectTypes() {
+    return this.getResource()['METADATA-OBJECT']['Object'].map(o => o.ObjectType);
+  }
+
+  getResource() {
+    // TODO errors?  those can happen?
+    return this.state.metadata.System['METADATA-RESOURCE'].Resource.filter(
+      r => (r.ResourceID === this.state.searchParams.resource)
+    )[0];
   }
 
   setAvailableObjectsState() {
@@ -142,18 +138,6 @@ class Search extends React.Component {
       console.log('could not find key field column:', keyField);
       return;
     }
-    const objectTypes = resource['METADATA-OBJECT']['Object'];
-    if (objectTypes.length === 0) {
-      return;
-    }
-    console.log('setting objects selection state');
-    this.setState({
-      objectTypeRows: objectTypes,
-      objectTypeCols: [{
-        key: 'ObjectType',
-        name: 'ObjectType',
-      }],
-    });
   }
 
   search(searchParams) {
@@ -195,27 +179,6 @@ class Search extends React.Component {
         console.log('meta: ', json.result.Metadata);
         this.setAvailableObjectsState();
       });
-  }
-
-  renderObjectMetadata() {
-    const { objectTypeRows, objectTypeCols } = this.state;
-    if (objectTypeRows.length === 0 || objectTypeCols.length === 0) {
-      return null;
-    }
-    const rowGetter = (i) => objectTypeRows[i];
-    return (
-      <div>
-        <div className="b mv2">Object Metadata Types</div>
-        <ReactDataGrid
-          columns={objectTypeCols}
-          rowGetter={rowGetter}
-          rowHeight={35}
-          rowsCount={objectTypeRows.length}
-          minHeight={(objectTypeRows.length + 1) * 35}
-          onCellSelected={this.onObjectOptionSelected}
-        />
-      </div>
-    );
   }
 
   renderSearchResultsTable() {
@@ -264,12 +227,19 @@ class Search extends React.Component {
         </div>
         <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
           <div>
-            <div className="b mb2">Search Results</div>
+            <div className="b mb2">Search Results:</div>
             {this.renderSearchResultsTable()}
-            {this.renderObjectMetadata()}
           </div>
-          <div>Search parameters:
-            <pre className="f6 code">{JSON.stringify(this.state.objectTypeCols, null, '  ')}</pre>
+          <div>Selection Operations:
+            <div>
+              <button
+                disabled={this.state.selectedIndexes.length === 0}
+                className="link"
+                onClick={() => this.getObjects()}
+              >
+                Objects
+              </button>
+            </div>
           </div>
         </div>
       </div>
