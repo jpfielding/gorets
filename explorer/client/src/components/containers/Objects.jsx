@@ -51,18 +51,40 @@ class Objects extends React.Component {
       });
   }
 
+  renderObjectInfo(obj) {
+    return (
+      <table>
+        <tr><td>Content ID</td><td>{obj.ContentID}</td></tr>
+        <tr><td>Content Type</td><td>{obj.ContentType}</td></tr>
+        <tr><td>Object ID</td><td>{obj.ObjectID}</td></tr>
+        <tr><td>Location</td><td>{obj.Location}</td></tr>
+        <tr><td>Description</td><td>{obj.Description}</td></tr>
+      </table>
+    );
+  }
+
   renderPicture(obj) {
     if (obj.RetsError) {
-      return <div className="b mv3">An error occured</div>;
+      return <div className="b mv3">An error occured, ${obj.RetsError}</div>;
     }
     if (!obj.ContentType.startsWith('image/')) {
       return null;
     }
     if (obj.location) {
-      return <img src={`data:image/png;base64,${obj.location}`} alt="pic" />;
+      return (
+        <li className="pa0 ma0 no-list-style">
+          ${this.renderObjectInfo(obj)}
+          <img src={`data:image/png;base64,${obj.location}`} alt="pic" />
+        </li>
+      );
     }
     if (obj.Blob) {
-      return <img src={`data:image/png;base64,${obj.Blob}`} alt="pic" />;
+      return (
+        <li className="pa0 ma0 no-list-style">
+          ${this.renderObjectInfo(obj)}
+          <img src={`data:image/png;base64,${obj.Blob}`} alt="pic" />
+        </li>
+      );
     }
     return null;
   }
@@ -81,8 +103,8 @@ class Objects extends React.Component {
           {searchParams.resource}
         </div>
         <div>
-          <span className="b">KeyFieldValue: </span>
-          {searchParams.keyFieldValue}
+          <span className="b">Object IDs: </span>
+          {searchParams.ids}
         </div>
         <div>
           <span className="b">Available Types: </span>
@@ -93,14 +115,16 @@ class Objects extends React.Component {
           )}
         </div>
         <div>
-          {hasResult
-            ? (
-              objects.result['Objects'].map(obj =>
-                this.renderPicture(obj)
+          <ul>
+            {hasResult
+              ? (
+                objects.result['Objects'].map(obj =>
+                  this.renderPicture(obj)
+                )
               )
-            )
-            : null
+              : null
           }
+          </ul>
         </div>
         <pre className="code f6">
           {JSON.stringify(this.state, null, '  ')}
