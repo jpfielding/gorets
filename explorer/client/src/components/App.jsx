@@ -91,12 +91,12 @@ export default class App extends React.Component {
             Connections
           </Link>
           <Link
-            to="/explorer"
-            title="Explorer"
+            to="/metadata"
+            title="Metadata"
             activeStyle={{ color: 'white' }}
             className="link red f6 dib mr3"
           >
-            Explorer
+            Metadata
           </Link>
           <Link
             to="/search"
@@ -150,7 +150,7 @@ export default class App extends React.Component {
           />
           {this.state.activeConnections.map(connection =>
             <Link
-              to={`/explorer/${connection.id}`}
+              to={`/metadata/${connection.id}`}
               onClick={() => this.setState({ selectedConnection: connection })}
               title={connection.id}
               className="link f6 dib ml2"
