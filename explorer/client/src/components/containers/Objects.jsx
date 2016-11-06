@@ -1,6 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router';
-import MetadataService from 'services/MetadataService';
+import ObjectsService from 'services/ObjectsService';
 
 class Objects extends React.Component {
 
@@ -35,7 +35,7 @@ class Objects extends React.Component {
         i => [i, '*'].join(':')
     ).join(',');
 
-    MetadataService
+    ObjectsService
       .getObjects({
         id: searchParams.id,
         resource: searchParams.resource,

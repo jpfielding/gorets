@@ -1,5 +1,6 @@
 import React from 'react';
 import MetadataService from 'services/MetadataService';
+import SearchService from 'services/SearchService';
 import StorageCache from 'util/StorageCache';
 import { withRouter } from 'react-router';
 import some from 'lodash/some';
@@ -98,7 +99,7 @@ class Search extends React.Component {
   }
 
   getObjectTypes() {
-    return this.getResource()['METADATA-OBJECT']['Object'].map(o => o.ObjectType);
+    return this.getResource()['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
   }
 
   getResource() {
@@ -159,7 +160,7 @@ class Search extends React.Component {
       return;
     }
     console.log('cache key found', sck);
-    MetadataService
+    SearchService
       .search(searchParams)
       .then(res => res.json())
       .then(json => {
@@ -177,9 +178,7 @@ class Search extends React.Component {
     const mck = `${searchParams.id}-metadata`;
     const md = StorageCache.getFromCache(mck);
     if (md) {
-      this.setState({
-        metadata: md,
-      });
+      this.setState({ metadata: md });
     } else {
       MetadataService
         .get(searchParams.id)
@@ -189,9 +188,7 @@ class Search extends React.Component {
             this.setState({ metadata: Search.emptyMetadata });
             return;
           }
-          this.setState({
-            metadata: json.result.Metadata,
-          });
+          this.setState({ metadata: json.result.Metadata });
           console.log('meta: ', json.result.Metadata);
           StorageCache.putInCache(mck, json.result.Metadata, 60);
           this.applySearchState();

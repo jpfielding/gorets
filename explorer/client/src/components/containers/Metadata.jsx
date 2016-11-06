@@ -97,12 +97,12 @@ class Metadata extends React.Component {
       selectedClassRows: [],
     });
     const ck = `${connectionId}-metadata`;
-    const md = StorageCache.getFromCache(ck);
-    if (md) {
-      console.log('loaded metadata from local cache', md);
-      this.setState({ metadata: md });
-      return;
-    }
+    // const md = StorageCache.getFromCache(ck);
+    // if (md) {
+    //   console.log('loaded metadata from local cache', md);
+    //   this.setState({ metadata: md });
+    //   return;
+    // }
     console.log('no metadata cached');
     MetadataService
       .get(connectionId)
