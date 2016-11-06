@@ -204,7 +204,7 @@ class Metadata extends React.Component {
 
   renderSelectedClassDescription(clazz) {
     return (
-      <span>
+      <span title={clazz.Description}>
         {clazz.ClassName} - <span className="f6 moon-gray">{clazz.Description}</span>
       </span>
     );
@@ -257,11 +257,11 @@ class Metadata extends React.Component {
       <div>
         <div className="fl h-100-ns w-100 w-20-ns no-list-style pa3 overflow-x-scroll nowrap">
           <ul className="pa0 ma0">
-            {this.state.metadata.System['METADATA-RESOURCE'].Resource.map((resource) =>
+            {this.state.metadata.System['METADATA-RESOURCE'].Resource.map((r) =>
               <li className="mb2">
-                <div className="b">{resource.ResourceID}</div>
+                <div title={r.Description} className="b">{r.ResourceID}</div>
                 <ul className="pa0 pl3 mv1">
-                  {resource['METADATA-CLASS'].Class.map((mClass) =>
+                  {r['METADATA-CLASS'].Class.map((mClass) =>
                     <li
                       onClick={() => this.metadataClassClick(mClass)}
                       className="clickable metadata-class-name"
