@@ -63,10 +63,6 @@ class Metadata extends React.Component {
     if (nextProps.params !== this.props.params && nextProps.params.connection) {
       this.props.setSelectedConnection(nextProps.params.connection);
       this.getMetadata(nextProps.params.connection);
-    } else {
-      this.setState({
-        metadata: Metadata.emptyMetadata,
-      });
     }
   }
 
@@ -97,12 +93,12 @@ class Metadata extends React.Component {
       selectedClassRows: [],
     });
     const ck = `${connectionId}-metadata`;
-    // const md = StorageCache.getFromCache(ck);
-    // if (md) {
-    //   console.log('loaded metadata from local cache', md);
-    //   this.setState({ metadata: md });
-    //   return;
-    // }
+    const md = StorageCache.getFromCache(ck);
+    if (md) {
+      console.log('loaded metadata from local cache', md);
+      this.setState({ metadata: md });
+      return;
+    }
     console.log('no metadata cached');
     MetadataService
       .get(connectionId)
@@ -114,6 +110,7 @@ class Metadata extends React.Component {
         }
         console.log('json request:', json.result.Metadata);
         this.setState({ metadata: json.result.Metadata });
+        // this.setState({ metadata: md });
         StorageCache.putInCache(ck, json.result.Metadata, 60);
       });
   }
@@ -242,7 +239,7 @@ class Metadata extends React.Component {
             columns={fieldSet}
             rowGetter={rowGetter}
             rowsCount={selectedClassRows.length}
-            minHeight={500}
+            minHeight={350}
             toolbar={<Toolbar enableFilter />}
             onAddFilter={this.handleFilterChange}
             onClearFilters={this.onClearFilters}
