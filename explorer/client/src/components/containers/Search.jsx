@@ -63,17 +63,10 @@ class Search extends React.Component {
   getObjects() {
     const {
       searchResultRows,
-      searchResultColumns,
       searchParams,
       selectedIndexes,
     } = this.state;
-    const keyField = this.getResource().KeyField;
-    const keyFieldCols = searchResultColumns.filter(c => (c.name === keyField));
-    if (keyFieldCols.length === 0) {
-      console.log('key field not found', keyField, searchResultColumns);
-      return;
-    }
-    const keyFieldCol = keyFieldCols[0];
+    const keyFieldCol = this.getKeyFieldColumn();
     const selectedRows = selectedIndexes.map(i => searchResultRows[i]);
     console.log('rows', selectedRows);
     const ids = selectedRows.map(r => r[keyFieldCol.key]);
@@ -94,6 +87,16 @@ class Search extends React.Component {
     });
   }
 
+  getKeyFieldColumn() {
+    const { searchResultColumns } = this.state;
+    const keyField = this.getResource().KeyField;
+    const keyFieldCols = searchResultColumns.filter(c => (c.name === keyField));
+    if (keyFieldCols.length === 0) {
+      return null;
+    }
+    return keyFieldCols[0];
+  }
+
   getObjectTypes() {
     return this.getResource()['METADATA-OBJECT']['Object'].map(o => o.ObjectType);
   }
@@ -105,7 +108,7 @@ class Search extends React.Component {
     )[0];
   }
 
-  setAvailableObjectsState() {
+  applySearchState() {
     // Search Results table setup
     const { searchResults } = this.state;
     if (!searchResults.result) {
@@ -123,21 +126,20 @@ class Search extends React.Component {
       searchResultColumns,
       searchResultRows,
     });
-    console.log('setting object state');
-    // Object metadata table setup
-    const resources = this.state.metadata.System['METADATA-RESOURCE'].Resource.filter(
-        r => (r.ResourceID === this.state.searchParams.resource)
-    );
-    if (resources.length === 0) {
-      console.log('could not find resource');
-      return;
+  }
+
+  // does the current state and selections support an object request
+  canPullObjects() {
+    if (this.state.selectedIndexes.length === 0) {
+      return false;
     }
-    const resource = resources[0];
-    const keyField = resource.KeyField;
-    if (!searchResults.result.columns.includes(keyField)) {
-      console.log('could not find key field column:', keyField);
-      return;
+    if (this.getObjectTypes().length === 0) {
+      return false;
     }
+    if (this.getKeyFieldColumn() == null) {
+      return false;
+    }
+    return true;
   }
 
   search(searchParams) {
@@ -170,7 +172,7 @@ class Search extends React.Component {
           searchResults: json,
           searchHistory,
         });
-        this.setAvailableObjectsState();
+        this.applySearchState();
       });
     const mck = `${searchParams.id}-metadata`;
     const md = StorageCache.getFromCache(mck);
@@ -192,7 +194,7 @@ class Search extends React.Component {
           });
           console.log('meta: ', json.result.Metadata);
           StorageCache.putInCache(mck, json.result.Metadata, 60);
-          this.setAvailableObjectsState();
+          this.applySearchState();
         });
     }
   }
@@ -246,16 +248,15 @@ class Search extends React.Component {
             <div className="b mb2">Search Results:</div>
             {this.renderSearchResultsTable()}
           </div>
-          <div>Selection Operations:
-            <div>
-              <button
-                disabled={this.state.selectedIndexes.length === 0}
-                className="link"
-                onClick={() => this.getObjects()}
-              >
-                Objects
-              </button>
-            </div>
+          <div className="b mb2">Operations:</div>
+          <div>
+            <button
+              disabled={!this.canPullObjects()}
+              className="link"
+              onClick={() => this.getObjects()}
+            >
+              Objects: {this.getObjectTypes().join(', ')}
+            </button>
           </div>
         </div>
       </div>

@@ -91,21 +91,19 @@ class Metadata extends React.Component {
   }
 
   getMetadata(connectionId) {
-    const ck = `${connectionId}-metadata`;
-    const md = StorageCache.getFromCache(ck);
-    if (md) {
-      console.log('loaded metadata from local cache');
-      this.setState({
-        metadata: md,
-      });
-      return;
-    }
-    console.log('no metadata cached');
     this.setState({
       selectedClass: null,
       defaultRows: [],
       selectedClassRows: [],
     });
+    const ck = `${connectionId}-metadata`;
+    const md = StorageCache.getFromCache(ck);
+    if (md) {
+      console.log('loaded metadata from local cache', md);
+      this.setState({ metadata: md });
+      return;
+    }
+    console.log('no metadata cached');
     MetadataService
       .get(connectionId)
       .then(response => response.json())
@@ -114,10 +112,8 @@ class Metadata extends React.Component {
           this.setState({ metadata: Metadata.emptyMetadata });
           return;
         }
-        console.log(json.result.Metadata);
-        this.setState({
-          metadata: json.result.Metadata,
-        });
+        console.log('json request:', json.result.Metadata);
+        this.setState({ metadata: json.result.Metadata });
         StorageCache.putInCache(ck, json.result.Metadata, 60);
       });
   }
