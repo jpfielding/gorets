@@ -248,7 +248,6 @@ class Metadata extends React.Component {
             columns={fieldSet}
             rowGetter={rowGetter}
             rowsCount={selectedClassRows.length}
-            minHeight={350}
             toolbar={<Toolbar enableFilter />}
             onAddFilter={this.handleFilterChange}
             onClearFilters={this.onClearFilters}
