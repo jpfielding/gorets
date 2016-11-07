@@ -28,6 +28,8 @@ class Metadata extends React.Component {
       'METADATA-RESOURCE': {
         Resource: [],
       },
+      SystemDescription: 'No Metadata Loaded',
+      SystemID: 'N/A',
     },
   };
 
@@ -60,7 +62,14 @@ class Metadata extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.params !== this.props.params && nextProps.params.connection) {
+    // if no connection is inbound
+    if (!nextProps.params.connection) {
+      console.log('wiping metadata');
+      this.setState({ metadata: Metadata.emptyMetadata });
+      return;
+    }
+    // if this is a new connection
+    if (nextProps.params !== this.props.params) {
       this.props.setSelectedConnection(nextProps.params.connection);
       this.getMetadata(nextProps.params.connection);
     }
@@ -91,6 +100,7 @@ class Metadata extends React.Component {
       selectedClass: null,
       defaultRows: [],
       selectedClassRows: [],
+      metadata: Metadata.emptyMetadata,
     });
     const ck = `${connectionId}-metadata`;
     const md = StorageCache.getFromCache(ck);
@@ -105,7 +115,6 @@ class Metadata extends React.Component {
       .then(response => response.json())
       .then(json => {
         if (json.error !== null) {
-          this.setState({ metadata: Metadata.emptyMetadata });
           return;
         }
         console.log('json request:', json.result.Metadata);
@@ -253,6 +262,9 @@ class Metadata extends React.Component {
     return (
       <div>
         <div className="fl h-100-ns w-100 w-20-ns no-list-style pa3 overflow-x-scroll nowrap">
+          <h1 className="f5" title={this.state.metadata.System.SystemDescription}>
+            {this.state.metadata.System.SystemID}
+          </h1>
           <ul className="pa0 ma0">
             {this.state.metadata.System['METADATA-RESOURCE'].Resource.map((r) =>
               <li className="mb2">
