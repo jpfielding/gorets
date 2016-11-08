@@ -3,8 +3,8 @@ package common
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/jpfielding/gorets/rets"
@@ -28,7 +28,7 @@ func (cfg *Config) Initialize() (rets.Requester, error) {
 
 	if cfg.WireLog != "" {
 		wirelog.LogToFile(transport, cfg.WireLog, true, true)
-		fmt.Println("wire logging enabled:", cfg.WireLog)
+		log.Println("wire logging enabled:", cfg.WireLog)
 	}
 	// should we throw an err here too?
 	return rets.DefaultSession(

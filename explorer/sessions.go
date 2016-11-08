@@ -3,6 +3,7 @@ package explorer
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -66,7 +67,7 @@ func (c *Session) create() (rets.Requester, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("wire logging enabled:", c.Wirelog())
+		log.Println("wire logging enabled:", c.Wirelog())
 		c.transport = transport
 	}
 	conn := c.Connection

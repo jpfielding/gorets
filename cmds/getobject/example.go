@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"time"
 
@@ -33,14 +34,14 @@ func main() {
 			panic(err)
 		}
 	}
-	fmt.Printf("Connection Settings: %v\n", config)
+	log.Printf("Connection Settings: %v\n", config)
 	if *optionsFile != "" {
 		err := getOptions.LoadFrom(*optionsFile)
 		if err != nil {
 			panic(err)
 		}
 	}
-	fmt.Printf("GetObject Options: %v\n", getOptions)
+	log.Printf("GetObject Options: %v\n", getOptions)
 
 	// should we throw an err here too?
 	session, err := config.Initialize()
@@ -58,7 +59,7 @@ func main() {
 	// make sure we close the rets connection
 	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: capability.Logout})
 	// feedback
-	fmt.Println("GetObject: ", capability.GetObject)
+	log.Println("GetObject: ", capability.GetObject)
 	// warning, this does _all_ of the photos
 	response, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
 		URL: capability.GetObject,
@@ -73,7 +74,7 @@ func main() {
 	}
 	defer response.Close()
 	err = response.ForEach(func(o *rets.Object, err error) error {
-		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
+		log.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
 		// if we arent saving, then we quit
 		if *output == "" {
 			return nil

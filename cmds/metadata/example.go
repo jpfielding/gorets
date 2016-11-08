@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"time"
 
@@ -33,14 +33,14 @@ func main() {
 			panic(err)
 		}
 	}
-	fmt.Printf("Connection Settings: %v\n", config)
+	log.Printf("Connection Settings: %v\n", config)
 	if *metadataFile != "" {
 		err := metadataOpts.LoadFrom(*metadataFile)
 		if err != nil {
 			panic(err)
 		}
 	}
-	fmt.Printf("Search Options: %v\n", metadataOpts)
+	log.Printf("Search Options: %v\n", metadataOpts)
 
 	// should we throw an err here too?
 	session, err := config.Initialize()

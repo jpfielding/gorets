@@ -3,6 +3,7 @@ package explorer
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/jpfielding/gorets/rets"
@@ -35,7 +36,7 @@ type SearchService struct{}
 
 // Run ....
 func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage) error {
-	fmt.Printf("search run params: %v\n", args)
+	log.Printf("search run params: %v\n", args)
 	if args.QueryType == "" {
 		args.QueryType = "DQML2"
 	}
@@ -46,7 +47,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 	if s == nil {
 		return fmt.Errorf("no source found for %s", args.ID)
 	}
-	fmt.Printf("%v\n", s.Connection)
+	log.Printf("%v\n", s.Connection)
 	ctx := context.Background()
 	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		req := rets.SearchRequest{
@@ -63,7 +64,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 				Offset:     args.Offset,
 			},
 		}
-		fmt.Printf("Querying : %v\n", req)
+		log.Printf("Querying : %v\n", req)
 		result, err := rets.SearchCompact(r, ctx, req)
 		defer result.Close()
 		if err != nil {
