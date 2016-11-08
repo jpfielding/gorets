@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/jpfielding/gorets/metadata"
@@ -27,7 +28,7 @@ type MetadataHeadParams struct {
 
 // Head ....
 func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply *MetadataResponse) error {
-	fmt.Printf("metadat head params: %v\n", args)
+	log.Printf("metadat head params: %v\n", args)
 	s := sessions.Open(args.ID)
 	ctx := context.Background()
 	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
@@ -48,13 +49,13 @@ type MetadataGetParams struct {
 
 // Get ....
 func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataResponse) error {
-	fmt.Printf("metadata get params: %v\n", args)
+	log.Printf("metadata get params: %v\n", args)
 
 	s := sessions.Open(args.ID)
 	if s == nil {
 		return fmt.Errorf("no source found for %s", args.ID)
 	}
-	fmt.Printf("connections params for %s %v\n", args.ID, s.Connection)
+	log.Printf("connections params for %s %v\n", args.ID, s.Connection)
 	if JSONExist(s.MSystem()) {
 		standard := metadata.MSystem{}
 		JSONLoad(s.MSystem(), &standard)

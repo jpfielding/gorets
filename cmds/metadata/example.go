@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"time"
 
@@ -15,6 +15,9 @@ import (
 )
 
 func main() {
+	status := 0
+	defer func() { os.Exit(status) }()
+
 	configFile := flag.String("config-file", "", "Config file for RETS connection")
 	metadataFile := flag.String("metadata-options", "", "Config file for metadata options")
 	output := flag.String("output", "", "Directory for file output")
@@ -30,22 +33,28 @@ func main() {
 	if *configFile != "" {
 		err := config.LoadFrom(*configFile)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 1
+			return
 		}
 	}
-	fmt.Printf("Connection Settings: %v\n", config)
+	log.Printf("Connection Settings: %v\n", config)
 	if *metadataFile != "" {
 		err := metadataOpts.LoadFrom(*metadataFile)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 2
+			return
 		}
 	}
-	fmt.Printf("Search Options: %v\n", metadataOpts)
+	log.Printf("Search Options: %v\n", metadataOpts)
 
 	// should we throw an err here too?
 	session, err := config.Initialize()
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 3
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -53,7 +62,9 @@ func main() {
 
 	capability, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 4
+		return
 	}
 	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: capability.Logout})
 
@@ -65,7 +76,9 @@ func main() {
 	})
 	defer reader.Close()
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 5
+		return
 	}
 	out := os.Stdout
 	if *output != "" {

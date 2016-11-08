@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -20,6 +21,9 @@ import (
 )
 
 func main() {
+	status := 0
+	defer func() { os.Exit(status) }()
+
 	configFile := flag.String("config-file", "", "Config file for RETS connection")
 	searchFile := flag.String("search-options", "", "Config file for search options")
 	output := flag.String("output", "", "Directory for file output")
@@ -35,22 +39,28 @@ func main() {
 	if *configFile != "" {
 		err := config.LoadFrom(*configFile)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 1
+			return
 		}
 	}
-	fmt.Printf("Connection Settings: %v\n", config)
+	log.Printf("Connection Settings: %v\n", config)
 	if *searchFile != "" {
 		err := searchOpts.LoadFrom(*searchFile)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 2
+			return
 		}
 	}
-	fmt.Printf("Search Options: %v\n", searchOpts)
+	log.Printf("Search Options: %v\n", searchOpts)
 
 	// should we throw an err here too?
 	session, err := config.Initialize()
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 3
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -58,29 +68,35 @@ func main() {
 
 	urls, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 4
+		return
 	}
 	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: urls.Logout})
 
 	if urls.GetPayloadList != "" {
-		fmt.Println("Payloads: ", urls.GetPayloadList)
+		log.Println("Payloads: ", urls.GetPayloadList)
 		payloads, err := rets.GetPayloadList(session, ctx, rets.PayloadListRequest{
 			URL: urls.GetPayloadList,
 			ID:  fmt.Sprintf("%s:%s", searchOpts.Resource, searchOpts.Class),
 		})
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 5
+			return
 		}
 		err = payloads.ForEach(func(payload rets.CompactData, err error) error {
 			fmt.Printf("%v\n", payload)
 			return err
 		})
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 6
+			return
 		}
 	}
 
-	fmt.Println("Search: ", urls.Search)
+	log.Println("Search: ", urls.Search)
 	req := rets.SearchRequest{
 		URL: urls.Search,
 		SearchParams: rets.SearchParams{
@@ -119,10 +135,11 @@ func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest
 	}
 	// loop over all the pages we need
 	for {
-		fmt.Printf("Querying next page: %v\n", req)
+		log.Printf("Querying next page: %v\n", req)
 		result, err := rets.StandardXMLSearch(sess, ctx, req)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			return
 		}
 		switch result.Response.Code {
 		case rets.StatusOK:
@@ -132,7 +149,8 @@ func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest
 		case rets.StatusSearchError:
 			fallthrough
 		default: // shit hit the fan
-			panic(errors.New(result.Response.Text))
+			log.Println(errors.New(result.Response.Text))
+			return
 		}
 		count := 0
 		_, more, err := result.ForEach(match, func(row io.ReadCloser, err error) error {
@@ -144,11 +162,13 @@ func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest
 			return err
 		})
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			return
 		}
 		result.Close()
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			return
 		}
 		if !more {
 			return
@@ -172,10 +192,11 @@ func processCompact(sess rets.Requester, ctx context.Context, req rets.SearchReq
 
 	// loop over all the pages we need
 	for {
-		fmt.Printf("Querying next page: %v\n", req)
+		log.Printf("Querying next page: %v\n", req)
 		result, err := rets.SearchCompact(sess, ctx, req)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			return
 		}
 		switch result.Response.Code {
 		case rets.StatusOK:
@@ -185,7 +206,8 @@ func processCompact(sess rets.Requester, ctx context.Context, req rets.SearchReq
 		case rets.StatusSearchError:
 			fallthrough
 		default: // shit hit the fan
-			panic(errors.New(result.Response.Text))
+			log.Println(errors.New(result.Response.Text))
+			return
 		}
 		count := 0
 		if count == 0 {
@@ -201,7 +223,8 @@ func processCompact(sess rets.Requester, ctx context.Context, req rets.SearchReq
 		})
 		result.Close()
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			return
 		}
 		if !hasMoreRows {
 			return

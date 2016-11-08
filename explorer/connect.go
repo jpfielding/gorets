@@ -2,7 +2,7 @@ package explorer
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/jpfielding/gorets/rets"
@@ -17,10 +17,10 @@ type Connections map[string]Connection
 // Load ...
 func (cs Connections) Load() Connections {
 	if len(cs) == 0 {
-		fmt.Println("loading connections")
+		log.Println("loading connections")
 		JSONLoad("/tmp/gorets/connections.json", &cs)
 	}
-	fmt.Printf("found %d connections\n", len(cs))
+	log.Printf("found %d connections\n", len(cs))
 	return cs
 }
 

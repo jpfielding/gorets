@@ -65,7 +65,7 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			}
 			req := WireLogPageRequest{}
 			json.NewDecoder(msg).Decode(&req)
-			fmt.Printf("wirelog request: %v\n", req)
+			log.Printf("wirelog request: %v\n", req)
 			// find the source for this message
 			sess := sessions.Open(req.ID)
 			if sess == nil {

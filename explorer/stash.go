@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 )
@@ -51,7 +51,7 @@ func JSONStore(filename string, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("wrote:", filename)
+	log.Println("wrote:", filename)
 	return nil
 }
 

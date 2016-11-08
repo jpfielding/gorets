@@ -40,7 +40,7 @@ func (ic *IncrementalCompact) Load(sess rets.Requester, ctx context.Context, url
 	ic.Response = msys.Response
 	ic.MSystem = msys.MSystem
 	ic.Elements = map[string][]rets.CompactData{}
-	// fmt.Printf("compact system: %v\n", compact)
+	// log.Printf("compact system: %v\n", compact)
 	cds, err := ic.extractChildren(get, []string{}, metadata.MISystem)
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (ic *IncrementalCompact) extractChildren(get cmgetter, path []string, mi me
 			//  recurse on each member of this cdata
 			for _, each := range cdata.Entries() {
 				var data map[string]string = each
-				// fmt.Printf("compact system: %v\n", compact)
+				// log.Printf("compact system: %v\n", compact)
 				cds, err := ic.extractChildren(get, append(path, child.ID(data)), child)
 				if err != nil {
 					return tmp, err

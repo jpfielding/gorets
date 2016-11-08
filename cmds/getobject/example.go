@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"time"
 
@@ -15,6 +16,9 @@ import (
 )
 
 func main() {
+	status := 0
+	defer func() { os.Exit(status) }()
+
 	optionsFile := flag.String("object-options", "", "Get object")
 	configFile := flag.String("config-file", "", "Config file for RETS connection")
 	output := flag.String("output", "", "Directory for file output")
@@ -30,22 +34,28 @@ func main() {
 	if *configFile != "" {
 		err := config.LoadFrom(*configFile)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 1
+			return
 		}
 	}
-	fmt.Printf("Connection Settings: %v\n", config)
+	log.Printf("Connection Settings: %v\n", config)
 	if *optionsFile != "" {
 		err := getOptions.LoadFrom(*optionsFile)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 2
+			return
 		}
 	}
-	fmt.Printf("GetObject Options: %v\n", getOptions)
+	log.Printf("GetObject Options: %v\n", getOptions)
 
 	// should we throw an err here too?
 	session, err := config.Initialize()
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 3
+		return
 	}
 	// setup timeout control
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -53,12 +63,14 @@ func main() {
 	// login
 	capability, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 4
+		return
 	}
 	// make sure we close the rets connection
 	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: capability.Logout})
 	// feedback
-	fmt.Println("GetObject: ", capability.GetObject)
+	log.Println("GetObject: ", capability.GetObject)
 	// warning, this does _all_ of the photos
 	response, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
 		URL: capability.GetObject,
@@ -69,11 +81,13 @@ func main() {
 		},
 	})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 5
+		return
 	}
 	defer response.Close()
 	err = response.ForEach(func(o *rets.Object, err error) error {
-		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
+		log.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
 		// if we arent saving, then we quit
 		if *output == "" {
 			return nil
@@ -89,7 +103,9 @@ func main() {
 		return err
 	})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 6
+		return
 	}
 }
 

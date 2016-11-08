@@ -3,6 +3,7 @@ package explorer
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/jpfielding/gorets/rets"
@@ -43,7 +44,7 @@ type ObjectService struct{}
 
 // Get ....
 func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects) error {
-	fmt.Printf("object get params: %v\n", args)
+	log.Printf("object get params: %v\n", args)
 
 	s := sessions.Open(args.ID)
 	if s == nil {
