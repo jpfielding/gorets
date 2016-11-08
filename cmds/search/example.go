@@ -21,6 +21,9 @@ import (
 )
 
 func main() {
+	status := 0
+	defer func() { os.Exit(status) }()
+
 	configFile := flag.String("config-file", "", "Config file for RETS connection")
 	searchFile := flag.String("search-options", "", "Config file for search options")
 	output := flag.String("output", "", "Directory for file output")
@@ -37,6 +40,7 @@ func main() {
 		err := config.LoadFrom(*configFile)
 		if err != nil {
 			log.Println(err)
+			status = 1
 			return
 		}
 	}
@@ -45,6 +49,7 @@ func main() {
 		err := searchOpts.LoadFrom(*searchFile)
 		if err != nil {
 			log.Println(err)
+			status = 2
 			return
 		}
 	}
@@ -54,6 +59,7 @@ func main() {
 	session, err := config.Initialize()
 	if err != nil {
 		log.Println(err)
+		status = 3
 		return
 	}
 
@@ -63,6 +69,7 @@ func main() {
 	urls, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
 	if err != nil {
 		log.Println(err)
+		status = 4
 		return
 	}
 	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: urls.Logout})
@@ -75,6 +82,7 @@ func main() {
 		})
 		if err != nil {
 			log.Println(err)
+			status = 5
 			return
 		}
 		err = payloads.ForEach(func(payload rets.CompactData, err error) error {
@@ -83,6 +91,7 @@ func main() {
 		})
 		if err != nil {
 			log.Println(err)
+			status = 6
 			return
 		}
 	}

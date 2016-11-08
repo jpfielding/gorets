@@ -16,6 +16,9 @@ import (
 )
 
 func main() {
+	status := 0
+	defer func() { os.Exit(status) }()
+
 	optionsFile := flag.String("object-options", "", "Get object")
 	configFile := flag.String("config-file", "", "Config file for RETS connection")
 	output := flag.String("output", "", "Directory for file output")
@@ -31,14 +34,18 @@ func main() {
 	if *configFile != "" {
 		err := config.LoadFrom(*configFile)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 1
+			return
 		}
 	}
 	log.Printf("Connection Settings: %v\n", config)
 	if *optionsFile != "" {
 		err := getOptions.LoadFrom(*optionsFile)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			status = 2
+			return
 		}
 	}
 	log.Printf("GetObject Options: %v\n", getOptions)
@@ -46,7 +53,9 @@ func main() {
 	// should we throw an err here too?
 	session, err := config.Initialize()
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 3
+		return
 	}
 	// setup timeout control
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -54,7 +63,9 @@ func main() {
 	// login
 	capability, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 4
+		return
 	}
 	// make sure we close the rets connection
 	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: capability.Logout})
@@ -70,7 +81,9 @@ func main() {
 		},
 	})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 5
+		return
 	}
 	defer response.Close()
 	err = response.ForEach(func(o *rets.Object, err error) error {
@@ -90,7 +103,9 @@ func main() {
 		return err
 	})
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		status = 6
+		return
 	}
 }
 
