@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -86,7 +87,12 @@ func parseCapability(body io.ReadCloser, url string) (*CapabilityURLs, error) {
 		return nil, err
 	}
 	if strings.TrimSpace(rets.Response) == "" {
-		return nil, errors.New("failed to read urls")
+
+		detail := ""
+		if rets.ReplyCode != StatusOK || rets.ReplyText != "" {
+			detail = fmt.Sprintf(" - %d: %s", rets.ReplyCode, rets.ReplyText)
+		}
+		return nil, errors.New("failed to read urls" + detail)
 	}
 
 	reader := bufio.NewReader(strings.NewReader(rets.Response))

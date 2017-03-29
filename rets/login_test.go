@@ -92,3 +92,60 @@ func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
 	testutils.Equals(t, "http://server.com:6103/rets2_2/Links", urls.AdditionalURLs["X-SampleLinks"])
 }
+
+func TestFailedLoginNotRets(t *testing.T) {
+	body :=
+		`<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+	<title>401 - Unauthorized: Access is denied due to invalid credentials.</title>
+	</head>
+	<body>
+	<div id="header"><h1>Server Error</h1></div>
+	<div id="content">
+	 <div class="content-container"><fieldset>
+	  <h2>401 - Unauthorized: Access is denied due to invalid credentials.</h2>
+	  <h3>You do not have permission to view this directory or page using the credentials that you supplied.</h3>
+	 </fieldset></div>
+	</div>
+	</body>
+	</html>`
+
+	_, err := parseCapability(
+		ioutil.NopCloser(strings.NewReader(body)),
+		"http://server.com:6103/platinum/login",
+	)
+	testutils.NotOk(t, err)
+	testutils.Equals(t, "expected element type <RETS> but have <html>", err.Error())
+}
+
+func TestFailedLoginRets(t *testing.T) {
+	body :=
+		`<RETS>
+	<RETS-RESPONSE>
+	</RETS-RESPONSE>
+	</RETS>`
+
+	_, err := parseCapability(
+		ioutil.NopCloser(strings.NewReader(body)),
+		"http://server.com:6103/platinum/login",
+	)
+	testutils.NotOk(t, err)
+	testutils.Equals(t, "failed to read urls", err.Error())
+}
+
+func TestFailedLoginRetsWithDetails(t *testing.T) {
+	body :=
+		`<RETS ReplyCode="20036" ReplyText="Missing User-Agent request header field." >
+	<RETS-RESPONSE>
+	</RETS-RESPONSE>
+	</RETS>`
+
+	_, err := parseCapability(
+		ioutil.NopCloser(strings.NewReader(body)),
+		"http://server.com:6103/platinum/login",
+	)
+	testutils.NotOk(t, err)
+	testutils.Equals(t, "failed to read urls - 20036: Missing User-Agent request header field.", err.Error())
+}
