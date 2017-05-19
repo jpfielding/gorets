@@ -1,6 +1,7 @@
 package rets
 
 import (
+	"bytes"
 	"encoding/xml"
 	"io"
 	"net/http"
@@ -31,6 +32,8 @@ const (
 type SearchParams struct {
 	SearchType, // Property
 	Class string // Residential
+
+	HTTPFormEncodedValues bool // POST style http params
 
 	Format, // 7.4.2 COMPACT | COMPACT-DECODED | STANDARD-XML | STANDARD-XML:dtd-version
 	Select string
@@ -103,8 +106,14 @@ func PrepSearchRequest(r SearchRequest) (*http.Request, error) {
 		method = r.HTTPMethod
 	}
 
+	// http POST style params
+	if r.HTTPFormEncodedValues {
+		req, err := http.NewRequest(method, url.String(), bytes.NewBufferString(values.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		return req, err
+	}
+	// the standard query string style params here
 	url.RawQuery = values.Encode()
-
 	return http.NewRequest(method, url.String(), nil)
 }
 
