@@ -93,9 +93,18 @@ type CompactRow string
 
 // Parse ...
 func (cr CompactRow) Parse(delim string) Row {
-	if string(cr) == "" {
+	asString := string(cr)
+	if asString == "" {
 		return []string{}
 	}
-	split := strings.Split(string(cr), delim)
-	return split[1 : len(split)-1]
+	split := strings.Split(asString, delim)
+	start := 0
+	if strings.HasPrefix(asString, delim) {
+		start = 1
+	}
+	len := len(split)
+	if strings.HasSuffix(asString, delim) {
+		len = len - 1
+	}
+	return split[start:len]
 }
