@@ -39,6 +39,29 @@ func TestCompactRowParsing(t *testing.T) {
 	testutils.Equals(t, 6, int(len(values)))
 }
 
+func TestCompactRowParsingEmpty(t *testing.T) {
+	var col = `	A	B	C	D	E	F	`
+	var row = ``
+	var delim = `	`
+
+	headers := CompactRow(col).Parse(delim)
+	values := CompactRow(row).Parse(delim)
+
+	testutils.Equals(t, 6, int(len(headers)))
+	testutils.Equals(t, 0, int(len(values)))
+}
+
+func TestCompactRowParsingFubar(t *testing.T) {
+	var col = `	A	B	C	D	E	F	`
+	var row = `	`
+	var delim = `	`
+	headers := CompactRow(col).Parse(delim)
+	values := CompactRow(row).Parse(delim)
+
+	testutils.Equals(t, 6, int(len(headers)))
+	testutils.Equals(t, 0, int(len(values)))
+}
+
 var compact = `<METADATA-ELEMENT Cat="Dog" Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	ResourceID	StandardName	</COLUMNS>
 <DATA>	ActiveAgent	ActiveAgent	</DATA>
