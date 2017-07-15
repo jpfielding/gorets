@@ -9,6 +9,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type Digest struct {
 	Opaque     string
 	Qop        string
 	NonceCount int
+	m          *sync.Mutex
 }
 
 func parseChallenge(chall string) (*Digest, error) {
@@ -81,6 +83,7 @@ func NewDigest(chall string) (*Digest, error) {
 		Opaque:     c.Opaque,
 		Qop:        c.Qop,
 		NonceCount: 1,
+		m:          &sync.Mutex{},
 	}, nil
 }
 
@@ -120,7 +123,10 @@ func (d *Digest) createResponse(ha1, ha2, nc, cnonce string, hasher hash.Hash) s
 }
 
 func (d *Digest) computeAuthorization(username, password, method, uri, cnonce string) string {
+	d.m.Lock()
 	nc := fmt.Sprintf("%08x", d.NonceCount)
+	d.NonceCount++
+	d.m.Unlock()
 	ha1 := d.createHa1(username, password, cnonce, md5.New())
 	ha2 := d.createHa2(method, uri, md5.New())
 	response := d.createResponse(ha1, ha2, nc, cnonce, md5.New())
@@ -142,7 +148,6 @@ func (d *Digest) computeAuthorization(username, password, method, uri, cnonce st
 		sl = append(sl, fmt.Sprintf(`opaque="%s"`, d.Opaque))
 	}
 
-	d.NonceCount++
 	return fmt.Sprintf("Digest %s", strings.Join(sl, ", "))
 }
 
