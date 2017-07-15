@@ -6,6 +6,7 @@ package rets
 
 import (
 	"crypto/md5"
+	"sync"
 	"testing"
 
 	testutils "github.com/jpfielding/gotest/testutils"
@@ -26,6 +27,7 @@ func TestParseChallenge(t *testing.T) {
 		Opaque:     "6e6f742075736564",
 		Qop:        "",
 		NonceCount: 1,
+		m:          &sync.Mutex{},
 	}
 
 	testutils.Equals(t, expected, digest)
@@ -131,6 +133,7 @@ func createNoQopDigest() *Digest {
 		Opaque:     "6e6f742075736564",
 		Qop:        "",
 		NonceCount: 1,
+		m:          &sync.Mutex{},
 	}
 }
 
@@ -142,5 +145,6 @@ func createAuthDigest() *Digest {
 		Opaque:     "6e6f742075736564",
 		Qop:        "auth",
 		NonceCount: 1,
+		m:          &sync.Mutex{},
 	}
 }
