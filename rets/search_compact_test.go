@@ -76,6 +76,19 @@ func TestSearchCompactNoEof(t *testing.T) {
 	testutils.Equals(t, StatusNoRecords, cr.Response.Code)
 }
 
+func TestSearchCompactWithDelimNoEof(t *testing.T) {
+	rets := `<?xml version="1.0" encoding="iso-8859-1"?>
+			<RETS ReplyCode="0" ReplyText="Operation successful" >
+			<DELIMITER value="09"/>
+			</RETS>`
+	body := ioutil.NopCloser(strings.NewReader(rets))
+
+	cr, err := NewCompactSearchResult(body)
+	testutils.Equals(t, cr.Delimiter, "	")
+	testutils.Ok(t, err)
+	testutils.Equals(t, StatusOK, cr.Response.Code)
+}
+
 func TestSearchCompactEmbeddedRetsStatus(t *testing.T) {
 	rets := `<?xml version="1.0" encoding="UTF-8" ?>
 			<RETS ReplyCode="0" ReplyText="Operation Successful">
