@@ -47,7 +47,7 @@ type CapabilityURLs struct {
 }
 
 // Login ...
-func Login(requester Requester, ctx context.Context, r LoginRequest) (*CapabilityURLs, error) {
+func Login(ctx context.Context, requester Requester, r LoginRequest) (*CapabilityURLs, error) {
 	method := DefaultHTTPMethod
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod

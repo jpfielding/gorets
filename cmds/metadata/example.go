@@ -51,13 +51,13 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	capability, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
+	capability, err := rets.Login(ctx, session, rets.LoginRequest{URL: config.URL})
 	if err != nil {
 		panic(err)
 	}
-	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: capability.Logout})
+	defer rets.Logout(ctx, session, rets.LogoutRequest{URL: capability.Logout})
 
-	reader, err := rets.MetadataStream(session, ctx, rets.MetadataRequest{
+	reader, err := rets.MetadataStream(ctx, session, rets.MetadataRequest{
 		URL:    capability.GetMetadata,
 		Format: metadataOpts.Format,
 		MType:  metadataOpts.MType,

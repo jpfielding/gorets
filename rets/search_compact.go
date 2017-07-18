@@ -11,8 +11,8 @@ import (
 )
 
 // SearchCompact if you set the wrong request Format you will get nothing back
-func SearchCompact(requester Requester, ctx context.Context, r SearchRequest) (*CompactSearchResult, error) {
-	body, err := SearchStream(requester, ctx, r)
+func SearchCompact(ctx context.Context, requester Requester, r SearchRequest) (*CompactSearchResult, error) {
+	body, err := SearchStream(ctx, requester, r)
 	if err != nil {
 		return nil, err
 	}

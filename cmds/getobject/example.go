@@ -51,16 +51,16 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 	// login
-	capability, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
+	capability, err := rets.Login(ctx, session, rets.LoginRequest{URL: config.URL})
 	if err != nil {
 		panic(err)
 	}
 	// make sure we close the rets connection
-	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: capability.Logout})
+	defer rets.Logout(ctx, session, rets.LogoutRequest{URL: capability.Logout})
 	// feedback
 	fmt.Println("GetObject: ", capability.GetObject)
 	// warning, this does _all_ of the photos
-	response, err := rets.GetObjects(session, ctx, rets.GetObjectRequest{
+	response, err := rets.GetObjects(ctx, session, rets.GetObjectRequest{
 		URL: capability.GetObject,
 		GetObjectParams: rets.GetObjectParams{
 			Resource: getOptions.Resource,
@@ -115,7 +115,7 @@ func (o *GetObjectOptions) LoadFrom(filename string) error {
 	if err != nil {
 		return err
 	}
-	blob, err := ioutil.ReadAll(file)
+	blob, _ := ioutil.ReadAll(file)
 	err = json.Unmarshal(blob, o)
 	if err != nil {
 		return err

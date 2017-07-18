@@ -56,15 +56,15 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	urls, err := rets.Login(session, ctx, rets.LoginRequest{URL: config.URL})
+	urls, err := rets.Login(ctx, session, rets.LoginRequest{URL: config.URL})
 	if err != nil {
 		panic(err)
 	}
-	defer rets.Logout(session, ctx, rets.LogoutRequest{URL: urls.Logout})
+	defer rets.Logout(ctx, session, rets.LogoutRequest{URL: urls.Logout})
 
 	if urls.GetPayloadList != "" {
 		fmt.Println("Payloads: ", urls.GetPayloadList)
-		payloads, err := rets.GetPayloadList(session, ctx, rets.PayloadListRequest{
+		payloads, err := rets.GetPayloadList(ctx, session, rets.PayloadListRequest{
 			URL: urls.GetPayloadList,
 			ID:  fmt.Sprintf("%s:%s", searchOpts.Resource, searchOpts.Class),
 		})
@@ -95,13 +95,13 @@ func main() {
 		},
 	}
 	if strings.HasPrefix(req.SearchParams.Format, "COMPACT") {
-		processCompact(session, ctx, req, output)
+		processCompact(ctx, session, req, output)
 	} else {
-		processXML(session, ctx, req, searchOpts.ElementName, output)
+		processXML(ctx, session, req, searchOpts.ElementName, output)
 	}
 }
 
-func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest, elem string, output *string) {
+func processXML(ctx context.Context, sess rets.Requester, req rets.SearchRequest, elem string, output *string) {
 	w := os.Stdout
 	if *output != "" {
 		os.MkdirAll(*output, 0777)
@@ -120,7 +120,7 @@ func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest
 	// loop over all the pages we need
 	for {
 		fmt.Printf("Querying next page: %v\n", req)
-		result, err := rets.StandardXMLSearch(sess, ctx, req)
+		result, err := rets.StandardXMLSearch(ctx, sess, req)
 		if err != nil {
 			panic(err)
 		}
@@ -160,7 +160,7 @@ func processXML(sess rets.Requester, ctx context.Context, req rets.SearchRequest
 	}
 }
 
-func processCompact(sess rets.Requester, ctx context.Context, req rets.SearchRequest, output *string) {
+func processCompact(ctx context.Context, sess rets.Requester, req rets.SearchRequest, output *string) {
 	w := csv.NewWriter(os.Stdout)
 	if *output != "" {
 		os.MkdirAll(*output, 0777)
@@ -173,7 +173,7 @@ func processCompact(sess rets.Requester, ctx context.Context, req rets.SearchReq
 	// loop over all the pages we need
 	for {
 		fmt.Printf("Querying next page: %v\n", req)
-		result, err := rets.SearchCompact(sess, ctx, req)
+		result, err := rets.SearchCompact(ctx, sess, req)
 		if err != nil {
 			panic(err)
 		}
@@ -254,7 +254,7 @@ func (o *SearchOptions) LoadFrom(filename string) error {
 	if err != nil {
 		return err
 	}
-	blob, err := ioutil.ReadAll(file)
+	blob, _ := ioutil.ReadAll(file)
 	err = json.Unmarshal(blob, o)
 	if err != nil {
 		return err

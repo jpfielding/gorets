@@ -34,7 +34,7 @@ func PrepGetPayloadList(r PayloadListRequest) (*http.Request, error) {
 }
 
 // GetPayloadList ...
-func GetPayloadList(requester Requester, ctx context.Context, r PayloadListRequest) (PayloadList, error) {
+func GetPayloadList(ctx context.Context, requester Requester, r PayloadListRequest) (PayloadList, error) {
 	req, err := PrepGetPayloadList(r)
 	if err != nil {
 		return PayloadList{}, err

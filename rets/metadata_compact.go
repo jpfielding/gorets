@@ -7,9 +7,9 @@ import (
 )
 
 // GetCompactMetadata ...
-func GetCompactMetadata(requester Requester, ctx context.Context, r MetadataRequest) (*CompactMetadata, error) {
+func GetCompactMetadata(ctx context.Context, requester Requester, r MetadataRequest) (*CompactMetadata, error) {
 	r.Format = "COMPACT"
-	body, err := MetadataStream(requester, ctx, r)
+	body, err := MetadataStream(ctx, requester, r)
 	if err != nil {
 		return nil, err
 	}

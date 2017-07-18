@@ -118,7 +118,7 @@ func PrepSearchRequest(r SearchRequest) (*http.Request, error) {
 }
 
 // SearchStream returns the raw stream from the RETS server response
-func SearchStream(requester Requester, ctx context.Context, r SearchRequest) (io.ReadCloser, error) {
+func SearchStream(ctx context.Context, requester Requester, r SearchRequest) (io.ReadCloser, error) {
 	req, err := PrepSearchRequest(r)
 	if err != nil {
 		return nil, err

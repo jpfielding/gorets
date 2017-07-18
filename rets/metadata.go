@@ -37,7 +37,7 @@ func PrepMetadataRequest(r MetadataRequest) (*http.Request, error) {
 }
 
 // MetadataStream ...
-func MetadataStream(requester Requester, ctx context.Context, r MetadataRequest) (io.ReadCloser, error) {
+func MetadataStream(ctx context.Context, requester Requester, r MetadataRequest) (io.ReadCloser, error) {
 	req, err := PrepMetadataRequest(r)
 	if err != nil {
 		return nil, err

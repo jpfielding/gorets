@@ -14,8 +14,8 @@ type IncrementalCompact rets.CompactMetadata
 
 type cmgetter func(string, string) (*rets.CompactMetadata, error)
 
-// GetCompactIncrementalMetadata retrieve the RETS Compact metadata from the server
-func (ic *IncrementalCompact) Load(sess rets.Requester, ctx context.Context, url string) error {
+// Load retrieve the RETS Compact metadata from the server
+func (ic *IncrementalCompact) Load(ctx context.Context, sess rets.Requester, url string) error {
 	// extract an id'd subesection of metadata
 	get := func(id, mtype string) (*rets.CompactMetadata, error) {
 		if id == "" {
@@ -27,7 +27,7 @@ func (ic *IncrementalCompact) Load(sess rets.Requester, ctx context.Context, url
 			MType:  mtype,
 			ID:     id,
 		}
-		reader, er := rets.MetadataStream(sess, ctx, req)
+		reader, er := rets.MetadataStream(ctx, sess, req)
 		if er != nil {
 			return nil, er
 		}

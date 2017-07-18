@@ -46,7 +46,7 @@ func NewObjectFromStream(header textproto.MIMEHeader, body io.ReadCloser) (*Obje
 	}
 
 	// 5.6.7
-	retsError, err := strconv.ParseBool(header.Get("RETS-Error"))
+	retsError, _ := strconv.ParseBool(header.Get("RETS-Error"))
 	retsMsg, err := ReadResponse(ioutil.NopCloser(bytes.NewReader(blob)))
 
 	// there is a rets message, stash it and wipe the content

@@ -61,7 +61,7 @@ func (cm AsStandard) MFilter() *metadata.MFilter {
 	return &mf
 }
 
-// MResources ...
+// MResource ...
 func (cm AsStandard) MResource() *metadata.MResource {
 	mr := metadata.MResource{}
 	mi := metadata.MIResource
@@ -86,7 +86,7 @@ func (cm AsStandard) MResource() *metadata.MResource {
 	return &mr
 }
 
-// SetValidationExpressions ...
+// MValidationExpression ...
 func (cm AsStandard) MValidationExpression(resource string) *metadata.MValidationExpression {
 	mve := metadata.MValidationExpression{}
 	mi := metadata.MIValidationExpression
@@ -179,7 +179,7 @@ func (cm AsStandard) MClass(resource string) *metadata.MClass {
 	return &mc
 }
 
-// ColumnGroup ...
+// MColumnGroup ...
 func (cm AsStandard) MColumnGroup(resource, class string) *metadata.MColumnGroup {
 	mcg := metadata.MColumnGroup{}
 	mi := metadata.MIColumnGroup

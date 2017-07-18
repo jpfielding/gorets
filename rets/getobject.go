@@ -47,7 +47,7 @@ func PrepGetObjects(r GetObjectRequest) (*http.Request, error) {
 }
 
 // GetObjects sends the GetObject request
-func GetObjects(requester Requester, ctx context.Context, r GetObjectRequest) (*GetObjectResponse, error) {
+func GetObjects(ctx context.Context, requester Requester, r GetObjectRequest) (*GetObjectResponse, error) {
 	req, err := PrepGetObjects(r)
 	if err != nil {
 		return nil, err

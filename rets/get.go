@@ -13,7 +13,7 @@ type GetRequest struct {
 }
 
 // Get gets an arbitrary file from the server or performs an arbitrary action, specified by URI
-func Get(requester Requester, ctx context.Context, r GetRequest) error {
+func Get(ctx context.Context, requester Requester, r GetRequest) error {
 	req, err := http.NewRequest("GET", r.URL, nil)
 	if err != nil {
 		return err

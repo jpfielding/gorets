@@ -26,7 +26,7 @@ type LogoutResponse struct {
 }
 
 // Logout ...
-func Logout(requester Requester, ctx context.Context, r LogoutRequest) (*LogoutResponse, error) {
+func Logout(ctx context.Context, requester Requester, r LogoutRequest) (*LogoutResponse, error) {
 	method := DefaultHTTPMethod
 	if r.HTTPMethod != "" {
 		method = r.HTTPMethod
