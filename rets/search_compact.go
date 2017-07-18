@@ -36,12 +36,14 @@ type EachRow func(row Row, err error) error
 
 // ForEach returns MaxRows and any error that 'each' wont handle
 func (c *CompactSearchResult) ForEach(each EachRow) (bool, error) {
-	defer c.body.Close()
+	if c.body == nil {
+		return false, nil
+	}
 	maxRows := false
 	for {
 		token, err := c.parser.Token()
 		if err != nil {
-			// dont catch io.EOF here since a clean read should never see it
+			// dont catch io.EOF here since a clean read should exit at the </RETS> tag
 			if err = each(nil, err); err != nil {
 				return maxRows, err
 			}
@@ -64,6 +66,7 @@ func (c *CompactSearchResult) ForEach(each EachRow) (bool, error) {
 					return maxRows, err
 				}
 			case XMLElemRETS, XMLElemRETSStatus:
+				c.Close() // close the stream since we've read to the end
 				return maxRows, nil
 			}
 		case xml.CharData:
@@ -78,7 +81,9 @@ func (c *CompactSearchResult) Close() error {
 	if c == nil || c.body == nil {
 		return nil
 	}
-	return c.body.Close()
+	tmp := c.body
+	c.body = nil
+	return tmp.Close()
 }
 
 // NewCompactSearchResult _always_ close this
@@ -122,7 +127,8 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 				result.Columns = CompactRow(result.buf.String()).Parse(result.Delimiter)
 				return result, nil
 			case XMLElemRETS, XMLElemRETSStatus:
-				// if there is only a RETS tag.. just exit
+				// if there is only a RETS tag.. close the stream and just exit
+				result.Close()
 				return result, nil
 			}
 		case xml.CharData:

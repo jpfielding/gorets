@@ -72,8 +72,20 @@ func TestSearchCompactNoEof(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(rets))
 
 	cr, err := NewCompactSearchResult(body)
+	defer cr.Close()
 	testutils.Ok(t, err)
 	testutils.Equals(t, StatusNoRecords, cr.Response.Code)
+	found := 0
+	max, err := cr.ForEach(func(data Row, err error) error {
+		if err != nil {
+			testutils.Ok(t, err)
+			return err
+		}
+		return nil
+	})
+	testutils.Ok(t, err)
+	testutils.Equals(t, max, false)
+	testutils.Equals(t, 0, found)
 }
 
 func TestSearchCompactWithDelimNoEof(t *testing.T) {
@@ -84,9 +96,21 @@ func TestSearchCompactWithDelimNoEof(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(rets))
 
 	cr, err := NewCompactSearchResult(body)
+	defer cr.Close()
 	testutils.Equals(t, cr.Delimiter, "	")
 	testutils.Ok(t, err)
 	testutils.Equals(t, StatusOK, cr.Response.Code)
+	found := 0
+	max, err := cr.ForEach(func(data Row, err error) error {
+		if err != nil {
+			testutils.Ok(t, err)
+			return err
+		}
+		return nil
+	})
+	testutils.Ok(t, err)
+	testutils.Equals(t, max, false)
+	testutils.Equals(t, 0, found)
 }
 
 func TestSearchCompactEmbeddedRetsStatus(t *testing.T) {
