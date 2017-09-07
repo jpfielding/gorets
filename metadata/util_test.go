@@ -3,7 +3,7 @@ package metadata
 import (
 	"testing"
 
-	"github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFieldTransfer(t *testing.T) {
@@ -18,7 +18,7 @@ func TestFieldTransfer(t *testing.T) {
 		"Foo": "bar",
 		"baz": "blah",
 	}).To(test)
-	testutils.Equals(t, "foo", test.Bob)
-	testutils.Assert(t, "" == test.foo, "shouldnt be able to set lower case fields")
-	testutils.Assert(t, "blah" == test.Baz, "should be case insensitive")
+	assert.Equal(t, "foo", test.Bob)
+	assert.Equal(t, "", test.foo, "shouldnt be able to set lower case fields")
+	assert.Equal(t, "blah", test.Baz, "should be case insensitive")
 }

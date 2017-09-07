@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNext(t *testing.T) {
@@ -27,18 +27,18 @@ func TestNext(t *testing.T) {
 	extractor := &Extractor{Body: body}
 	response, err := extractor.Open()
 
-	testutils.Ok(t, err)
-	testutils.Equals(t, "Operation successful.", response.ReplyText)
+	assert.Nil(t, err)
+	assert.Equal(t, "Operation successful.", response.ReplyText)
 
 	next := func(resource, version, date string) func(*testing.T) {
 		return func(tt *testing.T) {
 			mclass := &MClass{}
 			err = extractor.DecodeNext("METADATA-CLASS", mclass)
-			testutils.Ok(t, err)
-			testutils.Equals(tt, resource, string(mclass.Resource))
-			testutils.Equals(tt, version, string(mclass.Version))
-			testutils.Equals(tt, date, string(mclass.Date))
-			testutils.Equals(tt, 0, len(mclass.Class))
+			assert.Nil(t, err)
+			assert.Equal(tt, resource, string(mclass.Resource))
+			assert.Equal(tt, version, string(mclass.Version))
+			assert.Equal(tt, date, string(mclass.Date))
+			assert.Equal(tt, 0, len(mclass.Class))
 		}
 	}
 
@@ -47,5 +47,5 @@ func TestNext(t *testing.T) {
 	t.Run("listing", next("Listing", "01.72.11584", "2016-03-29T21:50:11"))
 
 	err = extractor.DecodeNext("METADATA-CLASS", &MClass{})
-	testutils.Equals(t, io.EOF, err)
+	assert.Equal(t, io.EOF, err)
 }

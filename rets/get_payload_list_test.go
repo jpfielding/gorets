@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 var payloadlist = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
@@ -40,16 +40,16 @@ func TestParseGetPayloadList(t *testing.T) {
 	if err != nil {
 		t.Error("error parsing body: " + err.Error())
 	}
-	testutils.Equals(t, StatusOK, pl.Response.Code)
-	testutils.Equals(t, "V2.7.0 2315: Success", pl.Response.Text)
+	assert.Equal(t, StatusOK, pl.Response.Code)
+	assert.Equal(t, "V2.7.0 2315: Success", pl.Response.Text)
 
 	var payload []CompactData
 	err = pl.ForEach(func(cd CompactData, err error) error {
 		payload = append(payload, cd)
 		return err
 	})
-	testutils.Equals(t, "CLASS_1", payload[0].Attr["Class"])
-	testutils.Equals(t, 1, len(payload[0].Entries()))
-	testutils.Equals(t, "CLASS_2", payload[1].Attr["Class"])
-	testutils.Equals(t, 2, len(payload[1].Entries()))
+	assert.Equal(t, "CLASS_1", payload[0].Attr["Class"])
+	assert.Equal(t, 1, len(payload[0].Entries()))
+	assert.Equal(t, "CLASS_2", payload[1].Attr["Class"])
+	assert.Equal(t, 2, len(payload[1].Entries()))
 }

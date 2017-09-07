@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 var raw = `<?xml version="1.0" encoding="utf-8"?>
@@ -33,12 +33,12 @@ func TestLoad(t *testing.T) {
 
 	err := parser.Decode(&xml)
 	if err != io.EOF {
-		testutils.Ok(t, err)
+		assert.Nil(t, err)
 	}
-	testutils.Equals(t, "Operation Successful", xml.ReplyText)
+	assert.Equal(t, "Operation Successful", xml.ReplyText)
 
-	testutils.Equals(t, "ABBA", xml.Metadata.MSystem.System.ID)
-	testutils.Equals(t, "Property", string(xml.Metadata.MSystem.System.MResource.Resource[0].ResourceID))
+	assert.Equal(t, "ABBA", xml.Metadata.MSystem.System.ID)
+	assert.Equal(t, "Property", string(xml.Metadata.MSystem.System.MResource.Resource[0].ResourceID))
 }
 
 func TestSystem(t *testing.T) {
@@ -48,14 +48,14 @@ func TestSystem(t *testing.T) {
 	extractor := &Extractor{Body: body}
 	response, err := extractor.Open()
 
-	testutils.Ok(t, err)
-	testutils.Equals(t, "Operation Successful", response.ReplyText)
+	assert.Nil(t, err)
+	assert.Equal(t, "Operation Successful", response.ReplyText)
 
 	xml := MSystem{}
 	err = extractor.DecodeNext("METADATA-SYSTEM", &xml)
 	if err != io.EOF {
-		testutils.Ok(t, err)
+		assert.Nil(t, err)
 	}
-	testutils.Equals(t, "ABBA", xml.System.ID)
-	testutils.Equals(t, "Property", string(xml.System.MResource.Resource[0].ResourceID))
+	assert.Equal(t, "ABBA", xml.System.ID)
+	assert.Equal(t, "Property", string(xml.System.MResource.Resource[0].ResourceID))
 }

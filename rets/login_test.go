@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
@@ -39,21 +39,21 @@ func TestParseCapabilitiesAbsoluteUrls(t *testing.T) {
 		ioutil.NopCloser(strings.NewReader(body)),
 		"http://server.com:6103/platinum/login",
 	)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
-	testutils.Equals(t, urls.Response.Text, "V2.7.0 2315: Success")
-	testutils.Equals(t, urls.Response.Code, StatusOK)
-	testutils.Equals(t, urls.Login, "http://server.com:6103/platinum/login")
-	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
-	testutils.Equals(t, "http://example.com/atom/feed/private/atom.xml", urls.AdditionalURLs["X-NotificationFeed"])
+	assert.Equal(t, urls.Response.Text, "V2.7.0 2315: Success")
+	assert.Equal(t, urls.Response.Code, StatusOK)
+	assert.Equal(t, urls.Login, "http://server.com:6103/platinum/login")
+	assert.Equal(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
+	assert.Equal(t, "http://example.com/atom/feed/private/atom.xml", urls.AdditionalURLs["X-NotificationFeed"])
 }
 
 func TestPrependHost(t *testing.T) {
 	login := "http://server.com:6103/platinum/login"
 	abs := "http://server.com:6103/platinum/search"
 	rel := "/platinum/search"
-	testutils.Equals(t, abs, prependHost(login, abs))
-	testutils.Equals(t, abs, prependHost(login, rel))
+	assert.Equal(t, abs, prependHost(login, abs))
+	assert.Equal(t, abs, prependHost(login, rel))
 }
 
 func TestParseCapabilitiesRelativeUrls(t *testing.T) {
@@ -84,13 +84,13 @@ func TestParseCapabilitiesRelativeUrls(t *testing.T) {
 		ioutil.NopCloser(strings.NewReader(body)),
 		"http://server.com:6103/platinum/login",
 	)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
-	testutils.Equals(t, urls.Response.Text, "V2.7.0 2315: Success")
-	testutils.Equals(t, urls.Response.Code, StatusOK)
-	testutils.Equals(t, urls.Login, "http://server.com:6103/platinum/login")
-	testutils.Equals(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
-	testutils.Equals(t, "http://server.com:6103/rets2_2/Links", urls.AdditionalURLs["X-SampleLinks"])
+	assert.Equal(t, urls.Response.Text, "V2.7.0 2315: Success")
+	assert.Equal(t, urls.Response.Code, StatusOK)
+	assert.Equal(t, urls.Login, "http://server.com:6103/platinum/login")
+	assert.Equal(t, urls.GetMetadata, "http://server.com:6103/platinum/getmetadata")
+	assert.Equal(t, "http://server.com:6103/rets2_2/Links", urls.AdditionalURLs["X-SampleLinks"])
 }
 
 func TestFailedLoginNotRets(t *testing.T) {
@@ -116,8 +116,8 @@ func TestFailedLoginNotRets(t *testing.T) {
 		ioutil.NopCloser(strings.NewReader(body)),
 		"http://server.com:6103/platinum/login",
 	)
-	testutils.NotOk(t, err)
-	testutils.Equals(t, "expected element type <RETS> but have <html>", err.Error())
+	assert.NotNil(t, err)
+	assert.Equal(t, "expected element type <RETS> but have <html>", err.Error())
 }
 
 func TestFailedLoginRets(t *testing.T) {
@@ -131,8 +131,8 @@ func TestFailedLoginRets(t *testing.T) {
 		ioutil.NopCloser(strings.NewReader(body)),
 		"http://server.com:6103/platinum/login",
 	)
-	testutils.NotOk(t, err)
-	testutils.Equals(t, "failed to read urls", err.Error())
+	assert.NotNil(t, err)
+	assert.Equal(t, "failed to read urls", err.Error())
 }
 
 func TestFailedLoginRetsWithDetails(t *testing.T) {
@@ -146,6 +146,6 @@ func TestFailedLoginRetsWithDetails(t *testing.T) {
 		ioutil.NopCloser(strings.NewReader(body)),
 		"http://server.com:6103/platinum/login",
 	)
-	testutils.NotOk(t, err)
-	testutils.Equals(t, "failed to read urls - 20036: Missing User-Agent request header field.", err.Error())
+	assert.NotNil(t, err)
+	assert.Equal(t, "failed to read urls - 20036: Missing User-Agent request header field.", err.Error())
 }

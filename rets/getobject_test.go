@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetObject(t *testing.T) {
@@ -38,21 +38,21 @@ func TestGetObject(t *testing.T) {
 		objects = append(objects, o)
 		return nil
 	})
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
-	testutils.Equals(t, 1, len(objects))
+	assert.Equal(t, 1, len(objects))
 
 	o := objects[0]
-	testutils.Equals(t, true, o.Preferred)
-	testutils.Equals(t, "image/jpeg", o.ContentType)
-	testutils.Equals(t, "123456", o.ContentID)
-	testutils.Equals(t, 1, o.ObjectID)
-	testutils.Equals(t, "1a234234234", o.UID)
-	testutils.Equals(t, "Outhouse", o.Description)
-	testutils.Equals(t, "The urinal", o.SubDescription)
-	testutils.Equals(t, "<binary data 1>", string(o.Blob))
-	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o.Location)
-	testutils.Equals(t, false, o.RetsError)
+	assert.Equal(t, true, o.Preferred)
+	assert.Equal(t, "image/jpeg", o.ContentType)
+	assert.Equal(t, "123456", o.ContentID)
+	assert.Equal(t, 1, o.ObjectID)
+	assert.Equal(t, "1a234234234", o.UID)
+	assert.Equal(t, "Outhouse", o.Description)
+	assert.Equal(t, "The urinal", o.SubDescription)
+	assert.Equal(t, "<binary data 1>", string(o.Blob))
+	assert.Equal(t, "http://www.simpleboundary.com/image-5.jpg", o.Location)
+	assert.Equal(t, false, o.RetsError)
 }
 
 var boundary = "simple boundary"
@@ -126,57 +126,57 @@ func TestGetObjects(t *testing.T) {
 	defer response.Close()
 	var objects []*Object
 	response.ForEach(func(o *Object, err error) error {
-		testutils.Ok(t, err)
+		assert.Nil(t, err)
 		objects = append(objects, o)
 		return nil
 	})
 
 	o1 := objects[0]
-	testutils.Equals(t, true, o1.Preferred)
-	testutils.Equals(t, "image/jpeg", o1.ContentType)
-	testutils.Equals(t, "123456", o1.ContentID)
-	testutils.Equals(t, 1, o1.ObjectID)
-	testutils.Equals(t, "<binary data 1>", string(o1.Blob))
-	testutils.Equals(t, "123456", o1.ObjectData["ListingKey"])
-	testutils.Equals(t, "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
+	assert.Equal(t, true, o1.Preferred)
+	assert.Equal(t, "image/jpeg", o1.ContentType)
+	assert.Equal(t, "123456", o1.ContentID)
+	assert.Equal(t, 1, o1.ObjectID)
+	assert.Equal(t, "<binary data 1>", string(o1.Blob))
+	assert.Equal(t, "123456", o1.ObjectData["ListingKey"])
+	assert.Equal(t, "2013-05-01T12:34:34.8-0500", o1.ObjectData["ListDate"])
 
 	o2 := objects[1]
-	testutils.Equals(t, 2, o2.ObjectID)
-	testutils.Equals(t, "1a234234234", o2.UID)
+	assert.Equal(t, 2, o2.ObjectID)
+	assert.Equal(t, "1a234234234", o2.UID)
 
 	o3 := objects[2]
-	testutils.Equals(t, 3, o3.ObjectID)
-	testutils.Equals(t, "Outhouse", o3.Description)
-	testutils.Equals(t, "The urinal", o3.SubDescription)
+	assert.Equal(t, 3, o3.ObjectID)
+	assert.Equal(t, "Outhouse", o3.Description)
+	assert.Equal(t, "The urinal", o3.SubDescription)
 
 	o4 := objects[3]
-	testutils.Equals(t, true, o4.RetsError)
+	assert.Equal(t, true, o4.RetsError)
 
-	testutils.Equals(t, "text/xml", o4.ContentType)
-	testutils.Equals(t, "There is no object with that Object-ID", o4.RetsMessage.Text)
-	testutils.Equals(t, StatusObjectNotFound, o4.RetsMessage.Code)
+	assert.Equal(t, "text/xml", o4.ContentType)
+	assert.Equal(t, "There is no object with that Object-ID", o4.RetsMessage.Text)
+	assert.Equal(t, StatusObjectNotFound, o4.RetsMessage.Code)
 
 	o5 := objects[4]
-	testutils.Equals(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
-	testutils.Equals(t, "image/jpeg", o5.ContentType)
-	testutils.Equals(t, "123457", o5.ContentID)
-	testutils.Equals(t, 5, o5.ObjectID)
-	testutils.Equals(t, "", string(o5.Blob))
+	assert.Equal(t, "http://www.simpleboundary.com/image-5.jpg", o5.Location)
+	assert.Equal(t, "image/jpeg", o5.ContentType)
+	assert.Equal(t, "123457", o5.ContentID)
+	assert.Equal(t, 5, o5.ObjectID)
+	assert.Equal(t, "", string(o5.Blob))
 
 	o6 := objects[5]
-	testutils.Equals(t, "http://www.simpleboundary.com/image-6.jpg", o6.Location)
-	testutils.Equals(t, "image/jpeg", o6.ContentType)
-	testutils.Equals(t, "123457", o6.ContentID)
-	testutils.Equals(t, 6, o6.ObjectID)
-	testutils.Equals(t, "<binary data 6>", string(o6.Blob))
-	testutils.Assert(t, o6.RetsMessage == nil, "should not be the zerod object")
+	assert.Equal(t, "http://www.simpleboundary.com/image-6.jpg", o6.Location)
+	assert.Equal(t, "image/jpeg", o6.ContentType)
+	assert.Equal(t, "123457", o6.ContentID)
+	assert.Equal(t, 6, o6.ObjectID)
+	assert.Equal(t, "<binary data 6>", string(o6.Blob))
+	assert.Nil(t, o6.RetsMessage, "should not be the zerod object")
 
 	o7 := objects[6]
-	testutils.Equals(t, "http://www.simpleboundary.com/image-7.jpg", o7.Location)
-	testutils.Equals(t, "image/jpeg", o7.ContentType)
-	testutils.Equals(t, "123457", o7.ContentID)
-	testutils.Equals(t, 7, o7.ObjectID)
-	testutils.Equals(t, "", string(o7.Blob))
-	testutils.Equals(t, "Found it!", o7.RetsMessage.Text)
+	assert.Equal(t, "http://www.simpleboundary.com/image-7.jpg", o7.Location)
+	assert.Equal(t, "image/jpeg", o7.ContentType)
+	assert.Equal(t, "123457", o7.ContentID)
+	assert.Equal(t, 7, o7.ObjectID)
+	assert.Equal(t, "", string(o7.Blob))
+	assert.Equal(t, "Found it!", o7.RetsMessage.Text)
 
 }

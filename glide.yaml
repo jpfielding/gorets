@@ -13,7 +13,10 @@ import:
     subpackages:
     - /encoding
     - /transform
-  - package: github.com/jpfielding/gotest
+  - package: github.com/stretchr/testify
+    ref:     890a5c3458b43e6104ff5da8dfa139d013d77544
+    subpackages:
+    - /assert
   - package: github.com/jpfielding/gofilters
   - package: github.com/jpfielding/gowirelog
   - package: github.com/jpfielding/gominidom

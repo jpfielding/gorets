@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 var retsStart = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">`
@@ -23,14 +23,14 @@ func TestSystem(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + system + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	verifySystem(t, *ms)
 }
 
 func verifySystem(t *testing.T, cm CompactMetadata) {
-	testutils.Equals(t, "MLS System", cm.MSystem.System.Description)
-	testutils.Equals(t, "1.12.30", cm.MSystem.Version)
-	testutils.Equals(t, "The System is provided to you by Systems.", cm.MSystem.Comments)
+	assert.Equal(t, "MLS System", cm.MSystem.System.Description)
+	assert.Equal(t, "1.12.30", cm.MSystem.Version)
+	assert.Equal(t, "The System is provided to you by Systems.", cm.MSystem.Comments)
 }
 
 var resource = `<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -43,23 +43,23 @@ func TestParseResources(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + resource + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	verifyParseResources(t, *ms)
 }
 
 func verifyParseResources(t *testing.T, cm CompactMetadata) {
 	resource := cm.Elements["METADATA-RESOURCE"][0]
 
-	testutils.Equals(t, "1.12.30", resource.Attr["Version"])
-	testutils.Equals(t, len(resource.CompactRows), 2)
+	assert.Equal(t, "1.12.30", resource.Attr["Version"])
+	assert.Equal(t, len(resource.CompactRows), 2)
 
 	indexer := resource.Indexer()
 	var rows []Row
 	resource.Rows(func(i int, r Row) {
 		rows = append(rows, r)
 	})
-	testutils.Equals(t, "ActiveAgent", indexer("ResourceID", rows[0]))
-	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate", rows[1]))
+	assert.Equal(t, "ActiveAgent", indexer("ResourceID", rows[0]))
+	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate", rows[1]))
 }
 
 var class = `<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -77,16 +77,16 @@ func TestParseClass(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + class + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	verifyParseClass(t, *ms)
 }
 
 func verifyParseClass(t *testing.T, cm CompactMetadata) {
 	mdata := cm.Elements["METADATA-CLASS"][0]
 
-	testutils.Equals(t, "Property", mdata.Attr["Resource"])
-	testutils.Equals(t, mdata.Attr["Version"], "1.12.29")
-	testutils.Equals(t, len(mdata.CompactRows), 6)
+	assert.Equal(t, "Property", mdata.Attr["Resource"])
+	assert.Equal(t, mdata.Attr["Version"], "1.12.29")
+	assert.Equal(t, len(mdata.CompactRows), 6)
 
 	indexer := mdata.Indexer()
 	var row []Row
@@ -94,9 +94,9 @@ func verifyParseClass(t *testing.T, cm CompactMetadata) {
 		row = append(row, r)
 	})
 
-	testutils.Equals(t, "RESO_PROP_2012_05", indexer("ClassName", row[5]))
-	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate", row[0]))
-	testutils.Equals(t, "MRIS Multi-Family", indexer("VisibleName", row[2]))
+	assert.Equal(t, "RESO_PROP_2012_05", indexer("ClassName", row[5]))
+	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate", row[0]))
+	assert.Equal(t, "MRIS Multi-Family", indexer("VisibleName", row[2]))
 }
 
 var table = `<METADATA-TABLE Resource="Agent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -112,17 +112,17 @@ func TestParseTable(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + table + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	verifyParseTable(t, *ms)
 }
 
 func verifyParseTable(t *testing.T, cm CompactMetadata) {
 	mdata := cm.Elements["METADATA-TABLE"][0]
 
-	testutils.Equals(t, "ActiveAgent", mdata.Attr["Class"])
-	testutils.Equals(t, "Agent", mdata.Attr["Resource"])
-	testutils.Equals(t, "1.12.29", mdata.Attr["Version"])
-	testutils.Equals(t, len(mdata.CompactRows), 4)
+	assert.Equal(t, "ActiveAgent", mdata.Attr["Class"])
+	assert.Equal(t, "Agent", mdata.Attr["Resource"])
+	assert.Equal(t, "1.12.29", mdata.Attr["Version"])
+	assert.Equal(t, len(mdata.CompactRows), 4)
 
 	indexer := mdata.Indexer()
 	var row []Row
@@ -130,8 +130,8 @@ func verifyParseTable(t *testing.T, cm CompactMetadata) {
 		row = append(row, r)
 	})
 
-	testutils.Equals(t, "AgentListingServiceName", indexer("SystemName", row[0]))
-	testutils.Equals(t, "0", indexer("Unique", row[3]))
+	assert.Equal(t, "AgentListingServiceName", indexer("SystemName", row[0]))
+	assert.Equal(t, "0", indexer("Unique", row[3]))
 }
 
 var lookup = `<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -147,16 +147,16 @@ func TestParseLookup(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + lookup + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	verifyParseLookup(t, *ms)
 }
 
 func verifyParseLookup(t *testing.T, cm CompactMetadata) {
 	mdata := cm.Elements["METADATA-LOOKUP"][0]
 
-	testutils.Equals(t, "TaxHistoricalDesignation", mdata.Attr["Resource"])
-	testutils.Equals(t, "1.12.29", mdata.Attr["Version"])
-	testutils.Equals(t, len(mdata.CompactRows), 4)
+	assert.Equal(t, "TaxHistoricalDesignation", mdata.Attr["Resource"])
+	assert.Equal(t, "1.12.29", mdata.Attr["Version"])
+	assert.Equal(t, len(mdata.CompactRows), 4)
 
 	indexer := mdata.Indexer()
 	var row []Row
@@ -164,8 +164,8 @@ func verifyParseLookup(t *testing.T, cm CompactMetadata) {
 		row = append(row, r)
 	})
 
-	testutils.Equals(t, "COUNTIES_OR_REGIONS", indexer("LookupName", row[0]))
-	testutils.Equals(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date", row[3]))
+	assert.Equal(t, "COUNTIES_OR_REGIONS", indexer("LookupName", row[0]))
+	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date", row[3]))
 }
 
 var lookupType = `<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Lookup="COUNTIES_OR_REGIONS" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -181,17 +181,17 @@ func TestParseLookupType(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + lookupType + retsEnd))
 
 	ms, err := ParseMetadataCompactResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	verifyParseLookupType(t, *ms)
 }
 func verifyParseLookupType(t *testing.T, cm CompactMetadata) {
 	mdata := cm.Elements["METADATA-LOOKUP_TYPE"][0]
 
-	testutils.Equals(t, "TaxHistoricalDesignation", mdata.Attr["Resource"])
-	testutils.Equals(t, "COUNTIES_OR_REGIONS", mdata.Attr["Lookup"])
+	assert.Equal(t, "TaxHistoricalDesignation", mdata.Attr["Resource"])
+	assert.Equal(t, "COUNTIES_OR_REGIONS", mdata.Attr["Lookup"])
 
-	testutils.Equals(t, "1.12.29", mdata.Attr["Version"])
-	testutils.Equals(t, len(mdata.CompactRows), 4)
+	assert.Equal(t, "1.12.29", mdata.Attr["Version"])
+	assert.Equal(t, len(mdata.CompactRows), 4)
 
 	indexer := mdata.Indexer()
 	var row []Row
@@ -199,14 +199,14 @@ func verifyParseLookupType(t *testing.T, cm CompactMetadata) {
 		row = append(row, r)
 	})
 
-	testutils.Equals(t, "BROOMFIELD-CO", indexer("LongValue", row[2]))
-	testutils.Equals(t, "CLARK", indexer("ShortValue", row[3]))
+	assert.Equal(t, "BROOMFIELD-CO", indexer("LongValue", row[2]))
+	assert.Equal(t, "CLARK", indexer("ShortValue", row[3]))
 }
 
 func TestParseMetadata(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + system + resource + class + table + lookup + lookupType + retsEnd))
 	ms, err := ParseMetadataCompactResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
 	verifySystem(t, *ms)
 	verifyParseResources(t, *ms)

@@ -6,26 +6,26 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCompactEntry(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(compact))
 	decoder := DefaultXMLDecoder(body, false)
 	token, err := decoder.Token()
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	start, ok := token.(xml.StartElement)
-	testutils.Assert(t, ok, "should be a start element")
+	assert.Equal(t, true, ok, "should be a start element")
 	cm, err := NewCompactData(start, decoder, "	")
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	type Test struct {
 		ResourceID, Standardname string
 	}
 	row1 := Test{}
 	maps := cm.Entries()
 	maps[0].SetFields(&row1)
-	testutils.Equals(t, "ActiveAgent", row1.ResourceID)
-	testutils.Equals(t, "ActiveAgent", row1.Standardname)
+	assert.Equal(t, "ActiveAgent", row1.ResourceID)
+	assert.Equal(t, "ActiveAgent", row1.Standardname)
 }
 
 func TestCompactRowParsing(t *testing.T) {
@@ -35,8 +35,8 @@ func TestCompactRowParsing(t *testing.T) {
 	headers := CompactRow(col).Parse(delim)
 	values := CompactRow(row).Parse(delim)
 
-	testutils.Equals(t, 6, int(len(headers)))
-	testutils.Equals(t, 6, int(len(values)))
+	assert.Equal(t, 6, int(len(headers)))
+	assert.Equal(t, 6, int(len(values)))
 }
 
 func TestCompactRowParsingEmpty(t *testing.T) {
@@ -47,8 +47,8 @@ func TestCompactRowParsingEmpty(t *testing.T) {
 	headers := CompactRow(col).Parse(delim)
 	values := CompactRow(row).Parse(delim)
 
-	testutils.Equals(t, 6, int(len(headers)))
-	testutils.Equals(t, 0, int(len(values)))
+	assert.Equal(t, 6, int(len(headers)))
+	assert.Equal(t, 0, int(len(values)))
 }
 
 func TestCompactRowParsingFubar(t *testing.T) {
@@ -58,8 +58,8 @@ func TestCompactRowParsingFubar(t *testing.T) {
 	headers := CompactRow(col).Parse(delim)
 	values := CompactRow(row).Parse(delim)
 
-	testutils.Equals(t, 6, int(len(headers)))
-	testutils.Equals(t, 0, int(len(values)))
+	assert.Equal(t, 6, int(len(headers)))
+	assert.Equal(t, 0, int(len(values)))
 }
 
 var compact = `<METADATA-ELEMENT Cat="Dog" Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -72,14 +72,14 @@ func TestParseCompactData(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(compact))
 	decoder := DefaultXMLDecoder(body, false)
 	token, err := decoder.Token()
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 	start, ok := token.(xml.StartElement)
-	testutils.Assert(t, ok, "should be a start element")
-	testutils.Equals(t, "METADATA-ELEMENT", start.Name.Local)
+	assert.Equal(t, true, ok, "should be a start element")
+	assert.Equal(t, "METADATA-ELEMENT", start.Name.Local)
 	cm, err := NewCompactData(start, decoder, "	")
-	testutils.Ok(t, err)
-	testutils.Equals(t, "METADATA-ELEMENT", cm.Element)
-	testutils.Equals(t, "Dog", cm.Attr["Cat"])
-	testutils.Equals(t, 2, len(cm.CompactRows))
-	testutils.Equals(t, 2, len(cm.Columns()))
+	assert.Nil(t, err)
+	assert.Equal(t, "METADATA-ELEMENT", cm.Element)
+	assert.Equal(t, "Dog", cm.Attr["Cat"])
+	assert.Equal(t, 2, len(cm.CompactRows))
+	assert.Equal(t, 2, len(cm.Columns()))
 }

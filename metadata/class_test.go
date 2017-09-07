@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClass(t *testing.T) {
@@ -47,27 +47,27 @@ func TestClass(t *testing.T) {
 	extractor := &Extractor{Body: body}
 	response, err := extractor.Open()
 
-	testutils.Ok(t, err)
-	testutils.Equals(t, "Operation Successful", response.ReplyText)
+	assert.Nil(t, err)
+	assert.Equal(t, "Operation Successful", response.ReplyText)
 
 	mclass := &MClass{}
 	err = extractor.DecodeNext("METADATA-CLASS", mclass)
-	testutils.Ok(t, err)
-	testutils.Equals(t, "Property", string(mclass.Resource))
-	testutils.Equals(t, "01.72.11588", string(mclass.Version))
-	testutils.Equals(t, "2016-06-01T16:05:01", string(mclass.Date))
-	testutils.Equals(t, 2, len(mclass.Class))
+	assert.Nil(t, err)
+	assert.Equal(t, "Property", string(mclass.Resource))
+	assert.Equal(t, "01.72.11588", string(mclass.Version))
+	assert.Equal(t, "2016-06-01T16:05:01", string(mclass.Date))
+	assert.Equal(t, 2, len(mclass.Class))
 
 	comm := mclass.Class[0]
-	testutils.Equals(t, "COMM", string(comm.ClassName))
-	testutils.Equals(t, "CommercialSale", string(comm.StandardName))
-	testutils.Equals(t, "Commercial", string(comm.VisibleName))
-	testutils.Equals(t, "Contains data for Commercial searches.", string(comm.Description))
-	testutils.Equals(t, "01.72.11581", string(comm.TableVersion))
-	testutils.Equals(t, "2016-02-09T06:02:17", string(comm.TableDate))
+	assert.Equal(t, "COMM", string(comm.ClassName))
+	assert.Equal(t, "CommercialSale", string(comm.StandardName))
+	assert.Equal(t, "Commercial", string(comm.VisibleName))
+	assert.Equal(t, "Contains data for Commercial searches.", string(comm.Description))
+	assert.Equal(t, "01.72.11581", string(comm.TableVersion))
+	assert.Equal(t, "2016-02-09T06:02:17", string(comm.TableDate))
 	// TODO fill in the rest when time permits
 
 	lotl := mclass.Class[1]
-	testutils.Equals(t, "LOTL", string(lotl.ClassName))
-	testutils.Equals(t, "Land", string(lotl.StandardName))
+	assert.Equal(t, "LOTL", string(lotl.ClassName))
+	assert.Equal(t, "Land", string(lotl.StandardName))
 }

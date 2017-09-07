@@ -3,7 +3,7 @@ package metadata
 import (
 	"testing"
 
-	"github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMetaInfoIDStruct(t *testing.T) {
@@ -21,10 +21,10 @@ func TestMetaInfoIDStruct(t *testing.T) {
 		ClassName:       "cn",
 		ColumnGroupName: "cgn",
 	}
-	testutils.Equals(t, "rid", MIResource.ID(test))
-	testutils.Equals(t, "ln", MILookup.ID(test))
-	testutils.Equals(t, "cn", MIClass.ID(test))
-	testutils.Equals(t, "cgn", MIColumnGroup.ID(test))
+	assert.Equal(t, "rid", MIResource.ID(test))
+	assert.Equal(t, "ln", MILookup.ID(test))
+	assert.Equal(t, "cn", MIClass.ID(test))
+	assert.Equal(t, "cgn", MIColumnGroup.ID(test))
 }
 
 func TestMetaInfoIDMap(t *testing.T) {
@@ -35,10 +35,10 @@ func TestMetaInfoIDMap(t *testing.T) {
 		"ClassName":       "cn",
 		"ColumnGroupName": "cgn",
 	}
-	testutils.Equals(t, "rid", MIResource.ID(test))
-	testutils.Equals(t, "ln", MILookup.ID(test))
-	testutils.Equals(t, "cn", MIClass.ID(test))
-	testutils.Equals(t, "cgn", MIColumnGroup.ID(test))
+	assert.Equal(t, "rid", MIResource.ID(test))
+	assert.Equal(t, "ln", MILookup.ID(test))
+	assert.Equal(t, "cn", MIClass.ID(test))
+	assert.Equal(t, "cgn", MIColumnGroup.ID(test))
 }
 
 func TestSystemHierarchyCount(t *testing.T) {
@@ -50,5 +50,5 @@ func TestSystemHierarchyCount(t *testing.T) {
 		}
 		return counter
 	}
-	testutils.Equals(t, 25, count(MISystem))
+	assert.Equal(t, 25, count(MISystem))
 }

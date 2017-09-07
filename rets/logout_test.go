@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProcessResponseBodyFull(t *testing.T) {
@@ -26,7 +26,7 @@ func TestProcessResponseBodyFull(t *testing.T) {
 
 	expected := &LogoutResponse{0, "Logging out", 12345, "Im Billing You", "Goodbye"}
 
-	testutils.Equals(t, expected, actual)
+	assert.Equal(t, expected, actual)
 }
 
 func TestProcessResponseBodyNoBilling(t *testing.T) {
@@ -46,7 +46,7 @@ func TestProcessResponseBodyNoBilling(t *testing.T) {
 
 	expected := &LogoutResponse{ReplyCode: StatusOK, ReplyText: "Logging out", ConnectTime: 0, SignOffMessage: "Goodbye"}
 
-	testutils.Equals(t, expected, actual)
+	assert.Equal(t, expected, actual)
 }
 
 func TestProcessResponseBodyNoConnectTime(t *testing.T) {
@@ -66,5 +66,5 @@ func TestProcessResponseBodyNoConnectTime(t *testing.T) {
 
 	expected := &LogoutResponse{ReplyCode: StatusOK, ReplyText: "Logging out", Billing: "Im Billing You", SignOffMessage: "Goodbye"}
 
-	testutils.Equals(t, expected, actual)
+	assert.Equal(t, expected, actual)
 }
