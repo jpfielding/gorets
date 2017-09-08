@@ -17,6 +17,8 @@ import:
     ref:     890a5c3458b43e6104ff5da8dfa139d013d77544
     subpackages:
     - /assert
+  - package: github.com/spf13/cobra
+    version: a3cd8ab85aeba3522b9b59242f3b86ddbc67f8bd
   - package: github.com/jpfielding/gofilters
   - package: github.com/jpfielding/gowirelog
   - package: github.com/jpfielding/gominidom

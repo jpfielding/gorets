@@ -13,7 +13,7 @@ Find me at gophers.slack.com#gorets
 
 
 ```
-config.json:
+connect.json:
 {
 	"username": "user",
 	"password": "pwd",
@@ -27,26 +27,27 @@ config.json:
 
 [Example Search](cmds/search/example.go)
 ```
-go run cmds/search/*.go -config-file ~/gorets/config.json -search-options ~/gorets/search.json -output /tmp/
+go run cmds/search/*.go -connect ~/.gorets/config.json -search ~/gorets/search.json -output /tmp/
 
 search.json:
 {
-	"resource": "Property",
-	"class": "Residential",
-	"select": "",
-	"format": "COMPACT_DECODED",
-	"query-type": "dmql2",
-	"count-type": 1,
-	"limit": 2500,
-	"query": "(ModifiedDateTime=2016-08-01T00:00:00+)"
+	"SearchType": "Property",
+	"Class": "Residential",
+	"Select": "",
+	"Format": "COMPACT_DECODED",
+	"Count": 1,
+	"Offset": 1,
+	"Limit": 2500,
+	"QueryType": "dmql2",
+	"Query": "(ModifiedDateTime=2016-08-01T00:00:00+)"
 }
 
 ```
 [Example GetObject](cmds/getobject/example.go)
 ```
-go run cmds/getobject/*.go -config-file ~/gorets/config.json -object-options ~/gorets/getobject.json -output /tmp/
+go run cmds/getobject/*.go -connect ~/.gorets/connect.json -objects ~/gorets/getobjects.json -output /tmp/
 
-getobject.json:
+getobjects.json:
 {
 	"resource": "Property",
 	"type": "Photo",
@@ -55,7 +56,7 @@ getobject.json:
 ```
 [Example Metadata](cmds/metadata/example.go)
 ```
-go run cmds/metadata/*.go -config-file ~/gorets/config.json -metadata-options ~/gorets/metadata.json -output /tmp
+go run cmds/metadata/*.go -connect ~/.gorets/connect.json -metadata-options ~/gorets/metadata.json -output /tmp
 
 metadata.json
 {

@@ -12,35 +12,27 @@ import (
 
 	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	optionsFile := flag.String("object-options", "", "Get object")
-	configFile := flag.String("config-file", "", "Config file for RETS connection")
-	output := flag.String("output", "", "Directory for file output")
+func NewGetObjectsCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "getobjects",
+		Short: "Get Objects from a RETS server",
+		Run:   getObjects,
+	}
+}
 
-	config := common.Config{}
-	config.SetFlags()
+func getObjects(cmd *cobra.Command, args []string) {
+	config := cmd.Flags().GetString("config", "", "Path to the config info for RETS connection")
+	output := cmd.Flags().GetString("output", "", "Directory for file output")
+	timeout := cmd.Flags().GetInt("timeout", 60, "Seconds to timeout the connection")
+
+	connect := common.Connect{}
+	LoadFrom(connectFile, &connect)
 
 	getOptions := GetObjectOptions{}
-	getOptions.SetFlags()
-
-	flag.Parse()
-
-	if *configFile != "" {
-		err := config.LoadFrom(*configFile)
-		if err != nil {
-			panic(err)
-		}
-	}
-	fmt.Printf("Connection Settings: %v\n", config)
-	if *optionsFile != "" {
-		err := getOptions.LoadFrom(*optionsFile)
-		if err != nil {
-			panic(err)
-		}
-	}
-	fmt.Printf("GetObject Options: %v\n", getOptions)
+	LoadFrom(optionsFile, &getOptions)
 
 	// should we throw an err here too?
 	session, err := config.Initialize()
@@ -48,7 +40,7 @@ func main() {
 		panic(err)
 	}
 	// setup timeout control
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Seconds)
 	defer cancel()
 	// login
 	capability, err := rets.Login(ctx, session, rets.LoginRequest{URL: config.URL})
