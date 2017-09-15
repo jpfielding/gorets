@@ -1,4 +1,4 @@
-all: restore-deps test vet
+all: restore-deps test
 
 vendor:
 	glide up 
