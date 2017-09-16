@@ -15,6 +15,7 @@ const (
 	mIDFlag     = "id"
 )
 
+// NewMetadataCmd ...
 func NewMetadataCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "metadata",

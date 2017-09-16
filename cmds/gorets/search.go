@@ -16,6 +16,7 @@ const (
 	searchFileFlag = "params"
 )
 
+// NewSearchCmd ...
 func NewSearchCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "search",
