@@ -1,116 +1,97 @@
 package main
 
 import (
-	"encoding/json"
-	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"time"
 
 	"context"
 
-	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"
 	"github.com/spf13/cobra"
 )
 
+const (
+	goResourceFlag = "resource"
+	goTypeFlag     = "type"
+	goIDFlag       = "id"
+)
+
+// NewGetObjectsCmd ...
 func NewGetObjectsCmd() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "getobjects",
 		Short: "Get Objects from a RETS server",
 		Run:   getObjects,
 	}
+	cmd.Flags().String(goResourceFlag, "Property", "Resource type of the request")
+	cmd.Flags().String(goTypeFlag, "Photo", "Metadata format")
+	cmd.Flags().String(goIDFlag, "", "Object ID for the request ('key1:*;key2:0')")
+
+	return cmd
 }
 
 func getObjects(cmd *cobra.Command, args []string) {
-	config := cmd.Flags().GetString("config", "", "Path to the config info for RETS connection")
-	output := cmd.Flags().GetString("output", "", "Directory for file output")
-	timeout := cmd.Flags().GetInt("timeout", 60, "Seconds to timeout the connection")
+	connect, output, timeout := getPersistentFlagValues(search, cmd)
 
-	connect := common.Connect{}
-	LoadFrom(connectFile, &connect)
+	var err error // annoying
 
-	getOptions := GetObjectOptions{}
-	LoadFrom(optionsFile, &getOptions)
+	params := GetObjectParams{}
+
+	params.Resource, err = cmd.Flags().GetString(goResourceFlag)
+	handleError(getObjects, err)
+
+	params.Type, err = cmd.Flags().GetString(goTypeFlag)
+	handleError(getObjects, err)
+
+	params.ID, err = cmd.Flags().GetString(goIDFlag)
+	handleError(getObjects, err)
 
 	// should we throw an err here too?
-	session, err := config.Initialize()
-	if err != nil {
-		panic(err)
-	}
-	// setup timeout control
-	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Seconds)
+	session, err := connect.Initialize()
+	handleError(getObjects, err)
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	// login
-	capability, err := rets.Login(ctx, session, rets.LoginRequest{URL: config.URL})
-	if err != nil {
-		panic(err)
-	}
+
+	capability, err := rets.Login(ctx, session, rets.LoginRequest{URL: connect.URL})
+	handleError(getObjects, err)
 	// make sure we close the rets connection
 	defer rets.Logout(ctx, session, rets.LogoutRequest{URL: capability.Logout})
+
 	// feedback
 	fmt.Println("GetObject: ", capability.GetObject)
 	// warning, this does _all_ of the photos
 	response, err := rets.GetObjects(ctx, session, rets.GetObjectRequest{
 		URL: capability.GetObject,
 		GetObjectParams: rets.GetObjectParams{
-			Resource: getOptions.Resource,
-			Type:     getOptions.Type,
-			ID:       getOptions.ID,
+			Resource: params.Resource,
+			Type:     params.Type,
+			ID:       params.ID,
 		},
 	})
-	if err != nil {
-		panic(err)
-	}
+	handleError(getObjects, err)
 	defer response.Close()
 	err = response.ForEach(func(o *rets.Object, err error) error {
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
 		// if we arent saving, then we quit
-		if *output == "" {
+		if output == "" {
 			return nil
 		}
-		path := fmt.Sprintf("%s/%s", *output, o.ContentID)
+		path := fmt.Sprintf("%s/%s", output, o.ContentID)
 		os.MkdirAll(path, os.ModePerm)
 		f, err := os.Create(fmt.Sprintf("%s/%d", path, o.ObjectID))
-		if err != nil {
-			return err
-		}
+		handleError(getObjects, err)
+
 		defer f.Close()
 		_, err = f.Write(o.Blob)
 		return err
 	})
-	if err != nil {
-		panic(err)
-	}
+	handleError(getObjects, err)
 }
 
-// GetObjectOptions ...
-type GetObjectOptions struct {
+// GetObjectParams ...
+type GetObjectParams struct {
 	Resource string `json:"resource"`
 	Type     string `json:"type"`
 	ID       string `json:"id"`
-}
-
-// SetFlags ...
-func (o *GetObjectOptions) SetFlags() {
-	flag.StringVar(&o.Resource, "resource", "Property", "Resource for the search")
-	flag.StringVar(&o.Type, "type", "Photo", "Photo, document, etc...")
-	flag.StringVar(&o.ID, "id", "*", "Subtype of resource")
-}
-
-// LoadFrom ...
-func (o *GetObjectOptions) LoadFrom(filename string) error {
-	// xlog.Println("loading:", filename)
-	file, err := os.Open(filename)
-	defer file.Close()
-	if err != nil {
-		return err
-	}
-	blob, _ := ioutil.ReadAll(file)
-	err = json.Unmarshal(blob, o)
-	if err != nil {
-		return err
-	}
-	return nil
 }

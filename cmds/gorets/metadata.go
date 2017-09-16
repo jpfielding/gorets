@@ -4,59 +4,69 @@ import (
 	"context"
 	"io"
 	"os"
-	"time"
 
-	"github.com/jpfielding/gorets/cmds/common"
 	"github.com/jpfielding/gorets/rets"
 	"github.com/spf13/cobra"
 )
 
+const (
+	mTypeFlag   = "type"
+	mFormatFlag = "format"
+	mIDFlag     = "id"
+)
+
 func NewMetadataCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "search",
-		Short: "Search a RETS server",
+	cmd := &cobra.Command{
+		Use:   "metadata",
+		Short: "Extract RETS metadata",
 		Run:   metadata,
 	}
+	cmd.Flags().String(mTypeFlag, "METADATA-SYSTEM", "The type of metadata requested")
+	cmd.Flags().String(mFormatFlag, "COMPACT", "Metadata format")
+	cmd.Flags().String(mIDFlag, "*", "Metadata identifier")
+	return cmd
 }
 
 func metadata(cmd *cobra.Command, args []string) {
-	config := cmd.Flags().GetString("config", "", "Path to the config info for RETS connection")
-	output := cmd.Flags().GetString("output", "", "Directory for file output")
-	timeout := cmd.Flags().GetInt("timeout", 60, "Seconds to timeout the connection")
+	connect, output, timeout := getPersistentFlagValues(search, cmd)
 
-	connect := common.Connect{}
-	LoadFrom(connectFile, &connect)
+	var err error // annoying
 
-	metadataOpts := MetadataOptions{}
-	LoadFrom(metadataFile, &metadataOpts)
+	params := MetadataOptions{}
+	params.MType, err = cmd.Flags().GetString(mTypeFlag)
+	handleError(metadata, err)
+
+	params.Format, err = cmd.Flags().GetString(mFormatFlag)
+	handleError(metadata, err)
+
+	params.ID, err = cmd.Flags().GetString(mIDFlag)
+	handleError(metadata, err)
+
 	// should we throw an err here too?
-	session, err := config.Initialize()
-	if err != nil {
-		panic(err)
-	}
+	session, err := connect.Initialize()
+	handleError(metadata, err)
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Seconds)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	capability, err := rets.Login(ctx, session, rets.LoginRequest{URL: config.URL})
-	if err != nil {
-		panic(err)
-	}
+	capability, err := rets.Login(ctx, session, rets.LoginRequest{URL: connect.URL})
+	handleError(metadata, err)
+
 	defer rets.Logout(ctx, session, rets.LogoutRequest{URL: capability.Logout})
 
 	reader, err := rets.MetadataStream(ctx, session, rets.MetadataRequest{
 		URL:    capability.GetMetadata,
-		Format: metadataOpts.Format,
-		MType:  metadataOpts.MType,
-		ID:     metadataOpts.ID,
+		Format: params.Format,
+		MType:  params.MType,
+		ID:     params.ID,
 	})
 	defer reader.Close()
-	if err != nil {
-		panic(err)
-	}
+	handleError(metadata, err)
+
 	out := os.Stdout
-	if *output != "" {
-		out, _ = os.Create(*output + "/metadata.xml")
+	if output != "" {
+		out, err = os.Create(output + "/metadata.xml")
+		handleError(metadata, err)
 		defer out.Close()
 	}
 	io.Copy(out, reader)
@@ -67,10 +77,4 @@ type MetadataOptions struct {
 	MType  string `json:"metadata-type"`
 	Format string `json:"format"`
 	ID     string `json:"id"`
-}
-
-func (o *MetadataOptions) GetFlags() {
-	o.MType = cmd.Flags().GetString("mtype", "METADATA-SYSTEM", "The type of metadata requested")
-	o.Format = cmd.Flags().GetString("format", "COMPACT", "Metadata format")
-	o.ID = cmd.Flags().GetString("id", "*", "Metadata identifier")
 }
