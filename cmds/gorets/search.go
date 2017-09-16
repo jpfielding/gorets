@@ -32,8 +32,14 @@ func search(cmd *cobra.Command, args []string) {
 	searchFile, err := cmd.Flags().GetString(searchFileFlag)
 	handleError(search, err)
 
-	// the params for the query to run
-	params := rets.SearchParams{}
+	// the params for the query to run (with some defaults)
+	params := rets.SearchParams{
+		SearchType: "Property",
+		Class:      "Residential",
+		Format:     "COMPACT-DECODED",
+		Offset:     1,
+		QueryType:  "DMQL2",
+	}
 	err = LoadFrom(searchFile, &params)
 	handleError(search, err)
 
