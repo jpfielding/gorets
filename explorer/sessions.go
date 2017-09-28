@@ -61,8 +61,8 @@ func (c *Session) create() (rets.Requester, error) {
 	if c.transport == nil {
 		// start with the default Dialer from http.DefaultTransport
 		transport := wirelog.NewHTTPTransport()
-		// logging
-		err := wirelog.LogToFile(transport, c.Wirelog(), true, true)
+		// TODO close the wire logging somehow
+		_, err := wirelog.LogToFile(transport, c.Wirelog(), true, true)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +97,7 @@ func (c *Session) Close() error {
 func (c *Session) Exec(ctx context.Context, op func(rets.Requester, rets.CapabilityURLs) error) error {
 	if c.requester == nil {
 		r, err := c.create()
-		urls, err := rets.Login(r, ctx, rets.LoginRequest{URL: c.Connection.URL})
+		urls, err := rets.Login(ctx, r, rets.LoginRequest{URL: c.Connection.URL})
 		if err != nil {
 			return err
 		}

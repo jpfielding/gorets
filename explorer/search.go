@@ -64,7 +64,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 			},
 		}
 		fmt.Printf("Querying : %v\n", req)
-		result, err := rets.SearchCompact(r, ctx, req)
+		result, err := rets.SearchCompact(ctx, r, req)
 		defer result.Close()
 		if err != nil {
 			return nil

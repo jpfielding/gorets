@@ -71,7 +71,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	}
 	ctx := context.Background()
 	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
-		standard, err := op(r, ctx, u.GetMetadata)
+		standard, err := op(ctx, r, u.GetMetadata)
 		reply.Metadata = *standard
 		// bg this
 		go func() {
@@ -82,7 +82,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 }
 
 // MetadataRequestType is a typedef metadata extraction options
-type MetadataRequestType func(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error)
+type MetadataRequestType func(ctx context.Context, requester rets.Requester, url string) (*metadata.MSystem, error)
 
 // options for extracting metadata
 var options = map[string]MetadataRequestType{
@@ -94,9 +94,9 @@ var options = map[string]MetadataRequestType{
 // TODO extract a common func and switch on the incoming param
 
 // fullViaCompactIncremental retrieve the RETS Compact metadata from the server
-func fullViaCompactIncremental(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
+func fullViaCompactIncremental(ctx context.Context, requester rets.Requester, url string) (*metadata.MSystem, error) {
 	compact := &util.IncrementalCompact{}
-	err := compact.Load(requester, ctx, url)
+	err := compact.Load(ctx, requester, url)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +104,8 @@ func fullViaCompactIncremental(requester rets.Requester, ctx context.Context, ur
 }
 
 // fullViaCompact retrieve the RETS Compact metadata from the server
-func fullViaCompact(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
-	reader, err := rets.MetadataStream(requester, ctx, rets.MetadataRequest{
+func fullViaCompact(ctx context.Context, requester rets.Requester, url string) (*metadata.MSystem, error) {
+	reader, err := rets.MetadataStream(ctx, requester, rets.MetadataRequest{
 		URL:    url,
 		Format: "COMPACT",
 		MType:  "METADATA-SYSTEM",
@@ -123,8 +123,8 @@ func fullViaCompact(requester rets.Requester, ctx context.Context, url string) (
 }
 
 // fullViaStandard ...
-func fullViaStandard(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
-	reader, err := rets.MetadataStream(requester, ctx, rets.MetadataRequest{
+func fullViaStandard(ctx context.Context, requester rets.Requester, url string) (*metadata.MSystem, error) {
+	reader, err := rets.MetadataStream(ctx, requester, rets.MetadataRequest{
 		URL:    url,
 		Format: "STANDARD-XML",
 		MType:  "METADATA-SYSTEM",
@@ -145,7 +145,7 @@ func fullViaStandard(requester rets.Requester, ctx context.Context, url string) 
 
 // head ...
 func head(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
-	reader, err := rets.MetadataStream(requester, ctx, rets.MetadataRequest{
+	reader, err := rets.MetadataStream(ctx, requester, rets.MetadataRequest{
 		URL:    url,
 		Format: "COMPACT",
 		MType:  "METADATA-SYSTEM",
