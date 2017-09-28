@@ -22,4 +22,7 @@ import:
   - package: github.com/jpfielding/gofilters
   - package: github.com/jpfielding/gowirelog
   - package: github.com/jpfielding/gominidom
+  - package: github.com/gorilla/rpc
+  - package: github.com/gorilla/handlers
+  - package: github.com/gorilla/websocket
 

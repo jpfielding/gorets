@@ -1,0 +1,32 @@
+extends: "airbnb"
+
+plugins:
+  - import
+
+globals:
+  config: true
+  controllo: true
+
+rules:
+  # Turning these off because webpack-selint-loader doesnt work with IDEs :(
+  # Also, if the imports don't resolve, webpack will blow up anyway
+  import/no-extraneous-dependencies: 'off'
+  import/no-unresolved: 'off'
+  react/require-extension: 'off'
+
+  no-multiple-empty-lines: [2, {"max": 2, "maxEOF": 2}]
+  no-console: 'off'
+  dot-notation: 'off'
+  max-len: ['error', 120]
+  jsx-a11y/href-no-hash: 'off'
+  react/prefer-stateless-function: 'off'
+
+settings:
+  import/resolver:
+    webpack:
+      config: 'webpack.config.js'
+
+env:
+  browser: true
+
+parser: "babel-eslint"
