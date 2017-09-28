@@ -59,7 +59,6 @@ func search(cmd *cobra.Command, args []string) {
 	handleError(search, err)
 	defer rets.Logout(ctx, session, rets.LogoutRequest{URL: urls.Logout})
 
-	fmt.Println("Search: ", urls.Search)
 	req := rets.SearchRequest{
 		URL:          urls.Search,
 		SearchParams: params,

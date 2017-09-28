@@ -25,11 +25,11 @@ connect.json:
 }
 ```
 
-[Example Search](cmds/search/example.go)
+[Example Search](cmds/gorets/search.go)
 ```
-go run cmds/search/*.go -connect ~/.gorets/config.json -search ~/gorets/search.json -output /tmp/
+go run cmds/gorets/*.go search -c connect.json -params sp.json -o /tmp/
 
-search.json:
+sp.json:
 {
 	"SearchType": "Property",
 	"Class": "Residential",
@@ -42,26 +42,12 @@ search.json:
 	"Query": "(ModifiedDateTime=2016-08-01T00:00:00+)"
 }
 
+[Example GetObject](cmds/gorets/getobject.go)
 ```
-[Example GetObject](cmds/getobject/example.go)
-```
-go run cmds/getobject/*.go -connect ~/.gorets/connect.json -objects ~/gorets/getobjects.json -output /tmp/
+go run cmds/getobject/*.go getobject -c connect.json -type "HiRes" -i "343234:*" -o /tmp/
 
-getobjects.json:
-{
-	"resource": "Property",
-	"type": "Photo",
-	"id": "1330918:*,1555397:*"
-}
+[Example Metadata](cmds/gorets/search.go)
 ```
-[Example Metadata](cmds/metadata/example.go)
-```
-go run cmds/metadata/*.go -connect ~/.gorets/connect.json -metadata-options ~/gorets/metadata.json -output /tmp
+go run cmds/metadata/*.go metadata -c connect.json -output /tmp/
 
-metadata.json
-{
-        "metadata-type": "METADATA-SYSTEM",
-        "format":       "COMPACT",
-        "id":           "*"
-}
 ```
