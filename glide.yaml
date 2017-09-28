@@ -3,25 +3,33 @@ homepage: github.com/jpfielding/gorets
 license: GPL3
 
 import:
+  # used for rets client encoding and http ctx client
   - package: golang.org/x/net
     ref:     07b51741c1d6423d4a6abab1c49940ec09cb1aaf
     subpackages:
     - /context/ctxhttp
     - /html/charset
+  # used for rets client encoding
   - package: golang.org/x/text
     ref:     5ee49cfe751141f8017047bab800d1f528ee3be1
     subpackages:
     - /encoding
     - /transform
+  # used for rets client unit tests
   - package: github.com/stretchr/testify
     ref:     890a5c3458b43e6104ff5da8dfa139d013d77544
     subpackages:
     - /assert
+  # used for rets client cmd package
   - package: github.com/spf13/cobra
-    version: a3cd8ab85aeba3522b9b59242f3b86ddbc67f8bd
+    ref: a3cd8ab85aeba3522b9b59242f3b86ddbc67f8bd
+  # used for rets client encoding
   - package: github.com/jpfielding/gofilters
+  # used for rets client cmd package
   - package: github.com/jpfielding/gowirelog
+    # used for rets client xml search
   - package: github.com/jpfielding/gominidom
+  # used for rets explorer
   - package: github.com/gorilla/rpc
   - package: github.com/gorilla/handlers
   - package: github.com/gorilla/websocket
