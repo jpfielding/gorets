@@ -1,5 +1,7 @@
-RETS Explorer
+RETS Explorer 
 ======
+
+This is a work in progress, PRs welcome.  (try to keep the deps minimal) 
 
 RETS client with a ReactJS front end, Gorilla RPC services on the backend.  
 
