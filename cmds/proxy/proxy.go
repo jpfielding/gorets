@@ -33,7 +33,7 @@ func main() {
 
 	// the base /rets/ proxy handler
 	login := "/proxy/rets/login/"
-	http.HandleFunc(login, proxy.Login(login, cfgs))
+	http.HandleFunc(login, proxy.Login(login, proxy.NewSources(cfgs)))
 
 	err = http.ListenAndServe(*bind, nil)
 	if err != nil {
