@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -31,9 +32,18 @@ func main() {
 		panic(err)
 	}
 
+	prefix := "/proxy/rets"
+	ops := map[string]string{
+		"Login":       fmt.Sprintf("%s/login/", prefix),
+		"GetMetadata": fmt.Sprintf("%s/metadata/", prefix),
+		"Search":      fmt.Sprintf("%s/search/", prefix),
+		"GetObject":   fmt.Sprintf("%s/getobject/", prefix),
+	}
 	// the base /rets/ proxy handler
-	login := "/proxy/rets/login/"
-	http.HandleFunc(login, proxy.Login(login, proxy.NewSources(cfgs)))
+	http.HandleFunc(
+		ops["Login"],
+		proxy.Login(ops, proxy.NewSources(cfgs)),
+	)
 
 	err = http.ListenAndServe(*bind, nil)
 	if err != nil {

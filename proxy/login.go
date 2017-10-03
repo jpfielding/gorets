@@ -10,9 +10,9 @@ import (
 )
 
 // Login manages de/multiplexing requests to RETS servers
-func Login(prefix string, srcs Sources) http.HandlerFunc {
+func Login(ops map[string]string, srcs Sources) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
-		sub := strings.TrimPrefix(req.URL.Path, prefix)
+		sub := strings.TrimPrefix(req.URL.Path, ops["Login"])
 		parts := strings.Split(sub, "/")
 		src := parts[0]
 		usr := parts[1]
@@ -35,11 +35,11 @@ func Login(prefix string, srcs Sources) http.HandlerFunc {
 		}
 		// success, send the urls (modified to point to this server)
 		res.WriteHeader(http.StatusOK)
-		fmt.Fprintf(res, asXML(fmt.Sprintf("%s/%s/%s/login", prefix, src, usr), *urls))
+		fmt.Fprintf(res, asXML(ops, src, usr, *urls))
 	}
 }
 
-func asXML(prefix string, urls rets.CapabilityURLs) string {
+func asXML(ops map[string]string, src, usr string, urls rets.CapabilityURLs) string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("<RETS ReplyCode='%d' ReplyText='%s'>\n", urls.Response.Code, urls.Response.Text))
 	fmt.Fprintln(&buf, "<RETS-RESPONSE>")
@@ -50,17 +50,15 @@ func asXML(prefix string, urls rets.CapabilityURLs) string {
 		}
 		fmt.Fprintf(&buf, "%s=%s\n", name, value)
 	}
-	// fmt.Fprint(&buf, "\n")
-	ifPrint("Login", fmt.Sprintf("%s/login", prefix))
-	ifPrint("Action", fmt.Sprintf("%s/action", prefix))
-	ifPrint("Search", fmt.Sprintf("%s/search", prefix))
-	ifPrint("Get", fmt.Sprintf("%s/get", prefix))
-	ifPrint("GetObject", fmt.Sprintf("%s/getobject", prefix))
-	ifPrint("Logout", fmt.Sprintf("%s/logout", prefix))
-	ifPrint("GetMetadata", fmt.Sprintf("%s/getmetadata", prefix))
-	for k, v := range urls.AdditionalURLs {
-		ifPrint(k, v)
+	// list our currently supported operations
+	for o, prefix := range ops {
+		prefix = strings.TrimSuffix(prefix, "/")
+		ifPrint(o, fmt.Sprintf("%s/%s/%s", prefix, src, usr))
 	}
+	// TODO the source additional urls??
+	// for k, v := range urls.AdditionalURLs {
+	// 	ifPrint(k, v)
+	// }
 
 	ifPrint("MemberName", urls.MemberName)
 	ifPrint("User", urls.User)
