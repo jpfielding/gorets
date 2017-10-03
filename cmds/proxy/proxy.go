@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	// load from config
-	cfgs := make(map[string][]proxy.Config)
+	var cfgs []proxy.Config
 	raw, err := ioutil.ReadFile(*config)
 	if err != nil {
 		panic(err)
