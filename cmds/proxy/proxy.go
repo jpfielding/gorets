@@ -43,6 +43,7 @@ func main() {
 	// the base /rets/ proxy handler
 	http.HandleFunc(ops["Login"], proxy.Login(ops, srcs))
 	http.HandleFunc(ops["GetMetadata"], proxy.Metadata(ops, srcs))
+	http.HandleFunc(ops["Search"], proxy.Search(ops, srcs))
 	// web server
 	err = http.ListenAndServe(*bind, nil)
 	if err != nil {
