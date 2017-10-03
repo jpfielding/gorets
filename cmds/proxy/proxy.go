@@ -39,12 +39,11 @@ func main() {
 		"Search":      fmt.Sprintf("%s/search/", prefix),
 		"GetObject":   fmt.Sprintf("%s/getobject/", prefix),
 	}
+	srcs := proxy.NewSources(cfgs)
 	// the base /rets/ proxy handler
-	http.HandleFunc(
-		ops["Login"],
-		proxy.Login(ops, proxy.NewSources(cfgs)),
-	)
-
+	http.HandleFunc(ops["Login"], proxy.Login(ops, srcs))
+	http.HandleFunc(ops["GetMetadata"], proxy.Metadata(ops, srcs))
+	// web server
 	err = http.ListenAndServe(*bind, nil)
 	if err != nil {
 		panic(err)
