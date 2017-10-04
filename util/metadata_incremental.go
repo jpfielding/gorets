@@ -21,13 +21,16 @@ func (ic *IncrementalCompact) Load(ctx context.Context, sess rets.Requester, url
 		if id == "" {
 			id = "0"
 		}
-		req := rets.MetadataRequest{
-			URL:    url,
+		params := rets.MetadataParams{
 			Format: "COMPACT",
 			MType:  mtype,
 			ID:     id,
 		}
-		reader, er := rets.MetadataStream(ctx, sess, req)
+		req := rets.MetadataRequest{
+			URL:            url,
+			MetadataParams: params,
+		}
+		reader, er := rets.MetadataStream(rets.MetadataResponse(ctx, sess, req))
 		if er != nil {
 			return nil, er
 		}
