@@ -12,42 +12,16 @@ http://www.reso.org/assets/RETS/Specifications/rets_1_8.pdf.
 Find me at gophers.slack.com#gorets
 
 
-```
-connect.json:
-{
-	"username": "user",
-	"password": "pwd",
-	"url":	  "http://www.rets.com/rets/login",
-	"user-agent": "Company/1.0",
-	"user-agent-pw": "",
-	"rets-version": "RETS/1.7",
-	"wirelog": "/tmp/gorets/wire.log"
-}
-```
+There are multiple projects in the repository:
 
-[Example Search](cmds/gorets/search.go)
-```
-go run cmds/gorets/*.go search -c connect.json -params sp.json -o /tmp/
+gorets/rets - provides a go based client for RETS
 
-sp.json:
-{
-	"SearchType": "Property",
-	"Class": "Residential",
-	"Select": "",
-	"Format": "COMPACT_DECODED",
-	"Count": 1,
-	"Offset": 1,
-	"Limit": 2500,
-	"QueryType": "dmql2",
-	"Query": "(ModifiedDateTime=2016-08-01T00:00:00+)"
-}
+gorets/metadata - provides the common structure for reading in properly formed RETS metadata
 
-[Example GetObject](cmds/gorets/getobject.go)
-```
-go run cmds/getobject/*.go getobject -c connect.json -type "HiRes" -i "343234:*" -o /tmp/
+gorets/explorer - provides a go backend for a reactjs ui for browsing RETS servers
 
-[Example Metadata](cmds/gorets/search.go)
-```
-go run cmds/metadata/*.go metadata -c connect.json -output /tmp/
+gorets/proxy - provides a mechanism for proxying multiple RETS connections through a single endpoint
 
-```
+gorets/syndication - provides the RETS syndication struct for processing syndication feeds 
+
+gorets/utils - helper tools for dealing with RETS
