@@ -1,9 +1,7 @@
 import React from 'react';
-import MetadataService from 'services/MetadataService';
-import StorageCache from 'util/StorageCache';
-import { Fieldset, Field, createValue, Input } from 'react-forms';
 import { withRouter } from 'react-router';
 import ReactDataGrid from 'react-data-grid';
+import MetadataService from 'services/MetadataService';
 
 const ReactDataGridPlugins = require('react-data-grid/addons');
 
@@ -15,124 +13,67 @@ class Metadata extends React.Component {
     params: React.PropTypes.any,
     location: React.PropTypes.any,
     router: React.PropTypes.any,
-    connection: React.PropTypes.any,
-    setSelectedConnection: React.PropTypes.func.isRequired,
+    shared: {
+      connection: React.PropTypes.any,
+      metadata: React.PropTypes.any,
+      resource: React.PropTypes.any,
+      class: React.PropTypes.any,
+      fields: React.PropTypes.any,
+      rows: React.PropTypes.any,
+    },
+    onRowsSelected: React.PropTypes.Func,
+    onRowsDeselected: React.PropTypes.Func,
+    onClassSelected: React.PropTypes.Func,
   }
 
   static defaultProps = {
-    connection: { id: null },
+    connection: { id: 'n/a' },
+    metadata: MetadataService.empty,
   }
-
-  static emptyMetadata = {
-    System: {
-      'METADATA-RESOURCE': {
-        Resource: [],
-      },
-      SystemDescription: 'No Metadata Loaded',
-      SystemID: 'N/A',
-    },
-  };
 
   constructor(props) {
     super(props);
-    const searchForm = createValue({
-      value: {
-        query: '(TIMESTAMP=2016-11-01T00:00:00+)',
-      },
-      onChange: this.searchInputsChange.bind(this),
-    });
-    this.state = {
-      metadata: Metadata.emptyMetadata,
-      selectedClass: null,
-      defaultRows: [],
-      selectedClassRows: [],
-      selectedFieldSet: [],
-      filters: {},
-      searchForm,
-    };
-    this.handleGridSort = this.handleGridSort.bind(this);
-    this.onCellSelected = this.onCellSelected.bind(this);
-    this.submitSearchForm = this.submitSearchForm.bind(this);
-  }
 
-  componentDidMount() {
-    if (this.props.params.connection) {
-      this.getMetadata(this.props.params.connection);
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // if no connection is inbound
-    if (!nextProps.params.connection) {
-      console.log('wiping metadata');
-      this.setState({ metadata: Metadata.emptyMetadata });
-      return;
-    }
-    // if this is a new connection
-    if (nextProps.params !== this.props.params) {
-      this.props.setSelectedConnection(nextProps.params.connection);
-      this.getMetadata(nextProps.params.connection);
-    }
-  }
-
-  onClearFilters = () => {
-    this.setState({ filters: {} });
-  }
-
-  onCellSelected(coordinates) {
-    const row = this.state.selectedClassRows[coordinates.rowIdx];
-    const selectedKey = 'SystemName';
-    const selectedVal = row[selectedKey];
-    const { searchForm } = this.state;
-    if (searchForm.value === null) {
-      searchForm.value = {};
-    }
-    let currentSearchVal = searchForm.value['select'] || '';
-    if (currentSearchVal !== '') {
-      currentSearchVal = `${currentSearchVal},`;
-    }
-    searchForm.value['select'] = `${currentSearchVal}${selectedVal}`;
-    this.setState({ searchForm });
-  }
-
-  getMetadata(connectionId) {
-    this.setState({
-      selectedClass: null,
-      defaultRows: [],
-      selectedClassRows: [],
-      metadata: Metadata.emptyMetadata,
-    });
-    const ck = `${connectionId}-metadata`;
-    const md = StorageCache.getFromCache(ck);
-    if (md) {
-      console.log('loaded metadata from local cache', md);
-      this.setState({ metadata: md });
-      return;
-    }
-    console.log('no metadata cached');
-    MetadataService
-      .get(connectionId)
-      .then(response => response.json())
-      .then(json => {
-        if (json.error !== null) {
+    const mtable = props.shared.class['METADATA-TABLE'];
+    const field = (mtable) ? mtable.Field : [];
+    const classRows = (mtable) ? mtable.Field : [];
+    const selectedFieldSet = [];
+    classRows.forEach(f => {
+      Object.keys(f).forEach(key => {
+        if (selectedFieldSet.includes(key)) {
           return;
         }
-        console.log('json request:', json.result.Metadata);
-        this.setState({ metadata: json.result.Metadata });
-        // this.setState({ metadata: md });
-        StorageCache.putInCache(ck, json.result.Metadata, 60);
+        selectedFieldSet.push(key);
       });
+    });
+    this.state = {
+      filters: {},
+      classRows: field,
+      filteredRows: field,
+      selectedFieldSet,
+    };
+    this.handleGridSort = this.handleGridSort.bind(this);
+    this.onRowsSelected = this.onRowsSelected.bind(this);
+    this.onRowsDeselected = this.onRowsDeselected.bind(this);
   }
 
-  searchInputsChange(searchForm) {
-    this.setState({ searchForm });
+  onRowsSelected(rows) {
+    this.props.onRowsSelected(rows);
   }
 
-  metadataClassClick(selectedClass) {
-    const defaultRows = selectedClass['METADATA-TABLE'].Field;
-    const selectedClassRows = selectedClass['METADATA-TABLE'].Field;
+  onRowsDeselected(rows) {
+    this.props.onRowsDeselected(rows);
+  }
+
+  onClassSelected(res, cls) {
+    if (cls === this.props.shared.class) {
+      return;
+    }
+    this.props.onClassSelected(res, cls);
+    const classRows = cls['METADATA-TABLE'].Field;
+    const filteredRows = cls['METADATA-TABLE'].Field;
     const selectedFieldSet = [];
-    defaultRows.forEach(field => {
+    classRows.forEach(field => {
       Object.keys(field).forEach(key => {
         if (selectedFieldSet.includes(key)) {
           return;
@@ -141,11 +82,14 @@ class Metadata extends React.Component {
       });
     });
     this.setState({
-      selectedClass,
-      defaultRows,
-      selectedClassRows,
+      classRows,
+      filteredRows,
       selectedFieldSet,
     });
+  }
+
+  onClearFilters = () => {
+    this.setState({ filters: {} });
   }
 
   handleGridSort(sortColumn, sortDirection) {
@@ -160,11 +104,12 @@ class Metadata extends React.Component {
       return null;
     };
     const rows = sortDirection === 'NONE'
-      ? this.state.selectedClassRows
-      : this.state.selectedClassRows.sort(comparer);
-    this.setState({ selectedClassRows: rows });
+      ? this.state.filteredRows
+      : this.state.filteredRows.sort(comparer);
+    this.setState({ filteredRows: rows });
   }
 
+  // TODO row selection and filters arent playing well together
   handleFilterChange = (filter) => {
     const newFilters = Object.assign({}, this.state.filters);
     if (filter.filterTerm) {
@@ -173,7 +118,7 @@ class Metadata extends React.Component {
       delete newFilters[filter.column.key];
     }
     this.setState({ filters: newFilters });
-    const rows = this.state.defaultRows;
+    const rows = this.state.classRows;
     const newRows = [...rows];
     Object.keys(newFilters).forEach(newFilter => {
       const filterObj = newFilters[newFilter];
@@ -191,21 +136,8 @@ class Metadata extends React.Component {
       }
     });
     if (newRows.length > 0) {
-      this.setState({ selectedClassRows: newRows });
+      this.setState({ filteredRows: newRows });
     }
-  }
-
-  submitSearchForm() {
-    this.props.router.push({
-      ...this.props.location,
-      pathname: '/search',
-      query: Object.assign({}, {
-        ...this.state.searchForm.value,
-        id: this.props.connection.id,
-        resource: this.state.selectedClass['METADATA-TABLE'].Resource,
-        class: this.state.selectedClass.ClassName,
-      }),
-    });
   }
 
   renderSelectedClassDescription(clazz) {
@@ -217,11 +149,11 @@ class Metadata extends React.Component {
   }
 
   render() {
-    const { selectedClassRows, selectedClass } = this.state;
+    const { filteredRows } = this.state;
     let tableBody;
-    if (selectedClassRows) {
+    if (filteredRows) {
       const availableFields = this.state.selectedFieldSet;
-      const fieldSet = (selectedClassRows && selectedClassRows.length > 0)
+      const fieldSet = (filteredRows && filteredRows.length > 0)
         ? availableFields.map((name) => ({
           key: name,
           name,
@@ -231,13 +163,15 @@ class Metadata extends React.Component {
           filterable: true,
         }))
         : [];
-      const rowGetter = (i) => selectedClassRows[i];
+      const rowGetter = (i) => filteredRows[i];
+      const selectedResource = this.props.shared.resource;
+      const selectedClass = this.props.shared.class;
       tableBody = (
         <div>
-          {selectedClass
+          {selectedResource
             ? (
               <span>
-                <span className="b">{selectedClass['METADATA-TABLE'].Resource} </span>
+                <span className="b">{selectedResource.ResourceID} </span>
                 {this.renderSelectedClassDescription(selectedClass)}
               </span>
             )
@@ -247,31 +181,41 @@ class Metadata extends React.Component {
             onGridSort={this.handleGridSort}
             columns={fieldSet}
             rowGetter={rowGetter}
-            rowsCount={selectedClassRows.length}
+            rowsCount={filteredRows.length}
             toolbar={<Toolbar enableFilter />}
             onAddFilter={this.handleFilterChange}
             onClearFilters={this.onClearFilters}
-            onCellSelected={this.onCellSelected}
+            rowSelection={{
+              showCheckbox: true,
+              enableShiftSelect: true,
+              onRowsSelected: this.onRowsSelected,
+              onRowsDeselected: this.onRowsDeselected,
+              selectBy: {
+                // TODO this does not deal with filter/sort
+                indexes: this.props.shared.fields.map(r => r.rowIdx),
+              },
+            }}
           />
         </div>
       );
     } else {
       tableBody = null;
     }
+    const system = this.props.shared.metadata.System;
     return (
       <div>
         <div className="fl h-100-ns w-100 w-20-ns no-list-style pa3 overflow-x-scroll nowrap">
-          <h1 className="f5" title={this.state.metadata.System.SystemDescription}>
-            {this.state.metadata.System.SystemID}
+          <h1 className="f5" title={system.SystemDescription}>
+            {system.SystemID}
           </h1>
           <ul className="pa0 ma0">
-            {this.state.metadata.System['METADATA-RESOURCE'].Resource.map((r) =>
+            {system['METADATA-RESOURCE'].Resource.map((r) =>
               <li className="mb2">
                 <div title={r.Description} className="b">{r.ResourceID}</div>
                 <ul className="pa0 pl3 mv1">
                   {r['METADATA-CLASS'].Class.map((mClass) =>
                     <li
-                      onClick={() => this.metadataClassClick(mClass)}
+                      onClick={() => this.onClassSelected(r, mClass)}
                       className="clickable metadata-class-name"
                     >
                       {this.renderSelectedClassDescription(mClass)}
@@ -283,19 +227,10 @@ class Metadata extends React.Component {
           </ul>
         </div>
         <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
-          { this.state.defaultRows.length > 0
+          { this.state.classRows.length > 0
             ? (
               <div>
                 { tableBody }
-                <Fieldset formValue={this.state.searchForm}>
-                  <Field select="select" label="Columns">
-                    <Input className="w-100" />
-                  </Field>
-                  <Field select="query" label="Query">
-                    <Input className="w-100" />
-                  </Field>
-                  <button onClick={this.submitSearchForm}>Submit</button>
-                </Fieldset>
               </div>
             )
             : <h1 className="f4">Please select a class to explore</h1>
