@@ -80,11 +80,12 @@ func Search(ops map[string]string, srcs Sources) http.HandlerFunc {
 		})
 		defer reader.Close()
 		if err != nil {
-			res.WriteHeader(http.StatusNotFound)
+			res.WriteHeader(http.StatusBadGateway)
 			fmt.Fprintf(res, "search err %s", err)
 			return
 		}
 		// success, send the urls (modified to point to this server)
+		// TODO set content-type here
 		res.WriteHeader(http.StatusOK)
 		io.Copy(res, reader)
 	}

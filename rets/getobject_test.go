@@ -27,7 +27,7 @@ func TestGetObject(t *testing.T) {
 	var body = `<binary data 1>`
 
 	response := GetObjectResponse{
-		response: &http.Response{
+		Response: &http.Response{
 			Header: header,
 			Body:   ioutil.NopCloser(strings.NewReader(body)),
 		},
@@ -118,7 +118,7 @@ func TestGetObjects(t *testing.T) {
 	headers := http.Header{}
 	headers.Add("Content-Type", contentType)
 	response := GetObjectResponse{
-		response: &http.Response{
+		Response: &http.Response{
 			Header: headers,
 			Body:   ioutil.NopCloser(strings.NewReader(multipartBody)),
 		},

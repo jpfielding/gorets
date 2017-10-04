@@ -37,6 +37,7 @@ func PrepMetadataRequest(r MetadataRequest) (*http.Request, error) {
 }
 
 // MetadataStream ...
+// TODO just return the http.Response and let the consumer wrap it for decoding
 func MetadataStream(ctx context.Context, requester Requester, r MetadataRequest) (io.ReadCloser, error) {
 	req, err := PrepMetadataRequest(r)
 	if err != nil {

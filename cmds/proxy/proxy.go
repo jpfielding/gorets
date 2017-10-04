@@ -44,6 +44,7 @@ func main() {
 	http.HandleFunc(ops["Login"], proxy.Login(ops, srcs))
 	http.HandleFunc(ops["GetMetadata"], proxy.Metadata(ops, srcs))
 	http.HandleFunc(ops["Search"], proxy.Search(ops, srcs))
+	http.HandleFunc(ops["GetObject"], proxy.GetObject(ops, srcs))
 	// web server
 	err = http.ListenAndServe(*bind, nil)
 	if err != nil {

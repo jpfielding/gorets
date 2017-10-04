@@ -47,27 +47,23 @@ func PrepGetObjects(r GetObjectRequest) (*http.Request, error) {
 }
 
 // GetObjects sends the GetObject request
-func GetObjects(ctx context.Context, requester Requester, r GetObjectRequest) (*GetObjectResponse, error) {
+func GetObjects(ctx context.Context, requester Requester, r GetObjectRequest) (*http.Response, error) {
 	req, err := PrepGetObjects(r)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := requester(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return &GetObjectResponse{response: resp}, nil
+	return requester(ctx, req)
 }
 
 // GetObjectResponse is the response holder for processing GetObject requests
 type GetObjectResponse struct {
-	response *http.Response
+	Response *http.Response
 }
 
 // ForEach ...
 func (r *GetObjectResponse) ForEach(result GetObjectResult) error {
-	resp := r.response
+	resp := r.Response
 	defer resp.Body.Close()
 	mediaType, params, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 	if err != nil {
@@ -97,10 +93,10 @@ func (r *GetObjectResponse) ForEach(result GetObjectResult) error {
 
 // Close ...
 func (r *GetObjectResponse) Close() error {
-	if r == nil || r.response.Body == nil {
+	if r == nil || r.Response.Body == nil {
 		return nil
 	}
-	return r.response.Body.Close()
+	return r.Response.Body.Close()
 }
 
 // GetObjectResult is the callback walking func for retrieving objets

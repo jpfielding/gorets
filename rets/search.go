@@ -118,6 +118,7 @@ func PrepSearchRequest(r SearchRequest) (*http.Request, error) {
 }
 
 // SearchStream returns the raw stream from the RETS server response
+// TODO just return the http.Response and let the consumer wrap it for decoding
 func SearchStream(ctx context.Context, requester Requester, r SearchRequest) (io.ReadCloser, error) {
 	req, err := PrepSearchRequest(r)
 	if err != nil {
