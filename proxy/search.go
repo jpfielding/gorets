@@ -67,26 +67,22 @@ func Search(ops map[string]string, srcs Sources) http.HandlerFunc {
 		}
 		// TODO standardnames
 
-		// if we're posting
-		if req.Method == "POST" {
-			params.HTTPFormEncodedValues = true
-		}
-
 		ctx := context.Background()
-		reader, err := rets.SearchStream(ctx, r, rets.SearchRequest{
-			URL:          urls.Search,
-			HTTPMethod:   req.Method,
-			SearchParams: params,
+		response, err := rets.SearchResponse(ctx, r, rets.SearchRequest{
+			URL:                   urls.Search,
+			HTTPMethod:            req.Method,
+			HTTPFormEncodedValues: (req.Method == "POST"),
+			SearchParams:          params,
 		})
-		defer reader.Close()
+		defer response.Body.Close()
 		if err != nil {
 			res.WriteHeader(http.StatusBadGateway)
 			fmt.Fprintf(res, "search err %s", err)
 			return
 		}
 		// success, send the urls (modified to point to this server)
-		// TODO set content-type here
+		res.Header().Set("Content-Type", response.Header.Get("Content-Type"))
 		res.WriteHeader(http.StatusOK)
-		io.Copy(res, reader)
+		io.Copy(res, response.Body)
 	}
 }

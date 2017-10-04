@@ -50,20 +50,21 @@ func GetObject(ops map[string]string, srcs Sources) http.HandlerFunc {
 		}
 
 		ctx := context.Background()
-		reader, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
-			URL:             urls.GetObject,
-			HTTPMethod:      req.Method,
-			GetObjectParams: params,
+		response, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
+			URL:                   urls.GetObject,
+			HTTPMethod:            req.Method,
+			HTTPFormEncodedValues: (req.Method == "POST"),
+			GetObjectParams:       params,
 		})
-		defer reader.Body.Close()
+		defer response.Body.Close()
 		if err != nil {
 			res.WriteHeader(http.StatusBadGateway)
 			fmt.Fprintf(res, "get objects err %s", err)
 			return
 		}
 		// success, send the urls (modified to point to this server)
-		res.Header().Set("Content-Type", reader.Header.Get("Content-Type"))
+		res.Header().Set("Content-Type", response.Header.Get("Content-Type"))
 		res.WriteHeader(http.StatusOK)
-		io.Copy(res, reader.Body)
+		io.Copy(res, response.Body)
 	}
 }

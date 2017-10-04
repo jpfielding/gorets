@@ -39,21 +39,25 @@ func Metadata(ops map[string]string, srcs Sources) http.HandlerFunc {
 		values := req.URL.Query()
 
 		ctx := context.Background()
-		reader, err := rets.MetadataStream(ctx, r, rets.MetadataRequest{
-			URL:    urls.GetMetadata,
-			Format: values.Get("Format"),
-			MType:  values.Get("Type"),
-			ID:     values.Get("ID"),
+		response, err := rets.MetadataResponse(ctx, r, rets.MetadataRequest{
+			URL:                   urls.GetMetadata,
+			HTTPMethod:            req.Method,
+			HTTPFormEncodedValues: (req.Method == "POST"),
+			MetadataParams: rets.MetadataParams{
+				Format: values.Get("Format"),
+				MType:  values.Get("Type"),
+				ID:     values.Get("ID"),
+			},
 		})
-		defer reader.Close()
+		defer response.Body.Close()
 		if err != nil {
 			res.WriteHeader(http.StatusBadGateway)
 			fmt.Fprintf(res, "metadata err %s", err)
 			return
 		}
 		// success, send the urls (modified to point to this server)
-		// TODO set content-type here
+		res.Header().Set("Content-Type", response.Header.Get("Content-Type"))
 		res.WriteHeader(http.StatusOK)
-		io.Copy(res, reader)
+		io.Copy(res, response.Body)
 	}
 }
