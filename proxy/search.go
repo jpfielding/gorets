@@ -81,7 +81,7 @@ func Search(ops map[string]string, srcs Sources) http.HandlerFunc {
 			return
 		}
 		// success, send the urls (modified to point to this server)
-		res.Header().Set("Content-Type", response.Header.Get("Content-Type"))
+		res.Header()["Content-Type"] = response.Header["Content-Type"]
 		res.WriteHeader(http.StatusOK)
 		io.Copy(res, response.Body)
 	}
