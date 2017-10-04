@@ -105,12 +105,14 @@ func fullViaCompactIncremental(ctx context.Context, requester rets.Requester, ur
 
 // fullViaCompact retrieve the RETS Compact metadata from the server
 func fullViaCompact(ctx context.Context, requester rets.Requester, url string) (*metadata.MSystem, error) {
-	reader, err := rets.MetadataStream(ctx, requester, rets.MetadataRequest{
-		URL:    url,
-		Format: "COMPACT",
-		MType:  "METADATA-SYSTEM",
-		ID:     "*",
-	})
+	reader, err := rets.MetadataStream(rets.MetadataResponse(ctx, requester, rets.MetadataRequest{
+		URL: url,
+		MetadataParams: rets.MetadataParams{
+			Format: "COMPACT",
+			MType:  "METADATA-SYSTEM",
+			ID:     "*",
+		},
+	}))
 	defer reader.Close()
 	if err != nil {
 		return nil, err
@@ -124,12 +126,14 @@ func fullViaCompact(ctx context.Context, requester rets.Requester, url string) (
 
 // fullViaStandard ...
 func fullViaStandard(ctx context.Context, requester rets.Requester, url string) (*metadata.MSystem, error) {
-	reader, err := rets.MetadataStream(ctx, requester, rets.MetadataRequest{
-		URL:    url,
-		Format: "STANDARD-XML",
-		MType:  "METADATA-SYSTEM",
-		ID:     "*",
-	})
+	reader, err := rets.MetadataStream(rets.MetadataResponse(ctx, requester, rets.MetadataRequest{
+		URL: url,
+		MetadataParams: rets.MetadataParams{
+			Format: "STANDARD-XML",
+			MType:  "METADATA-SYSTEM",
+			ID:     "*",
+		},
+	}))
 	defer reader.Close()
 	if err != nil {
 		return nil, err
@@ -145,12 +149,15 @@ func fullViaStandard(ctx context.Context, requester rets.Requester, url string) 
 
 // head ...
 func head(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
-	reader, err := rets.MetadataStream(ctx, requester, rets.MetadataRequest{
-		URL:    url,
+	params := rets.MetadataParams{
 		Format: "COMPACT",
 		MType:  "METADATA-SYSTEM",
 		ID:     "0",
-	})
+	}
+	reader, err := rets.MetadataStream(rets.MetadataResponse(ctx, requester, rets.MetadataRequest{
+		URL:            url,
+		MetadataParams: params,
+	}))
 	defer reader.Close()
 	if err != nil {
 		return nil, err

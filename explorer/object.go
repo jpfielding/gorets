@@ -52,7 +52,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 	ctx := context.Background()
 	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		// warning, this does _all_ of the photos
-		response, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
+		rsp, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
 			URL: u.GetObject,
 			GetObjectParams: rets.GetObjectParams{
 				Resource: args.Resource,
@@ -64,6 +64,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 			return err
 		}
 		// open the json encoder
+		response := &rets.GetObjectResponse{Response: rsp}
 		defer response.Close()
 		return response.ForEach(func(o *rets.Object, err error) error {
 			if o == nil {
