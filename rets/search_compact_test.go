@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 // GET /platinum/search?
@@ -41,7 +41,7 @@ func TestSearchCompactEof(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(""))
 
 	_, err := NewCompactSearchResult(body)
-	testutils.NotOk(t, err)
+	assert.NotNil(t, err)
 }
 
 func TestSearchCompactBadChar(t *testing.T) {
@@ -56,12 +56,12 @@ func TestSearchCompactBadChar(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(rets))
 
 	cr, err := NewCompactSearchResult(body)
-	testutils.Ok(t, err)
-	testutils.Equals(t, StatusOK, cr.Response.Code)
+	assert.Nil(t, err)
+	assert.Equal(t, StatusOK, cr.Response.Code)
 	counter := 0
 	cr.ForEach(func(row Row, err error) error {
-		testutils.Ok(t, err)
-		testutils.Equals(t, "1 1,2,3,4,,6", strings.Join(row, ","))
+		assert.Nil(t, err)
+		assert.Equal(t, "1 1,2,3,4,,6", strings.Join(row, ","))
 		counter = counter + 1
 		return nil
 	})
@@ -73,19 +73,19 @@ func TestSearchCompactNoEof(t *testing.T) {
 
 	cr, err := NewCompactSearchResult(body)
 	defer cr.Close()
-	testutils.Ok(t, err)
-	testutils.Equals(t, StatusNoRecords, cr.Response.Code)
+	assert.Nil(t, err)
+	assert.Equal(t, StatusNoRecords, cr.Response.Code)
 	found := 0
 	max, err := cr.ForEach(func(data Row, err error) error {
 		if err != nil {
-			testutils.Ok(t, err)
+			assert.Nil(t, err)
 			return err
 		}
 		return nil
 	})
-	testutils.Ok(t, err)
-	testutils.Equals(t, max, false)
-	testutils.Equals(t, 0, found)
+	assert.Nil(t, err)
+	assert.Equal(t, max, false)
+	assert.Equal(t, 0, found)
 }
 
 func TestSearchCompactWithDelimNoEof(t *testing.T) {
@@ -97,20 +97,20 @@ func TestSearchCompactWithDelimNoEof(t *testing.T) {
 
 	cr, err := NewCompactSearchResult(body)
 	defer cr.Close()
-	testutils.Equals(t, cr.Delimiter, "	")
-	testutils.Ok(t, err)
-	testutils.Equals(t, StatusOK, cr.Response.Code)
+	assert.Equal(t, cr.Delimiter, "	")
+	assert.Nil(t, err)
+	assert.Equal(t, StatusOK, cr.Response.Code)
 	found := 0
 	max, err := cr.ForEach(func(data Row, err error) error {
 		if err != nil {
-			testutils.Ok(t, err)
+			assert.Nil(t, err)
 			return err
 		}
 		return nil
 	})
-	testutils.Ok(t, err)
-	testutils.Equals(t, max, false)
-	testutils.Equals(t, 0, found)
+	assert.Nil(t, err)
+	assert.Equal(t, max, false)
+	assert.Equal(t, 0, found)
 }
 
 func TestSearchCompactEmbeddedRetsStatus(t *testing.T) {
@@ -120,8 +120,8 @@ func TestSearchCompactEmbeddedRetsStatus(t *testing.T) {
 			</RETS>`
 	body := ioutil.NopCloser(strings.NewReader(rets))
 	cr, err := NewCompactSearchResult(body)
-	testutils.Ok(t, err)
-	testutils.Equals(t, StatusNoRecords, cr.Response.Code)
+	assert.Nil(t, err)
+	assert.Equal(t, StatusNoRecords, cr.Response.Code)
 }
 
 func TestSearchCompactParseSearchQuit(t *testing.T) {
@@ -129,34 +129,34 @@ func TestSearchCompactParseSearchQuit(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(noEnd))
 
 	cr, err := NewCompactSearchResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
 	rowsFound := 0
 	cr.ForEach(func(data Row, err error) error {
 		if err != nil {
-			testutils.Assert(t, strings.Contains(err.Error(), "EOF"), "found something not eof")
+			assert.Equal(t, strings.Contains(err.Error(), "EOF"), "found something not eof")
 			return err
 		}
-		testutils.Equals(t, "1,2,3,4,,6", strings.Join(data, ","))
+		assert.Equal(t, "1,2,3,4,,6", strings.Join(data, ","))
 		rowsFound++
 		return nil
 	})
-	testutils.Equals(t, 8, rowsFound)
+	assert.Equal(t, 8, rowsFound)
 }
 
 func TestSearchCompactParseCompact(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(compactDecoded))
 
 	cr, err := NewCompactSearchResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
-	testutils.Assert(t, StatusOK == cr.Response.Code, "bad code")
-	testutils.Assert(t, "V2.7.0 2315: Success" == cr.Response.Text, "bad text")
+	assert.Equal(t, StatusOK == cr.Response.Code, "bad code")
+	assert.Equal(t, "V2.7.0 2315: Success" == cr.Response.Text, "bad text")
 
-	testutils.Assert(t, 10 == int(cr.Count), "bad count")
-	testutils.Assert(t, 6 == len(cr.Columns), "bad header count")
+	assert.Equal(t, 10 == int(cr.Count), "bad count")
+	assert.Equal(t, 6 == len(cr.Columns), "bad header count")
 
-	testutils.Assert(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
+	assert.Equal(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
 
 	counter := 0
 	maxRows, err := cr.ForEach(func(row Row, err error) error {
@@ -170,9 +170,9 @@ func TestSearchCompactParseCompact(t *testing.T) {
 		counter = counter + 1
 		return nil
 	})
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
-	testutils.Assert(t, 8 == counter, "bad count")
-	testutils.Assert(t, maxRows, "bad max rows")
+	assert.Equal(t, 8 == counter, "bad count")
+	assert.Equal(t, maxRows, "bad max rows")
 
 }
