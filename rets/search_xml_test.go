@@ -11,13 +11,13 @@ import (
 	"testing"
 
 	"github.com/jpfielding/gominidom/minidom"
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSearchXMLEof(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(""))
 	_, err := NewCompactSearchResult(body)
-	testutils.NotOk(t, err)
+	assert.NotNil(t, err)
 }
 
 func TestSearchXMLBadChar(t *testing.T) {
@@ -40,8 +40,8 @@ func TestSearchXMLBadChar(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(rets))
 
 	cr, err := NewStandardXMLSearchResult(body)
-	testutils.Ok(t, err)
-	testutils.Equals(t, StatusOK, cr.Response.Code)
+	assert.Nil(t, err)
+	assert.Equal(t, StatusOK, cr.Response.Code)
 	var listings []Listing
 	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
 		listing := Listing{}
@@ -49,12 +49,12 @@ func TestSearchXMLBadChar(t *testing.T) {
 		listings = append(listings, listing)
 		return err
 	})
-	testutils.Ok(t, err)
-	testutils.Equals(t, true, maxRows)
-	testutils.Equals(t, 5, count)
-	testutils.Equals(t, 2, len(listings))
-	testutils.Equals(t, "bad row", listings[0].Row)
-	testutils.Equals(t, "good row", listings[1].Row)
+	assert.Nil(t, err)
+	assert.Equal(t, true, maxRows)
+	assert.Equal(t, 5, count)
+	assert.Equal(t, 2, len(listings))
+	assert.Equal(t, "bad row", listings[0].Row)
+	assert.Equal(t, "good row", listings[1].Row)
 }
 
 func TestSearchXMLParseSearchQuit(t *testing.T) {
@@ -62,7 +62,7 @@ func TestSearchXMLParseSearchQuit(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(noEnd))
 
 	cr, err := NewStandardXMLSearchResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
 	var listings [][]byte
 	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
@@ -70,27 +70,27 @@ func TestSearchXMLParseSearchQuit(t *testing.T) {
 		listings = append(listings, tmp)
 		return err
 	})
-	testutils.NotOk(t, err)
-	testutils.Equals(t, false, maxRows)
-	testutils.Equals(t, 10, count)
-	testutils.Equals(t, 1, len(listings))
+	assert.NotNil(t, err)
+	assert.Equal(t, false, maxRows)
+	assert.Equal(t, 10, count)
+	assert.Equal(t, 1, len(listings))
 }
 
 func TestSearchXML(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(standardXML))
 
 	cr, err := NewStandardXMLSearchResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
 	var listings []io.ReadCloser
 	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
 		listings = append(listings, elem)
 		return err
 	})
-	testutils.Ok(t, err)
-	testutils.Equals(t, true, maxRows)
-	testutils.Equals(t, 10, count)
-	testutils.Equals(t, 2, len(listings))
+	assert.Nil(t, err)
+	assert.Equal(t, true, maxRows)
+	assert.Equal(t, 10, count)
+	assert.Equal(t, 2, len(listings))
 }
 
 func TestSearchXMLComplex(t *testing.T) {
@@ -107,7 +107,7 @@ func TestSearchXMLComplex(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(standardXML))
 
 	cr, err := NewStandardXMLSearchResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
 	var listings []Listing
 	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
@@ -119,10 +119,10 @@ func TestSearchXMLComplex(t *testing.T) {
 		listings = append(listings, listing)
 		return err
 	})
-	testutils.Ok(t, err)
-	testutils.Equals(t, true, maxRows)
-	testutils.Equals(t, 10, count)
-	testutils.Equals(t, 2, len(listings))
+	assert.Nil(t, err)
+	assert.Equal(t, true, maxRows)
+	assert.Equal(t, 10, count)
+	assert.Equal(t, 2, len(listings))
 }
 
 var standardXML = `<?xml version="1.0" encoding="utf-8"?>

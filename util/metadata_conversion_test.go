@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/jpfielding/gorets/rets"
-	testutils "github.com/jpfielding/gotest/testutils"
+	"github.com/stretchr/testify/assert"
 )
 
 var retsStart = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">`
@@ -59,30 +59,30 @@ var lookupType = `<METADATA-LOOKUP_TYPE Resource="Agent" Lookup="COUNTIES_OR_REG
 func TestConvertCompactMetadata(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(retsStart + system + resource + class + table + lookup + lookupType + retsEnd))
 	compact, err := rets.ParseMetadataCompactResult(body)
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
 	msystem, err := AsStandard(*compact).Convert()
-	testutils.Ok(t, err)
+	assert.Nil(t, err)
 
-	testutils.Equals(t, "MLS System", msystem.System.Description)
-	testutils.Equals(t, "1.12.30", string(msystem.Version))
-	testutils.Equals(t, "The System is provided to you by Systems.", msystem.System.Comments)
+	assert.Equal(t, "MLS System", msystem.System.Description)
+	assert.Equal(t, "1.12.30", string(msystem.Version))
+	assert.Equal(t, "The System is provided to you by Systems.", msystem.System.Comments)
 
 	mresource := msystem.System.MResource
-	testutils.Equals(t, "1.12.30", string(mresource.Version))
-	testutils.Equals(t, 2, len(mresource.Resource))
+	assert.Equal(t, "1.12.30", string(mresource.Version))
+	assert.Equal(t, 2, len(mresource.Resource))
 
 	mlookup := mresource.Resource[1].MLookup
-	testutils.Equals(t, "1.12.29", string(mlookup.Version))
-	testutils.Equals(t, 4, len(mlookup.Lookup))
+	assert.Equal(t, "1.12.29", string(mlookup.Version))
+	assert.Equal(t, 4, len(mlookup.Lookup))
 
 	mlookupType := mlookup.Lookup[0].MLookupType
-	testutils.Equals(t, "1.12.29", string(mlookupType.Version))
-	testutils.Equals(t, 4, len(mlookupType.LookupType))
+	assert.Equal(t, "1.12.29", string(mlookupType.Version))
+	assert.Equal(t, 4, len(mlookupType.LookupType))
 
 	agent := mresource.Resource[1]
-	testutils.Equals(t, 2, len(agent.MClass.Class))
-	testutils.Equals(t, "Agent", string(agent.ResourceID))
-	testutils.Equals(t, "1.12.29", string(agent.MClass.Version))
+	assert.Equal(t, 2, len(agent.MClass.Class))
+	assert.Equal(t, "Agent", string(agent.ResourceID))
+	assert.Equal(t, "1.12.29", string(agent.MClass.Version))
 
 }
