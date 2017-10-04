@@ -1,6 +1,7 @@
 package rets
 
 import (
+	"bytes"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -41,8 +42,13 @@ func PrepGetObjects(r GetObjectRequest) (*http.Request, error) {
 		method = r.HTTPMethod
 	}
 
+	// http POST style params
+	if r.HTTPFormEncodedValues {
+		req, err := http.NewRequest(method, url.String(), bytes.NewBufferString(values.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		return req, err
+	}
 	url.RawQuery = values.Encode()
-
 	return http.NewRequest(method, url.String(), nil)
 }
 
@@ -52,7 +58,6 @@ func GetObjects(ctx context.Context, requester Requester, r GetObjectRequest) (*
 	if err != nil {
 		return nil, err
 	}
-
 	return requester(ctx, req)
 }
 
@@ -120,5 +125,6 @@ type GetObjectRequest struct {
 	/* 5.3 */
 	URL,
 	HTTPMethod string
+	HTTPFormEncodedValues bool // POST style http params
 	GetObjectParams
 }

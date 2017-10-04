@@ -11,7 +11,7 @@ import (
 
 // StandardXMLSearch if you set the wrong request Format you will get nothing back
 func StandardXMLSearch(ctx context.Context, requester Requester, r SearchRequest) (*StandardXMLSearchResult, error) {
-	body, err := SearchStream(ctx, requester, r)
+	body, err := SearchStream(SearchResponse(ctx, requester, r))
 	if err != nil {
 		return nil, err
 	}

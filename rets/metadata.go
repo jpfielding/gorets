@@ -1,6 +1,7 @@
 package rets
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"net/url"
@@ -8,10 +9,17 @@ import (
 	"context"
 )
 
+// MetadataParams for the request
+type MetadataParams struct {
+	Format, MType, ID string
+}
+
 // MetadataRequest ...
 type MetadataRequest struct {
 	// RETS request options
-	URL, HTTPMethod, Format, MType, ID string
+	URL, HTTPMethod       string
+	HTTPFormEncodedValues bool // POST style http params
+	MetadataParams
 }
 
 // PrepMetadataRequest creates an http.Request from a MetadataRequest
@@ -31,22 +39,27 @@ func PrepMetadataRequest(r MetadataRequest) (*http.Request, error) {
 		method = r.HTTPMethod
 	}
 
+	// http POST style params
+	if r.HTTPFormEncodedValues {
+		req, err := http.NewRequest(method, url.String(), bytes.NewBufferString(values.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		return req, err
+	}
 	url.RawQuery = values.Encode()
-
 	return http.NewRequest(method, url.String(), nil)
 }
 
-// MetadataStream ...
-// TODO just return the http.Response and let the consumer wrap it for decoding
-func MetadataStream(ctx context.Context, requester Requester, r MetadataRequest) (io.ReadCloser, error) {
+// MetadataResponse processes the request... TOOD may no longer be necessary
+func MetadataResponse(ctx context.Context, requester Requester, r MetadataRequest) (*http.Response, error) {
 	req, err := PrepMetadataRequest(r)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := requester(ctx, req)
-	if err != nil {
-		return nil, err
-	}
+	return requester(ctx, req)
+}
+
+// MetadataStream encodes the http response stream for us
+func MetadataStream(resp *http.Response, err error) (io.ReadCloser, error) {
 	return DefaultReEncodeReader(resp.Body, resp.Header.Get(ContentType)), nil
 }

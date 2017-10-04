@@ -9,7 +9,7 @@ import (
 // GetCompactMetadata ...
 func GetCompactMetadata(ctx context.Context, requester Requester, r MetadataRequest) (*CompactMetadata, error) {
 	r.Format = "COMPACT"
-	body, err := MetadataStream(ctx, requester, r)
+	body, err := MetadataStream(MetadataResponse(ctx, requester, r))
 	if err != nil {
 		return nil, err
 	}

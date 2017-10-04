@@ -61,7 +61,7 @@ func getObjects(cmd *cobra.Command, args []string) {
 	// feedback
 	fmt.Println("GetObject: ", capability.GetObject)
 	// warning, this does _all_ of the photos
-	response, err := rets.GetObjects(ctx, session, rets.GetObjectRequest{
+	gor, err := rets.GetObjects(ctx, session, rets.GetObjectRequest{
 		URL: capability.GetObject,
 		GetObjectParams: rets.GetObjectParams{
 			Resource: params.Resource,
@@ -70,6 +70,7 @@ func getObjects(cmd *cobra.Command, args []string) {
 		},
 	})
 	handleError(getObjects, err)
+	response := &rets.GetObjectResponse{Response: gor}
 	defer response.Close()
 	err = response.ForEach(func(o *rets.Object, err error) error {
 		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))

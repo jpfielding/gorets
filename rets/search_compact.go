@@ -10,16 +10,16 @@ import (
 	"context"
 )
 
-// SearchCompact if you set the wrong request Format you will get nothing back
+// SearchCompact wraps up most of the intermediate steps
 func SearchCompact(ctx context.Context, requester Requester, r SearchRequest) (*CompactSearchResult, error) {
-	body, err := SearchStream(ctx, requester, r)
+	body, err := SearchStream(SearchResponse(ctx, requester, r))
 	if err != nil {
 		return nil, err
 	}
 	return NewCompactSearchResult(body)
 }
 
-// CompactSearchResult ...
+// CompactSearchResult provides processing given the components from the search
 type CompactSearchResult struct {
 	Response  Response
 	Count     int

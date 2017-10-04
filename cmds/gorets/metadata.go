@@ -54,13 +54,15 @@ func metadata(cmd *cobra.Command, args []string) {
 	handleError(metadata, err)
 
 	defer rets.Logout(ctx, session, rets.LogoutRequest{URL: capability.Logout})
-
-	reader, err := rets.MetadataStream(ctx, session, rets.MetadataRequest{
-		URL:    capability.GetMetadata,
+	mp := rets.MetadataParams{
 		Format: params.Format,
 		MType:  params.MType,
 		ID:     params.ID,
-	})
+	}
+	reader, err := rets.MetadataStream(rets.MetadataResponse(ctx, session, rets.MetadataRequest{
+		URL:            capability.GetMetadata,
+		MetadataParams: mp,
+	}))
 	defer reader.Close()
 	handleError(metadata, err)
 

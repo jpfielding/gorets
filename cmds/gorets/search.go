@@ -44,7 +44,6 @@ func search(cmd *cobra.Command, args []string) {
 	err = LoadFrom(searchFile, &params)
 	handleError(search, err)
 
-	// should we throw an err here too?
 	session, err := connect.Initialize()
 	handleError(search, err)
 

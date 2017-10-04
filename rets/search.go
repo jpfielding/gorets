@@ -33,8 +33,6 @@ type SearchParams struct {
 	SearchType, // Property
 	Class string // Residential
 
-	HTTPFormEncodedValues bool // POST style http params
-
 	Format, // 7.4.2 COMPACT | COMPACT-DECODED | STANDARD-XML | STANDARD-XML:dtd-version
 	Select string
 
@@ -59,6 +57,7 @@ type SearchParams struct {
 type SearchRequest struct {
 	URL,
 	HTTPMethod string
+	HTTPFormEncodedValues bool // POST style http params
 
 	SearchParams
 }
@@ -117,15 +116,17 @@ func PrepSearchRequest(r SearchRequest) (*http.Request, error) {
 	return http.NewRequest(method, url.String(), nil)
 }
 
-// SearchStream returns the raw stream from the RETS server response
-// TODO just return the http.Response and let the consumer wrap it for decoding
-func SearchStream(ctx context.Context, requester Requester, r SearchRequest) (io.ReadCloser, error) {
+// SearchResponse returns the raw stream from the RETS server response
+func SearchResponse(ctx context.Context, requester Requester, r SearchRequest) (*http.Response, error) {
 	req, err := PrepSearchRequest(r)
 	if err != nil {
 		return nil, err
 	}
+	return requester(ctx, req)
+}
 
-	resp, err := requester(ctx, req)
+// SearchStream wraps the body with proper content decoding given the content type or char encoding
+func SearchStream(resp *http.Response, err error) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
