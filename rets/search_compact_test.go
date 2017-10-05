@@ -134,7 +134,7 @@ func TestSearchCompactParseSearchQuit(t *testing.T) {
 	rowsFound := 0
 	cr.ForEach(func(data Row, err error) error {
 		if err != nil {
-			assert.Equal(t, strings.Contains(err.Error(), "EOF"), "found something not eof")
+			assert.Equal(t, true, strings.Contains(err.Error(), "EOF"), "found something not eof")
 			return err
 		}
 		assert.Equal(t, "1,2,3,4,,6", strings.Join(data, ","))
@@ -150,13 +150,13 @@ func TestSearchCompactParseCompact(t *testing.T) {
 	cr, err := NewCompactSearchResult(body)
 	assert.Nil(t, err)
 
-	assert.Equal(t, StatusOK == cr.Response.Code, "bad code")
-	assert.Equal(t, "V2.7.0 2315: Success" == cr.Response.Text, "bad text")
+	assert.Equal(t, StatusOK, cr.Response.Code, "bad code")
+	assert.Equal(t, "V2.7.0 2315: Success", cr.Response.Text, "bad text")
 
-	assert.Equal(t, 10 == int(cr.Count), "bad count")
-	assert.Equal(t, 6 == len(cr.Columns), "bad header count")
+	assert.Equal(t, 10, int(cr.Count), "bad count")
+	assert.Equal(t, 6, len(cr.Columns), "bad header count")
 
-	assert.Equal(t, "A,B,C,D,E,F" == strings.Join(cr.Columns, ","), "bad headers")
+	assert.Equal(t, "A,B,C,D,E,F", strings.Join(cr.Columns, ","), "bad headers")
 
 	counter := 0
 	maxRows, err := cr.ForEach(func(row Row, err error) error {
@@ -172,7 +172,7 @@ func TestSearchCompactParseCompact(t *testing.T) {
 	})
 	assert.Nil(t, err)
 
-	assert.Equal(t, 8 == counter, "bad count")
-	assert.Equal(t, maxRows, "bad max rows")
+	assert.Equal(t, 8, counter, "bad count")
+	assert.Equal(t, true, maxRows, "bad max rows")
 
 }
