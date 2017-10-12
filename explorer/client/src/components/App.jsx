@@ -16,9 +16,14 @@ export default class App extends React.Component {
       selected: {},
       connectionAutocompleteField: '',
     };
+    this.updateConnectionList = this.updateConnectionList.bind(this);
   }
 
   componentDidMount() {
+    this.updateConnectionList();
+  }
+
+  updateConnectionList() {
     ConnectionService
       .getConnectionList()
       .then(res => res.json())
@@ -45,7 +50,7 @@ export default class App extends React.Component {
               name: 'connections autocomplete',
               id: 'connections-autocomplete',
             }}
-            items={this.state.connections}
+            items={(this.state.connections == null ? [] : this.state.connections)}
             shouldItemRender={(item, value) =>
               (item.id.toLowerCase().indexOf(value.toLowerCase()) !== -1)
             }
@@ -79,7 +84,7 @@ export default class App extends React.Component {
               (<Tab>{id}</Tab>)
             )}
           </TabList>
-          <TabPanel><Connections /></TabPanel>
+          <TabPanel><Connections updateCallback={this.updateConnectionList} /></TabPanel>
           {Object.keys(this.state.active).map(id =>
             (<TabPanel>{this.state.active[id]}</TabPanel>)
           )}

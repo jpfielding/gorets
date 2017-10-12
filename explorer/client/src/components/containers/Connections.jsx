@@ -5,13 +5,20 @@ import PasswordForm from 'components/utils/PasswordForm';
 
 export default class Connections extends React.Component {
 
+  static propTypes = {
+    updateCallback: React.PropTypes.Func,
+  }
+
   constructor(props) {
     super(props);
     const formValue = createValue({
       value: null,
       onChange: this.onChange.bind(this),
     });
-    this.state = { formValue };
+    this.state = {
+      formValue,
+    };
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
   onChange(formValue) {
@@ -24,6 +31,7 @@ export default class Connections extends React.Component {
       .login(this.state.formValue.value)
       .then(response => {
         console.log(response);
+        this.props.updateCallback();
       }).catch((err) => {
         console.error(err);
       });
@@ -32,9 +40,14 @@ export default class Connections extends React.Component {
   render() {
     return (
       <div className="pa2">
-        <h1 className="f4">Add a connection</h1>
+        <h1 className="f4 tc">Add a connection</h1>
         <div className="flex flex-row justify-center">
-          <div className="w-60">
+          <div
+            style={{
+              border: '1px solid black',
+              padding: '20px',
+            }}
+          >
             <Fieldset formValue={this.state.formValue}>
               <Field select="url" label="Login URL" />
               <Field select="username" label="Username" />
@@ -43,7 +56,12 @@ export default class Connections extends React.Component {
               <Field select="user-agent-pw" label="User Agent Password" Input={PasswordForm} />
               <Field select="rets-version" label="Protocol Version" />
               <Field select="id" label="Custom RETs Name" />
-              <button onClick={this.onSubmit}>Submit</button>
+              <button
+                onClick={this.onSubmit}
+                style={{
+                  margin: '10px 0px',
+                }}
+              >Submit</button>
             </Fieldset>
           </div>
         </div>
