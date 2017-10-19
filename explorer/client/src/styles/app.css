@@ -56,3 +56,61 @@ a {
 .form-control.input-sm {
   width: 100%;
 }
+
+.titleInput input{
+    color:white;
+    background-color: transparent;
+    border:none;
+    border-bottom: 1px solid white;
+    padding: 4px;
+    width: inherit;
+    &::placeholder {
+      color:white;
+    }
+    &:hover{
+      background-color: rgba(255, 2555, 255, 0.3);
+    }
+    &:focus{
+      outline: none;
+    }
+}
+
+.titleInput div{
+    width: inherit;
+}
+
+.customTabElement {
+  color: var(--textColor);
+  & .customTabBar{
+    padding: 0px 5px;
+    position: relative;
+    background-color: var(--mainBackground);
+    height: 30px;
+    & button{
+      position: relative;
+      bottom: -1px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      height:inherit;
+      margin: 0px 5px;
+      padding: 0px 10px;
+      z-index: 5;
+      &.active{
+        background-color: var(--mainBackground);
+        border-color: var(--textColor);
+      }
+      &:focus{
+        outline:none;
+        color: red;
+      }
+    }
+  }
+  & .customTab{
+    padding:5px;
+    border-top: 1px solid var(--textColor);
+    position: relative;
+  }
+}

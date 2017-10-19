@@ -43,39 +43,49 @@ export default class App extends React.Component {
           >
             RETS Explorer
           </Link>
-          <Autocomplete
-            value={this.state.connectionAutocompleteField}
-            inputProps={{
-              placeholder: 'Available connections',
-              name: 'connections autocomplete',
-              id: 'connections-autocomplete',
+          <div
+            style={{
+              position: 'relative',
+              zIndex: '10',
+              display: 'inline-block',
+              width: '400px',
             }}
-            items={(this.state.connections == null ? [] : this.state.connections)}
-            shouldItemRender={(item, value) =>
-              (item.id.toLowerCase().indexOf(value.toLowerCase()) !== -1)
-            }
-            onChange={(event, value) => this.setState({ connectionAutocompleteField: value })}
-            onSelect={(value, connection) => {
-              console.log('selected', value);
-              const { active } = this.state;
-              active[connection.id] = (<Server connection={connection} />);
-              this.setState({
-                connectionAutocompleteField: '',
-                selected: connection,
-                active,
-              });
-            }}
-            sortItems={(a, b) => (a.id.toLowerCase() <= b.id.toLowerCase() ? -1 : 1)}
-            getItemValue={(item) => item.id}
-            renderItem={(item, isHighlighted) => (
-              <div
-                style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
-                key={item.id}
-              >
-                {item.id}
-              </div>
-            )}
-          />
+            className="titleInput"
+          >
+            <Autocomplete
+              value={this.state.connectionAutocompleteField}
+              inputProps={{
+                placeholder: 'Available connections',
+                name: 'connections autocomplete',
+                id: 'connections-autocomplete',
+              }}
+              items={(this.state.connections == null ? [] : this.state.connections)}
+              shouldItemRender={(item, value) =>
+                (item.id.toLowerCase().indexOf(value.toLowerCase()) !== -1)
+              }
+              onChange={(event, value) => this.setState({ connectionAutocompleteField: value })}
+              onSelect={(value, connection) => {
+                console.log('selected', value);
+                const { active } = this.state;
+                active[connection.id] = (<Server connection={connection} />);
+                this.setState({
+                  connectionAutocompleteField: '',
+                  selected: connection,
+                  active,
+                });
+              }}
+              sortItems={(a, b) => (a.id.toLowerCase() <= b.id.toLowerCase() ? -1 : 1)}
+              getItemValue={(item) => item.id}
+              renderItem={(item, isHighlighted) => (
+                <div
+                  style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
+                  key={item.id}
+                >
+                  {item.id}
+                </div>
+              )}
+            />
+          </div>
         </nav>
         <Tabs>
           <TabList>

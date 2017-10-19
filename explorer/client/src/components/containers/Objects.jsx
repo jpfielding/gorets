@@ -186,6 +186,12 @@ class Objects extends React.Component {
             <Field select="ids" label="IDs">
               <Input className="w-30" />
             </Field>
+            <Field select="type" label="Type">
+              <Input className="w-30" />
+            </Field>
+            <Field select="location" label="Location">
+              <Input className="w-30" />
+            </Field>
           </Fieldset>
         </div>
         <div>

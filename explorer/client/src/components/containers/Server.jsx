@@ -1,11 +1,11 @@
 import React from 'react';
 import { withRouter } from 'react-router';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import Metadata from 'components/containers/Metadata';
 import Search from 'components/containers/Search';
 import Objects from 'components/containers/Objects';
 import StorageCache from 'util/StorageCache';
 import MetadataService from 'services/MetadataService';
+import TabSection from 'components/containers/TabSection';
 
 class Server extends React.Component {
 
@@ -36,6 +36,7 @@ class Server extends React.Component {
         fields: [],
         data: [],
       },
+      tab: 0,
     };
     this.getMetadata = this.getMetadata.bind(this);
     this.onMetadataSelected = this.onMetadataSelected.bind(this);
@@ -119,28 +120,23 @@ class Server extends React.Component {
 
   render() {
     return (
-      <Tabs>
-        <TabList>
-          <Tab>Metadata</Tab>
-          <Tab>Search</Tab>
-          <Tab>Objects</Tab>
-        </TabList>
-        <TabPanel>
+      <TabSection
+        names={['Metadata', 'Search', 'Object']}
+        components={[
           <Metadata
             shared={this.state.shared}
             onRowsSelected={this.onMetadataSelected}
             onRowsDeselected={this.onMetadataDeselected}
             onClassSelected={this.onClassSelected}
-          />
-        </TabPanel>
-        <TabPanel>
+          />,
           <Search
             shared={this.state.shared}
             onRowsSelected={this.onDataSelected}
             onRowsDeselected={this.onDataDeselected}
-          /></TabPanel>
-        <TabPanel><Objects shared={this.state.shared} /></TabPanel>
-      </Tabs>
+          />,
+          <Objects shared={this.state.shared} />,
+        ]}
+      />
     );
   }
 }

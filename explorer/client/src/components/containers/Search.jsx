@@ -6,6 +6,7 @@ import some from 'lodash/some';
 import ReactDataGrid from 'react-data-grid';
 import MetadataService from 'services/MetadataService';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
+import HistoryElement from 'components/containers/HistoryElement';
 
 class Search extends React.Component {
 
@@ -42,17 +43,6 @@ class Search extends React.Component {
       onChange: this.searchInputsChange.bind(this),
     });
 
-    if (props.shared.class['METADATA-TABLE']) {
-      searchForm.value.select = props.shared.fields.map(i => i.row.SystemName).join(',');
-      const ts = props.shared.class['METADATA-TABLE'].Field.filter(f => f.StandardName === 'ModificationTimestamp');
-      console.log('last modified fields:', ts);
-      if (ts.length > 0) {
-        const field = ts[0].SystemName.trim();
-        const date = JSON.stringify(new Date());
-        const day = date.substring(1, 12);
-        searchForm.value.query = `(${field}=${day}00:00:00+)`;
-      }
-    }
     this.state = {
       searchParams: SearchService.params,
       searchForm,
@@ -61,11 +51,15 @@ class Search extends React.Component {
       searchResultColumns: [],
       searchResultRows: [],
       selectedIndexes: [],
+      searching: false,
+      errorOut: '',
     };
+
     this.search = this.search.bind(this);
     this.onRowsSelected = this.onRowsSelected.bind(this);
     this.onRowsDeselected = this.onRowsDeselected.bind(this);
     this.submitSearchForm = this.submitSearchForm.bind(this);
+    this.getRowAt = this.getRowAt.bind(this);
   }
 
   componentWillMount() {
@@ -82,12 +76,47 @@ class Search extends React.Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.shared.class['METADATA-TABLE']) {
+      const ClassName = nextProps.shared.class.ClassName;
+      const ResourceID = nextProps.shared.resource.ResourceID;
+      const select = nextProps.shared.fields.map(i => i.row.SystemName).join(',');
+      const ts = nextProps.shared.class['METADATA-TABLE'].Field.filter(f => f.StandardName === 'ModificationTimestamp');
+      console.log('last modified fields:', ts);
+      let query = null;
+      if (ts.length > 0) {
+        const field = ts[0].SystemName.trim();
+        const date = JSON.stringify(new Date());
+        const day = date.substring(1, 12);
+        const query = `(${field}=${day}00:00:00+)`;
+      }
+      const searchForm = createValue({
+        value: {
+          resource: ResourceID,
+          class: ClassName,
+          select: select,
+          query: query,
+        },
+        onChange: this.searchInputsChange.bind(this),
+      });
+      this.setState({ searchForm });
+    }
+  }
+
+
   onRowsSelected(rows) {
     this.props.onRowsSelected(rows);
   }
 
   onRowsDeselected(rows) {
     this.props.onRowsDeselected(rows);
+  }
+
+  getRowAt(index) {
+    if (index < 0) {
+      return undefined;
+    }
+    return this.state.searchResultRows[index];
   }
 
   searchInputsChange(searchForm) {
@@ -98,6 +127,7 @@ class Search extends React.Component {
     // Search Results table setup
     const { searchResults } = this.state;
     if (!searchResults.result || !searchResults.result.columns) {
+      this.setState({ errorOut: 'No Results Found' });
       return;
     }
     console.log('setting search state');
@@ -135,6 +165,7 @@ class Search extends React.Component {
       searchHistory,
       searchForm,
     });
+    this.setState({ searching: true, errorOut: '' });
     console.log('source id:', searchParams.id);
     if (searchParams === Search.emptySearch) {
       return;
@@ -154,6 +185,7 @@ class Search extends React.Component {
           searchHistory,
         });
         this.applySearchState();
+        this.setState({ searching: false });
       });
   }
 
@@ -162,11 +194,10 @@ class Search extends React.Component {
     if (searchResultRows.length === 0 || searchResultColumns.length === 0) {
       return null;
     }
-    const rowGetter = (i) => searchResultRows[i];
     return (
       <ReactDataGrid
         columns={searchResultColumns}
-        rowGetter={rowGetter}
+        rowGetter={this.getRowAt}
         rowsCount={searchResultRows.length}
         rowSelection={{
           showCheckbox: true,
@@ -184,19 +215,18 @@ class Search extends React.Component {
   render() {
     return (
       <div>
-        <div className="fl h-100-ns w-100 w-20-ns pa3 overflow-x-scroll nowrap">
+        <div className="fl h-100-ns w-100 w-20-ns pa3 overflow-x-scroll">
           <div className="b">Current Search Params</div>
-          <pre className="f6 code">{JSON.stringify(this.state.searchParams, null, '  ')}</pre>
+          <HistoryElement params={this.state.searchParams} />
           <div className="b">Search History</div>
           <ul className="pa0 ma0 no-list-style">
             {this.state.searchHistory.map(params =>
               <li>
-                <pre
+                <HistoryElement
                   className="f6 code clickable"
                   onClick={() => this.search(params)}
-                >
-                  { JSON.stringify(params, null, '  ') }
-                </pre>
+                  params={params}
+                />
               </li>
             )}
           </ul>
@@ -216,12 +246,15 @@ class Search extends React.Component {
               <Field select="query" label="Query">
                 <Input className="w-80" />
               </Field>
-              <button onClick={this.submitSearchForm}>Submit</button>
+              <button onClick={this.submitSearchForm} disabled={this.state.searching} >Submit</button>
             </Fieldset>
           </div>
           <div>
             <div className="b mb2">
                 Search Results: {this.state.searchResults.error ? (`${this.state.searchResults.error}`) : ''}
+            </div>
+            <div className={`bg-dark-red white br1 pa2 ${this.state.errorOut.length === 0 ? 'dn' : 'dib'}`}>
+              {this.state.errorOut}
             </div>
             {this.renderSearchResultsTable()}
           </div>

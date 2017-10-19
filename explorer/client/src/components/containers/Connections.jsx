@@ -56,12 +56,7 @@ export default class Connections extends React.Component {
               <Field select="user-agent-pw" label="User Agent Password" Input={PasswordForm} />
               <Field select="rets-version" label="Protocol Version" />
               <Field select="id" label="Custom RETs Name" />
-              <button
-                onClick={this.onSubmit}
-                style={{
-                  margin: '10px 0px',
-                }}
-              >Submit</button>
+              <button onClick={this.onSubmit} className="ma2 ba black bg-transparent b--black">Submit</button>
             </Fieldset>
           </div>
         </div>
