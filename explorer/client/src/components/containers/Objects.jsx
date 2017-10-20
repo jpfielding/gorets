@@ -8,7 +8,7 @@ import { Fieldset, Field, createValue, Input } from 'react-forms';
 class Objects extends React.Component {
 
   static propTypes = {
-    connection: React.PropTypes.any,
+    shared: React.PropTypes.any,
     metadata: React.PropTypes.any,
     router: React.PropTypes.any,
     location: React.PropTypes.any,
@@ -18,8 +18,7 @@ class Objects extends React.Component {
     super(props);
     const objectsForm = createValue({
       value: {
-        resource: 'Property',
-        type: 'Photo',
+        resource: "",
       },
       onChange: this.searchInputsChange.bind(this),
     });
@@ -28,8 +27,10 @@ class Objects extends React.Component {
       objectsForm,
       objectsHistory: [],
       objects: {},
+      errorOut: '',
     };
     this.getObjects = this.getObjects.bind(this);
+    this.getObjectsByType = this.getObjectsByType.bind(this);
   }
 
   // componentWillMount() {
@@ -38,10 +39,29 @@ class Objects extends React.Component {
   //   });
   // }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.shared.class['METADATA-TABLE']) {
+      const resource = nextProps.shared.resource.ResourceID;
+      const ids = this.state.objectsForm.value.ids;
+      const objectsForm = createValue({
+        value: { resource, ids },
+        onChange: this.searchInputsChange.bind(this)
+      });
+      this.setState({ objectsForm });
+    }
+  }
+
+  getObjectsByType(type) {
+    const id = this.props.shared.connection.id;
+    const { resource, ids } = this.state.objectsForm.value;
+    const location = 1;
+    this.setState({ objectsParams: { resource, type, ids, id, location } }, this.getObjects);
+  }
+
   getObjects() {
-    const ock = `${this.props.connection.id}-search-history`;
+    const ock = `${this.props.shared.connection.id}-search-history`;
     const objectsHistory = StorageCache.getFromCache(ock) || [];
-    const { objectsParams } = this.state;
+    const objectsParams = this.state.objectsParams;
     if (!objectsParams.ids) {
       return;
     }
@@ -49,16 +69,15 @@ class Objects extends React.Component {
         // avoiding other lint issues
         i => [i, '*'].join(':')
     ).join(',');
-
     ObjectsService
       .getObjects({
-        id: this.props.connection.id,
+        id: this.props.shared.connection.id,
         resource: objectsParams.resource,
         type: objectsParams.type,
         objectid: contentId,
       })
       .then((res) => res.json())
-      .then(json => {
+      .then((json) => {
         if (!some(objectsHistory, objectsParams)) {
           objectsHistory.unshift(objectsParams);
           StorageCache.putInCache(ock, objectsHistory, 720);
@@ -71,13 +90,15 @@ class Objects extends React.Component {
   }
 
   getObjectTypes() {
-    if (!this.state.searchParams) {
+    if (!this.state.objectsForm) {
       return [];
     }
     const r = this.getResource();
-    if (r == null) {
+    if (r == null || !r['METADATA-OBJECT']['Object'] ) {
+      this.state.errorOut = `No Object Types found for ${this.state.objectsForm.value.resource}` ;
       return [];
     }
+    this.state.errorOut = ""
     return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
   }
 
@@ -92,11 +113,11 @@ class Objects extends React.Component {
   }
 
   getResource() {
-    if (!this.state.searchParams) {
+    if (!this.state.objectsForm) {
       return [];
     }
-    const rs = this.props.metadata.System['METADATA-RESOURCE'].Resource.filter(
-      r => (r.ResourceID === this.state.searchParams.resource)
+    const rs = this.props.shared.metadata.System['METADATA-RESOURCE'].Resource.filter(
+      r => (r.ResourceID === this.state.objectsForm.value.resource)
     );
     if (rs.length === 0) {
       return null;
@@ -186,34 +207,36 @@ class Objects extends React.Component {
             <Field select="ids" label="IDs">
               <Input className="w-30" />
             </Field>
-            <Field select="type" label="Type">
-              <Input className="w-30" />
-            </Field>
-            <Field select="location" label="Location">
-              <Input className="w-30" />
-            </Field>
           </Fieldset>
-        </div>
-        <div>
-          {this.getObjectTypes().map(type =>
-            <button onClick={() => this.getObjects(type)}>{type}</button>
-          )}
-        </div>
-        <div>
-          <ul>
-            {hasResult
-              ? (
-                objects.result['Objects'].map(obj =>
-                  this.renderPicture(obj)
+          <div>
+            {this.getObjectTypes().map(type =>
+              <button
+                className="ba black bg-transparent b--black"
+                onClick={() => this.getObjectsByType(type)}
+              >
+                {type}
+              </button>
+            )}
+          </div>
+          <div className={`bg-dark-red white br1 pa2 ${this.state.errorOut.length === 0 ? 'dn' : 'dib'}`}>
+            {this.state.errorOut}
+          </div>
+          <div>
+            <ul>
+              {hasResult
+                ? (
+                  objects.result['Objects'].map(obj =>
+                    this.renderPicture(obj)
+                  )
                 )
-              )
-              : null
-          }
-          </ul>
+                : null
+            }
+            </ul>
+          </div>
+          <pre className="code f6">
+            {JSON.stringify(this.state, null, '  ')}
+          </pre>
         </div>
-        <pre className="code f6">
-          {JSON.stringify(this.state, null, '  ')}
-        </pre>
       </div>
     );
   }

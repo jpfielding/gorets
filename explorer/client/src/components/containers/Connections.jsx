@@ -1,5 +1,5 @@
 import React from 'react';
-import { Fieldset, Field, createValue } from 'react-forms';
+import { Fieldset, Field, createValue, Input } from 'react-forms';
 import ConnectionService from 'services/ConnectionService';
 import PasswordForm from 'components/utils/PasswordForm';
 
@@ -42,21 +42,35 @@ export default class Connections extends React.Component {
       <div className="pa2">
         <h1 className="f4 tc">Add a connection</h1>
         <div className="flex flex-row justify-center">
-          <div
-            style={{
-              border: '1px solid black',
-              padding: '20px',
-            }}
-          >
+          <div className="b--solid w5 ba pa2 tc">
             <Fieldset formValue={this.state.formValue}>
-              <Field select="url" label="Login URL" />
-              <Field select="username" label="Username" />
-              <Field select="password" label="Password" Input={PasswordForm} />
-              <Field select="user-agent" label="User Agent" />
-              <Field select="user-agent-pw" label="User Agent Password" Input={PasswordForm} />
-              <Field select="rets-version" label="Protocol Version" />
-              <Field select="id" label="Custom RETs Name" />
-              <button onClick={this.onSubmit} className="ma2 ba black bg-transparent b--black">Submit</button>
+              <Field select="url" label="Login URL">
+                <Input className="pa1 b--none outline-transparent" />
+              </Field>
+              <Field select="username" label="Username" >
+                <Input className="pa1 b--none outline-transparent" />
+              </Field>
+              <Field select="password" label="Password" Input={PasswordForm} >
+                <Input className="pa1 b--none outline-transparent" />
+              </Field>
+              <Field select="user-agent" label="User Agent" >
+                <Input className="pa1 b--none outline-transparent" />
+              </Field>
+              <Field select="user-agent-pw" label="User Agent Password" Input={PasswordForm} >
+                <Input className="pa1 b--none outline-transparent" />
+              </Field>
+              <Field select="rets-version" label="Protocol Version" >
+                <Input className="pa1 b--none outline-transparent" />
+              </Field>
+              <Field select="id" label="Custom RETs Name" >
+                <Input className="pa1 b--none outline-transparent" />
+              </Field>
+              <button
+                onClick={this.onSubmit}
+                className="ma2 ba black bg-transparent b--black outline-transparent rd-focus"
+              >
+                Submit
+              </button>
             </Fieldset>
           </div>
         </div>

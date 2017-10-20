@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import ConnectionService from 'services/ConnectionService';
 import Autocomplete from 'react-autocomplete';
 import Connections from 'components/containers/Connections';
 import Server from 'components/containers/Server';
+import TabSection from 'components/containers/TabSection';
 
 export default class App extends React.Component {
 
@@ -17,6 +17,8 @@ export default class App extends React.Component {
       connectionAutocompleteField: '',
     };
     this.updateConnectionList = this.updateConnectionList.bind(this);
+    this.createTabList = this.createTabList.bind(this);
+    this.createTabs = this.createTabs.bind(this);
   }
 
   componentDidMount() {
@@ -30,6 +32,18 @@ export default class App extends React.Component {
       .then((json) => {
         this.setState({ connections: json.result.connections });
       });
+  }
+
+  createTabList() {
+    const rtn = ['New Connection'];
+    Object.keys(this.state.active).map(id => (rtn.push(id)));
+    return rtn;
+  }
+
+  createTabs() {
+    const rtn = [<Connections updateCallback={this.updateConnectionList} />];
+    Object.keys(this.state.active).map(id => (rtn.push(this.state.active[id])));
+    return rtn;
   }
 
   render() {
@@ -46,7 +60,7 @@ export default class App extends React.Component {
           <div
             style={{
               position: 'relative',
-              zIndex: '10',
+              zIndex: '100',
               display: 'inline-block',
               width: '400px',
             }}
@@ -87,18 +101,10 @@ export default class App extends React.Component {
             />
           </div>
         </nav>
-        <Tabs>
-          <TabList>
-            <Tab>New Connection</Tab>
-            {Object.keys(this.state.active).map(id =>
-              (<Tab>{id}</Tab>)
-            )}
-          </TabList>
-          <TabPanel><Connections updateCallback={this.updateConnectionList} /></TabPanel>
-          {Object.keys(this.state.active).map(id =>
-            (<TabPanel>{this.state.active[id]}</TabPanel>)
-          )}
-        </Tabs>
+        <TabSection
+          names={this.createTabList()}
+          components={this.createTabs()}
+        />
       </div>
     );
   }

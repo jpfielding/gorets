@@ -38,7 +38,7 @@ class Search extends React.Component {
       value: {
         resource: props.shared.resource.ResourceID,
         class: props.shared.class.ClassName,
-        query: '(TIMESTAMP=2016-11-01T00:00:00+)',
+        query: null,
       },
       onChange: this.searchInputsChange.bind(this),
     });
@@ -79,24 +79,19 @@ class Search extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.shared.class['METADATA-TABLE']) {
       const ClassName = nextProps.shared.class.ClassName;
-      const ResourceID = nextProps.shared.resource.ResourceID;
+      const resource = nextProps.shared.resource.ResourceID;
       const select = nextProps.shared.fields.map(i => i.row.SystemName).join(',');
       const ts = nextProps.shared.class['METADATA-TABLE'].Field.filter(f => f.StandardName === 'ModificationTimestamp');
       console.log('last modified fields:', ts);
-      let query = null;
+      let query = this.state.searchForm.value.query;
       if (ts.length > 0) {
         const field = ts[0].SystemName.trim();
         const date = JSON.stringify(new Date());
         const day = date.substring(1, 12);
-        const query = `(${field}=${day}00:00:00+)`;
+        query = `(${field}=${day}00:00:00+)`;
       }
       const searchForm = createValue({
-        value: {
-          resource: ResourceID,
-          class: ClassName,
-          select: select,
-          query: query,
-        },
+        value: { resource, class: ClassName, select, query },
         onChange: this.searchInputsChange.bind(this),
       });
       this.setState({ searchForm });
@@ -200,7 +195,7 @@ class Search extends React.Component {
         rowGetter={this.getRowAt}
         rowsCount={searchResultRows.length}
         rowSelection={{
-          showCheckbox: true,
+          showCheckbox: false,
           enableShiftSelect: true,
           onRowsSelected: this.onRowsSelected,
           onRowsDeselected: this.onRowsDeselected,
@@ -235,18 +230,24 @@ class Search extends React.Component {
           <div>
             <Fieldset formValue={this.state.searchForm}>
               <Field select="resource" label="Resource">
-                <Input className="w-30" />
+                <Input className="w-30 pa1 b--none outline-transparent" />
               </Field>
               <Field select="class" label="Class">
-                <Input className="w-30" />
+                <Input className="w-30 pa1 b--none outline-transparent" />
               </Field>
               <Field select="select" label="Columns">
-                <Input className="w-80" />
+                <Input className="w-80 pa1 b--none outline-transparent" />
               </Field>
               <Field select="query" label="Query">
-                <Input className="w-80" />
+                <Input className="w-80 pa1 b--none outline-transparent" />
               </Field>
-              <button onClick={this.submitSearchForm} disabled={this.state.searching} >Submit</button>
+              <button
+                onClick={this.submitSearchForm}
+                disabled={this.state.searching}
+                className="ba black bg-transparent b--black"
+              >
+                Submit
+              </button>
             </Fieldset>
           </div>
           <div>
