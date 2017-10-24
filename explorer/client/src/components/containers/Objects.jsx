@@ -4,6 +4,7 @@ import some from 'lodash/some';
 import ObjectsService from 'services/ObjectsService';
 import StorageCache from 'util/StorageCache';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
+import ObjectHistory from 'components/containers/ObjectHistory';
 
 class Objects extends React.Component {
 
@@ -17,9 +18,7 @@ class Objects extends React.Component {
   constructor(props) {
     super(props);
     const objectsForm = createValue({
-      value: {
-        resource: "",
-      },
+      value: {},
       onChange: this.searchInputsChange.bind(this),
     });
     this.state = {
@@ -45,7 +44,7 @@ class Objects extends React.Component {
       const ids = this.state.objectsForm.value.ids;
       const objectsForm = createValue({
         value: { resource, ids },
-        onChange: this.searchInputsChange.bind(this)
+        onChange: this.searchInputsChange.bind(this),
       });
       this.setState({ objectsForm });
     }
@@ -66,8 +65,12 @@ class Objects extends React.Component {
       return;
     }
     const contentId = objectsParams.ids.split(',').map(
-        // avoiding other lint issues
-        i => [i, '*'].join(':')
+      (i) => {
+        if (i.indexOf(':') > -1) {
+          return i;
+        }
+        return [i, '*'].join(':');
+      }
     ).join(',');
     ObjectsService
       .getObjects({
@@ -94,11 +97,11 @@ class Objects extends React.Component {
       return [];
     }
     const r = this.getResource();
-    if (r == null || !r['METADATA-OBJECT']['Object'] ) {
-      this.state.errorOut = `No Object Types found for ${this.state.objectsForm.value.resource}` ;
+    if (r == null || !r['METADATA-OBJECT']['Object']) {
+      this.state.errorOut = `No Object Types found for ${this.state.objectsForm.value.resource}`;
       return [];
     }
-    this.state.errorOut = ""
+    this.state.errorOut = '';
     return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
   }
 
@@ -175,10 +178,10 @@ class Objects extends React.Component {
     const { objects } = this.state;
     const hasResult = (objects.result && objects.result['Objects'].length > 0);
     return (
-      <div className="pa2">
+      <div className="flex">
         <div className="fl h-100-ns w-100 w-20-ns pa3 overflow-x-scroll nowrap">
           <div className="b">Current Object Params</div>
-          <pre className="f6 code">{JSON.stringify(this.state.objectsParams, null, '  ')}</pre>
+          <ObjectHistory params={this.state.objectsParams} />
           <div className="b">Objects History</div>
           <ul className="pa0 ma0 no-list-style">
             {this.state.objectsHistory.map(params =>
@@ -202,16 +205,16 @@ class Objects extends React.Component {
         <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
           <Fieldset formValue={this.state.objectsForm}>
             <Field select="resource" label="Resource">
-              <Input className="w-30" />
+              <Input className="w-30 pa1 b--none outline-transparent" />
             </Field>
             <Field select="ids" label="IDs">
-              <Input className="w-30" />
+              <Input className="w-30 pa1 b--none outline-transparent" />
             </Field>
           </Fieldset>
-          <div>
+          <div className="pt2">
             {this.getObjectTypes().map(type =>
               <button
-                className="ba black bg-transparent b--black"
+                className="ba black bg-transparent b--black mr1"
                 onClick={() => this.getObjectsByType(type)}
               >
                 {type}
@@ -233,9 +236,6 @@ class Objects extends React.Component {
             }
             </ul>
           </div>
-          <pre className="code f6">
-            {JSON.stringify(this.state, null, '  ')}
-          </pre>
         </div>
       </div>
     );

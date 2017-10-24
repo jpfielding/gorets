@@ -209,16 +209,20 @@ class Search extends React.Component {
 
   render() {
     return (
-      <div>
-        <div className="fl h-100-ns w-100 w-20-ns pa3 overflow-x-scroll">
+      <div className="min-vh-100 flex">
+        <div className="fl w-100 w-20-ns pa3 overflow-x-scroll">
           <div className="b">Current Search Params</div>
-          <HistoryElement params={this.state.searchParams} />
+          <HistoryElement
+            className="clickable"
+            onClick={() => this.search(this.state.searchParams)}
+            params={this.state.searchParams}
+          />
           <div className="b">Search History</div>
           <ul className="pa0 ma0 no-list-style">
-            {this.state.searchHistory.map(params =>
+            {this.state.searchHistory.slice(1).map(params =>
               <li>
                 <HistoryElement
-                  className="f6 code clickable"
+                  className="clickable"
                   onClick={() => this.search(params)}
                   params={params}
                 />
@@ -226,8 +230,8 @@ class Search extends React.Component {
             )}
           </ul>
         </div>
-        <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
-          <div>
+        <div className="fl w-100 w-80-ns pa3 bl-ns">
+          <div className="pb3">
             <Fieldset formValue={this.state.searchForm}>
               <Field select="resource" label="Resource">
                 <Input className="w-30 pa1 b--none outline-transparent" />
@@ -244,7 +248,7 @@ class Search extends React.Component {
               <button
                 onClick={this.submitSearchForm}
                 disabled={this.state.searching}
-                className="ba black bg-transparent b--black"
+                className="ba black bg-transparent b--black pa1 mt2"
               >
                 Submit
               </button>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class HistoryElement extends React.Component {
+export default class ObjectHistory extends React.Component {
 
   static propTypes = {
     params: React.PropTypes.any,
@@ -32,13 +32,10 @@ export default class HistoryElement extends React.Component {
           {'Resource - '}<span className="moon-gray">{this.props.params.resource}</span>
         </li>
         <li>
-          {'Class - '}<span className="moon-gray">{this.props.params.class}</span>
+          {'IDS - '}<span className="moon-gray">{this.props.params.ids}</span>
         </li>
         <li>
-          {'Query - '}<span className="moon-gray">{this.props.params.query}</span>
-        </li>
-        <li>
-          {'Select - '}<span className="moon-gray">{this.props.params.select}</span>
+          {'Location - '}<span className="moon-gray">{this.props.params.location}</span>
         </li>
       </ul>
     );

@@ -40,7 +40,7 @@ export default class Connections extends React.Component {
   render() {
     return (
       <div className="pa2">
-        <h1 className="f4 tc">Add a connection</h1>
+        <h1 className="f4 tc nonclickable">Add a connection</h1>
         <div className="flex flex-row justify-center">
           <div className="b--solid w5 ba pa2 tc">
             <Fieldset formValue={this.state.formValue}>
@@ -67,7 +67,7 @@ export default class Connections extends React.Component {
               </Field>
               <button
                 onClick={this.onSubmit}
-                className="ma2 ba black bg-transparent b--black outline-transparent rd-focus"
+                className="ma2 ba black bg-transparent b--black outline-transparent rd-focus clickable"
               >
                 Submit
               </button>

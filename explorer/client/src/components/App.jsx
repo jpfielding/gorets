@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router';
 import ConnectionService from 'services/ConnectionService';
 import Autocomplete from 'react-autocomplete';
 import Connections from 'components/containers/Connections';
@@ -50,13 +49,7 @@ export default class App extends React.Component {
     return (
       <div className="helvetica">
         <nav className="pa3 bg-black">
-          <Link
-            to="/"
-            title="Home"
-            className="link fw2 red b f4 dib mr3"
-          >
-            RETS Explorer
-          </Link>
+          <h1 className=" fw2 red b f4 dib mr3 nonclickable"> RETS Explorer </h1>
           <div
             style={{
               position: 'relative',
@@ -79,7 +72,7 @@ export default class App extends React.Component {
               }
               onChange={(event, value) => this.setState({ connectionAutocompleteField: value })}
               onSelect={(value, connection) => {
-                console.log('selected', value);
+                console.log('Selected', value, 'from Autocomplete');
                 const { active } = this.state;
                 active[connection.id] = (<Server connection={connection} />);
                 this.setState({

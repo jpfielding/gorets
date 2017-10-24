@@ -185,6 +185,7 @@ class Metadata extends React.Component {
             toolbar={<Toolbar enableFilter />}
             onAddFilter={this.handleFilterChange}
             onClearFilters={this.onClearFilters}
+            minHeight={600}
             rowSelection={{
               showCheckbox: true,
               enableShiftSelect: true,
@@ -205,12 +206,12 @@ class Metadata extends React.Component {
     return (
       <div>
         <div className="fl h-100-ns w-100 w-20-ns no-list-style pa3 overflow-x-scroll nowrap">
-          <h1 className="f5" title={system.SystemDescription}>
+          <h1 className="f5 nonclickable" title={system.SystemDescription}>
             {system.SystemID}
           </h1>
-          <ul className="pa0 ma0">
+          <ul className="pa0 ma0 nonclickable">
             {system['METADATA-RESOURCE'].Resource.map((r) =>
-              <li className="mb2">
+              <li className="mb2 nonclickable">
                 <div title={r.Description} className="b">{r.ResourceID}</div>
                 <ul className="pa0 pl3 mv1">
                   {r['METADATA-CLASS'].Class.map((mClass) =>

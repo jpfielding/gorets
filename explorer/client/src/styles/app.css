@@ -33,6 +33,10 @@ body {
   cursor: pointer;
 }
 
+.nonclickable {
+  cursor: default;
+}
+
 .min-vh-100 {
   min-height: 100vh;
 }
@@ -95,6 +99,7 @@ a {
     background-color: var(--mainBackground);
     height: 35px;
     & button{
+      cursor: pointer;
       position: relative;
       bottom: -1px;
       background: transparent;
