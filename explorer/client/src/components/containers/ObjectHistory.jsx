@@ -35,7 +35,7 @@ export default class ObjectHistory extends React.Component {
           {'IDS - '}<span className="moon-gray">{this.props.params.ids}</span>
         </li>
         <li>
-          {'Location - '}<span className="moon-gray">{this.props.params.location}</span>
+          {'Type - '}<span className="moon-gray">{this.props.params.type}</span>
         </li>
       </ul>
     );

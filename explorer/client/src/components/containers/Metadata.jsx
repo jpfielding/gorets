@@ -227,7 +227,7 @@ class Metadata extends React.Component {
             )}
           </ul>
         </div>
-        <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
+        <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns nonclickable">
           { this.state.classRows.length > 0
             ? (
               <div>

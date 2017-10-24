@@ -87,6 +87,7 @@ export default class App extends React.Component {
                 <div
                   style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
                   key={item.id}
+                  className="clickable"
                 >
                   {item.id}
                 </div>

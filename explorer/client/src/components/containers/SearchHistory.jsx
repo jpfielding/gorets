@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class HistoryElement extends React.Component {
+export default class SearchHistory extends React.Component {
 
   static propTypes = {
     params: React.PropTypes.any,
@@ -12,7 +12,7 @@ export default class HistoryElement extends React.Component {
   // }
 
   render() {
-    if (this.props.params == null) {
+    if (this.props.params == null || this.props.params.id == null || this.props.params.resource == null) {
       return <div />;
     }
     return (

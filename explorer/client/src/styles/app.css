@@ -45,6 +45,10 @@ body {
 
 }
 
+.da-effect:disabled {
+  opacity: 0.5;
+}
+
 a {
   outline: 0 !important;
   &:active, &:active, &:focus {
@@ -94,10 +98,10 @@ a {
   color: var(--textColor);
   & .customTabBar{
     padding: 0px 5px;
-    margin-top: 5px;
+    padding-top: 5px;
     position: relative;
     background-color: var(--mainBackground);
-    height: 35px;
+    height: 40px;
     & button{
       cursor: pointer;
       position: relative;
@@ -107,7 +111,7 @@ a {
       border-bottom: none;
       border-top-left-radius: 5px;
       border-top-right-radius: 5px;
-      height: inherit;
+      height: 100%;
       margin: 0px 5px;
       padding: 5px 10px;
       z-index: 5;

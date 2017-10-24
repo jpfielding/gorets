@@ -10,9 +10,6 @@ class Objects extends React.Component {
 
   static propTypes = {
     shared: React.PropTypes.any,
-    metadata: React.PropTypes.any,
-    router: React.PropTypes.any,
-    location: React.PropTypes.any,
   }
 
   constructor(props) {
@@ -26,17 +23,29 @@ class Objects extends React.Component {
       objectsForm,
       objectsHistory: [],
       objects: {},
+      searching: false,
       errorOut: '',
     };
     this.getObjects = this.getObjects.bind(this);
     this.getObjectsByType = this.getObjectsByType.bind(this);
   }
 
-  // componentWillMount() {
-  //   this.setState({
-  //     getParams: this.props.location.query,
-  //   });
-  // }
+  componentWillMount() {
+    // TODO set inital state
+    const ock = `${this.props.shared.connection.id}-search-history`;
+    let objectsHistory = StorageCache.getFromCache(ock) || [];
+    if (objectsHistory && objectsHistory.length > 0) {
+      objectsHistory = objectsHistory.filter((i) => (i.ids));
+    }
+    let objectsParams = null;
+    if (objectsHistory.length > 0) {
+      objectsParams = objectsHistory[0];
+    }
+    this.setState({
+      objectsParams,
+      objectsHistory,
+    });
+  }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.shared.class['METADATA-TABLE']) {
@@ -53,17 +62,30 @@ class Objects extends React.Component {
   getObjectsByType(type) {
     const id = this.props.shared.connection.id;
     const { resource, ids } = this.state.objectsForm.value;
-    const location = 1;
-    this.setState({ objectsParams: { resource, type, ids, id, location } }, this.getObjects);
+    this.setState({ objectsParams: { resource, type, ids, id } }, this.getObjects);
   }
 
   getObjects() {
+    this.setState({ searching: true });
+    const resource = this.state.objectsParams.resource;
+    const type = this.state.objectsParams.type;
+    const id = this.state.objectsParams.id;
+    const ids = this.state.objectsParams.ids;
+
+    const objectsForm = createValue({
+      value: { resource, type, id, ids },
+      onChange: this.searchInputsChange.bind(this),
+    });
+
+    this.setState({ objectsForm });
+
     const ock = `${this.props.shared.connection.id}-search-history`;
     const objectsHistory = StorageCache.getFromCache(ock) || [];
     const objectsParams = this.state.objectsParams;
     if (!objectsParams.ids) {
       return;
     }
+
     const contentId = objectsParams.ids.split(',').map(
       (i) => {
         if (i.indexOf(':') > -1) {
@@ -88,6 +110,7 @@ class Objects extends React.Component {
         console.log(json);
         this.setState({
           objects: json,
+          searching: false,
         });
       });
   }
@@ -179,30 +202,27 @@ class Objects extends React.Component {
     const hasResult = (objects.result && objects.result['Objects'].length > 0);
     return (
       <div className="flex">
-        <div className="fl h-100-ns w-100 w-20-ns pa3 overflow-x-scroll nowrap">
-          <div className="b">Current Object Params</div>
+        <div className="fl w-100 w-20-ns pa3 overflow-x-scroll nowrap">
+          <div className="b nonclickable">Current Object Params</div>
           <ObjectHistory params={this.state.objectsParams} />
-          <div className="b">Objects History</div>
+          <div className="b nonclickable">Objects History</div>
           <ul className="pa0 ma0 no-list-style">
             {this.state.objectsHistory.map(params =>
               <li>
-                <pre
-                  className="f6 code clickable"
+                <ObjectHistory
+                  params={params}
                   onClick={() => {
                     // TODO convert getObjects to accept params directly
                     this.setState({
                       objectsParams: params,
-                    });
-                    this.getObjects();
+                    }, this.getObjects);
                   }}
-                >
-                  { JSON.stringify(params, null, '  ') }
-                </pre>
+                />
               </li>
               )}
           </ul>
         </div>
-        <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns">
+        <div className="fl min-vh-100 w-100 w-80-ns pa3 bl-ns">
           <Fieldset formValue={this.state.objectsForm}>
             <Field select="resource" label="Resource">
               <Input className="w-30 pa1 b--none outline-transparent" />
@@ -214,8 +234,9 @@ class Objects extends React.Component {
           <div className="pt2">
             {this.getObjectTypes().map(type =>
               <button
-                className="ba black bg-transparent b--black mr1"
+                className="ba black bg-transparent b--black mr1 da-effect"
                 onClick={() => this.getObjectsByType(type)}
+                disabled={this.state.searching}
               >
                 {type}
               </button>

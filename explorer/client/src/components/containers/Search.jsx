@@ -6,7 +6,7 @@ import some from 'lodash/some';
 import ReactDataGrid from 'react-data-grid';
 import MetadataService from 'services/MetadataService';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
-import HistoryElement from 'components/containers/HistoryElement';
+import SearchHistory from 'components/containers/SearchHistory';
 
 class Search extends React.Component {
 
@@ -34,6 +34,7 @@ class Search extends React.Component {
 
   constructor(props) {
     super(props);
+
     const searchForm = createValue({
       value: {
         resource: props.shared.resource.ResourceID,
@@ -60,20 +61,11 @@ class Search extends React.Component {
     this.onRowsDeselected = this.onRowsDeselected.bind(this);
     this.submitSearchForm = this.submitSearchForm.bind(this);
     this.getRowAt = this.getRowAt.bind(this);
+    this.setSearchHistory = this.setSearchHistory.bind(this);
   }
 
   componentWillMount() {
-      // search history cache key used for storage
-    const sck = `${this.props.shared.connection.id}-search-history`;
-    const searchHistory = StorageCache.getFromCache(sck) || [];
-    let searchParams = Search.emptySearch;
-    if (searchHistory.length > 0) {
-      searchParams = searchHistory[0];
-    }
-    this.setState({
-      searchParams,
-      searchHistory,
-    });
+    this.setSearchHistory();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -98,7 +90,6 @@ class Search extends React.Component {
     }
   }
 
-
   onRowsSelected(rows) {
     this.props.onRowsSelected(rows);
   }
@@ -112,6 +103,17 @@ class Search extends React.Component {
       return undefined;
     }
     return this.state.searchResultRows[index];
+  }
+
+  setSearchHistory() {
+    const sck = `${this.props.shared.connection.id}-search-history`;
+    let searchHistory = StorageCache.getFromCache(sck) || [];
+    if (searchHistory && searchHistory.length > 0) {
+      searchHistory = searchHistory.filter((i) => (i.query));
+    }
+    this.setState({
+      searchHistory,
+    });
   }
 
   searchInputsChange(searchForm) {
@@ -157,7 +159,6 @@ class Search extends React.Component {
     const searchHistory = StorageCache.getFromCache(sck) || [];
     this.setState({
       searchParams,
-      searchHistory,
       searchForm,
     });
     this.setState({ searching: true, errorOut: '' });
@@ -177,11 +178,12 @@ class Search extends React.Component {
         console.log(json);
         this.setState({
           searchResults: json,
-          searchHistory,
         });
         this.applySearchState();
         this.setState({ searching: false });
+        this.setSearchHistory();
       });
+    this.setSearchHistory();
   }
 
   renderSearchResultsTable() {
@@ -207,29 +209,34 @@ class Search extends React.Component {
     );
   }
 
+  renderHistoryBar() {
+    return (
+      <div className="fl w-100 w-20-ns pa3">
+        <div className="b nonclickable">Current Search Params</div>
+        <SearchHistory
+          onClick={() => this.search(this.state.searchParams)}
+          params={this.state.searchParams}
+        />
+        <div className="b nonclickable">Search History</div>
+        <ul className="pa0 ma0 no-list-style">
+          {this.state.searchHistory.map(params =>
+            <li>
+              <SearchHistory
+                className="clickable"
+                onClick={() => this.search(params)}
+                params={params}
+              />
+            </li>
+          )}
+        </ul>
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className="min-vh-100 flex">
-        <div className="fl w-100 w-20-ns pa3 overflow-x-scroll">
-          <div className="b">Current Search Params</div>
-          <HistoryElement
-            className="clickable"
-            onClick={() => this.search(this.state.searchParams)}
-            params={this.state.searchParams}
-          />
-          <div className="b">Search History</div>
-          <ul className="pa0 ma0 no-list-style">
-            {this.state.searchHistory.slice(1).map(params =>
-              <li>
-                <HistoryElement
-                  className="clickable"
-                  onClick={() => this.search(params)}
-                  params={params}
-                />
-              </li>
-            )}
-          </ul>
-        </div>
+        {this.renderHistoryBar()}
         <div className="fl w-100 w-80-ns pa3 bl-ns">
           <div className="pb3">
             <Fieldset formValue={this.state.searchForm}>
@@ -248,14 +255,14 @@ class Search extends React.Component {
               <button
                 onClick={this.submitSearchForm}
                 disabled={this.state.searching}
-                className="ba black bg-transparent b--black pa1 mt2"
+                className="ba black bg-transparent b--black pa1 mt2 da-effect"
               >
                 Submit
               </button>
             </Fieldset>
           </div>
           <div>
-            <div className="b mb2">
+            <div className="b mb2 nonclickable">
                 Search Results: {this.state.searchResults.error ? (`${this.state.searchResults.error}`) : ''}
             </div>
             <div className={`bg-dark-red white br1 pa2 ${this.state.errorOut.length === 0 ? 'dn' : 'dib'}`}>
