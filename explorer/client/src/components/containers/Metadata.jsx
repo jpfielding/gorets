@@ -204,8 +204,8 @@ class Metadata extends React.Component {
     }
     const system = this.props.shared.metadata.System;
     return (
-      <div>
-        <div className="fl h-100-ns w-100 w-20-ns no-list-style pa3 overflow-x-scroll nowrap">
+      <div className="min-vh-100 flex">
+        <div className="fl w-100 w-20-ns no-list-style pa3 overflow-x-scroll nowrap">
           <h1 className="f5 nonclickable" title={system.SystemDescription}>
             {system.SystemID}
           </h1>
@@ -227,7 +227,7 @@ class Metadata extends React.Component {
             )}
           </ul>
         </div>
-        <div className="fl h-100 min-vh-100 w-100 w-80-ns pa3 bl-ns nonclickable">
+        <div className="fl w-100 w-80-ns pa3 bl-ns nonclickable">
           { this.state.classRows.length > 0
             ? (
               <div>

@@ -5,13 +5,16 @@ export default class TabSection extends React.Component {
   static propTypes={
     names: React.PropTypes.any,
     components: React.PropTypes.any,
+    onRemove: React.PropTypes.Func,
+    enableRemove: React.PropTypes.any,
+    removeOffset: React.PropTypes.any,
   }
 
   constructor(props) {
     super(props);
     this.createTabBar = this.createTabBar.bind(this);
     this.state = {
-      tab: 0,
+      tab: '',
       tabs: [],
     };
     this.createTabBar = this.createTabBar.bind(this);
@@ -19,6 +22,10 @@ export default class TabSection extends React.Component {
     this.createTabs = this.createTabs.bind(this);
     this.moveTab = this.moveTab.bind(this);
     this.handleKeys = this.handleKeys.bind(this);
+  }
+
+  componentWillMount() {
+    this.setState({ tab: this.props.names[0] });
   }
 
   createTabBar() {
@@ -37,8 +44,9 @@ export default class TabSection extends React.Component {
     } else if (newTab > this.state.tabs.length - 1) {
       i = 0;
     }
-    this.setState({ tab: i });
     this.state.tabs[i].focus();
+    const e = this.props.names[i];
+    this.setState({ tab: e });
   }
 
   handleKeys(e, i) {
@@ -50,22 +58,37 @@ export default class TabSection extends React.Component {
   }
 
   createTabTag(e, i) {
+    let close = null;
+    if (this.props.enableRemove && i >= this.props.removeOffset) {
+      close = (
+        <button
+          className="customClose"
+          onClick={() => { this.props.onRemove(e); }}
+        >
+          X
+        </button>
+      );
+    }
     return (
-      <button
-        onClick={() => this.setState({ tab: i })}
-        onKeyDown={(vent) => this.handleKeys(vent, i)}
-        className={`${this.state.tab === i ? 'active' : ''}`}
-        key={e}
-        ref={(input) => { this.state.tabs[i] = input; }}
-      >
-        {e}
-      </button>
+      <div className="customTabSection">
+        <button
+          onClick={() => this.setState({ tab: e })}
+          onKeyDown={(vent) => this.handleKeys(vent, i)}
+          className={`customTabSelect ${this.state.tab === e ? 'active' : ''}`}
+          key={e}
+          ref={(input) => { this.state.tabs[i] = input; }}
+        >
+          {e}
+        </button>
+        {close}
+      </div>
     );
   }
 
   createTabs(e, i) {
+    const name = this.props.names[i];
     return (
-      <div className={`customTab ${this.state.tab === i ? 'db' : 'dn'}`} key={i}>
+      <div className={`customTab ${this.state.tab === name ? 'db' : 'dn'}`} key={name}>
         {e}
       </div>
     );

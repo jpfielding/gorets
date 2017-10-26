@@ -3,7 +3,9 @@
 
 :root {
   --mainBackground: #f1f1f1;
+  --secondaryBackground: #dddddd;
   --textColor: #444;
+  --darkRed: #ff4136;
 }
 
 body {
@@ -102,26 +104,54 @@ a {
     position: relative;
     background-color: var(--mainBackground);
     height: 40px;
-    & button{
-      cursor: pointer;
+    & .customTabSection{
       position: relative;
       bottom: -1px;
-      background: transparent;
-      border: 1px solid transparent;
-      border-bottom: none;
-      border-top-left-radius: 5px;
-      border-top-right-radius: 5px;
       height: 100%;
-      margin: 0px 5px;
-      padding: 5px 10px;
-      z-index: 5;
-      &.active{
-        background-color: var(--mainBackground);
-        border-color: var(--textColor);
+      display: inline-block;
+      & .customTabSelect{
+        cursor: pointer;
+        position: relative;
+        background: transparent;
+        border: 1px solid transparent;
+        border-bottom: none;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        height: 100%;
+        margin: 0px 5px;
+        padding: 5px 20px;
+        z-index: 5;
+        &.active{
+          background-color: var(--mainBackground);
+          border-color: var(--textColor);
+        }
+        &:focus{
+          outline:none;
+          color: var(--darkRed);
+        }
       }
-      &:focus{
-        outline:none;
-        color: #ff4136;
+      & .customClose{
+        position: absolute;
+        right: 1px;
+        height: 75%;
+        width: 30px;
+        border: none;
+        background-color: transparent;
+        color: var(--textColor);
+        font-size: 75%;
+        z-index: 6;
+        opacity: 0;
+        &:focus{
+          outline:none;
+        }
+      }
+      &:hover{
+        & .customClose{
+          opacity: 0.5;
+          &:hover{
+            opacity: 1;
+          }
+        }
       }
     }
   }
@@ -132,6 +162,152 @@ a {
   }
 }
 
+.customCombo {
+  box-sizing:border-box;
+  border: 1px solid var(--textColor);
+  display: table;
+  height: 30px;
+  border-radius: 10px;
+  overflow: hidden;
+  & .customComboButton{
+    background-color: var(--textColor);
+    border: none;
+    border-right: 1px solid var(--textColor);
+    color: var(--mainBackground);
+    box-sizing:border-box;
+    height: 100%;
+    padding: 0px 10px;
+    cursor: pointer;
+    &:focus{
+      outline:none;
+      color:var(--darkRed);
+    }
+    &:active{
+      color: var(--textColor);
+      background-color: transparent;
+    }
+  }
+  & .customComboInput{
+    background-color: transparent;
+    border: none;
+    color: var(--textColor);
+    box-sizing:border-box;
+    height: 100%;
+    padding: 0px 10px;
+    &:focus{
+      outline:none;
+    }
+  }
+}
+
+.customTitle{
+  font-size: 150%;
+  font-weight: 700;
+  cursor: default;
+}
+
+.customButton{
+  cursor: pointer;
+  background-color: var(--textColor);
+  border: none;
+  border-right: 1px solid var(--textColor);
+  color: var(--mainBackground);
+  box-sizing:border-box;
+  height: 100%;
+  padding: 5px 10px;
+  border-radius: 10px;
+  &:focus{
+    outline:none;
+    color:var(--darkRed);
+  }
+  &:active{
+    color: var(--textColor);
+    background-color: transparent;
+  }
+}
+
+.customInputBar{
+  border: none;
+  border-bottom: 1px solid var(--textColor);
+  background-color: transparent;
+  color: var(--textColor);
+  &:focus{
+    outline:none;
+  }
+}
+
+.customResultsSet {
+  border-radius: 10px;
+  border: 1px solid var(--textColor);
+  overflow: hidden;
+  margin-bottom: 20px;
+  & .customResultsTitle{
+    padding: 20px;
+    background-color: var(--secondaryBackground);
+    border-bottom: 1px solid var(--textColor);
+  }
+  & .customResultsBody{
+    padding:20px;
+  }
+  & .customResultsFoot{
+    padding: 10px 20px;
+    background-color: var(--secondaryBackground);
+    border-top: 1px solid var(--textColor);
+  }
+}
+
+.customResultsCompactSet {
+  border-radius: 10px;
+  border: 1px solid var(--textColor);
+  overflow: hidden;
+  margin-bottom: 10px;
+  & .customResultsTitle{
+    padding: 5px;
+    background-color: var(--secondaryBackground);
+    border-bottom: 1px solid var(--textColor);
+  }
+  & .customResultsBody{
+    padding:5px;
+  }
+  & .customResultsFoot{
+    padding: 5px;
+    background-color: var(--secondaryBackground);
+    border-top: 1px solid var(--textColor);
+  }
+}
+
+.customButtonSet{
+    border-radius: 10px;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+    & button{
+      background-color: var(--textColor);
+      border: none;
+      margin-left: 1px;
+      color: var(--mainBackground);
+      box-sizing:border-box;
+      height: 100%;
+      padding: 5px 10px;
+      cursor: pointer;
+      &:focus{
+        outline:none;
+        color:var(--darkRed);
+      }
+      &:active{
+        color: var(--textColor);
+        background-color: transparent;
+      }
+      &:first-child{
+        margin: 0px;
+      }
+    }
+}
+
+.customHistoryElement{
+
+}
+
 .rd-focus:focus{
-  color: #ff4136;
+  color: var(--darkRed);
 }

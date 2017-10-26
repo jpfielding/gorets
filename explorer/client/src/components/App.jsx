@@ -18,6 +18,7 @@ export default class App extends React.Component {
     this.updateConnectionList = this.updateConnectionList.bind(this);
     this.createTabList = this.createTabList.bind(this);
     this.createTabs = this.createTabs.bind(this);
+    this.removeTab = this.removeTab.bind(this);
   }
 
   componentDidMount() {
@@ -43,6 +44,12 @@ export default class App extends React.Component {
     const rtn = [<Connections updateCallback={this.updateConnectionList} />];
     Object.keys(this.state.active).map(id => (rtn.push(this.state.active[id])));
     return rtn;
+  }
+
+  removeTab(tab) {
+    const active = Object.assign({}, this.state.active);
+    delete active[tab];
+    this.setState({ active });
   }
 
   render() {
@@ -98,6 +105,9 @@ export default class App extends React.Component {
         <TabSection
           names={this.createTabList()}
           components={this.createTabs()}
+          enableRemove
+          onRemove={this.removeTab}
+          removeOffset={1}
         />
       </div>
     );

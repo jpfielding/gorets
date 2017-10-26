@@ -35,6 +35,7 @@ class Server extends React.Component {
         class: {},
         fields: [],
         data: [],
+        tabs: {},
       },
       tab: 0,
     };
@@ -44,6 +45,8 @@ class Server extends React.Component {
     this.onDataSelected = this.onDataSelected.bind(this);
     this.onDataDeselected = this.onDataDeselected.bind(this);
     this.onClassSelected = this.onClassSelected.bind(this);
+    this.removeTab = this.removeTab.bind(this);
+    this.addTab = this.addTab.bind(this);
   }
 
   componentWillMount() {
@@ -118,24 +121,45 @@ class Server extends React.Component {
       });
   }
 
+  addTab(key, value) {
+    const tabs = Object.assign({}, this.state.tabs);
+    tabs[key] = value;
+    this.setState({ tabs });
+  }
+
+  removeTab(tab) {
+    const tabs = Object.assign({}, this.state.tabs);
+    delete tabs[tab];
+    this.setState({ tabs });
+  }
+
   render() {
+    const tabs = this.state.tabs || {};
+    const names = Object.keys(tabs);
+    const components = Object.keys(tabs).map((key) => tabs[key]);
+    names.unshift('Metadata', 'Search', 'Objects');
+    components.unshift(
+      <Metadata
+        shared={this.state.shared}
+        onRowsSelected={this.onMetadataSelected}
+        onRowsDeselected={this.onMetadataDeselected}
+        onClassSelected={this.onClassSelected}
+      />,
+      <Search
+        shared={this.state.shared}
+        onRowsSelected={this.onDataSelected}
+        onRowsDeselected={this.onDataDeselected}
+        addTab={this.addTab}
+      />,
+      <Objects shared={this.state.shared} />
+    );
     return (
       <TabSection
-        names={['Metadata', 'Search', 'Object']}
-        components={[
-          <Metadata
-            shared={this.state.shared}
-            onRowsSelected={this.onMetadataSelected}
-            onRowsDeselected={this.onMetadataDeselected}
-            onClassSelected={this.onClassSelected}
-          />,
-          <Search
-            shared={this.state.shared}
-            onRowsSelected={this.onDataSelected}
-            onRowsDeselected={this.onDataDeselected}
-          />,
-          <Objects shared={this.state.shared} />,
-        ]}
+        names={names}
+        components={components}
+        enableRemove
+        onRemove={this.removeTab}
+        removeOffset={3}
       />
     );
   }
