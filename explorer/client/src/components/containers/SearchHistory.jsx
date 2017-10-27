@@ -64,19 +64,28 @@ export default class SearchHistory extends React.Component {
   }
 
   renderType() {
-    return (
-      <div className="customResultsButtonTitle fr">
-        {this.state.countTypes[this.props.params['count-type']]}
-      </div>
-    );
+    if(this.props.params['count-type'] >= 0){
+      return (
+        <div className="customResultsButtonTitle fr">
+          {this.state.countTypes[this.props.params['count-type']]}
+        </div>
+      );
+    } else if (this.props.params.type){
+      return (
+        <div className="customResultsButtonTitle fr">
+          {this.props.params.type}
+        </div>
+      );
+    }
+    return null;
   }
 
   render() {
-    if (this.props.params == null || this.props.params.name == null || this.props.params['count-type'] == null) {
+    if (this.props.params == null || !this.props.params.id) {
       return <div />;
     }
     const body = Object.keys(this.props.params).sort(this.sortKeys).map((key) => {
-      if (key === 'name' || key === 'count-type') {
+      if (key === 'name' || key === 'count-type' || key === 'type') {
         return null;
       }
       return (

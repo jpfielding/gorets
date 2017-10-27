@@ -151,7 +151,10 @@ class Server extends React.Component {
         onRowsDeselected={this.onDataDeselected}
         addTab={this.addTab}
       />,
-      <Objects shared={this.state.shared} />
+      <Objects
+        shared={this.state.shared}
+        addTab={this.addTab}
+      />
     );
     return (
       <TabSection

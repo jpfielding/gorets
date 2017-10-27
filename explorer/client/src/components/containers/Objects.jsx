@@ -4,12 +4,14 @@ import some from 'lodash/some';
 import ObjectsService from 'services/ObjectsService';
 import StorageCache from 'util/StorageCache';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
-import ObjectHistory from 'components/containers/ObjectHistory';
+import SearchHistory from 'components/containers/SearchHistory';
+import _ from 'underscore';
 
 class Objects extends React.Component {
 
   static propTypes = {
     shared: React.PropTypes.any,
+    addTab: React.PropTypes.Func,
   }
 
   constructor(props) {
@@ -25,9 +27,18 @@ class Objects extends React.Component {
       objects: {},
       searching: false,
       errorOut: '',
+      resultCount: 1,
+      tabName: '',
+      objectsHistoryName: '',
     };
     this.getObjects = this.getObjects.bind(this);
     this.getObjectsByType = this.getObjectsByType.bind(this);
+    this.removeHistoryElement = this.removeHistoryElement.bind(this);
+
+    this.bindTabNameChange = this.bindTabNameChange.bind(this);
+    this.bindQueryNameChange = this.bindQueryNameChange.bind(this);
+
+    this.createNewTab = this.createNewTab.bind(this);
   }
 
   componentWillMount() {
@@ -37,12 +48,7 @@ class Objects extends React.Component {
     if (objectsHistory && objectsHistory.length > 0) {
       objectsHistory = objectsHistory.filter((i) => (i.ids));
     }
-    let objectsParams = null;
-    if (objectsHistory.length > 0) {
-      objectsParams = objectsHistory[0];
-    }
     this.setState({
-      objectsParams,
       objectsHistory,
     });
   }
@@ -59,10 +65,43 @@ class Objects extends React.Component {
     }
   }
 
+  bindTabNameChange(tabName) {
+    this.setState({ tabName });
+  }
+
+  bindQueryNameChange(objectsHistoryName) {
+    this.setState({ objectsHistoryName });
+  }
+
+  createNewTab() {
+    let tabName = this.state.tabName;
+    if (tabName === '') {
+      tabName = `O${this.state.resultCount}`;
+      const resultCount = this.state.resultCount + 1;
+      this.setState({ resultCount });
+    }
+    console.log(`[OBJECT] Creating new tab of name ${tabName}`);
+    const { objects } = this.state;
+    const hasResult = (objects.result && objects.result['Objects'].length > 0);
+    this.props.addTab(tabName, (
+        <ul>
+          {hasResult
+            ? (
+              objects.result['Objects'].map(obj =>
+                this.renderPicture(obj)
+              )
+            )
+            : null
+          }
+        </ul>
+    ));
+  }
+
   getObjectsByType(type) {
     const id = this.props.shared.connection.id;
     const { resource, ids } = this.state.objectsForm.value;
-    this.setState({ objectsParams: { resource, type, ids, id } }, this.getObjects);
+    const name = this.state.objectsHistoryName;
+    this.setState({ objectsParams: { resource, type, ids, id, name } }, this.getObjects);
   }
 
   getObjects() {
@@ -80,7 +119,7 @@ class Objects extends React.Component {
     this.setState({ objectsForm });
 
     const ock = `${this.props.shared.connection.id}-search-history`;
-    const objectsHistory = StorageCache.getFromCache(ock) || [];
+    let objectsHistory = StorageCache.getFromCache(ock) || [];
     const objectsParams = this.state.objectsParams;
     if (!objectsParams.ids) {
       return;
@@ -108,9 +147,13 @@ class Objects extends React.Component {
           StorageCache.putInCache(ock, objectsHistory, 720);
         }
         console.log(json);
+        if (objectsHistory && objectsHistory.length > 0) {
+          objectsHistory = objectsHistory.filter((i) => (i.ids));
+        }
         this.setState({
           objects: json,
           searching: false,
+          objectsHistory,
         });
       });
   }
@@ -151,6 +194,21 @@ class Objects extends React.Component {
     return rs[0];
   }
 
+  removeHistoryElement(params) {
+    console.log('[OBJECT] Removing history element');
+    const sck = `${this.props.shared.connection.id}-search-history`;
+    let objectsHistory = StorageCache.getFromCache(sck) || [];
+    if (some(objectsHistory, params)) {
+      objectsHistory.splice(objectsHistory.findIndex(i => _.isEqual(i, params)), 1);
+      StorageCache.putInCache(sck, objectsHistory, 720);
+    }
+    if (objectsHistory && objectsHistory.length > 0) {
+      objectsHistory = objectsHistory.filter((i) => (i.ids));
+    }
+    this.setState({
+      objectsHistory,
+    });
+  }
 
   searchInputsChange(objectsForm) {
     this.setState({ objectsForm });
@@ -202,60 +260,104 @@ class Objects extends React.Component {
     const hasResult = (objects.result && objects.result['Objects'].length > 0);
     return (
       <div className="flex">
-        <div className="fl w-100 w-20-ns pa3 overflow-x-scroll nowrap">
-          <div className="b nonclickable">Current Object Params</div>
-          <ObjectHistory params={this.state.objectsParams} />
-          <div className="b nonclickable">Objects History</div>
-          <ul className="pa0 ma0 no-list-style">
-            {this.state.objectsHistory.map(params =>
-              <li>
-                <ObjectHistory
-                  params={params}
-                  onClick={() => {
-                    // TODO convert getObjects to accept params directly
-                    this.setState({
-                      objectsParams: params,
-                    }, this.getObjects);
-                  }}
-                />
-              </li>
-              )}
-          </ul>
+        <div className="fl w-100 w-20-ns pa3 pr0">
+          <div className="customResultsCompactSet">
+            <div className="customResultsTitle">
+              <div className="b nonclickable">Current Object Params</div>
+            </div>
+            <div className="customResultsBody">
+              <SearchHistory params={this.state.objectsParams} preventClose/>
+            </div>
+          </div>
+          <div className="customResultsCompactSet">
+            <div className="customResultsTitle">
+              <div className="b nonclickable">Objects History</div>
+            </div>
+            <div className="customResultsBody">
+              <ul className="pa0 ma0 no-list-style customListSpacing">
+                {this.state.objectsHistory.map(params =>
+                  <li>
+                    <SearchHistory
+                      params={params}
+                      removeHistoryElement={() => this.removeHistoryElement(params)}
+                      clickHandle={() => {
+                        // TODO convert getObjects to accept params directly
+                        this.setState({
+                          objectsParams: params,
+                        }, this.getObjects);
+                      }}
+                    />
+                  </li>
+                  )}
+              </ul>
+            </div>
+          </div>
         </div>
-        <div className="fl min-vh-100 w-100 w-80-ns pa3 bl-ns">
-          <Fieldset formValue={this.state.objectsForm}>
-            <Field select="resource" label="Resource">
-              <Input className="w-30 pa1 b--none outline-transparent" />
-            </Field>
-            <Field select="ids" label="IDs">
-              <Input className="w-30 pa1 b--none outline-transparent" />
-            </Field>
-          </Fieldset>
-          <div className="pt2">
-            {this.getObjectTypes().map(type =>
-              <button
-                className="ba black bg-transparent b--black mr1 da-effect"
-                onClick={() => this.getObjectsByType(type)}
-                disabled={this.state.searching}
-              >
-                {type}
-              </button>
-            )}
+        <div className="fl w-100 w-80-ns pa3">
+          <div className="customResultsSet">
+            <div className="customResultsTitle">
+              <div className="customTitle">
+                  Query:
+              </div>
+              <input
+                className="customInputBar pt1"
+                placeholder="Query Name"
+                onChange={(e) => this.bindQueryNameChange(e.target.value)}
+                value={this.state.objectsHistoryName}
+              />
+            </div>
+            <div className="customResultsBody">
+              <Fieldset formValue={this.state.objectsForm}>
+                <Field select="resource" label="Resource">
+                  <Input className="w-30 pa1 b--none outline-transparent" />
+                </Field>
+                <Field select="ids" label="IDs">
+                  <Input className="w-30 pa1 b--none outline-transparent" />
+                </Field>
+              </Fieldset>
+            </div>
+            <div className="customResultsFoot">
+              <div className="customButtonSet">
+                {this.getObjectTypes().map(type =>
+                  <button
+                    onClick={() => this.getObjectsByType(type)}
+                    disabled={this.state.searching}
+                  >
+                    {type}
+                  </button>
+                )}
+              </div>
+              <div className={`bg-dark-red white br1 pa2 ${this.state.errorOut.length === 0 ? 'dn' : 'dib'}`}>
+                {this.state.errorOut}
+              </div>
+            </div>
           </div>
-          <div className={`bg-dark-red white br1 pa2 ${this.state.errorOut.length === 0 ? 'dn' : 'dib'}`}>
-            {this.state.errorOut}
-          </div>
-          <div>
-            <ul>
-              {hasResult
-                ? (
-                  objects.result['Objects'].map(obj =>
-                    this.renderPicture(obj)
+          <div className="customResultsSet">
+            <div className="customResultsTitle">
+              <div className="customCombo fr">
+                <button className="customComboButton" onClick={this.createNewTab}>New Tab</button>
+                <input
+                  className="customComboInput"
+                  placeholder={`O${this.state.resultCount}`}
+                  onChange={(e) => this.bindTabNameChange(e.target.value)}
+                />
+              </div>
+              <div className="customTitle">
+                  Results:
+              </div>
+            </div>
+            <div className="customResultsBody">
+              <ul>
+                {hasResult
+                  ? (
+                    objects.result['Objects'].map(obj =>
+                      this.renderPicture(obj)
+                    )
                   )
-                )
-                : null
-            }
-            </ul>
+                  : null
+                }
+              </ul>
+            </div>
           </div>
         </div>
       </div>

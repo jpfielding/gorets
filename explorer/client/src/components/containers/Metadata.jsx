@@ -185,7 +185,7 @@ class Metadata extends React.Component {
             toolbar={<Toolbar enableFilter />}
             onAddFilter={this.handleFilterChange}
             onClearFilters={this.onClearFilters}
-            minHeight={600}
+            minHeight={500}
             rowSelection={{
               showCheckbox: true,
               enableShiftSelect: true,
@@ -204,38 +204,53 @@ class Metadata extends React.Component {
     }
     const system = this.props.shared.metadata.System;
     return (
-      <div className="min-vh-100 flex">
-        <div className="fl w-100 w-20-ns no-list-style pa3 overflow-x-scroll nowrap">
-          <h1 className="f5 nonclickable" title={system.SystemDescription}>
-            {system.SystemID}
-          </h1>
-          <ul className="pa0 ma0 nonclickable">
-            {system['METADATA-RESOURCE'].Resource.map((r) =>
-              <li className="mb2 nonclickable">
-                <div title={r.Description} className="b">{r.ResourceID}</div>
-                <ul className="pa0 pl3 mv1">
-                  {r['METADATA-CLASS'].Class.map((mClass) =>
-                    <li
-                      onClick={() => this.onClassSelected(r, mClass)}
-                      className="clickable metadata-class-name"
-                    >
-                      {this.renderSelectedClassDescription(mClass)}
-                    </li>
-                  )}
-                </ul>
-              </li>
-            )}
-          </ul>
+      <div className="flex">
+        <div className="w-20-ns no-list-style pa3 pr0">
+          <div className="customResultsCompactSet">
+            <div className="customResultsTitle">
+              <h1 className="f5 nonclickable" title={system.SystemDescription}>
+                {system.SystemID}
+              </h1>
+            </div>
+            <div className="customResultsBody overflow-x-scroll nowrap">
+              <ul className="pa1 ma0 nonclickable">
+                {system['METADATA-RESOURCE'].Resource.map((r) =>
+                  <li className="mb2 nonclickable">
+                    <div title={r.Description} className="b">{r.ResourceID}</div>
+                    <ul className="pa0 pl3 mv1">
+                      {r['METADATA-CLASS'].Class.map((mClass) =>
+                        <li
+                          onClick={() => this.onClassSelected(r, mClass)}
+                          className="clickable metadata-class-name"
+                        >
+                          {this.renderSelectedClassDescription(mClass)}
+                        </li>
+                      )}
+                    </ul>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
         </div>
-        <div className="fl w-100 w-80-ns pa3 bl-ns nonclickable">
-          { this.state.classRows.length > 0
-            ? (
-              <div>
-                { tableBody }
+        <div className="fl w-100 w-80-ns pa3">
+          <div className="customResultsSet">
+            <div className="customResultsTitle">
+              <div className="customTitle">
+                  Metadata:
               </div>
-            )
-            : <h1 className="f4">Please select a class to explore</h1>
-          }
+            </div>
+            <div className="customResultsBody">
+              { this.state.classRows.length > 0
+                ? (
+                  <div>
+                    { tableBody }
+                  </div>
+                )
+                : <h1 className="f4">Please select a class to explore</h1>
+              }
+            </div>
+          </div>
         </div>
       </div>
     );
