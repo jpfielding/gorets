@@ -39,10 +39,6 @@ body {
   cursor: default;
 }
 
-.min-vh-100 {
-  min-height: 100vh;
-}
-
 .metadata-class-name {
 
 }
@@ -141,12 +137,14 @@ a {
         font-size: 75%;
         z-index: 6;
         opacity: 0;
+        display: none;
         &:focus{
           outline:none;
         }
       }
       &:hover{
         & .customClose{
+          display: inline-block;
           opacity: 0.5;
           &:hover{
             opacity: 1;
@@ -206,11 +204,31 @@ a {
   cursor: default;
 }
 
+.customCenterTitle{
+  font-weight: 700;
+  text-align: center;
+}
+
+.customResultsSimpleTitle{
+  font-weight: 700;
+  display: inline-block;
+  padding: 5px 0px;
+}
+
+.customResultsButtonTitle{
+  background-color: var(--textColor);
+  border: none;
+  color: var(--mainBackground);
+  box-sizing:border-box;
+  height: 100%;
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
 .customButton{
   cursor: pointer;
   background-color: var(--textColor);
   border: none;
-  border-right: 1px solid var(--textColor);
   color: var(--mainBackground);
   box-sizing:border-box;
   height: 100%;
@@ -260,7 +278,9 @@ a {
   border-radius: 10px;
   border: 1px solid var(--textColor);
   overflow: hidden;
-  margin-bottom: 10px;
+  margin: 0px;
+  padding: 0px;
+  position: relative;
   & .customResultsTitle{
     padding: 5px;
     background-color: var(--secondaryBackground);
@@ -273,6 +293,45 @@ a {
     padding: 5px;
     background-color: var(--secondaryBackground);
     border-top: 1px solid var(--textColor);
+  }
+  &:not(:first-child){
+    margin-top: 10px;
+  }
+}
+
+.customCloseElement{
+  position: relative;
+  & .customCloseButton{
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background-color: transparent;
+    opacity: 0;
+    color: var(--textColor);
+    display: none;
+    &:focus{
+      outline:none;
+    }
+  }
+  &:hover{
+    & .customCloseButton{
+      display: block;
+      opacity: 0.5;
+      &:hover{
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.customListSpacing{
+  & > li{
+    &:not(:first-child){
+      margin-top: 10px;
+    }
   }
 }
 
@@ -302,10 +361,6 @@ a {
         margin: 0px;
       }
     }
-}
-
-.customHistoryElement{
-
 }
 
 .rd-focus:focus{

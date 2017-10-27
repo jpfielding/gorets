@@ -57,6 +57,7 @@
     "style-loader": "^0.13.1",
     "tachyons": "^4.5.4",
     "tachyons-flexbox": "^2.0.1",
+    "underscore": "^1.8.3",
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.16.2",
     "whatwg-fetch": "^1.0.0"

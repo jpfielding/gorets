@@ -7,6 +7,7 @@ import ReactDataGrid from 'react-data-grid';
 import MetadataService from 'services/MetadataService';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
 import SearchHistory from 'components/containers/SearchHistory';
+import _ from 'underscore';
 
 class Search extends React.Component {
 
@@ -62,28 +63,35 @@ class Search extends React.Component {
     };
 
     this.search = this.search.bind(this);
-    this.onRowsSelected = this.onRowsSelected.bind(this);
-    this.onRowsDeselected = this.onRowsDeselected.bind(this);
+
     this.submitSearchForm = this.submitSearchForm.bind(this);
-    this.submitSearchFormWithCount = this.submitSearchFormWithCount.bind(this);
-    this.submitSearchFormOnlyCount = this.submitSearchFormOnlyCount.bind(this);
+
     this.getRowAt = this.getRowAt.bind(this);
+
     this.setSearchHistory = this.setSearchHistory.bind(this);
     this.createNewTab = this.createNewTab.bind(this);
-    this.tabNameChange = this.tabNameChange.bind(this);
+
+    this.bindTabNameChange = this.bindTabNameChange.bind(this);
+    this.bindQueryNameChange = this.bindQueryNameChange.bind(this);
   }
 
   componentWillMount() {
-    this.setSearchHistory();
+    console.log('[SEARCH] Component Mounting');
+    const sck = `${this.props.shared.connection.id}-search-history`;
+    const searchHistory = StorageCache.getFromCache(sck) || [];
+    this.setSearchHistory(searchHistory);
   }
 
   componentWillReceiveProps(nextProps) {
+    console.log('[SEARCH] Updating Props');
     if (nextProps.shared.class['METADATA-TABLE']) {
       const ClassName = nextProps.shared.class.ClassName;
       const resource = nextProps.shared.resource.ResourceID;
       const select = nextProps.shared.fields.map(i => i.row.SystemName).join(',');
       const ts = nextProps.shared.class['METADATA-TABLE'].Field.filter(f => f.StandardName === 'ModificationTimestamp');
-      console.log('last modified fields:', ts);
+
+      console.log('[SEARCH][PROPS] Last modified fields:', ts);
+
       let query = this.state.searchForm.value.query;
       if (ts.length > 0) {
         const field = ts[0].SystemName.trim();
@@ -99,14 +107,6 @@ class Search extends React.Component {
     }
   }
 
-  onRowsSelected(rows) {
-    this.props.onRowsSelected(rows);
-  }
-
-  onRowsDeselected(rows) {
-    this.props.onRowsDeselected(rows);
-  }
-
   getRowAt(index) {
     if (index < 0) {
       return undefined;
@@ -114,9 +114,9 @@ class Search extends React.Component {
     return this.state.searchResultRows[index];
   }
 
-  setSearchHistory() {
-    const sck = `${this.props.shared.connection.id}-search-history`;
-    let searchHistory = StorageCache.getFromCache(sck) || [];
+  setSearchHistory(sh) {
+    console.log('[SEARCH] Pulling new search history set');
+    let searchHistory = _.clone(sh);
     if (searchHistory && searchHistory.length > 0) {
       searchHistory = searchHistory.filter((i) => (i.query));
     }
@@ -125,11 +125,27 @@ class Search extends React.Component {
     });
   }
 
-  tabNameChange(tabName) {
+  removeHistoryElement(params) {
+    console.log('[SEARCH] Removing history element');
+    const sck = `${this.props.shared.connection.id}-search-history`;
+    let searchHistory = StorageCache.getFromCache(sck) || [];
+    if (some(searchHistory, params)) {
+      searchHistory.splice(searchHistory.findIndex(i => _.isEqual(i, params)), 1);
+      StorageCache.putInCache(sck, searchHistory, 720);
+    }
+    if (searchHistory && searchHistory.length > 0) {
+      searchHistory = searchHistory.filter((i) => (i.query));
+    }
+    this.setState({
+      searchHistory,
+    });
+  }
+
+  bindTabNameChange(tabName) {
     this.setState({ tabName });
   }
 
-  queryNameChange(searchHistoryName) {
+  bindQueryNameChange(searchHistoryName) {
     this.setState({ searchHistoryName });
   }
 
@@ -137,10 +153,11 @@ class Search extends React.Component {
     let tabName = this.state.tabName;
     if (tabName === '') {
       tabName = `R${this.state.resultCount}`;
+      const resultCount = this.state.resultCount + 1;
+      this.setState({ resultCount });
     }
+    console.log(`[SEARCH] Creating new tab of name ${tabName}`);
     this.props.addTab(tabName, this.renderNewTab());
-    const resultCount = this.state.resultCount + 1;
-    this.setState({ resultCount });
   }
 
   searchInputsChange(searchForm) {
@@ -154,88 +171,71 @@ class Search extends React.Component {
       this.setState({ errorOut: 'No Results Found' });
       return;
     }
+
+    let searchResultColumns = [];
+    let searchResultRows = [];
+    let searchCount = -1;
+    let errorOut = '';
+
     console.log('[SEARCH] Applying search state');
+
     if (searchResults.result.columns && searchResults.result.rows) {
-      const searchResultColumns = searchResults.result.columns.map((column, index) => ({
+      searchResultColumns = searchResults.result.columns.map((column, index) => ({
         key: index,
         name: column,
         resizable: true,
         width: 150,
       }));
-      const searchResultRows = searchResults.result.rows;
-      this.setState({
-        searchResultColumns,
-        searchResultRows,
-      });
-    } else {
-      this.setState({
-        searchResultColumns: [],
-        searchResultRows: [],
-      });
+      searchResultRows = searchResults.result.rows;
     }
     if (searchResults.result.count) {
       if (searchResults.result.count < 0) {
-        this.setState({
-          errorOut: `Bad Result Count ${searchResults.result.count}`,
-          searchCount: -1,
-        });
+        errorOut = `Bad Result Count ${searchResults.result.count}`;
+        searchCount = -1;
       } else {
-        this.setState({ searchCount: searchResults.result.count });
+        searchCount = searchResults.result.count;
       }
-    } else {
-      this.setState({ searchCount: -1 });
     }
-  }
-
-  submitSearchForm() {
-    this.search({
-      id: this.props.shared.connection.id,
-      ...this.state.searchForm.value,
+    this.setState({
+      searchResultColumns,
+      searchResultRows,
+      searchCount,
+      errorOut,
     });
   }
 
-  submitSearchFormWithCount() {
-    const form = Object.assign({}, this.state.searchForm.value);
+  submitSearchForm(countType) {
+    const form = _.clone(this.state.searchForm.value);
     form['id'] = this.props.shared.connection.id;
-    form['count-type'] = 1;
-    this.search(form);
-  }
-
-  submitSearchFormOnlyCount() {
-    const form = Object.assign({}, this.state.searchForm.value);
-    form['id'] = this.props.shared.connection.id;
-    form['count-type'] = 2;
-    this.search(form);
-  }
-
-  search(sp) {
-    const searchParams = sp;
-    let searchHistoryName = this.state.searchHistoryName;
-    if (searchParams.name) {
-      searchHistoryName = searchParams.name;
-    }
+    form['count-type'] = countType;
     if (this.state.searchHistoryName !== '') {
-      searchParams.name = this.state.searchHistoryName;
+      form['name'] = this.state.searchHistoryName;
+    } else {
+      form['name'] = '';
     }
+    this.search(form);
+  }
 
+  search(searchParams) {
     const searchForm = this.state.searchForm;
     searchForm.value.resource = searchParams.resource;
     searchForm.value.class = searchParams.class;
     searchForm.value.query = searchParams.query;
     searchForm.value.select = searchParams.select;
-    // search history cache key used for storage
+    const searchHistoryName = searchParams.name;
+
     const sck = `${this.props.shared.connection.id}-search-history`;
     const searchHistory = StorageCache.getFromCache(sck) || [];
     this.setState({
       searchParams,
       searchForm,
       searchHistoryName,
+      searching: true,
+      errorOut: '',
     });
-    this.setState({ searching: true, errorOut: '' });
     if (searchParams === Search.emptySearch) {
       return;
     }
-    console.log('[SEARCH] Cache key found', sck);
     SearchService
       .search(searchParams)
       .then(res => res.json())
@@ -247,21 +247,27 @@ class Search extends React.Component {
         console.log('[SEARCH] Results:', json);
         this.setState({
           searchResults: json,
+          searching: false,
         });
         this.applySearchState();
-        this.setState({ searching: false });
-        this.setSearchHistory();
+        this.setSearchHistory(searchHistory);
       });
   }
 
   renderNewTab() {
     return (
-      <div className="pa3">
-        <div className="b nonclickable">Results from Search query</div>
-        <SearchHistory
-          params={this.state.searchParams}
-        />
-        {this.renderSearchResultsTable()}
+      <div className="ma3 customResultsSet">
+        <div className="customResultsTitle">
+          <div className="customTitle nonclickable">Results from Search query</div>
+        </div>
+        <div className="customResultsBody">
+          <SearchHistory
+            params={this.state.searchParams}
+          />
+          <div className="pa3">
+            {this.renderSearchResultsTable()}
+          </div>
+        </div>
       </div>
     );
   }
@@ -282,15 +288,16 @@ class Search extends React.Component {
 
   renderHistoryBar() {
     return (
-      <div className="fl w-100 w-20-ns pa3">
+      <div className="fl w-100 w-20-ns pa3 pr0">
         <div className="customResultsCompactSet">
           <div className="customResultsTitle">
             <div className="b nonclickable">Current Search Params</div>
           </div>
           <div className="customResultsBody">
             <SearchHistory
-              onClick={() => this.search(this.state.searchParams)}
+              clickHandle={() => this.search(this.state.searchParams)}
               params={this.state.searchParams}
+              preventClose
             />
           </div>
         </div>
@@ -299,12 +306,12 @@ class Search extends React.Component {
             <div className="b nonclickable">Search History</div>
           </div>
           <div className="customResultsBody">
-            <ul className="pa0 ma0 no-list-style">
+            <ul className="pa0 ma0 no-list-style customListSpacing">
               {this.state.searchHistory.map(params =>
                 <li>
                   <SearchHistory
-                    className="clickable"
-                    onClick={() => this.search(params)}
+                    clickHandle={() => this.search(params)}
+                    removeHistoryElement={() => this.removeHistoryElement(params)}
                     params={params}
                   />
                 </li>
@@ -318,7 +325,7 @@ class Search extends React.Component {
 
   render() {
     return (
-      <div className="min-vh-100 flex">
+      <div className="flex">
         {this.renderHistoryBar()}
         <div className="fl w-100 w-80-ns pa3">
           <div className="customResultsSet">
@@ -329,7 +336,7 @@ class Search extends React.Component {
               <input
                 className="customInputBar pt1"
                 placeholder="Query Name"
-                onChange={(e) => this.queryNameChange(e.target.value)}
+                onChange={(e) => this.bindQueryNameChange(e.target.value)}
                 value={this.state.searchHistoryName}
               />
             </div>
@@ -352,21 +359,21 @@ class Search extends React.Component {
             <div className="customResultsFoot">
               <div className="customButtonSet">
                 <button
-                  onClick={this.submitSearchForm}
+                  onClick={() => this.submitSearchForm(0)}
                   disabled={this.state.searching}
                   className="da-effect"
                 >
                   Submit
                 </button>
                 <button
-                  onClick={this.submitSearchFormWithCount}
+                  onClick={() => this.submitSearchForm(1)}
                   disabled={this.state.searching}
                   className="da-effect"
                 >
                   with Count
                 </button>
                 <button
-                  onClick={this.submitSearchFormOnlyCount}
+                  onClick={() => this.submitSearchForm(2)}
                   disabled={this.state.searching}
                   className="da-effect"
                 >
@@ -382,7 +389,7 @@ class Search extends React.Component {
                 <input
                   className="customComboInput"
                   placeholder={`R${this.state.resultCount}`}
-                  onChange={(e) => this.tabNameChange(e.target.value)}
+                  onChange={(e) => this.bindTabNameChange(e.target.value)}
                 />
               </div>
               <div className="customTitle">
