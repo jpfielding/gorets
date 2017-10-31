@@ -54,8 +54,8 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	if s == nil {
 		return fmt.Errorf("no source found for %s", args.ID)
 	}
-	fmt.Printf("connections params for %s %v\n", args.ID, s.Connection)
 	if JSONExist(s.MSystem()) {
+		fmt.Printf("found cached metadata for %s\n", args.ID)
 		standard := metadata.MSystem{}
 		JSONLoad(s.MSystem(), &standard)
 		reply.Metadata = standard
@@ -71,6 +71,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	}
 	ctx := context.Background()
 	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
+		fmt.Printf("requesting remote metadata for %s\n", args.ID)
 		standard, err := op(ctx, r, u.GetMetadata)
 		reply.Metadata = *standard
 		// bg this

@@ -53,13 +53,13 @@ export default class Connections extends React.Component {
               <Field select="password" label="Password" Input={PasswordForm} >
                 <Input className="pa1 b--none outline-transparent" />
               </Field>
-              <Field select="user-agent" label="User Agent" >
+              <Field select="userAgent" label="User Agent" >
                 <Input className="pa1 b--none outline-transparent" />
               </Field>
-              <Field select="user-agent-password" label="User Agent Password" Input={PasswordForm} >
+              <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm} >
                 <Input className="pa1 b--none outline-transparent" />
               </Field>
-              <Field select="rets-version" label="Protocol Version" >
+              <Field select="version" label="Protocol Version" >
                 <Input className="pa1 b--none outline-transparent" />
               </Field>
               <Field select="proxy" label="Proxy (Socks5)" >

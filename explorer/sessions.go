@@ -3,11 +3,13 @@ package explorer
 import (
 	"context"
 	"fmt"
-	"net/http"
+	"io"
+	"log"
 	"os"
 
 	"github.com/jpfielding/gorets/rets"
 	"github.com/jpfielding/gowirelog/wirelog"
+	"golang.org/x/net/proxy"
 )
 
 // TODO make this a user based map of sessions
@@ -30,8 +32,8 @@ func (s Sessions) Open(id string) *Session {
 // Session ...
 type Session struct {
 	Connection Connection
-	// things is user state
-	transport *http.Transport
+	// things in user state
+	closer    io.Closer
 	requester rets.Requester
 	urls      rets.CapabilityURLs
 }
@@ -57,53 +59,65 @@ func (c *Session) MSystem() string {
 }
 
 // create ...
-func (c *Session) create() (rets.Requester, error) {
-	if c.transport == nil {
-		// start with the default Dialer from http.DefaultTransport
-		transport := wirelog.NewHTTPTransport()
-		// TODO close the wire logging somehow
-		_, err := wirelog.LogToFile(transport, c.Wirelog(), true, true)
+func (c *Session) create() (rets.Requester, io.Closer, error) {
+	// start with the default Dialer from http.DefaultTransport
+	transport := wirelog.NewHTTPTransport()
+	// if there is a need to proxy
+	if c.Connection.Proxy != "" {
+		log.Printf("Using proxy %s", c.Connection.Proxy)
+		d, err := proxy.SOCKS5("tcp", c.Connection.Proxy, nil, proxy.Direct)
 		if err != nil {
-			return nil, err
+			return nil, nil, fmt.Errorf("rets proxy: '%s'", c.Connection.Proxy)
 		}
-		fmt.Println("wire logging enabled:", c.Wirelog())
-		c.transport = transport
+		transport.Dial = d.Dial
 	}
-	conn := c.Connection
-	r, err := rets.DefaultSession(
-		conn.Username,
-		conn.Password,
-		conn.UserAgent,
-		conn.UserAgentPw,
-		conn.Version,
-		c.transport,
+	var closer io.Closer
+	var err error
+	// wire logging
+	logFile := c.Wirelog()
+	closer, err = wirelog.LogToFile(transport, logFile, true, true)
+	if err != nil {
+		return nil, nil, fmt.Errorf("wirelog setup")
+	}
+	log.Printf("wire logging enabled %s", logFile)
+
+	// should we throw an err here too?
+	sess, err := rets.DefaultSession(
+		c.Connection.Username,
+		c.Connection.Password,
+		c.Connection.UserAgent,
+		c.Connection.UserAgentPw,
+		c.Connection.Version,
+		transport,
 	)
-	return r, err
+	return sess, closer, err
 }
 
 // Active tells whether this connection is considered to be in use
 func (c *Session) Active() bool {
-	return c.transport != nil
+	return c.requester != nil
 }
 
 // Close is a closer
 func (c *Session) Close() error {
+	defer c.closer.Close()
 	// TODO see if we can close the file handle for the wirelog
-	c.transport = nil
+	c.closer = nil
+	c.requester = nil
 	return nil
 }
 
-// Exec ...
+// Exec TODO needs a retry mechanism
 func (c *Session) Exec(ctx context.Context, op func(rets.Requester, rets.CapabilityURLs) error) error {
 	if c.requester == nil {
-		r, err := c.create()
+		r, closer, err := c.create()
 		urls, err := rets.Login(ctx, r, rets.LoginRequest{URL: c.Connection.URL})
 		if err != nil {
 			return err
 		}
+		c.closer = closer
 		c.requester = r
 		c.urls = *urls
-		// defer rets.Logout(r, ctx, rets.LogoutRequest{URL: urls.Logout})
 	}
 	return op(c.requester, c.urls)
 }
