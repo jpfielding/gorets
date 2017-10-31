@@ -77,7 +77,7 @@ class Search extends React.Component {
 
   componentWillMount() {
     console.log('[SEARCH] Component Mounting');
-    const sck = `${this.props.shared.connection.id}-search-history`;
+    const sck = `${this.props.shared.config.id}-search-history`;
     const searchHistory = StorageCache.getFromCache(sck) || [];
     this.setSearchHistory(searchHistory);
   }
@@ -127,7 +127,7 @@ class Search extends React.Component {
 
   removeHistoryElement(params) {
     console.log('[SEARCH] Removing history element');
-    const sck = `${this.props.shared.connection.id}-search-history`;
+    const sck = `${this.props.shared.config.id}-search-history`;
     let searchHistory = StorageCache.getFromCache(sck) || [];
     if (some(searchHistory, params)) {
       searchHistory.splice(searchHistory.findIndex(i => _.isEqual(i, params)), 1);
@@ -206,7 +206,7 @@ class Search extends React.Component {
 
   submitSearchForm(countType) {
     const form = _.clone(this.state.searchForm.value);
-    form['id'] = this.props.shared.connection.id;
+    form['id'] = this.props.shared.config.id;
     form['count-type'] = countType;
     if (this.state.searchHistoryName !== '') {
       form['name'] = this.state.searchHistoryName;
@@ -224,7 +224,7 @@ class Search extends React.Component {
     searchForm.value.select = searchParams.select;
     const searchHistoryName = searchParams.name;
 
-    const sck = `${this.props.shared.connection.id}-search-history`;
+    const sck = `${this.props.shared.config.id}-search-history`;
     const searchHistory = StorageCache.getFromCache(sck) || [];
     this.setState({
       searchParams,

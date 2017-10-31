@@ -43,7 +43,7 @@ var WirelogUpgrader = websocket.Upgrader{
 }
 
 // WireLogSocket provides access to wire logs as websocket data
-func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
+func WireLogSocket(cfgs map[string]Config, upgrader websocket.Upgrader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -67,12 +67,12 @@ func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 			json.NewDecoder(msg).Decode(&req)
 			fmt.Printf("wirelog request: %v\n", req)
 			// find the source for this message
-			sess := sessions.Open(req.ID)
-			if sess == nil {
+			cfg, ok := cfgs[req.ID]
+			if !ok {
 				conn.WriteMessage(messageType, []byte("{'error': 'id not found'}"))
 				continue
 			}
-			err = sess.ReadWirelog(func(f *os.File, err error) error {
+			err = cfg.ReadWirelog(func(f *os.File, err error) error {
 				if err != nil {
 					return err
 				}

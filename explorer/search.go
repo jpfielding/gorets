@@ -31,7 +31,9 @@ type SearchPage struct {
 }
 
 // SearchService ...
-type SearchService struct{}
+type SearchService struct {
+	Configs map[string]Config
+}
 
 // Run ....
 func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage) error {
@@ -42,13 +44,17 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 	if args.Format == "" {
 		args.Format = "COMPACT_DECODED"
 	}
-	s := sessions.Open(args.ID)
-	if s == nil {
+	cfg, ok := ms.Configs[args.ID]
+	if !ok {
 		return fmt.Errorf("no source found for %s", args.ID)
 	}
-	fmt.Printf("%v\n", s.Connection)
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
+	sess, err := cfg.Connect(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%v\n", cfg)
+	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		req := rets.SearchRequest{
 			URL: u.Search,
 			SearchParams: rets.SearchParams{

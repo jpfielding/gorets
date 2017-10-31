@@ -39,18 +39,24 @@ type Object struct {
 }
 
 // ObjectService ...
-type ObjectService struct{}
+type ObjectService struct {
+	Configs map[string]Config
+}
 
 // Get ....
 func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects) error {
 	fmt.Printf("object get params: %v\n", args)
 
-	s := sessions.Open(args.ID)
-	if s == nil {
+	cfg, ok := os.Configs[args.ID]
+	if !ok {
 		return fmt.Errorf("no source found for %s", args.ID)
 	}
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
+	sess, err := cfg.Connect(ctx)
+	if err != nil {
+		return err
+	}
+	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		// warning, this does _all_ of the photos
 		rsp, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
 			URL: u.GetObject,

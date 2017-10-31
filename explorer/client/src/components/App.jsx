@@ -1,7 +1,7 @@
 import React from 'react';
-import ConnectionService from 'services/ConnectionService';
+import ConfigService from 'services/ConfigService';
 import Autocomplete from 'react-autocomplete';
-import Connections from 'components/containers/Connections';
+import Configs from 'components/containers/Configs';
 import Server from 'components/containers/Server';
 import TabSection from 'components/containers/TabSection';
 
@@ -10,38 +10,38 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      connections: [],
+      configs: [],
       active: {},
       selected: {},
-      connectionAutocompleteField: '',
+      configAutocompleteField: '',
     };
-    this.updateConnectionList = this.updateConnectionList.bind(this);
+    this.updateConfigList = this.updateConfigList.bind(this);
     this.createTabList = this.createTabList.bind(this);
     this.createTabs = this.createTabs.bind(this);
     this.removeTab = this.removeTab.bind(this);
   }
 
   componentDidMount() {
-    this.updateConnectionList();
+    this.updateConfigList();
   }
 
-  updateConnectionList() {
-    ConnectionService
-      .getConnectionList()
+  updateConfigList() {
+    ConfigService
+      .getConfigList()
       .then(res => res.json())
       .then((json) => {
-        this.setState({ connections: json.result.connections });
+        this.setState({ configs: json.result.configs });
       });
   }
 
   createTabList() {
-    const rtn = ['New Connection'];
+    const rtn = ['New Config'];
     Object.keys(this.state.active).map(id => (rtn.push(id)));
     return rtn;
   }
 
   createTabs() {
-    const rtn = [<Connections updateCallback={this.updateConnectionList} />];
+    const rtn = [<Configs updateCallback={this.updateConfigList} />];
     Object.keys(this.state.active).map(id => (rtn.push(this.state.active[id])));
     return rtn;
   }
@@ -67,24 +67,24 @@ export default class App extends React.Component {
             className="titleInput"
           >
             <Autocomplete
-              value={this.state.connectionAutocompleteField}
+              value={this.state.configAutocompleteField}
               inputProps={{
-                placeholder: 'Available connections',
-                name: 'connections autocomplete',
-                id: 'connections-autocomplete',
+                placeholder: 'Available configs',
+                name: 'configs autocomplete',
+                id: 'configs-autocomplete',
               }}
-              items={(this.state.connections == null ? [] : this.state.connections)}
+              items={(this.state.configs == null ? [] : this.state.configs)}
               shouldItemRender={(item, value) =>
                 (item.id.toLowerCase().indexOf(value.toLowerCase()) !== -1)
               }
-              onChange={(event, value) => this.setState({ connectionAutocompleteField: value })}
-              onSelect={(value, connection) => {
+              onChange={(event, value) => this.setState({ configAutocompleteField: value })}
+              onSelect={(value, config) => {
                 console.log('Selected', value, 'from Autocomplete');
                 const { active } = this.state;
-                active[connection.id] = (<Server connection={connection} />);
+                active[config.id] = (<Server config={config} />);
                 this.setState({
-                  connectionAutocompleteField: '',
-                  selected: connection,
+                  configAutocompleteField: '',
+                  selected: config,
                   active,
                 });
               }}
