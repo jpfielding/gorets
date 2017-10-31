@@ -50,43 +50,13 @@ type ConnectionList struct {
 }
 
 // ConnectionListArgs ...
-type ConnectionListArgs struct {
-	Active *bool `json:"active,omitempty"`
-}
+type ConnectionListArgs struct{}
 
 // List ....
 func (cs ConnectionService) List(r *http.Request, args *ConnectionListArgs, reply *ConnectionList) error {
 	for _, v := range connections {
-		// if we want to filter on active
-		if args.Active != nil {
-			// do they have matching state
-			if _, ok := sessions[v.ID]; *args.Active != ok {
-				continue
-			}
-		}
 		reply.Connections = append(reply.Connections, v)
 	}
-	return nil
-}
-
-// DeleteConnectionArgs ..
-type DeleteConnectionArgs struct {
-	ID     string `json:"id"`
-	Logout bool   `json:"logout"`
-}
-
-// Delete ...
-func (cs ConnectionService) Delete(r *http.Request, args *DeleteConnectionArgs, reply *struct{}) error {
-	delete(connections, args.ID)
-	connections.Stash()
-	if session, ok := sessions[args.ID]; !ok {
-		if session.Active() && args.Logout {
-			sessions[args.ID].Close()
-			delete(sessions, args.ID)
-		}
-		return nil
-	}
-
 	return nil
 }
 
