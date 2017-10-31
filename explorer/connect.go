@@ -36,7 +36,8 @@ type Connection struct {
 	Username    string `json:"username"`
 	Password    string `json:"password"`
 	UserAgent   string `json:"user-agent"`
-	UserAgentPw string `json:"user-agent-pw"`
+	UserAgentPw string `json:"user-agent-password"`
+	Proxy       string `json:"proxy"`
 	Version     string `json:"rets-version"`
 }
 
