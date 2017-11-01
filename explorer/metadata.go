@@ -13,9 +13,7 @@ import (
 )
 
 // MetadataService ...
-type MetadataService struct {
-	Configs map[string]Config
-}
+type MetadataService struct{}
 
 // MetadataResponse ...
 type MetadataResponse struct {
@@ -24,7 +22,7 @@ type MetadataResponse struct {
 
 // MetadataGetParams ...
 type MetadataGetParams struct {
-	ID         string `json:"id"`
+	Connection Config `json:"connection"`
 	Extraction string // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
 }
 
@@ -32,12 +30,9 @@ type MetadataGetParams struct {
 func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataResponse) error {
 	fmt.Printf("metadata get params: %v\n", args)
 
-	cfg, ok := ms.Configs[args.ID] // TOOD deal with bad lookup
-	if !ok {
-		return fmt.Errorf("no source found for %s", args.ID)
-	}
+	cfg := args.Connection
 	if JSONExist(cfg.MSystem()) {
-		fmt.Printf("found cached metadata for %s\n", args.ID)
+		fmt.Printf("found cached metadata for %s\n", cfg.ID)
 		standard := metadata.MSystem{}
 		JSONLoad(cfg.MSystem(), &standard)
 		reply.Metadata = standard
@@ -58,7 +53,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		return err
 	}
 	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
-		fmt.Printf("requesting remote metadata for %s\n", args.ID)
+		fmt.Printf("requesting remote metadata for %s\n", cfg.ID)
 		standard, err := op(ctx, r, u.GetMetadata)
 		reply.Metadata = *standard
 		// bg this

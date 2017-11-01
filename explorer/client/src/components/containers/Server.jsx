@@ -109,7 +109,7 @@ class Server extends React.Component {
     }
     console.log('no metadata cached');
     MetadataService
-      .get(this.state.shared.connection.id)
+      .get(this.state.shared.connection)
       .then(response => response.json())
       .then(json => {
         if (json.error !== null) {
