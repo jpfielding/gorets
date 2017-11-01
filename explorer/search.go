@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -74,6 +75,13 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 		defer result.Close()
 		if err != nil {
 			return nil
+		}
+		// non success rets codes should return an error
+		switch result.Response.Code {
+		case rets.StatusOK, rets.StatusNoRecords:
+		default: // shit hit the fan
+			fmt.Printf("Querying : %v\n", result.Response.Text)
+			return errors.New(result.Response.Text)
 		}
 		// opening the strea
 		reply.Columns = result.Columns

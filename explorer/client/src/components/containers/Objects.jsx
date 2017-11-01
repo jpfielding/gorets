@@ -43,7 +43,7 @@ class Objects extends React.Component {
 
   componentWillMount() {
     // TODO set inital state
-    const ock = `${this.props.shared.config.id}-search-history`;
+    const ock = `${this.props.shared.connection.id}-search-history`;
     let objectsHistory = StorageCache.getFromCache(ock) || [];
     if (objectsHistory && objectsHistory.length > 0) {
       objectsHistory = objectsHistory.filter((i) => (i.ids));
@@ -98,7 +98,7 @@ class Objects extends React.Component {
   }
 
   getObjectsByType(type) {
-    const id = this.props.shared.config.id;
+    const id = this.props.shared.connection.id;
     const { resource, ids } = this.state.objectsForm.value;
     const name = this.state.objectsHistoryName;
     this.setState({ objectsParams: { resource, type, ids, id, name } }, this.getObjects);
@@ -118,7 +118,7 @@ class Objects extends React.Component {
 
     this.setState({ objectsForm });
 
-    const ock = `${this.props.shared.config.id}-search-history`;
+    const ock = `${this.props.shared.connection.id}-search-history`;
     let objectsHistory = StorageCache.getFromCache(ock) || [];
     const objectsParams = this.state.objectsParams;
     if (!objectsParams.ids) {
@@ -135,7 +135,7 @@ class Objects extends React.Component {
     ).join(',');
     ObjectsService
       .getObjects({
-        id: this.props.shared.config.id,
+        id: this.props.shared.connection.id,
         resource: objectsParams.resource,
         type: objectsParams.type,
         objectid: contentId,
@@ -196,7 +196,7 @@ class Objects extends React.Component {
 
   removeHistoryElement(params) {
     console.log('[OBJECT] Removing history element');
-    const sck = `${this.props.shared.config.id}-search-history`;
+    const sck = `${this.props.shared.connection.id}-search-history`;
     let objectsHistory = StorageCache.getFromCache(sck) || [];
     if (some(objectsHistory, params)) {
       objectsHistory.splice(objectsHistory.findIndex(i => _.isEqual(i, params)), 1);

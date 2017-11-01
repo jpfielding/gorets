@@ -28,7 +28,7 @@ func main() {
 	// gorilla rpc
 	s := rpc.NewServer()
 	s.RegisterCodec(json.NewCodec(), "application/json")
-	s.RegisterService(&explorer.ConfigService{Configs: cfgs}, "")
+	s.RegisterService(&explorer.ConnectionService{Connections: cfgs}, "")
 	s.RegisterService(&explorer.MetadataService{Configs: cfgs}, "")
 	s.RegisterService(&explorer.SearchService{Configs: cfgs}, "")
 	s.RegisterService(&explorer.ObjectService{Configs: cfgs}, "")
