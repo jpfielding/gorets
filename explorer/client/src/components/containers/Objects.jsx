@@ -129,7 +129,7 @@ class Objects extends React.Component {
       return;
     }
 
-    const contentId = objectsParams.ids.split(',').map(
+    objectsParams.ids = objectsParams.ids.split(',').map(
       (i) => {
         if (i.indexOf(':') > -1) {
           return i;
@@ -138,12 +138,7 @@ class Objects extends React.Component {
       }
     ).join(',');
     ObjectsService
-      .getObjects({
-        connection: this.props.shared.connection,
-        resource: objectsParams.resource,
-        type: objectsParams.type,
-        objectid: contentId,
-      })
+      .getObjects(this.props.shared.connection, objectsParams)
       .then((res) => res.json())
       .then((json) => {
         if (!some(objectsHistory, objectsParams)) {

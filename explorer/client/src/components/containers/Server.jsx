@@ -107,13 +107,12 @@ class Server extends React.Component {
       onFound(md);
       return;
     }
-
-    console.log('no metadata cached, pulling COMPACT');
+    const args = {
+      extraction: 'COMPACT', // TODO configurable?
+    };
+    console.log('no metadata cached, pulling', args.extraction);
     MetadataService
-      .get({
-        connection: this.state.shared.connection,
-        extraction: 'COMPACT', // TODO configurable?
-      })
+      .get(this.state.shared.connection, args)
       .then(response => response.json())
       .then(json => {
         if (json.error !== null) {

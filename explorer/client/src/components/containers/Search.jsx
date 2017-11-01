@@ -248,7 +248,7 @@ class Search extends React.Component {
       return;
     }
     SearchService
-      .search(searchParams)
+      .search(this.props.shared.connection, searchParams)
       .then(res => res.json())
       .then(json => {
         if (!some(searchHistory, searchParams)) {

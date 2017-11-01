@@ -2,7 +2,6 @@ export default class SearchService {
 
   // search params
   static params = {
-    connection: null,  // the connection to process the query
     resource: null,
     class: null,
     select: null,
@@ -26,7 +25,7 @@ export default class SearchService {
   //  "error": "Foo Bar",
   //  "id":1
   // }
-  static search(args) {
+  static search(conn, args) {
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {
@@ -38,6 +37,8 @@ export default class SearchService {
         method: 'SearchService.Run',
         params: [{
           ...args,
+          connection: conn,
+          // are these useful?
           format: 'COMPACT-DECODED',
           querytype: 'DMQL2',
           counttype: 1,
