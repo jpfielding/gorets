@@ -64,13 +64,13 @@ export default class SearchHistory extends React.Component {
   }
 
   renderType() {
-    if(this.props.params['count-type'] >= 0){
+    if (this.props.params['count-type'] >= 0) {
       return (
         <div className="customResultsButtonTitle fr">
           {this.state.countTypes[this.props.params['count-type']]}
         </div>
       );
-    } else if (this.props.params.type){
+    } else if (this.props.params.type) {
       return (
         <div className="customResultsButtonTitle fr">
           {this.props.params.type}

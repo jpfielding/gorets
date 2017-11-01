@@ -216,7 +216,7 @@ class Search extends React.Component {
     const form = _.clone(this.state.searchForm.value);
     form['connection'] = this.props.shared.connection;
     form['count-type'] = countType;
-    // TODO is the switch necessary?  
+    // TODO is the switch necessary?
     if (this.state.searchHistoryName !== '') {
       form['name'] = this.state.searchHistoryName;
     } else {

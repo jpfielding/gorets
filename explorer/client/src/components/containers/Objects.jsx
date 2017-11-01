@@ -65,36 +65,30 @@ class Objects extends React.Component {
     }
   }
 
-  bindTabNameChange(tabName) {
-    this.setState({ tabName });
-  }
-
-  bindQueryNameChange(objectsHistoryName) {
-    this.setState({ objectsHistoryName });
-  }
-
-  createNewTab() {
-    let tabName = this.state.tabName;
-    if (tabName === '') {
-      tabName = `O${this.state.resultCount}`;
-      const resultCount = this.state.resultCount + 1;
-      this.setState({ resultCount });
+  getResource() {
+    if (!this.state.objectsForm) {
+      return [];
     }
-    console.log(`[OBJECT] Creating new tab of name ${tabName}`);
-    const { objects } = this.state;
-    const hasResult = (objects.result && objects.result['Objects'].length > 0);
-    this.props.addTab(tabName, (
-        <ul>
-          {hasResult
-            ? (
-              objects.result['Objects'].map(obj =>
-                this.renderPicture(obj)
-              )
-            )
-            : null
-          }
-        </ul>
-    ));
+    const rs = this.props.shared.metadata.System['METADATA-RESOURCE'].Resource.filter(
+      r => (r.ResourceID === this.state.objectsForm.value.resource)
+    );
+    if (rs.length === 0) {
+      return null;
+    }
+    return rs[0];
+  }
+
+  getObjectTypes() {
+    if (!this.state.objectsForm) {
+      return [];
+    }
+    const r = this.getResource();
+    if (r == null || !r['METADATA-OBJECT']['Object']) {
+      this.state.errorOut = `No Object Types found for ${this.state.objectsForm.value.resource}`;
+      return [];
+    }
+    this.state.errorOut = '';
+    return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
   }
 
   getObjectsByType(type) {
@@ -102,6 +96,16 @@ class Objects extends React.Component {
     const { resource, ids } = this.state.objectsForm.value;
     const name = this.state.objectsHistoryName;
     this.setState({ objectsParams: { resource, type, ids, id, name } }, this.getObjects);
+  }
+
+  getKeyFieldColumn() {
+    const { searchResultColumns } = this.state;
+    const keyField = this.getResource().KeyField;
+    const keyFieldCols = searchResultColumns.filter(c => (c.name === keyField));
+    if (keyFieldCols.length === 0) {
+      return null;
+    }
+    return keyFieldCols[0];
   }
 
   getObjects() {
@@ -158,40 +162,36 @@ class Objects extends React.Component {
       });
   }
 
-  getObjectTypes() {
-    if (!this.state.objectsForm) {
-      return [];
+  createNewTab() {
+    let tabName = this.state.tabName;
+    if (tabName === '') {
+      tabName = `O${this.state.resultCount}`;
+      const resultCount = this.state.resultCount + 1;
+      this.setState({ resultCount });
     }
-    const r = this.getResource();
-    if (r == null || !r['METADATA-OBJECT']['Object']) {
-      this.state.errorOut = `No Object Types found for ${this.state.objectsForm.value.resource}`;
-      return [];
-    }
-    this.state.errorOut = '';
-    return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
+    console.log(`[OBJECT] Creating new tab of name ${tabName}`);
+    const { objects } = this.state;
+    const hasResult = (objects.result && objects.result['Objects'].length > 0);
+    this.props.addTab(tabName, (
+      <ul>
+        {hasResult
+          ? (
+            objects.result['Objects'].map(obj =>
+              this.renderPicture(obj)
+            )
+          )
+          : null
+        }
+      </ul>
+    ));
   }
 
-  getKeyFieldColumn() {
-    const { searchResultColumns } = this.state;
-    const keyField = this.getResource().KeyField;
-    const keyFieldCols = searchResultColumns.filter(c => (c.name === keyField));
-    if (keyFieldCols.length === 0) {
-      return null;
-    }
-    return keyFieldCols[0];
+  bindTabNameChange(tabName) {
+    this.setState({ tabName });
   }
 
-  getResource() {
-    if (!this.state.objectsForm) {
-      return [];
-    }
-    const rs = this.props.shared.metadata.System['METADATA-RESOURCE'].Resource.filter(
-      r => (r.ResourceID === this.state.objectsForm.value.resource)
-    );
-    if (rs.length === 0) {
-      return null;
-    }
-    return rs[0];
+  bindQueryNameChange(objectsHistoryName) {
+    this.setState({ objectsHistoryName });
   }
 
   removeHistoryElement(params) {
@@ -266,7 +266,7 @@ class Objects extends React.Component {
               <div className="b nonclickable">Current Object Params</div>
             </div>
             <div className="customResultsBody">
-              <SearchHistory params={this.state.objectsParams} preventClose/>
+              <SearchHistory params={this.state.objectsParams} preventClose />
             </div>
           </div>
           <div className="customResultsCompactSet">

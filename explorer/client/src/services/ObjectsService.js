@@ -10,7 +10,7 @@ export default class ObjectsService {
   };
 
 
-  static getObjects(params) {
+  static getObjects(args) {
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {
@@ -21,7 +21,7 @@ export default class ObjectsService {
         id: 1,
         method: 'ObjectService.Get',
         params: [{
-          ...params,
+          ...args,
           location: 0,
         }],
       }),

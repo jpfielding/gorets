@@ -15,20 +15,18 @@ export default class SearchService {
     limit: null, // defaults to none
   };
 
-
-
   // {
-  //  "result": 
+  //  "result":
   //    {
-  //    "columns": "array", 
-  //    "row": "array of arrays", 
-  //    "maxRows": false, 
+  //    "columns": "array",
+  //    "row": "array of arrays",
+  //    "maxRows": false,
   //    "count":0}
   //    },
   //  "error": "Foo Bar",
   //  "id":1
   // }
-  static search(params) {
+  static search(args) {
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {
@@ -39,7 +37,7 @@ export default class SearchService {
         id: 1,
         method: 'SearchService.Run',
         params: [{
-          ...params,
+          ...args,
           format: 'COMPACT-DECODED',
           querytype: 'DMQL2',
           counttype: 1,

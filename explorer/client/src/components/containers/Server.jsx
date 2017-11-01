@@ -107,9 +107,15 @@ class Server extends React.Component {
       onFound(md);
       return;
     }
-    console.log('no metadata cached');
+
+    const args = MetadataService.params;
+    args.connection = this.state.shared.connection;
+    // TODO make this configurable since not everyone can use this type (see cornerstone.com)
+    args.extraction = 'COMPACT';
+
+    console.log('no metadata cached, pulling ', args.extraction);
     MetadataService
-      .get(this.state.shared.connection)
+      .get(args)
       .then(response => response.json())
       .then(json => {
         if (json.error !== null) {
