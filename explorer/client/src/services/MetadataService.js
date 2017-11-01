@@ -13,7 +13,7 @@ export default class MetadataService {
 
   // metadata params
   static params = {
-    id: null,  // the source to extract metadata for
+    connection: null,  // the connection info
     extraction: null,  // the extraction type to use (COMPACT-DECODED, COMPACT-INCREMENTAL, STANDARD-XML)
   }
 
@@ -28,7 +28,7 @@ export default class MetadataService {
         id: 1,
         method: 'MetadataService.Get',
         params: [{
-          connection: connection,
+          ...params,
         }],
       }),
     });
