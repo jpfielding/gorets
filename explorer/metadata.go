@@ -52,6 +52,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	if err != nil {
 		return err
 	}
+	defer sess.Close(ctx)
 	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		fmt.Printf("requesting remote metadata for %s\n", cfg.ID)
 		standard, err := op(ctx, r, u.GetMetadata)

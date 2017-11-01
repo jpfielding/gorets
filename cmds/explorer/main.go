@@ -30,7 +30,7 @@ func main() {
 	s.RegisterCodec(json.NewCodec(), "application/json")
 	s.RegisterService(&explorer.ConnectionService{Connections: cfgs}, "")
 	s.RegisterService(&explorer.MetadataService{}, "")
-	s.RegisterService(&explorer.SearchService{Configs: cfgs}, "")
+	s.RegisterService(&explorer.SearchService{}, "")
 	s.RegisterService(&explorer.ObjectService{Configs: cfgs}, "")
 
 	cors := handlers.CORS(

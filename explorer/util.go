@@ -105,11 +105,12 @@ type Session struct {
 }
 
 // Close is an io.Closer
+// TODO remove need for context to help it match up with io.Closer
 func (s *Session) Close(ctx context.Context) error {
 	_, err := rets.Logout(ctx, s.requester, rets.LogoutRequest{URL: s.urls.Logout})
+	s.closer.Close()
 	s.closer = nil
 	s.requester = nil
-	s.closer.Close()
 	return err
 }
 

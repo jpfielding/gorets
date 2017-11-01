@@ -2,7 +2,7 @@ export default class SearchService {
 
   // search params
   static params = {
-    id: null,  // the source to query
+    connection: null,  // the connection to process the query
     resource: null,
     class: null,
     select: null,

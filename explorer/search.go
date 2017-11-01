@@ -11,16 +11,16 @@ import (
 
 // SearchArgs ...
 type SearchArgs struct {
-	ID        string `json:"id"`
-	Resource  string `json:"resource"`
-	Class     string `json:"class"`
-	Format    string `json:"format"`
-	Select    string `json:"select"`
-	CountType int    `json:"count-type"`
-	Offset    int    `json:"offset"`
-	Limit     int    `json:"limit"`
-	Query     string `json:"query"`
-	QueryType string `json:"query-type"`
+	Connection Config `json:"connection"`
+	Resource   string `json:"resource"`
+	Class      string `json:"class"`
+	Format     string `json:"format"`
+	Select     string `json:"select"`
+	CountType  int    `json:"count-type"`
+	Offset     int    `json:"offset"`
+	Limit      int    `json:"limit"`
+	Query      string `json:"query"`
+	QueryType  string `json:"query-type"`
 }
 
 // SearchPage ...
@@ -32,23 +32,18 @@ type SearchPage struct {
 }
 
 // SearchService ...
-type SearchService struct {
-	Configs map[string]Config
-}
+type SearchService struct{}
 
 // Run ....
 func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage) error {
 	fmt.Printf("search run params: %v\n", args)
 	if args.QueryType == "" {
-		args.QueryType = "DQML2"
+		args.QueryType = "DMQL2"
 	}
 	if args.Format == "" {
 		args.Format = "COMPACT_DECODED"
 	}
-	cfg, ok := ms.Configs[args.ID]
-	if !ok {
-		return fmt.Errorf("no source found for %s", args.ID)
-	}
+	cfg := args.Connection
 	ctx := context.Background()
 	sess, err := cfg.Connect(ctx)
 	if err != nil {
