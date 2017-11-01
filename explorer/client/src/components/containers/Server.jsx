@@ -108,14 +108,12 @@ class Server extends React.Component {
       return;
     }
 
-    const args = MetadataService.params;
-    args.connection = this.state.shared.connection;
-    // TODO make this configurable since not everyone can use this type (see cornerstone.com)
-    args.extraction = 'COMPACT';
-
-    console.log('no metadata cached, pulling ', args.extraction);
+    console.log('no metadata cached, pulling COMPACT');
     MetadataService
-      .get(args)
+      .get({
+        connection: this.state.shared.connection,
+        extraction: 'COMPACT', // TODO configurable?
+      })
       .then(response => response.json())
       .then(json => {
         if (json.error !== null) {

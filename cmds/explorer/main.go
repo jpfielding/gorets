@@ -31,7 +31,7 @@ func main() {
 	s.RegisterService(&explorer.ConnectionService{Connections: cfgs}, "")
 	s.RegisterService(&explorer.MetadataService{}, "")
 	s.RegisterService(&explorer.SearchService{}, "")
-	s.RegisterService(&explorer.ObjectService{Configs: cfgs}, "")
+	s.RegisterService(&explorer.ObjectService{}, "")
 
 	cors := handlers.CORS(
 		handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "HEAD"}),

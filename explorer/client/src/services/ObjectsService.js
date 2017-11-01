@@ -2,7 +2,7 @@ export default class ObjectsService {
 
   // parameters for the objects request
   static params = {
-    id: null, // source
+    connection: null, // connection that processes the query
     resource: null,
     ids: null,  // <id-1>:*,<id-2>:1,<id-2>:2
     type: null, // Photo | HiRes, depends on the server metadata

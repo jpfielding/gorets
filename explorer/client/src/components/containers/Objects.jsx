@@ -139,7 +139,7 @@ class Objects extends React.Component {
     ).join(',');
     ObjectsService
       .getObjects({
-        id: this.props.shared.connection.id,
+        connection: this.props.shared.connection,
         resource: objectsParams.resource,
         type: objectsParams.type,
         objectid: contentId,
