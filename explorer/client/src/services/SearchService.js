@@ -16,6 +16,18 @@ export default class SearchService {
   };
 
 
+
+  // {
+  //  "result": 
+  //    {
+  //    "columns": "array", 
+  //    "row": "array of arrays", 
+  //    "maxRows": false, 
+  //    "count":0}
+  //    },
+  //  "error": "Foo Bar",
+  //  "id":1
+  // }
   static search(params) {
     return fetch(`${config.api}/rpc`, {
       method: 'POST',

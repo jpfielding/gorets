@@ -168,6 +168,14 @@ class Search extends React.Component {
     // Search Results table setup
     const { searchResults } = this.state;
     if (!searchResults.result) {
+      if (searchResults.error) {
+        this.setState({ errorOut: searchResults.error });
+      } else {
+        this.setState({ errorOut: 'No Results Found' });
+      }
+      return;
+    }
+    if (searchResults.error) {
       this.setState({ errorOut: 'No Results Found' });
       return;
     }
