@@ -41,7 +41,8 @@ class Search extends React.Component {
       value: {
         resource: props.shared.resource.ResourceID,
         class: props.shared.class.ClassName,
-        query: null,
+        query: '',
+        limit: 100,
       },
       onChange: this.searchInputsChange.bind(this),
     });
@@ -231,6 +232,7 @@ class Search extends React.Component {
     searchForm.value.class = searchParams.class;
     searchForm.value.query = searchParams.query;
     searchForm.value.select = searchParams.select;
+    searchForm.value.limit = searchParams.limit;
     const searchHistoryName = searchParams.name;
 
     const sck = `${this.props.shared.connection.id}-search-history`;
@@ -358,6 +360,9 @@ class Search extends React.Component {
                   <Input className="w-30 pa1 b--none outline-transparent" />
                 </Field>
                 <Field select="select" label="Columns">
+                  <Input className="w-80 pa1 b--none outline-transparent" />
+                </Field>
+                <Field select="limit" label="Limit">
                   <Input className="w-80 pa1 b--none outline-transparent" />
                 </Field>
                 <Field select="query" label="Query">

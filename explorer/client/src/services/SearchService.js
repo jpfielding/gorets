@@ -12,7 +12,7 @@ export default class SearchService {
     counttype: 0, // defaults = 0 (none)
     querytype: 'DMQL2', // defaults to DMQL2
     offset: 1, // defaults to 1
-    limit: null, // defaults to none
+    limit: 1000, // defaults to none
   };
 
   // {
