@@ -31,13 +31,13 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	fmt.Printf("metadata get params: %v\n", args)
 
 	cfg := args.Connection
-	if JSONExist(cfg.MSystem()) {
-		fmt.Printf("found cached metadata for %s\n", cfg.ID)
-		standard := metadata.MSystem{}
-		JSONLoad(cfg.MSystem(), &standard)
-		reply.Metadata = standard
-		return nil
-	}
+	// if JSONExist(cfg.MSystem()) {
+	// 	fmt.Printf("found cached metadata for %s\n", cfg.ID)
+	// 	standard := metadata.MSystem{}
+	// 	JSONLoad(cfg.MSystem(), &standard)
+	// 	reply.Metadata = standard
+	// 	return nil
+	// }
 	// lookup the operation for pulling metadata
 	if args.Extraction == "" {
 		// TODO deal with sources not supporting the default type

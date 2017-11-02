@@ -13,7 +13,7 @@ type ObjectParams struct {
 	Connection Config `json:"connection"`
 	Resource   string `json:"resource"`
 	Type       string `json:"type"`
-	ObjectID   string `json:"ids"`
+	ID         string `json:"ids"`
 	Location   int    `json:"location"` // setting to 1 requests the URL to the photo
 }
 
@@ -59,7 +59,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 			GetObjectParams: rets.GetObjectParams{
 				Resource: args.Resource,
 				Type:     args.Type,
-				ID:       args.ObjectID,
+				ID:       args.ID,
 			},
 		})
 		if err != nil {
