@@ -41,7 +41,8 @@ class Search extends React.Component {
       value: {
         resource: props.shared.resource.ResourceID,
         class: props.shared.class.ClassName,
-        query: null,
+        query: '',
+        limit: 100,
       },
       onChange: this.searchInputsChange.bind(this),
     });
@@ -168,6 +169,14 @@ class Search extends React.Component {
     // Search Results table setup
     const { searchResults } = this.state;
     if (!searchResults.result) {
+      if (searchResults.error) {
+        this.setState({ errorOut: searchResults.error });
+      } else {
+        this.setState({ errorOut: 'No Results Found' });
+      }
+      return;
+    }
+    if (searchResults.error) {
       this.setState({ errorOut: 'No Results Found' });
       return;
     }
@@ -206,8 +215,9 @@ class Search extends React.Component {
 
   submitSearchForm(countType) {
     const form = _.clone(this.state.searchForm.value);
-    form['id'] = this.props.shared.connection.id;
+    form['connection'] = this.props.shared.connection;
     form['count-type'] = countType;
+    // TODO is the switch necessary?
     if (this.state.searchHistoryName !== '') {
       form['name'] = this.state.searchHistoryName;
     } else {
@@ -222,6 +232,7 @@ class Search extends React.Component {
     searchForm.value.class = searchParams.class;
     searchForm.value.query = searchParams.query;
     searchForm.value.select = searchParams.select;
+    searchForm.value.limit = searchParams.limit;
     const searchHistoryName = searchParams.name;
 
     const sck = `${this.props.shared.connection.id}-search-history`;
@@ -237,7 +248,7 @@ class Search extends React.Component {
       return;
     }
     SearchService
-      .search(searchParams)
+      .search(this.props.shared.connection, searchParams)
       .then(res => res.json())
       .then(json => {
         if (!some(searchHistory, searchParams)) {
@@ -349,6 +360,9 @@ class Search extends React.Component {
                   <Input className="w-30 pa1 b--none outline-transparent" />
                 </Field>
                 <Field select="select" label="Columns">
+                  <Input className="w-80 pa1 b--none outline-transparent" />
+                </Field>
+                <Field select="limit" label="Limit">
                   <Input className="w-80 pa1 b--none outline-transparent" />
                 </Field>
                 <Field select="query" label="Query">

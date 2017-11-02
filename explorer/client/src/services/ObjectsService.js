@@ -2,7 +2,6 @@ export default class ObjectsService {
 
   // parameters for the objects request
   static params = {
-    id: null, // source
     resource: null,
     ids: null,  // <id-1>:*,<id-2>:1,<id-2>:2
     type: null, // Photo | HiRes, depends on the server metadata
@@ -10,7 +9,7 @@ export default class ObjectsService {
   };
 
 
-  static getObjects(params) {
+  static getObjects(conn, args) {
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {
@@ -21,8 +20,8 @@ export default class ObjectsService {
         id: 1,
         method: 'ObjectService.Get',
         params: [{
-          ...params,
-          location: 0,
+          ...args,
+          connection: conn,
         }],
       }),
     });

@@ -2,7 +2,6 @@ export default class SearchService {
 
   // search params
   static params = {
-    id: null,  // the source to query
     resource: null,
     class: null,
     select: null,
@@ -12,11 +11,21 @@ export default class SearchService {
     counttype: 0, // defaults = 0 (none)
     querytype: 'DMQL2', // defaults to DMQL2
     offset: 1, // defaults to 1
-    limit: null, // defaults to none
+    limit: 1000, // defaults to none
   };
 
-
-  static search(params) {
+  // {
+  //  "result":
+  //    {
+  //    "columns": "array",
+  //    "row": "array of arrays",
+  //    "maxRows": false,
+  //    "count":0}
+  //    },
+  //  "error": "Foo Bar",
+  //  "id":1
+  // }
+  static search(conn, args) {
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {
@@ -27,7 +36,9 @@ export default class SearchService {
         id: 1,
         method: 'SearchService.Run',
         params: [{
-          ...params,
+          ...args,
+          connection: conn,
+          // are these useful?
           format: 'COMPACT-DECODED',
           querytype: 'DMQL2',
           counttype: 1,

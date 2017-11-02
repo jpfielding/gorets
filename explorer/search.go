@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -10,16 +11,16 @@ import (
 
 // SearchArgs ...
 type SearchArgs struct {
-	ID        string `json:"id"`
-	Resource  string `json:"resource"`
-	Class     string `json:"class"`
-	Format    string `json:"format"`
-	Select    string `json:"select"`
-	CountType int    `json:"count-type"`
-	Offset    int    `json:"offset"`
-	Limit     int    `json:"limit"`
-	Query     string `json:"query"`
-	QueryType string `json:"query-type"`
+	Connection Config `json:"connection"`
+	Resource   string `json:"resource"`
+	Class      string `json:"class"`
+	Format     string `json:"format"`
+	Select     string `json:"select"`
+	CountType  int    `json:"count-type"`
+	Offset     int    `json:"offset"`
+	Limit      int    `json:"limit"`
+	Query      string `json:"query"`
+	QueryType  string `json:"query-type"`
 }
 
 // SearchPage ...
@@ -37,18 +38,19 @@ type SearchService struct{}
 func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage) error {
 	fmt.Printf("search run params: %v\n", args)
 	if args.QueryType == "" {
-		args.QueryType = "DQML2"
+		args.QueryType = "DMQL2"
 	}
 	if args.Format == "" {
 		args.Format = "COMPACT_DECODED"
 	}
-	s := sessions.Open(args.ID)
-	if s == nil {
-		return fmt.Errorf("no source found for %s", args.ID)
-	}
-	fmt.Printf("%v\n", s.Connection)
+	cfg := args.Connection
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
+	sess, err := cfg.Connect(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%v\n", cfg)
+	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		req := rets.SearchRequest{
 			URL: u.Search,
 			SearchParams: rets.SearchParams{
@@ -68,6 +70,13 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 		defer result.Close()
 		if err != nil {
 			return nil
+		}
+		// non success rets codes should return an error
+		switch result.Response.Code {
+		case rets.StatusOK, rets.StatusNoRecords:
+		default: // shit hit the fan
+			fmt.Printf("Querying : %v\n", result.Response.Text)
+			return errors.New(result.Response.Text)
 		}
 		// opening the strea
 		reply.Columns = result.Columns

@@ -10,11 +10,11 @@ import (
 
 // ObjectParams ...
 type ObjectParams struct {
-	ID       string `json:"id"`
-	Resource string `json:"resource"`
-	Type     string `json:"type"`
-	ObjectID string `json:"objectid"`
-	Location int    `json:"location"` // setting to 1 requests the URL to the photo
+	Connection Config `json:"connection"`
+	Resource   string `json:"resource"`
+	Type       string `json:"type"`
+	ObjectID   string `json:"objectid"`
+	Location   int    `json:"location"` // setting to 1 requests the URL to the photo
 }
 
 // Objects ...
@@ -45,12 +45,14 @@ type ObjectService struct{}
 func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects) error {
 	fmt.Printf("object get params: %v\n", args)
 
-	s := sessions.Open(args.ID)
-	if s == nil {
-		return fmt.Errorf("no source found for %s", args.ID)
-	}
+	cfg := args.Connection
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
+	sess, err := cfg.Connect(ctx)
+	if err != nil {
+		return err
+	}
+	defer sess.Close(ctx)
+	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		// warning, this does _all_ of the photos
 		rsp, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
 			URL: u.GetObject,

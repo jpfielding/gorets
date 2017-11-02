@@ -20,29 +20,9 @@ type MetadataResponse struct {
 	Metadata metadata.MSystem
 }
 
-// MetadataHeadParams ...
-type MetadataHeadParams struct {
-	ID string `json:"id"`
-}
-
-// Head ....
-func (ms MetadataService) Head(r *http.Request, args *MetadataHeadParams, reply *MetadataResponse) error {
-	fmt.Printf("metadat head params: %v\n", args)
-	s := sessions.Open(args.ID)
-	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
-		head, err := head(r, ctx, u.GetMetadata)
-		if err != nil {
-			return err
-		}
-		reply.Metadata = *head
-		return err
-	})
-}
-
 // MetadataGetParams ...
 type MetadataGetParams struct {
-	ID         string `json:"id"`
+	Connection Config `json:"connection"`
 	Extraction string // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
 }
 
@@ -50,19 +30,17 @@ type MetadataGetParams struct {
 func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *MetadataResponse) error {
 	fmt.Printf("metadata get params: %v\n", args)
 
-	s := sessions.Open(args.ID)
-	if s == nil {
-		return fmt.Errorf("no source found for %s", args.ID)
-	}
-	if JSONExist(s.MSystem()) {
-		fmt.Printf("found cached metadata for %s\n", args.ID)
+	cfg := args.Connection
+	if JSONExist(cfg.MSystem()) {
+		fmt.Printf("found cached metadata for %s\n", cfg.ID)
 		standard := metadata.MSystem{}
-		JSONLoad(s.MSystem(), &standard)
+		JSONLoad(cfg.MSystem(), &standard)
 		reply.Metadata = standard
 		return nil
 	}
 	// lookup the operation for pulling metadata
 	if args.Extraction == "" {
+		// TODO deal with sources not supporting the default type
 		args.Extraction = "COMPACT"
 	}
 	op, ok := options[args.Extraction]
@@ -70,13 +48,18 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		return fmt.Errorf("%s not supported", args.Extraction)
 	}
 	ctx := context.Background()
-	return s.Exec(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
-		fmt.Printf("requesting remote metadata for %s\n", args.ID)
+	sess, err := cfg.Connect(ctx)
+	if err != nil {
+		return err
+	}
+	defer sess.Close(ctx)
+	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
+		fmt.Printf("requesting remote metadata for %s\n", cfg.ID)
 		standard, err := op(ctx, r, u.GetMetadata)
 		reply.Metadata = *standard
 		// bg this
 		go func() {
-			JSONStore(s.MSystem(), &standard)
+			JSONStore(cfg.MSystem(), &standard)
 		}()
 		return err
 	})

@@ -65,11 +65,47 @@ class Objects extends React.Component {
     }
   }
 
+  getResource() {
+    if (!this.state.objectsForm) {
+      return [];
+    }
+    const rs = this.props.shared.metadata.System['METADATA-RESOURCE'].Resource.filter(
+      r => (r.ResourceID === this.state.objectsForm.value.resource)
+    );
+    if (rs.length === 0) {
+      return null;
+    }
+    return rs[0];
+  }
+
+  getObjectTypes() {
+    if (!this.state.objectsForm) {
+      return [];
+    }
+    const r = this.getResource();
+    if (r == null || !r['METADATA-OBJECT']['Object']) {
+      this.state.errorOut = `No Object Types found for ${this.state.objectsForm.value.resource}`;
+      return [];
+    }
+    this.state.errorOut = '';
+    return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
+  }
+
   getObjectsByType(type) {
     const id = this.props.shared.connection.id;
     const { resource, ids } = this.state.objectsForm.value;
     const name = this.state.objectsHistoryName;
     this.setState({ objectsParams: { resource, type, ids, id, name } }, this.getObjects);
+  }
+
+  getKeyFieldColumn() {
+    const { searchResultColumns } = this.state;
+    const keyField = this.getResource().KeyField;
+    const keyFieldCols = searchResultColumns.filter(c => (c.name === keyField));
+    if (keyFieldCols.length === 0) {
+      return null;
+    }
+    return keyFieldCols[0];
   }
 
   getObjects() {
@@ -93,7 +129,7 @@ class Objects extends React.Component {
       return;
     }
 
-    const contentId = objectsParams.ids.split(',').map(
+    objectsParams.ids = objectsParams.ids.split(',').map(
       (i) => {
         if (i.indexOf(':') > -1) {
           return i;
@@ -102,12 +138,7 @@ class Objects extends React.Component {
       }
     ).join(',');
     ObjectsService
-      .getObjects({
-        id: this.props.shared.connection.id,
-        resource: objectsParams.resource,
-        type: objectsParams.type,
-        objectid: contentId,
-      })
+      .getObjects(this.props.shared.connection, objectsParams)
       .then((res) => res.json())
       .then((json) => {
         if (!some(objectsHistory, objectsParams)) {
@@ -126,40 +157,36 @@ class Objects extends React.Component {
       });
   }
 
-  getObjectTypes() {
-    if (!this.state.objectsForm) {
-      return [];
+  createNewTab() {
+    let tabName = this.state.tabName;
+    if (tabName === '') {
+      tabName = `O${this.state.resultCount}`;
+      const resultCount = this.state.resultCount + 1;
+      this.setState({ resultCount });
     }
-    const r = this.getResource();
-    if (r == null || !r['METADATA-OBJECT']['Object']) {
-      this.state.errorOut = `No Object Types found for ${this.state.objectsForm.value.resource}`;
-      return [];
-    }
-    this.state.errorOut = '';
-    return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
+    console.log(`[OBJECT] Creating new tab of name ${tabName}`);
+    const { objects } = this.state;
+    const hasResult = (objects.result && objects.result['Objects'].length > 0);
+    this.props.addTab(tabName, (
+      <ul>
+        {hasResult
+          ? (
+            objects.result['Objects'].map(obj =>
+              this.renderPicture(obj)
+            )
+          )
+          : null
+        }
+      </ul>
+    ));
   }
 
-  getKeyFieldColumn() {
-    const { searchResultColumns } = this.state;
-    const keyField = this.getResource().KeyField;
-    const keyFieldCols = searchResultColumns.filter(c => (c.name === keyField));
-    if (keyFieldCols.length === 0) {
-      return null;
-    }
-    return keyFieldCols[0];
+  bindTabNameChange(tabName) {
+    this.setState({ tabName });
   }
 
-  getResource() {
-    if (!this.state.objectsForm) {
-      return [];
-    }
-    const rs = this.props.shared.metadata.System['METADATA-RESOURCE'].Resource.filter(
-      r => (r.ResourceID === this.state.objectsForm.value.resource)
-    );
-    if (rs.length === 0) {
-      return null;
-    }
-    return rs[0];
+  bindQueryNameChange(objectsHistoryName) {
+    this.setState({ objectsHistoryName });
   }
 
   bindTabNameChange(tabName) {

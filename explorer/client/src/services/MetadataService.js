@@ -13,11 +13,10 @@ export default class MetadataService {
 
   // metadata params
   static params = {
-    id: null,  // the source to extract metadata for
     extraction: null,  // the extraction type to use (COMPACT-DECODED, COMPACT-INCREMENTAL, STANDARD-XML)
   }
 
-  static get(connectionId) {
+  static get(conn, args) {
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {
@@ -28,7 +27,8 @@ export default class MetadataService {
         id: 1,
         method: 'MetadataService.Get',
         params: [{
-          id: connectionId,
+          ...args,
+          connection: conn,
         }],
       }),
     });
