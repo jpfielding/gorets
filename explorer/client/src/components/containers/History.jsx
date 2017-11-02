@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class SearchHistory extends React.Component {
+export default class ContentHistory extends React.Component {
 
   static propTypes = {
     params: React.PropTypes.any,

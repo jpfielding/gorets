@@ -4,7 +4,7 @@ import some from 'lodash/some';
 import ObjectsService from 'services/ObjectsService';
 import StorageCache from 'util/StorageCache';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
-import SearchHistory from 'components/containers/SearchHistory';
+import ContentHistory from 'components/containers/History';
 import _ from 'underscore';
 
 class Objects extends React.Component {
@@ -258,7 +258,7 @@ class Objects extends React.Component {
               <div className="b nonclickable">Current Object Params</div>
             </div>
             <div className="customResultsBody">
-              <SearchHistory params={this.state.objectsParams} preventClose />
+              <ContentHistory params={this.state.objectsParams} preventClose />
             </div>
           </div>
           <div className="customResultsCompactSet">
@@ -269,7 +269,7 @@ class Objects extends React.Component {
               <ul className="pa0 ma0 no-list-style customListSpacing">
                 {this.state.objectsHistory.map(params =>
                   <li>
-                    <SearchHistory
+                    <ContentHistory
                       params={params}
                       removeHistoryElement={() => this.removeHistoryElement(params)}
                       clickHandle={() => this.search(params)}

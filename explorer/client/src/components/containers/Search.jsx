@@ -6,7 +6,7 @@ import some from 'lodash/some';
 import ReactDataGrid from 'react-data-grid';
 import MetadataService from 'services/MetadataService';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
-import SearchHistory from 'components/containers/SearchHistory';
+import ContentHistory from 'components/containers/History';
 import _ from 'underscore';
 
 class Search extends React.Component {
@@ -261,7 +261,7 @@ class Search extends React.Component {
           <div className="customTitle nonclickable">Results from Search query</div>
         </div>
         <div className="customResultsBody">
-          <SearchHistory
+          <ContentHistory
             params={this.state.searchParams}
           />
           <div className="pa3">
@@ -294,7 +294,7 @@ class Search extends React.Component {
             <div className="b nonclickable">Current Search Params</div>
           </div>
           <div className="customResultsBody">
-            <SearchHistory
+            <ContentHistory
               clickHandle={() => this.search(this.state.searchParams)}
               params={this.state.searchParams}
               preventClose
@@ -309,7 +309,7 @@ class Search extends React.Component {
             <ul className="pa0 ma0 no-list-style customListSpacing">
               {this.state.searchHistory.map(params =>
                 <li>
-                  <SearchHistory
+                  <ContentHistory
                     clickHandle={() => this.search(params)}
                     removeHistoryElement={() => this.removeHistoryElement(params)}
                     params={params}
