@@ -39,43 +39,47 @@ export default class Connections extends React.Component {
 
   render() {
     return (
-      <div className="pa2">
-        <h1 className="f4 tc nonclickable">Add a connection</h1>
-        <div className="flex flex-row justify-center">
-          <div className="b--solid w5 ba pa2 tc">
-            <Fieldset formValue={this.state.formValue}>
-              <Field select="url" label="Login URL">
-                <Input className="pa1 b--none outline-transparent" />
-              </Field>
-              <Field select="username" label="Username" >
-                <Input className="pa1 b--none outline-transparent" />
-              </Field>
-              <Field select="password" label="Password" Input={PasswordForm} >
-                <Input className="pa1 b--none outline-transparent" />
-              </Field>
-              <Field select="userAgent" label="User Agent" >
-                <Input className="pa1 b--none outline-transparent" />
-              </Field>
-              <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm} >
-                <Input className="pa1 b--none outline-transparent" />
-              </Field>
-              <Field select="version" label="Protocol Version" >
-                <Input className="pa1 b--none outline-transparent" />
-              </Field>
-              <Field select="proxy" label="Proxy (Socks5)" >
-                <Input className="pa1 b--none outline-transparent" />
-              </Field>
-              <Field select="id" label="Custom RETs Name" >
-                <Input className="pa1 b--none outline-transparent" />
-              </Field>
-              <button
-                onClick={this.onSubmit}
-                className="ma2 ba black bg-transparent b--black outline-transparent rd-focus clickable"
-              >
-                Submit
-              </button>
-            </Fieldset>
+      <div className="customResultsSet w-30 center mt3">
+        <div className="customResultsTitle">
+          <div className="customTitle tc">
+            Add a connection
           </div>
+        </div>
+        <div className="customResultsBody flex flex-row justify-center">
+          <Fieldset formValue={this.state.formValue}>
+            <Field select="url" label="Login URL">
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
+            <Field select="username" label="Username" >
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
+            <Field select="password" label="Password" Input={PasswordForm} >
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
+            <Field select="userAgent" label="User Agent" >
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
+            <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm} >
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
+            <Field select="version" label="Protocol Version" >
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
+            <Field select="proxy" label="Proxy (Socks5)" >
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
+            <Field select="id" label="Custom RETs Name" >
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
+          </Fieldset>
+        </div>
+        <div className="customResultsFoot">
+          <button
+            onClick={this.onSubmit}
+            className="customButton"
+          >
+            Submit
+          </button>
         </div>
       </div>
     );

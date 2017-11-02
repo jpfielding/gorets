@@ -363,6 +363,50 @@ a {
     }
 }
 
+.customHoverSection{
+  position: relative;
+  overflow: visible;
+  padding: 0px;
+  margin: 0px;
+  & > .customHoverBar{
+    position: relative;
+    z-index: 201;
+    height:30px;
+    padding: 5px 10px;
+    margin-right: 40px;
+    border: none;
+    background-color: var(--secondaryBackground);
+    color: var(--textColor);
+    border: 1px solid var(--textColor);
+    border-top: 0px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    font-weight: 600;
+  }
+  & > .customHoverBody{
+    display: none;
+    position: absolute;
+    z-index: 200;
+    right: 30px;
+    min-width: 400px;
+    background-color: var(--mainBackground);
+    color: var(--textColor);
+    border: 1px solid var(--textColor);
+    border-top: none;
+    padding: 20px;
+    padding-top: 40px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+  }
+  &:hover {
+    & > .customHoverBody {
+      display: block;
+    }
+    & > .customHoverBar{
+    }
+  }
+}
+
 .rd-focus:focus{
   color: var(--darkRed);
 }

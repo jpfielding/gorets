@@ -117,10 +117,7 @@ class Search extends React.Component {
 
   setSearchHistory(sh) {
     console.log('[SEARCH] Pulling new search history set', sh);
-    let searchHistory = _.clone(sh);
-    if (searchHistory && searchHistory.length > 0) {
-      searchHistory = searchHistory.filter((i) => (i.select));
-    }
+    const searchHistory = _.clone(sh);
     this.setState({
       searchHistory,
     });
@@ -129,13 +126,10 @@ class Search extends React.Component {
   removeHistoryElement(params) {
     console.log('[SEARCH] Removing history element');
     const sck = `${this.props.shared.connection.id}-search-history`;
-    let searchHistory = StorageCache.getFromCache(sck) || [];
+    const searchHistory = StorageCache.getFromCache(sck) || [];
     if (some(searchHistory, params)) {
       searchHistory.splice(searchHistory.findIndex(i => _.isEqual(i, params)), 1);
       StorageCache.putInCache(sck, searchHistory, 720);
-    }
-    if (searchHistory && searchHistory.length > 0) {
-      searchHistory = searchHistory.filter((i) => (i.select));
     }
     this.setState({
       searchHistory,

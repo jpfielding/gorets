@@ -6,6 +6,7 @@ import Objects from 'components/containers/Objects';
 import StorageCache from 'util/StorageCache';
 import MetadataService from 'services/MetadataService';
 import TabSection from 'components/containers/TabSection';
+import ConnectionForm from 'components/containers/ConnectionForm';
 import _ from 'underscore';
 
 class Server extends React.Component {
@@ -29,6 +30,7 @@ class Server extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       shared: {
         connection: props.connection,
@@ -44,6 +46,8 @@ class Server extends React.Component {
     this.onMetadataSelected = this.onMetadataSelected.bind(this);
     this.onMetadataDeselected = this.onMetadataDeselected.bind(this);
     this.onClassSelected = this.onClassSelected.bind(this);
+
+    this.updateConnection = this.updateConnection.bind(this);
 
     this.removeTab = this.removeTab.bind(this);
     this.addTab = this.addTab.bind(this);
@@ -111,6 +115,12 @@ class Server extends React.Component {
       });
   }
 
+  updateConnection(connection) {
+    const shared = _.clone(this.state.shared);
+    shared.connection = connection;
+    this.setState({ shared });
+  }
+
   errorOut(errorOut) {
     this.setState({ errorOut });
   }
@@ -150,6 +160,14 @@ class Server extends React.Component {
     );
     return (
       <div>
+        <div className="fr">
+          <div className="customHoverSection">
+            <button className="fr ma-3 customHoverBar"> Connection Config </button>
+            <div className="customHoverBody">
+              <ConnectionForm updateConnection={this.updateConnection} connection={this.state.shared.connection} />
+            </div>
+          </div>
+        </div>
         <div className={`bg-dark-red white br1 pa4 w-100 tc ${this.state.errorOut.length === 0 ? 'dn' : 'db'}`}>
           {this.state.errorOut}
         </div>

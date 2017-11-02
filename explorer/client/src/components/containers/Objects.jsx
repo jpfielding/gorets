@@ -44,10 +44,7 @@ class Objects extends React.Component {
   componentWillMount() {
     // TODO set inital state
     const ock = `${this.props.shared.connection.id}-object-history`;
-    let objectsHistory = StorageCache.getFromCache(ock) || [];
-    if (objectsHistory && objectsHistory.length > 0) {
-      objectsHistory = objectsHistory.filter((i) => (i.ids));
-    }
+    const objectsHistory = StorageCache.getFromCache(ock) || [];
     this.setState({
       objectsHistory,
     });
@@ -123,7 +120,7 @@ class Objects extends React.Component {
     this.setState({ objectsForm });
 
     const ock = `${this.props.shared.connection.id}-object-history`;
-    let objectsHistory = StorageCache.getFromCache(ock) || [];
+    const objectsHistory = StorageCache.getFromCache(ock) || [];
     const objectsParams = this.state.objectsParams;
     if (!objectsParams.ids) {
       return;
@@ -146,9 +143,6 @@ class Objects extends React.Component {
           StorageCache.putInCache(ock, objectsHistory, 720);
         }
         console.log(json);
-        if (objectsHistory && objectsHistory.length > 0) {
-          objectsHistory = objectsHistory.filter((i) => (i.ids));
-        }
         this.setState({
           objects: json,
           searching: false,
@@ -192,13 +186,10 @@ class Objects extends React.Component {
   removeHistoryElement(params) {
     console.log('[OBJECT] Removing history element');
     const sck = `${this.props.shared.connection.id}-object-history`;
-    let objectsHistory = StorageCache.getFromCache(sck) || [];
+    const objectsHistory = StorageCache.getFromCache(sck) || [];
     if (some(objectsHistory, params)) {
       objectsHistory.splice(objectsHistory.findIndex(i => _.isEqual(i, params)), 1);
       StorageCache.putInCache(sck, objectsHistory, 720);
-    }
-    if (objectsHistory && objectsHistory.length > 0) {
-      objectsHistory = objectsHistory.filter((i) => (i.ids));
     }
     this.setState({
       objectsHistory,
