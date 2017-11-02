@@ -47,6 +47,9 @@ export default class Connections extends React.Component {
         </div>
         <div className="customResultsBody flex flex-row justify-center">
           <Fieldset formValue={this.state.formValue}>
+          <Field select="id" label="ID (unique per config service)" >
+              <Input className="pa1 b--none outline-transparent" />
+            </Field>
             <Field select="url" label="Login URL">
               <Input className="pa1 b--none outline-transparent" />
             </Field>
@@ -66,9 +69,6 @@ export default class Connections extends React.Component {
               <Input className="pa1 b--none outline-transparent" />
             </Field>
             <Field select="proxy" label="Proxy (Socks5)" >
-              <Input className="pa1 b--none outline-transparent" />
-            </Field>
-            <Field select="id" label="Custom RETs Name" >
               <Input className="pa1 b--none outline-transparent" />
             </Field>
           </Fieldset>
