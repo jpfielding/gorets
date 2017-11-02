@@ -189,6 +189,38 @@ class Objects extends React.Component {
     this.setState({ objectsHistoryName });
   }
 
+  bindTabNameChange(tabName) {
+    this.setState({ tabName });
+  }
+
+  bindQueryNameChange(objectsHistoryName) {
+    this.setState({ objectsHistoryName });
+  }
+
+  createNewTab() {
+    let tabName = this.state.tabName;
+    if (tabName === '') {
+      tabName = `O${this.state.resultCount}`;
+      const resultCount = this.state.resultCount + 1;
+      this.setState({ resultCount });
+    }
+    console.log(`[OBJECT] Creating new tab of name ${tabName}`);
+    const { objects } = this.state;
+    const hasResult = (objects.result && objects.result['Objects'].length > 0);
+    this.props.addTab(tabName, (
+      <ul>
+        {hasResult
+            ? (
+              objects.result['Objects'].map(obj =>
+                this.renderPicture(obj)
+              )
+            )
+            : null
+          }
+      </ul>
+    ));
+  }
+
   removeHistoryElement(params) {
     console.log('[OBJECT] Removing history element');
     const sck = `${this.props.shared.connection.id}-object-history`;
@@ -203,6 +235,12 @@ class Objects extends React.Component {
     this.setState({
       objectsHistory,
     });
+  }
+
+  search(params) {
+    this.setState({
+      objectsParams: params,
+    }, this.getObjects);
   }
 
   searchInputsChange(objectsForm) {
@@ -275,12 +313,7 @@ class Objects extends React.Component {
                     <SearchHistory
                       params={params}
                       removeHistoryElement={() => this.removeHistoryElement(params)}
-                      clickHandle={() => {
-                        // TODO convert getObjects to accept params directly
-                        this.setState({
-                          objectsParams: params,
-                        }, this.getObjects);
-                      }}
+                      clickHandle={() => this.search(params)}
                     />
                   </li>
                   )}

@@ -109,7 +109,6 @@ class Metadata extends React.Component {
     this.setState({ filteredRows: rows });
   }
 
-  // TODO row selection and filters arent playing well together
   handleFilterChange = (filter) => {
     const newFilters = Object.assign({}, this.state.filters);
     if (filter.filterTerm) {
@@ -123,8 +122,6 @@ class Metadata extends React.Component {
     Object.keys(newFilters).forEach(newFilter => {
       const filterObj = newFilters[newFilter];
       if (filterObj.filterTerm) {
-        console.log(filterObj.filterTerm);
-        console.log('rowLen: ', rows.length);
         for (let i = rows.length - 1; i >= 0; i--) {
           const row = rows[i];
           const val = row[filterObj.column.key] || '';
@@ -192,8 +189,7 @@ class Metadata extends React.Component {
               onRowsSelected: this.onRowsSelected,
               onRowsDeselected: this.onRowsDeselected,
               selectBy: {
-                // TODO this does not deal with filter/sort
-                indexes: this.props.shared.fields.map(r => r.rowIdx),
+                keys: { rowKey: 'SystemName', values: this.props.shared.fields.map(r => r.row.SystemName) },
               },
             }}
           />
