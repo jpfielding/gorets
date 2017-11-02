@@ -42,7 +42,7 @@ class Search extends React.Component {
         resource: props.shared.resource.ResourceID,
         class: props.shared.class.ClassName,
         query: '',
-        limit: 100,
+        limit: 100, // TODO impliment
       },
       onChange: this.searchInputsChange.bind(this),
     });
@@ -211,12 +211,7 @@ class Search extends React.Component {
     const form = _.clone(this.state.searchForm.value);
     form['connection'] = this.props.shared.connection;
     form['count-type'] = countType;
-    // TODO is the switch necessary?
-    if (this.state.searchHistoryName !== '') {
-      form['name'] = this.state.searchHistoryName;
-    } else {
-      form['name'] = '';
-    }
+    form['name'] = this.state.searchHistoryName;
     this.search(form);
   }
 

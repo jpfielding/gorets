@@ -13,7 +13,7 @@ type ObjectParams struct {
 	Connection Config `json:"connection"`
 	Resource   string `json:"resource"`
 	Type       string `json:"type"`
-	ObjectID   string `json:"objectid"`
+	ObjectID   string `json:"ids"`
 	Location   int    `json:"location"` // setting to 1 requests the URL to the photo
 }
 

@@ -118,7 +118,14 @@ class Server extends React.Component {
   updateConnection(connection) {
     const shared = _.clone(this.state.shared);
     shared.connection = connection;
-    this.setState({ shared });
+    this.setState({ shared }, () => {
+      StorageCache.clearAll();
+      this.getMetadata(m => {
+        console.log('Setting ', m);
+        shared.metadata = m;
+        this.setState({ shared });
+      });
+    });
   }
 
   errorOut(errorOut) {
@@ -162,7 +169,7 @@ class Server extends React.Component {
       <div>
         <div className="fr">
           <div className="customHoverSection">
-            <button className="fr ma-3 customHoverBar"> Connection Config </button>
+            <div className="fr ma-3 customHoverBar"> Connection Config </div>
             <div className="customHoverBody">
               <ConnectionForm updateConnection={this.updateConnection} connection={this.state.shared.connection} />
             </div>

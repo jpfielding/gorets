@@ -4,6 +4,7 @@ import Autocomplete from 'react-autocomplete';
 import Connections from 'components/containers/Connections';
 import Server from 'components/containers/Server';
 import TabSection from 'components/containers/TabSection';
+import _ from 'underscore';
 
 export default class App extends React.Component {
 
@@ -15,6 +16,7 @@ export default class App extends React.Component {
       selected: {},
       connectionAutocompleteField: '',
     };
+    this.addTab = this.addTab.bind(this);
     this.updateConnectionList = this.updateConnectionList.bind(this);
     this.createTabList = this.createTabList.bind(this);
     this.createTabs = this.createTabs.bind(this);
@@ -41,14 +43,20 @@ export default class App extends React.Component {
   }
 
   createTabs() {
-    const rtn = [<Connections updateCallback={this.updateConnectionList} />];
+    const rtn = [<Connections addTab={this.addTab} />];
     Object.keys(this.state.active).map(id => (rtn.push(this.state.active[id])));
     return rtn;
   }
 
   removeTab(tab) {
-    const active = Object.assign({}, this.state.active);
+    const active = _.clone(this.state.active);
     delete active[tab];
+    this.setState({ active });
+  }
+
+  addTab(connection) {
+    const active = _.clone(this.state.active);
+    active[connection.id] = <Server connection={connection} />;
     this.setState({ active });
   }
 

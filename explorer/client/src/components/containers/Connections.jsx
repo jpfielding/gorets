@@ -1,12 +1,11 @@
 import React from 'react';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
-import ConnectionService from 'services/ConnectionService';
 import PasswordForm from 'components/utils/PasswordForm';
 
 export default class Connections extends React.Component {
 
   static propTypes = {
-    updateCallback: React.PropTypes.Func,
+    addTab: React.PropTypes.Func,
   }
 
   constructor(props) {
@@ -26,17 +25,10 @@ export default class Connections extends React.Component {
   }
 
   onSubmit = () => {
-    console.log('Submitting: ', this.state.formValue.value);
-    ConnectionService
-      .login(this.state.formValue.value)
-      .then(response => {
-        console.log(response);
-        this.props.updateCallback();
-      }).catch((err) => {
-        console.error(err);
-      });
+    console.log('Launching tab with: ', this.state.formValue.value);
+    this.props.addTab(this.state.formValue.value);
   }
-
+  // TODO Password fields dont seem to be playing nice with field elements.
   render() {
     return (
       <div className="customResultsSet w-30 center mt3">
