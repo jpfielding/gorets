@@ -92,10 +92,10 @@ class Objects extends React.Component {
   }
 
   getObjectsByType(type) {
-    const id = this.props.shared.connection.id;
+    const connection = this.props.shared.connection.id;
     const { resource, ids } = this.state.objectsForm.value;
     const name = this.state.objectsHistoryName;
-    this.setState({ objectsParams: { resource, type, ids, id, name } }, this.getObjects);
+    this.setState({ objectsParams: { resource, type, ids, connection, name } }, this.getObjects);
   }
 
   getKeyFieldColumn() {
@@ -112,11 +112,11 @@ class Objects extends React.Component {
     this.setState({ searching: true });
     const resource = this.state.objectsParams.resource;
     const type = this.state.objectsParams.type;
-    const id = this.state.objectsParams.id;
+    const connection = this.state.objectsParams.connection;
     const ids = this.state.objectsParams.ids;
 
     const objectsForm = createValue({
-      value: { resource, type, id, ids },
+      value: { resource, type, connection, ids },
       onChange: this.searchInputsChange.bind(this),
     });
 
@@ -187,38 +187,6 @@ class Objects extends React.Component {
 
   bindQueryNameChange(objectsHistoryName) {
     this.setState({ objectsHistoryName });
-  }
-
-  bindTabNameChange(tabName) {
-    this.setState({ tabName });
-  }
-
-  bindQueryNameChange(objectsHistoryName) {
-    this.setState({ objectsHistoryName });
-  }
-
-  createNewTab() {
-    let tabName = this.state.tabName;
-    if (tabName === '') {
-      tabName = `O${this.state.resultCount}`;
-      const resultCount = this.state.resultCount + 1;
-      this.setState({ resultCount });
-    }
-    console.log(`[OBJECT] Creating new tab of name ${tabName}`);
-    const { objects } = this.state;
-    const hasResult = (objects.result && objects.result['Objects'].length > 0);
-    this.props.addTab(tabName, (
-      <ul>
-        {hasResult
-            ? (
-              objects.result['Objects'].map(obj =>
-                this.renderPicture(obj)
-              )
-            )
-            : null
-          }
-      </ul>
-    ));
   }
 
   removeHistoryElement(params) {

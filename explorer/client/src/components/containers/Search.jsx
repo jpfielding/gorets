@@ -116,7 +116,7 @@ class Search extends React.Component {
   }
 
   setSearchHistory(sh) {
-    console.log('[SEARCH] Pulling new search history set');
+    console.log('[SEARCH] Pulling new search history set', sh);
     let searchHistory = _.clone(sh);
     if (searchHistory && searchHistory.length > 0) {
       searchHistory = searchHistory.filter((i) => (i.select));

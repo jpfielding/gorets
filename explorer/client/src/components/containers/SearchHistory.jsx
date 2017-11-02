@@ -14,6 +14,7 @@ export default class SearchHistory extends React.Component {
     super(props);
     this.state = {
       orderList: ['name', 'id', 'resource', 'class', 'select', 'count-type', 'query'],
+      exclude: ['connection'],
       countTypes: ['Submit', 'with Count', 'only Count'],
     };
     this.sortKeys = this.sortKeys.bind(this);
@@ -81,11 +82,11 @@ export default class SearchHistory extends React.Component {
   }
 
   render() {
-    if (this.props.params == null || !this.props.params.id) {
+    if (this.props.params == null || !this.props.params['connection']) {
       return <div />;
     }
     const body = Object.keys(this.props.params).sort(this.sortKeys).map((key) => {
-      if (key === 'name' || key === 'count-type' || key === 'type') {
+      if (key === 'name' || key === 'count-type' || key === 'type' || this.state.exclude.indexOf(key) !== -1) {
         return null;
       }
       return (
