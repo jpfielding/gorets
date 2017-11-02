@@ -6,6 +6,7 @@ import Objects from 'components/containers/Objects';
 import StorageCache from 'util/StorageCache';
 import MetadataService from 'services/MetadataService';
 import TabSection from 'components/containers/TabSection';
+import _ from 'underscore';
 
 class Server extends React.Component {
 
@@ -21,10 +22,11 @@ class Server extends React.Component {
       'METADATA-RESOURCE': {
         Resource: [],
       },
-      SystemDescription: 'Loading metadata...',
-      SystemID: 'Loading...',
+      SystemDescription: '',
+      SystemID: '',
     },
   };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -34,24 +36,24 @@ class Server extends React.Component {
         resource: {},
         class: {},
         fields: [],
-        data: [],
-        tabs: {},
       },
-      tab: 0,
+      tabs: {},
+      errorOut: '',
     };
     this.getMetadata = this.getMetadata.bind(this);
     this.onMetadataSelected = this.onMetadataSelected.bind(this);
     this.onMetadataDeselected = this.onMetadataDeselected.bind(this);
-    this.onDataSelected = this.onDataSelected.bind(this);
-    this.onDataDeselected = this.onDataDeselected.bind(this);
     this.onClassSelected = this.onClassSelected.bind(this);
+
     this.removeTab = this.removeTab.bind(this);
     this.addTab = this.addTab.bind(this);
+
+    this.errorOut = this.errorOut.bind(this);
   }
 
   componentWillMount() {
     this.getMetadata(m => {
-      console.log('setting ', m);
+      console.log('Setting ', m);
       const shared = this.state.shared;
       shared.metadata = m;
       this.setState({ shared });
@@ -59,39 +61,23 @@ class Server extends React.Component {
   }
 
   onMetadataSelected(rows) {
-    console.log('rows selected:', rows);
-    const shared = this.state.shared;
+    console.log('Rows selected:', rows);
+    const shared = _.clone(this.state.shared);
     shared.fields = shared.fields.concat(rows);
     this.setState({ shared });
-    console.log('rows:', shared.fields);
+    console.log('Rows:', shared.fields);
   }
 
   onMetadataDeselected(rows) {
-    console.log('rows deselected:', rows);
-    const shared = this.state.shared;
+    console.log('Rows deselected:', rows);
+    const shared = _.clone(this.state.shared);
     shared.fields = shared.fields.filter(i => rows.map(r => r.row).indexOf(i.row) === -1);
     this.setState({ shared });
-    console.log('rows:', shared.fields);
-  }
-
-  onDataSelected(rows) {
-    console.log('rows selected:', rows);
-    const shared = this.state.shared;
-    shared.data = shared.fields.concat(rows);
-    this.setState({ shared });
-    console.log('rows:', shared.data);
-  }
-
-  onDataDeselected(rows) {
-    console.log('rows deselected:', rows);
-    const shared = this.state.shared;
-    shared.data = shared.data.filter(i => rows.map(r => r.row).indexOf(i.row) === -1);
-    this.setState({ shared });
-    console.log('rows:', shared.data);
+    console.log('Rows:', shared.fields);
   }
 
   onClassSelected(res, cls) {
-    console.log('class selected:', res, cls);
+    console.log('Class selected:', res, cls);
     const shared = this.state.shared;
     shared.resource = res;
     shared.class = cls;
@@ -103,22 +89,27 @@ class Server extends React.Component {
     const ck = `${this.state.shared.connection.id}-metadata`;
     const md = StorageCache.getFromCache(ck);
     if (md) {
-      console.log('loaded metadata from local cache', md);
+      console.log('[SERVER] Loaded metadata from local cache', md);
       onFound(md);
       return;
     }
-    console.log('no metadata cached');
+    console.log('[SERVER] No metadata cached');
     MetadataService
       .get(this.state.shared.connection.id)
       .then(response => response.json())
       .then(json => {
         if (json.error !== null) {
+          this.errorOut(`[ERROR]  ${json.error}`);
           return;
         }
-        console.log('metadata pulled via json request');
+        console.log('[SERVER] Metadata pulled via json request');
         onFound(json.result.Metadata);
         StorageCache.putInCache(ck, json.result.Metadata, 60);
       });
+  }
+
+  errorOut(errorOut) {
+    this.setState({ errorOut });
   }
 
   addTab(key, value) {
@@ -147,8 +138,6 @@ class Server extends React.Component {
       />,
       <Search
         shared={this.state.shared}
-        onRowsSelected={this.onDataSelected}
-        onRowsDeselected={this.onDataDeselected}
         addTab={this.addTab}
       />,
       <Objects
@@ -157,13 +146,23 @@ class Server extends React.Component {
       />
     );
     return (
-      <TabSection
-        names={names}
-        components={components}
-        enableRemove
-        onRemove={this.removeTab}
-        removeOffset={3}
-      />
+      <div>
+        <div className={`bg-dark-red white br1 pa4 w-100 tc ${this.state.errorOut.length === 0 ? 'dn' : 'db'}`}>
+          {this.state.errorOut}
+        </div>
+        <div className={`${this.state.shared.metadata.System.SystemID.length === 0 ? 'dn' : 'db'}`}>
+          <TabSection
+            names={names}
+            components={components}
+            enableRemove
+            onRemove={this.removeTab}
+            removeOffset={3}
+          />
+        </div>
+        <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>
+          <div className="loading">LOADING METADATA</div>
+        </div>
+      </div>
     );
   }
 }

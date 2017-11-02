@@ -366,3 +366,34 @@ a {
 .rd-focus:focus{
   color: var(--darkRed);
 }
+
+@keyframes load{
+    0%   {background-color: var(--textColor); right:0;}
+    50%  {background-color: var(--darkRed);right:45%;}
+    100%  {background-color: var(--textColor);right:90%;}
+}
+
+.loading-wrap{
+  position: relative;
+  text-align: center;
+  padding: 50px 200px;
+  & .loading{
+    position: relative;
+    font-size: 200%;
+    &::after{
+      content: '';
+      display: block;
+      position: absolute;
+      background-color:var(--textColor);
+      width:10%;
+      height: 3px;
+      bottom: -3px;
+      right:0px;
+      animation-name: load;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+      animation-timing-function: ease-in-out;
+    }
+  }
+}
