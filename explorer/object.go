@@ -5,16 +5,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/jpfielding/gorets/config"
 	"github.com/jpfielding/gorets/rets"
 )
 
 // ObjectParams ...
 type ObjectParams struct {
-	Connection Config `json:"connection"`
-	Resource   string `json:"resource"`
-	Type       string `json:"type"`
-	ID         string `json:"ids"`
-	Location   int    `json:"location"` // setting to 1 requests the URL to the photo
+	Connection config.Config `json:"connection"`
+	Resource   string        `json:"resource"`
+	Type       string        `json:"type"`
+	ID         string        `json:"ids"`
+	Location   int           `json:"location"` // setting to 1 requests the URL to the photo
 }
 
 // Objects ...

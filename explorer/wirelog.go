@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/gorilla/websocket"
+	"github.com/jpfielding/gorets/config"
 )
 
 // WireLogPageRequest ...
@@ -43,7 +44,7 @@ var WirelogUpgrader = websocket.Upgrader{
 }
 
 // WireLogSocket provides access to wire logs as websocket data
-func WireLogSocket(cfgs map[string]Config, upgrader websocket.Upgrader) http.HandlerFunc {
+func WireLogSocket(cfgs map[string]config.Config, upgrader websocket.Upgrader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {

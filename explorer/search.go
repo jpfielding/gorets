@@ -6,21 +6,22 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/jpfielding/gorets/config"
 	"github.com/jpfielding/gorets/rets"
 )
 
 // SearchArgs ...
 type SearchArgs struct {
-	Connection Config `json:"connection"`
-	Resource   string `json:"resource"`
-	Class      string `json:"class"`
-	Format     string `json:"format"`
-	Select     string `json:"select"`
-	CountType  int    `json:"count-type"`
-	Offset     int    `json:"offset"`
-	Limit      int    `json:"limit"`
-	Query      string `json:"query"`
-	QueryType  string `json:"query-type"`
+	Connection config.Config `json:"connection"`
+	Resource   string        `json:"resource"`
+	Class      string        `json:"class"`
+	Format     string        `json:"format"`
+	Select     string        `json:"select"`
+	CountType  int           `json:"count-type"`
+	Offset     int           `json:"offset"`
+	Limit      int           `json:"limit"`
+	Query      string        `json:"query"`
+	QueryType  string        `json:"query-type"`
 }
 
 // SearchPage ...

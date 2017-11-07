@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/jpfielding/gorets/config"
 	"github.com/jpfielding/gorets/metadata"
 	"github.com/jpfielding/gorets/rets"
 	"github.com/jpfielding/gorets/util"
@@ -22,8 +23,8 @@ type MetadataResponse struct {
 
 // MetadataGetParams ...
 type MetadataGetParams struct {
-	Connection Config `json:"connection"`
-	Extraction string // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
+	Connection config.Config `json:"connection"`
+	Extraction string        // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
 }
 
 // Get ....
@@ -31,6 +32,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	fmt.Printf("metadata get params: %v\n", args)
 
 	cfg := args.Connection
+	// TOOD make a head request and see if how stale this is
 	// if JSONExist(cfg.MSystem()) {
 	// 	fmt.Printf("found cached metadata for %s\n", cfg.ID)
 	// 	standard := metadata.MSystem{}
@@ -132,7 +134,7 @@ func fullViaStandard(ctx context.Context, requester rets.Requester, url string) 
 }
 
 // head ...
-func head(requester rets.Requester, ctx context.Context, url string) (*metadata.MSystem, error) {
+func head(ctx context.Context, requester rets.Requester, url string) (*metadata.MSystem, error) {
 	params := rets.MetadataParams{
 		Format: "COMPACT",
 		MType:  "METADATA-SYSTEM",

@@ -34,7 +34,7 @@ class ConnectionForm extends React.Component {
           <Field select="id" label="ID">
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
           </Field>
-          <Field select="url" label="URLS">
+          <Field select="loginURL" label="URLS">
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
           </Field>
           <Field select="username" label="Username">
@@ -52,7 +52,7 @@ class ConnectionForm extends React.Component {
           <Field select="proxy" label="Proxy">
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
           </Field>
-          <Field select="version" label="Version">
+          <Field select="retsVersion" label="Version">
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
           </Field>
         </Fieldset>

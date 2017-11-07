@@ -44,7 +44,7 @@ export default class Configs extends React.Component {
         <div className="flex flex-row justify-center">
           <div className="b--solid w5 ba pa2 tc">
             <Fieldset formValue={this.state.formValue}>
-              <Field select="url" label="Login URL">
+              <Field select="loginURL" label="Login URL">
                 <Input className="pa1 b--none outline-transparent" />
               </Field>
               <Field select="username" label="Username" >
@@ -59,7 +59,7 @@ export default class Configs extends React.Component {
               <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm} >
                 <Input className="pa1 b--none outline-transparent" />
               </Field>
-              <Field select="version" label="Protocol Version" >
+              <Field select="retsVersion" label="Protocol Version" >
                 <Input className="pa1 b--none outline-transparent" />
               </Field>
               <Field select="proxy" label="Proxy (Socks5)" >

@@ -4,17 +4,18 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/jpfielding/gorets/config"
 	"github.com/jpfielding/gorets/rets"
 )
 
 // ConnectionService ...
 type ConnectionService struct {
-	Connections map[string]Config
+	Connections map[string]config.Config
 }
 
 // ConnectionList ...
 type ConnectionList struct {
-	Connections []Config `json:"connections"`
+	Connections []config.Config `json:"connections"`
 }
 
 // ConnectionListArgs ...
@@ -30,8 +31,8 @@ func (cs ConnectionService) List(r *http.Request, args *ConnectionListArgs, repl
 
 // AddConnectionArgs ..
 type AddConnectionArgs struct {
-	Connection Config `json:"connection"`
-	Test       bool   `json:"test"`
+	Connection config.Config `json:"connection"`
+	Test       bool          `json:"test"`
 }
 
 // AddConnectionReply ...
