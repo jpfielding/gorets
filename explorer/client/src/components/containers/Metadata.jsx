@@ -2,6 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router';
 import ReactDataGrid from 'react-data-grid';
 import MetadataService from 'services/MetadataService';
+import KeyFormatter from 'components/gridcells/KeyFormatter';
 
 const ReactDataGridPlugins = require('react-data-grid/addons');
 
@@ -92,6 +93,15 @@ class Metadata extends React.Component {
     this.setState({ filters: {} });
   }
 
+  getObjectTypes() {
+    console.log(this.props.shared);
+    const r = this.props.shared.resource;
+    if (r == null || !r['METADATA-OBJECT'] || !r['METADATA-OBJECT']['Object']) {
+      return [];
+    }
+    return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
+  }
+
   handleGridSort(sortColumn, sortDirection) {
     const comparer = (a, b) => {
       const aVal = a[sortColumn] ? String(a[sortColumn]).toLowerCase() : '';
@@ -147,21 +157,37 @@ class Metadata extends React.Component {
 
   render() {
     const { filteredRows } = this.state;
+    const selectedResource = this.props.shared.resource;
     let tableBody;
     if (filteredRows) {
       const availableFields = this.state.selectedFieldSet;
       const fieldSet = (filteredRows && filteredRows.length > 0)
-        ? availableFields.map((name) => ({
-          key: name,
-          name,
-          resizable: true,
-          width: 200,
-          sortable: true,
-          filterable: true,
-        }))
+        ? availableFields.map((name) => {
+          if (name === 'SystemName') {
+            const keyfield = selectedResource.KeyField;
+            const key = { name, keyfield };
+            console.log(key);
+            return {
+              key: name,
+              name,
+              resizable: true,
+              width: 200,
+              sortable: true,
+              filterable: true,
+              formatter: <KeyFormatter extra={keyfield} />,
+            };
+          }
+          return {
+            key: name,
+            name,
+            resizable: true,
+            width: 200,
+            sortable: true,
+            filterable: true,
+          };
+        })
         : [];
       const rowGetter = (i) => filteredRows[i];
-      const selectedResource = this.props.shared.resource;
       const selectedClass = this.props.shared.class;
       tableBody = (
         <div>
@@ -174,6 +200,12 @@ class Metadata extends React.Component {
             )
             : null
           }
+          <div>
+            {'Object Types - '}
+            <span className="moon-gray">
+              {this.getObjectTypes().join(', ')}
+            </span>
+          </div>
           <ReactDataGrid
             onGridSort={this.handleGridSort}
             columns={fieldSet}

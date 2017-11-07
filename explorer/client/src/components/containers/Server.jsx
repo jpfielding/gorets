@@ -118,6 +118,7 @@ class Server extends React.Component {
   updateConnection(connection) {
     const shared = _.clone(this.state.shared);
     shared.connection = connection;
+    shared.metadata = Server.emptyMetadata;
     this.setState({ shared }, () => {
       StorageCache.clearAll();
       this.getMetadata(m => {

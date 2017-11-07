@@ -441,3 +441,23 @@ a {
     }
   }
 }
+
+.customSearchFormater{
+  & > input{
+    border: none;
+    background-color: transparent;
+    width: 100%;
+  }
+  & > button{
+    opacity: 0.2;
+    border: 1px solid var(--textColor);
+    border-radius: 5px;
+    background-color: transparent;
+    color: var(--textColor);
+    margin:2px;
+    cursor: pointer;
+  }
+  & :focus{
+    outline: none;
+  }
+}

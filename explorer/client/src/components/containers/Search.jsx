@@ -7,6 +7,7 @@ import ReactDataGrid from 'react-data-grid';
 import MetadataService from 'services/MetadataService';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
 import ContentHistory from 'components/containers/History';
+import SearchFormatter from 'components/gridcells/SearchFormatter';
 import _ from 'underscore';
 
 class Search extends React.Component {
@@ -24,8 +25,6 @@ class Search extends React.Component {
       fields: React.PropTypes.any,
       rows: React.PropTypes.any,
     },
-    onRowsSelected: React.PropTypes.Func,
-    onRowsDeselected: React.PropTypes.Func,
     addTab: React.PropTypes.Func,
   }
 
@@ -188,6 +187,7 @@ class Search extends React.Component {
         name: column,
         resizable: true,
         width: 150,
+        formatter: <SearchFormatter />,
       }));
       searchResultRows = searchResults.result.rows;
     }
