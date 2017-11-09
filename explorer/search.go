@@ -46,7 +46,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 	}
 	cfg := args.Connection
 	ctx := context.Background()
-	sess, err := cfg.Connect(ctx)
+	sess, err := cfg.Connect(ctx, "")
 	if err != nil {
 		return err
 	}

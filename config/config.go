@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 
 	"github.com/jpfielding/gorets/rets"
 	"github.com/jpfielding/gowirelog/wirelog"
@@ -24,23 +23,6 @@ type Config struct {
 	RetsVersion string `json:"retsVersion"`
 }
 
-// ReadWirelog ...
-func (c Config) ReadWirelog(fun func(*os.File, error) error) error {
-	f, err := os.Open(c.Wirelog())
-	defer f.Close()
-	if e := fun(f, err); e != nil {
-		return e
-	}
-	return nil
-}
-
-// TODO creating a unqiue tmp path and storing this instantiation there
-
-// Wirelog path
-func (c Config) Wirelog() string {
-	return fmt.Sprintf("/tmp/gorets/%s/wire.log", c.ID)
-}
-
 // MSystem path
 func (c Config) MSystem() string {
 	return fmt.Sprintf("/tmp/gorets/%s/metadata.json", c.ID)
@@ -48,7 +30,7 @@ func (c Config) MSystem() string {
 
 // Connect ...
 // TODO need to remove connecting from session creation
-func (c Config) Connect(ctx context.Context) (*Session, error) {
+func (c Config) Connect(ctx context.Context, wlog string) (*Session, error) {
 	// start with the default Dialer from http.DefaultTransport
 	transport := wirelog.NewHTTPTransport()
 	// if there is a need to proxy
@@ -63,12 +45,13 @@ func (c Config) Connect(ctx context.Context) (*Session, error) {
 	var closer io.Closer
 	var err error
 	// wire logging
-	logFile := c.Wirelog()
-	closer, err = wirelog.LogToFile(transport, logFile, true, true)
-	if err != nil {
-		return nil, fmt.Errorf("wirelog setup: %v", err)
+	if wlog != "" {
+		closer, err = wirelog.LogToFile(transport, wlog, true, true)
+		if err != nil {
+			return nil, fmt.Errorf("wirelog setup: %v", err)
+		}
+		log.Printf("wire logging enabled %s", wlog)
 	}
-	log.Printf("wire logging enabled %s", logFile)
 
 	// should we throw an err here too?
 	sess, err := rets.DefaultSession(
@@ -103,7 +86,9 @@ type Session struct {
 // TODO remove need for context to help it match up with io.Closer
 func (s *Session) Close(ctx context.Context) error {
 	_, err := rets.Logout(ctx, s.requester, rets.LogoutRequest{URL: s.urls.Logout})
-	s.closer.Close()
+	if s.closer != nil {
+		s.closer.Close()
+	}
 	s.closer = nil
 	s.requester = nil
 	return err

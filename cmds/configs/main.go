@@ -18,16 +18,15 @@ func main() {
 
 	flag.Parse()
 
-	cfgs, err := config.ImportFrom(*configPath)
-	if err != nil {
-		panic(err)
+	cfgs, err := func(*ListArgs) ([]Config, error) {
+		return config.ImportFrom(*configPath)
 	}
 	fmt.Printf("loaded %d configs\n", len(cfgs))
 
 	// gorilla rpc
 	s := rpc.NewServer()
 	s.RegisterCodec(gson.NewCodec(), "application/json")
-	s.RegisterService(&config.ConfigService{Configs: cfgs}, "")
+	s.RegisterService(&config.RPCService{Configs: cfgs}, "Config")
 
 	cors := handlers.CORS(
 		handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "HEAD"}),

@@ -22,6 +22,8 @@ const (
 	outputUsage  = "Output directory"
 	timeoutFlag  = "tiemout"
 	timeoutUsage = "Request timeout (in seconds)"
+	wirelogFlag  = "wirelog"
+	wirelogUsage = "The file that will contain wirelog output"
 )
 
 func main() {
@@ -39,7 +41,8 @@ func NewCmd() *cobra.Command {
 		NewSearchCmd(),
 		NewGetObjectsCmd(),
 	)
-	cmd.PersistentFlags().StringP(connectFlag, "c", "connect.json", connectUsage)
+	cmd.PersistentFlags().StringP(connectFlag, "c", "config.json", connectUsage)
+	cmd.PersistentFlags().StringP(wirelogFlag, "w", "wire.log", wirelogUsage)
 	cmd.PersistentFlags().StringP(outputFlag, "o", "", outputUsage)
 	cmd.PersistentFlags().Int64P(timeoutFlag, "t", 60, timeoutUsage)
 	return cmd

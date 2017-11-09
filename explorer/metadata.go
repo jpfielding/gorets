@@ -50,7 +50,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		return fmt.Errorf("%s not supported", args.Extraction)
 	}
 	ctx := context.Background()
-	sess, err := cfg.Connect(ctx)
+	sess, err := cfg.Connect(ctx, "")
 	if err != nil {
 		return err
 	}
