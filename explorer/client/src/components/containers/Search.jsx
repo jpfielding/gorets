@@ -208,9 +208,9 @@ class Search extends React.Component {
 
   submitSearchForm(countType) {
     const form = _.clone(this.state.searchForm.value);
-    form['connection'] = this.props.shared.connection;
     form['counttype'] = countType;
     form['name'] = this.state.searchHistoryName;
+    form['submited'] = true;
     if (form.limit && typeof form.limit === 'string') {
       form.limit = parseInt(form.limit, 10);
     }
@@ -218,13 +218,11 @@ class Search extends React.Component {
   }
 
   search(searchParams) {
-    const searchForm = this.state.searchForm;
-    searchForm.value.resource = searchParams.resource;
-    searchForm.value.class = searchParams.class;
-    searchForm.value.query = searchParams.query;
-    searchForm.value.select = searchParams.select;
-    searchForm.value.limit = searchParams.limit;
     const searchHistoryName = searchParams.name;
+    const searchForm = createValue({
+      value: _.clone(searchParams),
+      onChange: this.searchInputsChange.bind(this),
+    });
 
     const sck = `${this.props.shared.connection.id}-search-history`;
     const searchHistory = StorageCache.getFromCache(sck) || [];

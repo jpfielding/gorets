@@ -38,10 +38,6 @@ export default class SearchService {
         params: [{
           ...args,
           connection: conn,
-          // are these useful?
-          format: 'COMPACT-DECODED',
-          querytype: 'DMQL2',
-          counttype: 1,
         }],
       }),
     });

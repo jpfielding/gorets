@@ -14,7 +14,7 @@ export default class ContentHistory extends React.Component {
     super(props);
     this.state = {
       orderList: ['name', 'id', 'resource', 'class', 'select', 'counttype', 'limit', 'query'],
-      exclude: ['connection', 'name', 'counttype', 'type', 'format', 'offset', 'querytype'],
+      exclude: ['connection', 'name', 'counttype', 'type', 'format', 'offset', 'querytype', 'submited'],
       countTypes: ['Submit', 'with Count', 'only Count'],
     };
     this.sortKeys = this.sortKeys.bind(this);
@@ -82,8 +82,8 @@ export default class ContentHistory extends React.Component {
   }
 
   render() {
-    if (this.props.params == null || !this.props.params['connection']) {
-      return <div />;
+    if (this.props.params == null || !this.props.params.submited) {
+      return null;
     }
     const body = Object.keys(this.props.params).sort(this.sortKeys).map((key) => {
       if (this.state.exclude.indexOf(key) !== -1) {
