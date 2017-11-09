@@ -11,7 +11,6 @@ export default class ConfigService {
         id: 1,
         method: 'ConfigService.List',
         params: [{
-          active: true,
         }],
       }),
     });
