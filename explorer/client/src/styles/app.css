@@ -92,22 +92,45 @@ a {
   }
 }
 
-.customTabElement {
+.customTabElementA {
   color: var(--textColor);
-  & .customTabBar{
-    padding: 0px 5px;
-    padding-top: 5px;
-    position: relative;
-    background-color: var(--mainBackground);
-    height: 40px;
+  & > .customTabBar{
+    background-color: black;
     & .customTabSection{
-      position: relative;
-      bottom: -1px;
-      height: 100%;
-      display: inline-block;
+      bottom: -3px;
       & .customTabSelect{
-        cursor: pointer;
-        position: relative;
+        background: transparent;
+        color: var(--mainBackground);
+        border: none;
+        border-bottom: 6px solid transparent;
+        height: 100%;
+        margin: 0px 5px;
+        padding: 5px 20px;
+        &.active{
+          border-bottom-color: var(--darkRed);
+        }
+        &:focus{
+          color: var(--darkRed);
+        }
+      }
+      & .customClose{
+        color: var(--mainBackground);
+      }
+    }
+  }
+  & > .customTab{
+  }
+}
+
+.customTabElementB {
+  color: var(--textColor);
+  & > .customTabBar{
+    padding: 0px 5px;
+    background-color: var(--secondaryBackground);
+    padding-top: 0.5rem;
+    & .customTabSection{
+      bottom: -1px;
+      & .customTabSelect{
         background: transparent;
         border: 1px solid transparent;
         border-bottom: none;
@@ -116,14 +139,40 @@ a {
         height: 100%;
         margin: 0px 5px;
         padding: 5px 20px;
-        z-index: 5;
         &.active{
           background-color: var(--mainBackground);
           border-color: var(--textColor);
         }
         &:focus{
-          outline:none;
           color: var(--darkRed);
+        }
+      }
+      & .customClose{
+        color: var(--textColor);
+      }
+    }
+  }
+  & > .customTab{
+    border-top: 1px solid var(--textColor);
+  }
+}
+
+.customTabElementU {
+  & > .customTabBar{
+    position: relative;
+    height: 40px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    & .customTabSection{
+      position: relative;
+      height: 100%;
+      display: inline-block;
+      & .customTabSelect{
+        cursor: pointer;
+        position: relative;
+        z-index: 5;
+        &:focus{
+          outline:none;
         }
       }
       & .customClose{
@@ -133,7 +182,6 @@ a {
         width: 30px;
         border: none;
         background-color: transparent;
-        color: var(--textColor);
         font-size: 75%;
         z-index: 6;
         opacity: 0;
@@ -153,8 +201,7 @@ a {
       }
     }
   }
-  & .customTab{
-    border-top: 1px solid var(--textColor);
+  & > .customTab{
     position: relative;
     z-index: 1;
   }
@@ -375,7 +422,7 @@ a {
     padding: 5px 10px;
     margin-right: 40px;
     border: none;
-    background-color: var(--secondaryBackground);
+    background-color: var(--mainBackground);
     color: var(--textColor);
     border: 1px solid var(--textColor);
     border-top: 0px;
@@ -403,6 +450,7 @@ a {
       display: block;
     }
     & > .customHoverBar{
+      background-color: var(--secondaryBackground);
     }
   }
 }

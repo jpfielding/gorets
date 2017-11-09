@@ -63,7 +63,7 @@ export default class App extends React.Component {
   render() {
     return (
       <div className="helvetica">
-        <nav className="pa3 bg-black">
+        <nav className="pa3 bg-black" style={{ paddingBottom: '0px' }}>
           <h1 className=" fw2 red b f4 dib mr3 nonclickable"> RETS Explorer </h1>
           <div
             style={{
@@ -111,6 +111,7 @@ export default class App extends React.Component {
           </div>
         </nav>
         <TabSection
+          className="customTabElementA"
           names={this.createTabList()}
           components={this.createTabs()}
           enableRemove

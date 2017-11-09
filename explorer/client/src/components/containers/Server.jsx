@@ -186,6 +186,7 @@ class Server extends React.Component {
         </div>
         <div className={`${this.state.shared.metadata.System.SystemID.length === 0 ? 'dn' : 'db'}`}>
           <TabSection
+            className="customTabElementB"
             names={names}
             components={components}
             enableRemove

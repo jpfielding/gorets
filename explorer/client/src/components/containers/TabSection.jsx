@@ -8,6 +8,8 @@ export default class TabSection extends React.Component {
     onRemove: React.PropTypes.Func,
     enableRemove: React.PropTypes.any,
     removeOffset: React.PropTypes.any,
+
+    className: React.PropTypes.any,
   }
 
   constructor(props) {
@@ -96,7 +98,7 @@ export default class TabSection extends React.Component {
 
   render() {
     return (
-      <div className="customTabElement">
+      <div className={`${this.props.className} customTabElementU`}>
         {this.createTabBar()}
         {this.props.components.map(this.createTabs)}
       </div>
