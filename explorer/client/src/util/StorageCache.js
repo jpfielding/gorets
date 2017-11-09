@@ -18,7 +18,8 @@ class StorageCache {
 
   remove(k) {
     const key = this.versioned(k);
-    this.storage.removeItem(this.versioned(key));
+    console.log('removing cashe item', key);
+    this.storage.removeItem(key);
   }
 
   readCache(versionedkey) {

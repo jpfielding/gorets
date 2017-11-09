@@ -116,11 +116,16 @@ class Server extends React.Component {
   }
 
   updateConnection(connection) {
+    const sck = `${this.state.shared.connection.id}-search-history`;
+    const ock = `${this.state.shared.connection.id}-object-history`;
+    const mck = `${this.state.shared.connection.id}-metadata`;
+    StorageCache.remove(sck);
+    StorageCache.remove(ock);
+    StorageCache.remove(mck);
     const shared = _.clone(this.state.shared);
     shared.connection = connection;
     shared.metadata = Server.emptyMetadata;
     this.setState({ shared }, () => {
-      StorageCache.clearAll();
       this.getMetadata(m => {
         console.log('Setting ', m);
         shared.metadata = m;

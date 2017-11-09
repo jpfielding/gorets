@@ -17,11 +17,11 @@ type SearchArgs struct {
 	Class      string        `json:"class"`
 	Format     string        `json:"format"`
 	Select     string        `json:"select"`
-	CountType  int           `json:"count-type"`
+	CountType  int           `json:"counttype"`
 	Offset     int           `json:"offset"`
 	Limit      int           `json:"limit"`
 	Query      string        `json:"query"`
-	QueryType  string        `json:"query-type"`
+	QueryType  string        `json:"querytype"`
 }
 
 // SearchPage ...

@@ -37,12 +37,7 @@ class Search extends React.Component {
     super(props);
 
     const searchForm = createValue({
-      value: {
-        resource: props.shared.resource.ResourceID,
-        class: props.shared.class.ClassName,
-        query: '',
-        limit: 100, // TODO impliment
-      },
+      value: SearchService.params,
       onChange: this.searchInputsChange.bind(this),
     });
 
@@ -99,8 +94,14 @@ class Search extends React.Component {
         const day = date.substring(1, 12);
         query = `(${field}=${day}00:00:00+)`;
       }
+      const value = this.state.searchForm.value;
+      value.resource = resource;
+      value.class = ClassName;
+      value.select = select;
+      value.query = query;
+
       const searchForm = createValue({
-        value: { resource, class: ClassName, select, query },
+        value,
         onChange: this.searchInputsChange.bind(this),
       });
       this.setState({ searchForm });
@@ -210,8 +211,11 @@ class Search extends React.Component {
   submitSearchForm(countType) {
     const form = _.clone(this.state.searchForm.value);
     form['connection'] = this.props.shared.connection;
-    form['count-type'] = countType;
+    form['counttype'] = countType;
     form['name'] = this.state.searchHistoryName;
+    if (form.limit && typeof form.limit === 'string') {
+      form.limit = parseInt(form.limit, 10);
+    }
     this.search(form);
   }
 
@@ -238,8 +242,10 @@ class Search extends React.Component {
     }
     SearchService
       .search(this.props.shared.connection, searchParams)
-      .then(res => res.json())
-      .then(json => {
+      .then(res => {
+        console.log(res);
+        return res.json();
+      }).then(json => {
         if (!some(searchHistory, searchParams)) {
           searchHistory.unshift(searchParams);
           StorageCache.putInCache(sck, searchHistory, 720);

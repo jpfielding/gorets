@@ -13,8 +13,8 @@ export default class ContentHistory extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      orderList: ['name', 'id', 'resource', 'class', 'select', 'count-type', 'query'],
-      exclude: ['connection'],
+      orderList: ['name', 'id', 'resource', 'class', 'select', 'counttype', 'query'],
+      exclude: ['connection', 'name', 'counttype', 'type'],
       countTypes: ['Submit', 'with Count', 'only Count'],
     };
     this.sortKeys = this.sortKeys.bind(this);
@@ -65,10 +65,10 @@ export default class ContentHistory extends React.Component {
   }
 
   renderType() {
-    if (this.props.params['count-type'] >= 0) {
+    if (this.props.params['counttype'] >= 0) {
       return (
         <div className="customResultsButtonTitle fr">
-          {this.state.countTypes[this.props.params['count-type']]}
+          {this.state.countTypes[this.props.params['counttype']]}
         </div>
       );
     } else if (this.props.params.type) {
@@ -86,7 +86,7 @@ export default class ContentHistory extends React.Component {
       return <div />;
     }
     const body = Object.keys(this.props.params).sort(this.sortKeys).map((key) => {
-      if (key === 'name' || key === 'count-type' || key === 'type' || this.state.exclude.indexOf(key) !== -1) {
+      if (this.state.exclude.indexOf(key) !== -1) {
         return null;
       }
       return (
