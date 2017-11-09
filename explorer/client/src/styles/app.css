@@ -461,3 +461,9 @@ a {
     outline: none;
   }
 }
+
+.customSelect{
+  margin-top: 10px;
+  border: 1px solid var(--textColor);
+  color: var(--textColor);
+}

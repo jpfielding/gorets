@@ -19,6 +19,7 @@ class ConnectionForm extends React.Component {
 
     this.state = {
       connectionForm,
+      show: false,
     };
   }
 
@@ -41,13 +42,19 @@ class ConnectionForm extends React.Component {
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
           </Field>
           <Field select="password" label="Password" Input={PasswordForm}>
-            <Input className="border-box w-100 pa1 b--none outline-transparent" />
+            <Input
+              type={!this.state.show ? 'password' : ''}
+              className="border-box w-100 pa1 b--none outline-transparent"
+            />
           </Field>
           <Field select="userAgent" label="User Agent">
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
           </Field>
           <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm}>
-            <Input className="border-box w-100 pa1 b--none outline-transparent" />
+            <Input
+              type={!this.state.show ? 'password' : ''}
+              className="border-box w-100 pa1 b--none outline-transparent"
+            />
           </Field>
           <Field select="proxy" label="Proxy">
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
@@ -56,11 +63,25 @@ class ConnectionForm extends React.Component {
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
           </Field>
         </Fieldset>
+        <select className="customSelect" ref={(e) => { this.state.select = e; }}>
+          <option value="COMPACT">COMPACT</option>
+          <option value="COMPACT-INCREMENTAL">COMPACT-INCREMENTAL</option>
+          <option value="STANDARD-XML">STANDARD-XML</option>
+        </select>
         <button
           className="customButton mt3"
-          onClick={() => this.props.updateConnection(this.state.connectionForm.value)}
+          onClick={() => this.props.updateConnection(this.state.connectionForm.value, this.state.select.value)}
         >
           Update Changes
+        </button>
+        <button
+          className="customButton mt3 fr"
+          onClick={() => {
+            const show = !this.state.show;
+            this.setState({ show });
+          }}
+        >
+          {this.state.show ? 'Hide Passwords' : 'Show Passwords'}
         </button>
       </div>
     );

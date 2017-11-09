@@ -41,6 +41,9 @@ class Server extends React.Component {
       },
       tabs: {},
       errorOut: '',
+      args: {
+        extraction: 'COMPACT',
+      },
     };
     this.getMetadata = this.getMetadata.bind(this);
     this.onMetadataSelected = this.onMetadataSelected.bind(this);
@@ -57,7 +60,6 @@ class Server extends React.Component {
 
   componentWillMount() {
     this.getMetadata(m => {
-      console.log('Setting ', m);
       const shared = this.state.shared;
       shared.metadata = m;
       this.setState({ shared });
@@ -65,67 +67,65 @@ class Server extends React.Component {
   }
 
   onMetadataSelected(rows) {
-    console.log('Rows selected:', rows);
+    console.log('rows selected:', rows);
     const shared = _.clone(this.state.shared);
     shared.fields = shared.fields.concat(rows);
     this.setState({ shared });
-    console.log('Rows:', shared.fields);
+    console.log('rows:', shared.fields);
   }
 
   onMetadataDeselected(rows) {
-    console.log('Rows deselected:', rows);
+    console.log('rows deselected:', rows);
     const shared = _.clone(this.state.shared);
     shared.fields = shared.fields.filter(i => rows.map(r => r.row).indexOf(i.row) === -1);
     this.setState({ shared });
-    console.log('Rows:', shared.fields);
+    console.log('rows:', shared.fields);
   }
 
   onClassSelected(res, cls) {
-    console.log('Class selected:', res, cls);
+    console.log('class selected:', res, cls);
     const shared = this.state.shared;
     shared.resource = res;
     shared.class = cls;
     this.setState({ shared });
-    this.forceUpdate();
   }
 
   getMetadata(onFound) {
     const ck = `${this.state.shared.connection.id}-metadata`;
     const md = StorageCache.getFromCache(ck);
     if (md) {
-      console.log('[SERVER] Loaded metadata from local cache', md);
+      console.log('loaded metadata from local cache', md);
       onFound(md);
       return;
     }
-    const args = {
-      extraction: 'COMPACT', // TODO configurable?
-    };
+    const args = this.state.args;
     console.log('no metadata cached, pulling', args.extraction);
     MetadataService
       .get(this.state.shared.connection, args)
       .then(response => response.json())
       .then(json => {
         if (json.error !== null) {
-          this.errorOut(`[ERROR]  ${json.error}`);
+          this.errorOut(json.error);
           return;
         }
-        console.log('[SERVER] Metadata pulled via json request');
+        console.log('metadata pulled via json request');
         onFound(json.result.Metadata);
         StorageCache.putInCache(ck, json.result.Metadata, 60);
       });
   }
 
-  updateConnection(connection) {
+  updateConnection(connection, extraction) {
     const sck = `${this.state.shared.connection.id}-search-history`;
     const ock = `${this.state.shared.connection.id}-object-history`;
     const mck = `${this.state.shared.connection.id}-metadata`;
     StorageCache.remove(sck);
     StorageCache.remove(ock);
     StorageCache.remove(mck);
+    const args = { extraction };
     const shared = _.clone(this.state.shared);
     shared.connection = connection;
     shared.metadata = Server.emptyMetadata;
-    this.setState({ shared }, () => {
+    this.setState({ shared, args }, () => {
       this.getMetadata(m => {
         console.log('Setting ', m);
         shared.metadata = m;

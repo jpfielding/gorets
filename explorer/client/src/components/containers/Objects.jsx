@@ -42,7 +42,6 @@ class Objects extends React.Component {
   }
 
   componentWillMount() {
-    // TODO set inital state
     const ock = `${this.props.shared.connection.id}-object-history`;
     const objectsHistory = StorageCache.getFromCache(ock) || [];
     this.setState({

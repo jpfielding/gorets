@@ -94,7 +94,6 @@ class Metadata extends React.Component {
   }
 
   getObjectTypes() {
-    console.log(this.props.shared);
     const r = this.props.shared.resource;
     if (r == null || !r['METADATA-OBJECT'] || !r['METADATA-OBJECT']['Object']) {
       return [];
@@ -165,8 +164,6 @@ class Metadata extends React.Component {
         ? availableFields.map((name) => {
           if (name === 'SystemName') {
             const keyfield = selectedResource.KeyField;
-            const key = { name, keyfield };
-            console.log(key);
             return {
               key: name,
               name,

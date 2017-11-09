@@ -28,7 +28,7 @@ export default class Connections extends React.Component {
     console.log('Launching tab with: ', this.state.formValue.value);
     this.props.addTab(this.state.formValue.value);
   }
-  // TODO Password fields dont seem to be playing nice with field elements.
+
   render() {
     return (
       <div className="customResultsSet w-30 center mt3">
@@ -49,13 +49,13 @@ export default class Connections extends React.Component {
               <Input className="pa1 b--none outline-transparent" />
             </Field>
             <Field select="password" label="Password" Input={PasswordForm} >
-              <Input className="pa1 b--none outline-transparent" />
+              <Input type="password" className="pa1 b--none outline-transparent" />
             </Field>
             <Field select="userAgent" label="User Agent" >
               <Input className="pa1 b--none outline-transparent" />
             </Field>
-            <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm} >
-              <Input className="pa1 b--none outline-transparent" />
+            <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm}>
+              <Input type="password" className="pa1 b--none outline-transparent" />
             </Field>
             <Field select="version" label="Protocol Version" >
               <Input className="pa1 b--none outline-transparent" />

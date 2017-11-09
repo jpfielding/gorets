@@ -13,8 +13,8 @@ export default class ContentHistory extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      orderList: ['name', 'id', 'resource', 'class', 'select', 'counttype', 'query'],
-      exclude: ['connection', 'name', 'counttype', 'type'],
+      orderList: ['name', 'id', 'resource', 'class', 'select', 'counttype', 'limit', 'query'],
+      exclude: ['connection', 'name', 'counttype', 'type', 'format', 'offset', 'querytype'],
       countTypes: ['Submit', 'with Count', 'only Count'],
     };
     this.sortKeys = this.sortKeys.bind(this);

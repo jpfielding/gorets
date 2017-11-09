@@ -71,21 +71,20 @@ class Search extends React.Component {
   }
 
   componentWillMount() {
-    console.log('[SEARCH] Component Mounting');
     const sck = `${this.props.shared.connection.id}-search-history`;
     const searchHistory = StorageCache.getFromCache(sck) || [];
     this.setSearchHistory(searchHistory);
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log('[SEARCH] Updating Props');
+    console.log('updating Props');
     if (nextProps.shared.class['METADATA-TABLE']) {
       const ClassName = nextProps.shared.class.ClassName;
       const resource = nextProps.shared.resource.ResourceID;
       const select = nextProps.shared.fields.map(i => i.row.SystemName).join(',');
       const ts = nextProps.shared.class['METADATA-TABLE'].Field.filter(f => f.StandardName === 'ModificationTimestamp');
 
-      console.log('[SEARCH][PROPS] Last modified fields:', ts);
+      console.log('last modified fields:', ts);
 
       let query = this.state.searchForm.value.query;
       if (ts.length > 0) {
@@ -116,7 +115,6 @@ class Search extends React.Component {
   }
 
   setSearchHistory(sh) {
-    console.log('[SEARCH] Pulling new search history set', sh);
     const searchHistory = _.clone(sh);
     this.setState({
       searchHistory,
@@ -124,7 +122,7 @@ class Search extends React.Component {
   }
 
   removeHistoryElement(params) {
-    console.log('[SEARCH] Removing history element');
+    console.log('removing history element');
     const sck = `${this.props.shared.connection.id}-search-history`;
     const searchHistory = StorageCache.getFromCache(sck) || [];
     if (some(searchHistory, params)) {
@@ -151,7 +149,7 @@ class Search extends React.Component {
       const resultCount = this.state.resultCount + 1;
       this.setState({ resultCount });
     }
-    console.log(`[SEARCH] Creating new tab of name ${tabName}`);
+    console.log(`creating new tab of name ${tabName}`);
     this.props.addTab(tabName, this.renderNewTab());
   }
 
@@ -180,7 +178,7 @@ class Search extends React.Component {
     let searchCount = -1;
     let errorOut = '';
 
-    console.log('[SEARCH] Applying search state');
+    console.log('applying search state');
 
     if (searchResults.result.columns && searchResults.result.rows) {
       searchResultColumns = searchResults.result.columns.map((column, index) => ({
@@ -250,7 +248,7 @@ class Search extends React.Component {
           searchHistory.unshift(searchParams);
           StorageCache.putInCache(sck, searchHistory, 720);
         }
-        console.log('[SEARCH] Results:', json);
+        console.log('results:', json);
         this.setState({
           searchResults: json,
           searching: false,
