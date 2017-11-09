@@ -10,7 +10,6 @@ import (
 	"os"
 
 	"github.com/gorilla/websocket"
-	"github.com/jpfielding/gorets/config"
 )
 
 // WireLogPageRequest ...
@@ -44,7 +43,7 @@ var WirelogUpgrader = websocket.Upgrader{
 }
 
 // WireLogSocket provides access to wire logs as websocket data
-func WireLogSocket(cfgs map[string]config.Config, upgrader websocket.Upgrader) http.HandlerFunc {
+func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -67,13 +66,8 @@ func WireLogSocket(cfgs map[string]config.Config, upgrader websocket.Upgrader) h
 			req := WireLogPageRequest{}
 			json.NewDecoder(msg).Decode(&req)
 			fmt.Printf("wirelog request: %v\n", req)
-			// find the source for this message
-			cfg, ok := cfgs[req.ID]
-			if !ok {
-				conn.WriteMessage(messageType, []byte("{'error': 'id not found'}"))
-				continue
-			}
-			err = cfg.ReadWirelog(func(f *os.File, err error) error {
+			// read the log for this message
+			err = ReadWirelog(Wirelog(req.ID), func(f *os.File, err error) error {
 				if err != nil {
 					return err
 				}
@@ -105,4 +99,19 @@ func WireLogSocket(cfgs map[string]config.Config, upgrader websocket.Upgrader) h
 			}
 		}
 	}
+}
+
+// ReadWirelog ...
+func ReadWirelog(wirelog string, fun func(*os.File, error) error) error {
+	f, err := os.Open(wirelog)
+	defer f.Close()
+	if e := fun(f, err); e != nil {
+		return e
+	}
+	return nil
+}
+
+// Wirelog path TODO make this configurable
+func Wirelog(id string) string {
+	return fmt.Sprintf("/tmp/gorets/%s/wire.log", id)
 }

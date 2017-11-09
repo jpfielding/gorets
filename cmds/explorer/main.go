@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -11,25 +10,29 @@ import (
 	"github.com/gorilla/rpc/json"
 	"github.com/jpfielding/gorets/config"
 	"github.com/jpfielding/gorets/explorer"
+	"github.com/jpfielding/gowirelog/wirelog"
 )
 
 func main() {
 	port := flag.String("port", "8000", "http port")
 	react := flag.String("react", "../../explorer/client/build", "ReactJS path")
-	configPath := flag.String("configs", "source-configs", "The configurations for this service")
+	configService := flag.String("configService", "http://localhost:8888/rpc", "The configuration service")
 
 	flag.Parse()
 
 	http.Handle("/", http.FileServer(http.Dir(*react)))
 
-	// HACK were moving to loading from a web endpoint anyways...
-	cfgs, _ := config.ImportFrom(*configPath)
-	fmt.Printf("loaded %d configs\n", len(cfgs))
-
 	// gorilla rpc
 	s := rpc.NewServer()
 	s.RegisterCodec(json.NewCodec(), "application/json")
-	s.RegisterService(&explorer.ConnectionService{Connections: cfgs}, "")
+	// TODO remove this connection service and replace with configservice (or reference the service from the react)
+	s.RegisterService(&explorer.ConnectionService{
+		Client: config.Client{
+			EndPoint: *configService,
+			Client: http.Client{
+				Transport: wirelog.NewHTTPTransport(),
+			},
+		}}, "ConfigService")
 	s.RegisterService(&explorer.MetadataService{}, "")
 	s.RegisterService(&explorer.SearchService{}, "")
 	s.RegisterService(&explorer.ObjectService{}, "")
@@ -42,7 +45,7 @@ func main() {
 	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
 
 	// websocket wire logs
-	http.Handle("/wirelog", explorer.WireLogSocket(cfgs, explorer.WirelogUpgrader))
+	http.Handle("/wirelog", explorer.WireLogSocket(explorer.WirelogUpgrader))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))

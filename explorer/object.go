@@ -48,7 +48,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 
 	cfg := args.Connection
 	ctx := context.Background()
-	sess, err := cfg.Connect(ctx)
+	sess, err := cfg.Connect(ctx, "")
 	if err != nil {
 		return err
 	}
