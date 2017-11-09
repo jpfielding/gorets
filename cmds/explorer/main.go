@@ -22,17 +22,24 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir(*react)))
 
+	// use our client tool to get configs from another microservice
+	rpcClient := config.Client{
+		EndPoint: *configService,
+		Client: http.Client{
+			Transport: wirelog.NewHTTPTransport(),
+		},
+	}
+	// adapt this to our config service
+	rpcClientFunc := func(args *config.ListArgs) ([]config.Config, error) {
+		reply, err := rpcClient.List(*args)
+		return reply.Configs, err
+	}
+
 	// gorilla rpc
 	s := rpc.NewServer()
 	s.RegisterCodec(json.NewCodec(), "application/json")
 	// TODO remove this connection service and replace with configservice (or reference the service from the react)
-	s.RegisterService(&explorer.ConnectionService{
-		Client: config.Client{
-			EndPoint: *configService,
-			Client: http.Client{
-				Transport: wirelog.NewHTTPTransport(),
-			},
-		}}, "ConfigService")
+	s.RegisterService(&config.RPCService{Configs: rpcClientFunc}, "ConfigService")
 	s.RegisterService(&explorer.MetadataService{}, "")
 	s.RegisterService(&explorer.SearchService{}, "")
 	s.RegisterService(&explorer.ObjectService{}, "")
