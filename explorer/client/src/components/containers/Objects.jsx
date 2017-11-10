@@ -250,7 +250,13 @@ class Objects extends React.Component {
     const { objects } = this.state;
     const hasResult = (objects.result && objects.result['Objects'].length > 0);
     return (
-      <div className="flex">
+      <div
+        className="flex"
+        style={{
+          maxWidth: '1500px',
+          margin: 'auto',
+        }}
+      >
         <div className="fl w-100 w-20-ns pa3 pr0">
           <div className="customResultsCompactSet">
             <div className="customResultsTitle">

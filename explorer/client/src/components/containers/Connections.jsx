@@ -30,44 +30,50 @@ export default class Connections extends React.Component {
 
   render() {
     return (
-      <div className="customResultsSet w-30 center mt3">
+      <div
+        className="customResultsSet center mt3"
+        style={{
+          maxWidth: '400px',
+        }}
+      >
         <div className="customResultsTitle">
           <div className="customTitle tc">
             Add a connection
           </div>
         </div>
-        <div className="customResultsBody flex flex-row justify-center">
-          <Fieldset formValue={this.state.formValue}>
+        <div className="customResultsBody flex flex-row justify-center w-100">
+          <Fieldset formValue={this.state.formValue} className="w-100">
             <Field select="id" label="ID (unique per config service)" >
-              <Input className="pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" />
             </Field>
             <Field select="loginURL" label="Login URL">
-              <Input className="pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" />
             </Field>
             <Field select="username" label="Username" >
-              <Input className="pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" />
             </Field>
             <Field select="password" label="Password" >
-              <Input className="pa1 b--none outline-transparent masker" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent masker" />
             </Field>
             <Field select="userAgent" label="User Agent" >
-              <Input className="pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" />
             </Field>
             <Field select="userAgentPw" label="User Agent Password" >
-              <Input className="pa1 b--none outline-transparent masker" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent masker" />
             </Field>
             <Field select="retsVersion" label="Protocol Version" >
-              <Input className="pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" />
             </Field>
             <Field select="proxy" label="Proxy (Socks5)" >
-              <Input className="pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" />
             </Field>
           </Fieldset>
         </div>
         <div className="customResultsFoot">
           <button
             onClick={this.onSubmit}
-            className="customButton"
+            className="customButton db"
+            style={{ margin: 'auto', width: '50%' }}
           >
             Submit
           </button>

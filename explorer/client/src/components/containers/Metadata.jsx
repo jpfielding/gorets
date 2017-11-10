@@ -229,7 +229,13 @@ class Metadata extends React.Component {
     }
     const system = this.props.shared.metadata.System;
     return (
-      <div className="flex">
+      <div
+        className="flex"
+        style={{
+          maxWidth: '1500px',
+          margin: 'auto',
+        }}
+      >
         <div className="w-20-ns no-list-style pa3 pr0">
           <div className="customResultsCompactSet">
             <div className="customResultsTitle">

@@ -127,6 +127,7 @@ a {
   & > .customTabBar{
     padding: 0px 5px;
     background-color: var(--secondaryBackground);
+    border-bottom: 1px solid var(--textColor);
     padding-top: 0.5rem;
     & .customTabSection{
       bottom: -1px;
@@ -153,7 +154,6 @@ a {
     }
   }
   & > .customTab{
-    border-top: 1px solid var(--textColor);
   }
 }
 

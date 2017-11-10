@@ -327,7 +327,13 @@ class Search extends React.Component {
 
   render() {
     return (
-      <div className="flex">
+      <div
+        className="flex"
+        style={{
+          maxWidth: '1500px',
+          margin: 'auto',
+        }}
+      >
         {this.renderHistoryBar()}
         <div className="fl w-100 w-80-ns pa3">
           <div className="customResultsSet">
