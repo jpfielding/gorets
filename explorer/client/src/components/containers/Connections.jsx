@@ -1,6 +1,5 @@
 import React from 'react';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
-import PasswordForm from 'components/utils/PasswordForm';
 
 export default class Connections extends React.Component {
 
