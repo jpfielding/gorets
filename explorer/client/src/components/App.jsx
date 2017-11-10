@@ -1,5 +1,5 @@
 import React from 'react';
-import ConnectionService from 'services/ConnectionService';
+import ConfigService from 'services/ConfigService';
 import Autocomplete from 'react-autocomplete';
 import Connections from 'components/containers/Connections';
 import Server from 'components/containers/Server';
@@ -17,22 +17,22 @@ export default class App extends React.Component {
       connectionAutocompleteField: '',
     };
     this.addTab = this.addTab.bind(this);
-    this.updateConnectionList = this.updateConnectionList.bind(this);
+    this.updateConfigList = this.updateConfigList.bind(this);
     this.createTabList = this.createTabList.bind(this);
     this.createTabs = this.createTabs.bind(this);
     this.removeTab = this.removeTab.bind(this);
   }
 
   componentDidMount() {
-    this.updateConnectionList();
+    this.updateConfigList();
   }
 
-  updateConnectionList() {
-    ConnectionService
-      .getConnectionList()
+  updateConfigList() {
+    ConfigService
+      .getConfigList()
       .then(res => res.json())
       .then((json) => {
-        this.setState({ connections: json.result.connections });
+        this.setState({ connections: json.result.configs });
       });
   }
 
