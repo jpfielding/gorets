@@ -125,7 +125,7 @@ class Server extends React.Component {
     const shared = _.clone(this.state.shared);
     shared.connection = connection;
     shared.metadata = Server.emptyMetadata;
-    this.setState({ shared, args }, () => {
+    this.setState({ shared, args, errorOut: '' }, () => {
       this.getMetadata(m => {
         console.log('Setting ', m);
         shared.metadata = m;

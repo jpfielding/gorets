@@ -42,7 +42,7 @@ export default class Connections extends React.Component {
             <Field select="id" label="ID (unique per config service)" >
               <Input className="pa1 b--none outline-transparent" />
             </Field>
-            <Field select="url" label="Login URL">
+            <Field select="loginURL" label="Login URL">
               <Input className="pa1 b--none outline-transparent" />
             </Field>
             <Field select="username" label="Username" >
@@ -57,7 +57,7 @@ export default class Connections extends React.Component {
             <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm}>
               <Input type="password" className="pa1 b--none outline-transparent" />
             </Field>
-            <Field select="version" label="Protocol Version" >
+            <Field select="retsVersion" label="Protocol Version" >
               <Input className="pa1 b--none outline-transparent" />
             </Field>
             <Field select="proxy" label="Proxy (Socks5)" >
