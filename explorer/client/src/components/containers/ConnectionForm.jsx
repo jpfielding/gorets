@@ -43,8 +43,7 @@ class ConnectionForm extends React.Component {
           </Field>
           <Field select="password" label="Password" Input={PasswordForm}>
             <Input
-              type={!this.state.show ? 'password' : ''}
-              className="border-box w-100 pa1 b--none outline-transparent"
+              className={`border-box w-100 pa1 b--none outline-transparent ${!this.state.show ? 'masker' : ''}`}
             />
           </Field>
           <Field select="userAgent" label="User Agent">
@@ -52,8 +51,7 @@ class ConnectionForm extends React.Component {
           </Field>
           <Field select="userAgentPw" label="User Agent Password" Input={PasswordForm}>
             <Input
-              type={!this.state.show ? 'password' : ''}
-              className="border-box w-100 pa1 b--none outline-transparent"
+              className={`border-box w-100 pa1 b--none outline-transparent ${!this.state.show ? 'masker' : ''}`}
             />
           </Field>
           <Field select="proxy" label="Proxy">

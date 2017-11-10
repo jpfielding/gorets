@@ -515,3 +515,5 @@ a {
   border: 1px solid var(--textColor);
   color: var(--textColor);
 }
+
+input.masker { -webkit-text-security: disc; }
