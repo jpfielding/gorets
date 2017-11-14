@@ -1,0 +1,4 @@
+module.exports = {
+  staticAssetPath: '.',
+  api: '',
+};

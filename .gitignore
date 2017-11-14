@@ -11,3 +11,4 @@ explorer/client/build/*
 explorer/client/npm-debug.log
 .DS_Store
 package-lock.json
+bin/
