@@ -1,6 +1,7 @@
 .idea
 *.iml
 out
+bin
 *~
 metadata/main/metadata.go
 vendor/
