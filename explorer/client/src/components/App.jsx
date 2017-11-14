@@ -15,25 +15,13 @@ export default class App extends React.Component {
       active: {},
       selected: {},
       connectionAutocompleteField: '',
+      configURL: '',
     };
     this.addTab = this.addTab.bind(this);
-    this.updateConfigList = this.updateConfigList.bind(this);
+    this.submitConfigURL = this.submitConfigURL.bind(this);
     this.createTabList = this.createTabList.bind(this);
     this.createTabs = this.createTabs.bind(this);
     this.removeTab = this.removeTab.bind(this);
-  }
-
-  componentDidMount() {
-    this.updateConfigList();
-  }
-
-  updateConfigList() {
-    ConfigService
-      .getConfigList()
-      .then(res => res.json())
-      .then((json) => {
-        this.setState({ connections: json.result.configs });
-      });
   }
 
   createTabList() {
@@ -58,6 +46,27 @@ export default class App extends React.Component {
     const active = _.clone(this.state.active);
     active[connection.id] = <Server connection={connection} />;
     this.setState({ active });
+  }
+
+  updateConfigURL(configURL) {
+    this.setState({ configURL });
+  }
+
+  handleURLKeyPress(e) {
+    if (e.keyCode === 13) {
+      this.submitConfigURL();
+    }
+  }
+
+  submitConfigURL() {
+    console.log('Pulling new source list from ', this.state.configURL);
+    ConfigService
+      .getConfigList(this.state.configURL)
+      .then(res => res.json())
+      .then((json) => {
+        console.log(json);
+        this.setState({ connections: json.result.configs });
+      });
   }
 
   render() {
@@ -107,6 +116,24 @@ export default class App extends React.Component {
                   {item.id}
                 </div>
               )}
+            />
+          </div>
+          <div className="customCombo fr" style={{ margin: '10px' }}>
+            <button
+              className="customComboButton"
+              onClick={() => this.submitConfigURL()}
+            >
+              Submit
+            </button>
+            <input
+              style={{
+                width: '300px',
+              }}
+              className="customComboInput bg-mainbg"
+              placeholder="Source URL"
+              value={this.state.configURL}
+              onChange={(e) => this.updateConfigURL(e.target.value)}
+              onKeyDown={(e) => this.handleURLKeyPress(e)}
             />
           </div>
         </nav>
