@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -18,10 +17,9 @@ func main() {
 
 	flag.Parse()
 
-	cfgs, err := func(*ListArgs) ([]Config, error) {
+	cfgs := func(*config.ListArgs) ([]config.Config, error) {
 		return config.ImportFrom(*configPath)
 	}
-	fmt.Printf("loaded %d configs\n", len(cfgs))
 
 	// gorilla rpc
 	s := rpc.NewServer()
