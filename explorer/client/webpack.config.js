@@ -37,7 +37,7 @@ module.exports = {
     extensions: ['', '.js', '.jsx'],
   },
   output: {
-    path: path.join(__dirname, '/build'),
+    path: path.join(__dirname, '/../../bin/explorer'),
     filename: 'bundle.js',
     publicPath: `${config.staticAssetPath}/`,
   },
