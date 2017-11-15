@@ -21,6 +21,10 @@ body {
   }
 }
 
+.bg-mainbg{
+  background-color: var(--mainBackground) !important;
+}
+
 .no-list-style {
   list-style-type: none;
   & ul {
