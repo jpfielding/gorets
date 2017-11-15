@@ -46,7 +46,7 @@ func main() {
 
 	cors := handlers.CORS(
 		handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "HEAD"}),
-		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
+		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "Access-Control-Allow-Origin"}),
 	)
 	// rpc calls
 	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
