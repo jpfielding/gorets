@@ -52,6 +52,7 @@ class Metadata extends React.Component {
       classRows: field,
       filteredRows: field,
       selectedFieldSet,
+      displayContents: null,
     };
     this.handleGridSort = this.handleGridSort.bind(this);
     this.onRowsSelected = this.onRowsSelected.bind(this);
@@ -99,6 +100,10 @@ class Metadata extends React.Component {
       return [];
     }
     return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
+  }
+
+  setDisplay(displayContents) {
+    this.setState({ displayContents });
   }
 
   handleGridSort(sortColumn, sortDirection) {
@@ -157,13 +162,13 @@ class Metadata extends React.Component {
   render() {
     const { filteredRows } = this.state;
     const selectedResource = this.props.shared.resource;
+    const selectedClass = this.props.shared.class;
     let tableBody;
     if (filteredRows) {
       const availableFields = this.state.selectedFieldSet;
       const fieldSet = (filteredRows && filteredRows.length > 0)
         ? availableFields.map((name) => {
           if (name === 'SystemName') {
-            const keyfield = selectedResource.KeyField;
             return {
               key: name,
               name,
@@ -171,7 +176,12 @@ class Metadata extends React.Component {
               width: 200,
               sortable: true,
               filterable: true,
-              formatter: <KeyFormatter extra={keyfield} />,
+              formatter:
+          <KeyFormatter
+            metadataResource={selectedResource}
+            metadataClass={selectedClass}
+            displayContents={(e) => this.setDisplay(e)}
+          />,
             };
           }
           return {
@@ -185,7 +195,6 @@ class Metadata extends React.Component {
         })
         : [];
       const rowGetter = (i) => filteredRows[i];
-      const selectedClass = this.props.shared.class;
       tableBody = (
         <div>
           {selectedResource
@@ -202,6 +211,9 @@ class Metadata extends React.Component {
             <span className="moon-gray">
               {this.getObjectTypes().join(', ')}
             </span>
+          </div>
+          <div>
+            {this.state.displayContents}
           </div>
           <ReactDataGrid
             onGridSort={this.handleGridSort}
