@@ -23,11 +23,6 @@ type Config struct {
 	RetsVersion string `json:"retsVersion"`
 }
 
-// MSystem path
-func (c Config) MSystem() string {
-	return fmt.Sprintf("/tmp/gorets/%s/metadata.json", c.ID)
-}
-
 // Connect ...
 // TODO need to remove connecting from session creation
 func (c Config) Connect(ctx context.Context, wlog string) (*Session, error) {

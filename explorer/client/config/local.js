@@ -3,7 +3,7 @@ module.exports = {
   api: 'http://localhost:8080',
   configURLS: [
     {
-      url: 'https://localhost:7000/rc',
+      url: 'https://localhost:7000/rpc',
       name: 'Local',
     },
   ],

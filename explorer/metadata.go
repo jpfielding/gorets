@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/jpfielding/gorets/config"
 	"github.com/jpfielding/gorets/metadata"
@@ -24,6 +25,7 @@ type MetadataResponse struct {
 // MetadataGetParams ...
 type MetadataGetParams struct {
 	Connection config.Config `json:"connection"`
+	Oldest     time.Duration `json:"oldest"` // the oldst metadata we're willing to accept (minutes)
 	Extraction string        // (|STANDARD-XML|COMPACT|COMPACT-INCREMENTAL) the format to pull from the server
 }
 
@@ -32,14 +34,14 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	fmt.Printf("metadata get params: %v\n", args)
 
 	cfg := args.Connection
-	// TOOD make a head request and see if how stale this is
-	// if JSONExist(cfg.MSystem()) {
-	// 	fmt.Printf("found cached metadata for %s\n", cfg.ID)
-	// 	standard := metadata.MSystem{}
-	// 	JSONLoad(cfg.MSystem(), &standard)
-	// 	reply.Metadata = standard
-	// 	return nil
-	// }
+	// TOOD make a head request and see if how stale this is??
+	if JSONExist(MSystem(cfg), args.Oldest*time.Minute) {
+		fmt.Printf("found cached (<%dm old) metadata for %s\n", args.Oldest, cfg.ID)
+		standard := metadata.MSystem{}
+		JSONLoad(MSystem(cfg), &standard)
+		reply.Metadata = standard
+		return nil
+	}
 	// lookup the operation for pulling metadata
 	if args.Extraction == "" {
 		// TODO deal with sources not supporting the default type
@@ -61,10 +63,15 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		reply.Metadata = *standard
 		// bg this
 		go func() {
-			JSONStore(cfg.MSystem(), &standard)
+			JSONStore(MSystem(cfg), &standard)
 		}()
 		return err
 	})
+}
+
+// MSystem path
+func MSystem(c config.Config) string {
+	return fmt.Sprintf("/tmp/gorets/%s/metadata.json", c.ID)
 }
 
 // MetadataRequestType is a typedef metadata extraction options

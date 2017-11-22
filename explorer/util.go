@@ -8,14 +8,18 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"time"
 )
 
 // GZIP the output
 
 //JSONExist ...
-func JSONExist(filename string) bool {
-	_, err := os.Stat(filename + ".gz")
-	return !os.IsNotExist(err)
+func JSONExist(filename string, ifNewerThan time.Duration) bool {
+	stat, err := os.Stat(filename + ".gz")
+	if os.IsNotExist(err) {
+		return false
+	}
+	return time.Since(stat.ModTime()) <= ifNewerThan
 }
 
 // JSONStore raw file storage
