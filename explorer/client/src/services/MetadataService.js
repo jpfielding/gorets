@@ -1,4 +1,3 @@
-export default class MetadataService {
   // request:
   // endpoint/rpc
   // {
@@ -18,6 +17,7 @@ export default class MetadataService {
   //   "id": 0
   //   }
 
+  export default class MetadataService {
   // empty metadata
   static empty = {
     System: {

@@ -93,14 +93,27 @@ func (s *Session) Close(ctx context.Context) error {
 type Op func(rets.Requester, rets.CapabilityURLs) error
 
 // Process processes a set of requests
-// TODO needs a retry mechanism
-// TOOD deal with keeping sessions alive
 func (s *Session) Process(ctx context.Context, ops ...Op) error {
 	for _, op := range ops {
+		//op = retry(op, 3)
 		err := op(s.requester, s.urls)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// retry operation
+func retry(op Op, times int) Op {
+	return func(req rets.Requester, urls rets.CapabilityURLs) error {
+		var err error
+		for ; times > 0; times-- {
+			err = op(req, urls)
+			if err == nil {
+				return nil
+			}
+		}
+		return err
+	}
 }

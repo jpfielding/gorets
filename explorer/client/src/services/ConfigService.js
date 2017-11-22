@@ -1,4 +1,22 @@
-export default class ConfigService {
+  // request:
+  // endpoint/rpc
+  // {
+  // "id": 0,
+  // "method": "ConfigService.Get",
+  // "params": {
+  //    "connection": {} // see config object
+  //    "name": "MRIS", 
+  //    "source": "MRIS"  
+  //    }
+  // }
+
+  // response:
+  //  {
+  //   "result": {},
+  //   "error": nil,
+  //   "id": 0
+  //   }
+  export default class ConfigService {
   static getConfigList(url, args) {
     return fetch(url, {
       method: 'POST',
