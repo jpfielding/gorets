@@ -5,7 +5,7 @@ explorer:
 	CGO_ENABLED=0 GOOS=linux go build -o bin/explorer/explorer cmds/explorer/*.go
 	cd explorer/client && npm install && CONFIG_ENV=docker npm run build
 	cp docker/explorer/Dockerfile bin/explorer
-	docker build bin/explorer
+	docker build -t $(DOCKER_USER)/goretsexplorer bin/explorer
 
 vendor:
 	glide up
