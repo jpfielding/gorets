@@ -16,8 +16,7 @@
   //   "error": nil,
   //   "id": 0
   //   }
-
-  export default class MetadataService {
+export default class MetadataService {
   // empty metadata
   static empty = {
     System: {
