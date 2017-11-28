@@ -33,13 +33,14 @@ class Server extends React.Component {
 
     this.state = {
       shared: {
-        connection: props.connection,
+        connection: props.connection.data,
         metadata: Server.emptyMetadata,
         resource: {},
         class: {},
         fields: [],
+        source: props.connection.name,
       },
-      tabs: {},
+      tabs: [],
       errorOut: '',
       args: {
         extraction: 'COMPACT',
@@ -91,7 +92,7 @@ class Server extends React.Component {
   }
 
   getMetadata(onFound) {
-    const ck = `${this.state.shared.connection.id}-metadata`;
+    const ck = `${this.state.shared.source}-${this.state.shared.connection.id}-metadata`;
     const md = StorageCache.getFromCache(ck);
     if (md) {
       console.log('loaded metadata from local cache', md);
@@ -115,9 +116,9 @@ class Server extends React.Component {
   }
 
   updateConnection(connection, extraction) {
-    const sck = `${this.state.shared.connection.id}-search-history`;
-    const ock = `${this.state.shared.connection.id}-object-history`;
-    const mck = `${this.state.shared.connection.id}-metadata`;
+    const sck = `${this.state.shared.source}-${this.state.shared.connection.id}-search-history`;
+    const ock = `${this.state.shared.source}-${this.state.shared.connection.id}-object-history`;
+    const mck = `${this.state.shared.source}-${this.state.shared.connection.id}-metadata`;
     StorageCache.remove(sck);
     StorageCache.remove(ock);
     StorageCache.remove(mck);
@@ -139,23 +140,28 @@ class Server extends React.Component {
   }
 
   addTab(key, value) {
-    const tabs = Object.assign({}, this.state.tabs);
-    tabs[key] = value;
+    const tabs = _.clone(this.state.tabs);
+    tabs.push({
+      id: key,
+      page: value,
+    });
     this.setState({ tabs });
   }
 
-  removeTab(tab) {
-    const tabs = Object.assign({}, this.state.tabs);
-    delete tabs[tab];
+  removeTab(t) {
+    const tabs = _.clone(this.state.tabs);
+    tabs.forEach((tab, i) => {
+      if (tab.id === t) {
+        tabs.splice(i, 1);
+      }
+    });
     this.setState({ tabs });
   }
 
   render() {
-    const tabs = this.state.tabs || {};
-    const names = Object.keys(tabs);
-    const components = Object.keys(tabs).map((key) => tabs[key]);
-    names.unshift('Metadata', 'Search', 'Objects');
-    components.unshift(
+    const tabs = _.clone(this.state.tabs);
+    console.log(tabs);
+    const pages = [
       <Metadata
         shared={this.state.shared}
         onRowsSelected={this.onMetadataSelected}
@@ -169,7 +175,21 @@ class Server extends React.Component {
       <Objects
         shared={this.state.shared}
         addTab={this.addTab}
-      />
+      />,
+    ];
+    tabs.unshift(
+      {
+        id: 'Metadata',
+        page: pages[0],
+      },
+      {
+        id: 'Search',
+        page: pages[1],
+      },
+      {
+        id: 'Objects',
+        page: pages[2],
+      },
     );
     return (
       <div>
@@ -187,8 +207,7 @@ class Server extends React.Component {
         <div className={`${this.state.shared.metadata.System.SystemID.length === 0 ? 'dn' : 'db'}`}>
           <TabSection
             className="customTabElementB"
-            names={names}
-            components={components}
+            components={tabs}
             enableRemove
             onRemove={this.removeTab}
             removeOffset={3}

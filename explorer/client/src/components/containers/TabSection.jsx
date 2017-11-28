@@ -3,7 +3,6 @@ import React from 'react';
 export default class TabSection extends React.Component {
 
   static propTypes={
-    names: React.PropTypes.any,
     components: React.PropTypes.any,
     onRemove: React.PropTypes.Func,
     enableRemove: React.PropTypes.any,
@@ -14,11 +13,12 @@ export default class TabSection extends React.Component {
 
   constructor(props) {
     super(props);
-    this.createTabBar = this.createTabBar.bind(this);
+
     this.state = {
       tab: '',
       tabs: [],
     };
+
     this.createTabBar = this.createTabBar.bind(this);
     this.createTabTag = this.createTabTag.bind(this);
     this.createTabs = this.createTabs.bind(this);
@@ -27,11 +27,13 @@ export default class TabSection extends React.Component {
   }
 
   componentWillMount() {
-    this.setState({ tab: this.props.names[0] });
+    if (this.props.components[0]) {
+      this.setState({ tab: this.props.components[0].id });
+    }
   }
 
   createTabBar() {
-    const tabs = this.props.names.map(this.createTabTag);
+    const tabs = this.props.components.map(this.createTabTag);
     return (
       <div className="customTabBar">
         {tabs}
@@ -47,7 +49,7 @@ export default class TabSection extends React.Component {
       i = 0;
     }
     this.state.tabs[i].focus();
-    const e = this.props.names[i];
+    const e = this.props.components[i].id;
     this.setState({ tab: e });
   }
 
@@ -65,33 +67,42 @@ export default class TabSection extends React.Component {
       close = (
         <button
           className="customClose"
-          onClick={() => { this.props.onRemove(e); }}
+          onClick={() => { this.props.onRemove(e.id); }}
         >
           X
         </button>
       );
     }
+    let tags = null;
+    if (e.tags) {
+      tags = e.tags.map((tag) => (
+        <div style={{ backgroundColor: tag['color'] }} className="activeFullTag" >
+          {tag.name}
+        </div>
+      ));
+    }
     return (
       <div className="customTabSection">
         <button
-          onClick={() => this.setState({ tab: e })}
+          onClick={() => this.setState({ tab: e.id })}
           onKeyDown={(vent) => this.handleKeys(vent, i)}
-          className={`customTabSelect ${this.state.tab === e ? 'active' : ''}`}
-          key={e}
+          className={`customTabSelect ${this.state.tab === e.id ? 'active' : ''}`}
+          key={e.id}
           ref={(input) => { this.state.tabs[i] = input; }}
         >
-          {e}
+          {tags ? tags[0] : null}
+          {e.name ? e.name : e.id}
         </button>
         {close}
       </div>
     );
   }
 
-  createTabs(e, i) {
-    const name = this.props.names[i];
+  createTabs(e) {
+    const name = e.id;
     return (
       <div className={`customTab ${this.state.tab === name ? 'db' : 'dn'}`} key={name}>
-        {e}
+        {e.page}
       </div>
     );
   }

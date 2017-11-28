@@ -83,38 +83,63 @@ a {
   width: 100%;
 }
 
-.titleInput {
-  & input{
-    color: black;
-    background-color: var(--mainBackground);
-    border:none;
-    padding: 10px 30px;
-    width: inherit;
-    &::placeholder {
-      color:black;
-      opacity: 0.5;
-    }
-    &:hover{
-    }
-    &:focus{
-      outline: none;
-    }
-  }
-  & div{
-    width: inherit;
-    border-radius: 0px !important;
-  }
+.activeFullTag {
+  padding: 3px 8px;
+  border-radius: 3px;
+  color: var(--mainBackground);
+  display: inline-block;
+  margin: 5px;
+}
 
-  & div div{
-    padding: 8px 30px;
-    width: 460px;
-    opacity: 1;
+.activeStartTag {
+  display: inline-block;
+  width: 4px;
+  margin-right: 5px;
+}
+
+.navbarAutocomplete {
+  position: relative;
+  z-index: 100;
+  display: inline-block;
+  width: 400px;
+  margin: 0.5rem 0;
+  & > div {
+    width: 100%;
+    & > input{
+      color: black;
+      background-color: var(--mainBackground);
+      border:none;
+      padding: 10px 30px;
+      width: inherit;
+      box-sizing: border-box;
+      &::placeholder {
+        color:black;
+        opacity: 0.5;
+      }
+      &:hover{
+      }
+      &:focus{
+        outline: none;
+      }
+    }
+  }
+}
+
+.titleSelectBox {
+  max-height: 400px;
+  overflow-y: scroll;
+  & > div {
+      padding: 5px 20px;
+      display: flex;
   }
 }
 
 .titleBottom {
   background-color: white;
   color: var(--textColor);
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  padding: 5px;
   & button{
     margin: auto;
     display: block;
@@ -143,6 +168,7 @@ a {
   color: var(--textColor);
   & > .customTabBar{
     background-color: black;
+    height: 50px;
     & .customTabSection{
       bottom: -3px;
       & .customTabSelect{
@@ -176,6 +202,7 @@ a {
     background-color: var(--secondaryBackground);
     border-bottom: 1px solid var(--textColor);
     padding-top: 0.5rem;
+    height: 40px;
     & .customTabSection{
       bottom: -1px;
       & .customTabSelect{
@@ -207,7 +234,6 @@ a {
 .customTabElementU {
   & > .customTabBar{
     position: relative;
-    height: 40px;
     padding-left: 1rem;
     padding-right: 1rem;
     & .customTabSection{

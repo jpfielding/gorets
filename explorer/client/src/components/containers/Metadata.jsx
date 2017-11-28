@@ -254,6 +254,7 @@ class Metadata extends React.Component {
               <h1 className="f5 nonclickable" title={system.SystemDescription}>
                 {system.SystemID}
               </h1>
+              {system.SystemDescription}
             </div>
             <div className="customResultsBody overflow-x-scroll nowrap">
               <ul className="pa1 ma0 nonclickable">

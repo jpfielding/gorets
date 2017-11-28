@@ -42,7 +42,7 @@ class Objects extends React.Component {
   }
 
   componentWillMount() {
-    const ock = `${this.props.shared.connection.id}-object-history`;
+    const ock = `${this.props.shared.source}-${this.props.shared.connection.id}-object-history`;
     const objectsHistory = StorageCache.getFromCache(ock) || [];
     this.setState({
       objectsHistory,
@@ -118,7 +118,7 @@ class Objects extends React.Component {
 
     this.setState({ objectsForm });
 
-    const ock = `${this.props.shared.connection.id}-object-history`;
+    const ock = `${this.props.shared.source}-${this.props.shared.connection.id}-object-history`;
     const objectsHistory = StorageCache.getFromCache(ock) || [];
     const objectsParams = this.state.objectsParams;
     if (!objectsParams.ids) {
@@ -184,7 +184,7 @@ class Objects extends React.Component {
 
   removeHistoryElement(params) {
     console.log('[OBJECT] Removing history element');
-    const sck = `${this.props.shared.connection.id}-object-history`;
+    const sck = `${this.props.shared.source}-${this.props.shared.connection.id}-object-history`;
     const objectsHistory = StorageCache.getFromCache(sck) || [];
     if (some(objectsHistory, params)) {
       objectsHistory.splice(objectsHistory.findIndex(i => _.isEqual(i, params)), 1);
