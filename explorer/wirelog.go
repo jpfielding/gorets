@@ -43,6 +43,7 @@ var WirelogUpgrader = websocket.Upgrader{
 }
 
 // WireLogSocket provides access to wire logs as websocket data
+// http.Handle("/wirelog", explorer.WireLogSocket(explorer.WirelogUpgrader))
 func WireLogSocket(upgrader websocket.Upgrader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
