@@ -19,13 +19,13 @@ export default class App extends React.Component {
       State Setup
       connections:
         {
-          name: <name of config connection is from
+          name: <name of config connection is from>
           data: <actual connection data>
         }
       activeTabs:
         {
           id: <unique id>
-          [title: <overrides the id with a diffrent displayed text>]
+          [name: <overrides the id with a diffrent displayed text>]
           page: <component object to be rendered when tab is active>
           [tags:[{ name: <displayed name>, color: <displayed background color> }, ...]]
         }

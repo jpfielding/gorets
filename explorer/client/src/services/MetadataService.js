@@ -47,7 +47,6 @@ export default class MetadataService {
         params: [{
           ...args,
           connection: conn,
-          oldest: 360, // TODO (dan) this needs to be removed when we take different params
         }],
       }),
     });

@@ -44,6 +44,7 @@ class Server extends React.Component {
       errorOut: '',
       args: {
         extraction: 'COMPACT',
+        oldest: 360,
       },
     };
     this.getMetadata = this.getMetadata.bind(this);
@@ -115,14 +116,13 @@ class Server extends React.Component {
       });
   }
 
-  updateConnection(connection, extraction) {
+  updateConnection(connection, args) {
     const sck = `${this.state.shared.source}-${this.state.shared.connection.id}-search-history`;
     const ock = `${this.state.shared.source}-${this.state.shared.connection.id}-object-history`;
     const mck = `${this.state.shared.source}-${this.state.shared.connection.id}-metadata`;
     StorageCache.remove(sck);
     StorageCache.remove(ock);
     StorageCache.remove(mck);
-    const args = { extraction };
     const shared = _.clone(this.state.shared);
     shared.connection = connection;
     shared.metadata = Server.emptyMetadata;

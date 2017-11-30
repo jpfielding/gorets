@@ -68,7 +68,13 @@ class ConnectionForm extends React.Component {
         </select>
         <button
           className="customButton mt3"
-          onClick={() => this.props.updateConnection(this.state.connectionForm.value, this.state.select.value)}
+          onClick={() => {
+            const args = {
+              extraction: this.state.select.value,
+              oldest: 0,
+            };
+            this.props.updateConnection(this.state.connectionForm.value, args);
+          }}
         >
           Update Changes
         </button>
