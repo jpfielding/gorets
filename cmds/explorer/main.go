@@ -34,7 +34,7 @@ func main() {
 	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
 
 	// websocket wire logs  TODO fix this or remove it
-	http.Handle("/wirelog", explorer.WireLogSocket(explorer.WirelogUpgrader))
+	// http.Handle("/wirelog", explorer.WireLogSocket(explorer.WirelogUpgrader))
 
 	log.Println("Server starting: http://localhost:" + *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
