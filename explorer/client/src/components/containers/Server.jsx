@@ -3,6 +3,7 @@ import { withRouter } from 'react-router';
 import Metadata from 'components/containers/Metadata';
 import Search from 'components/containers/Search';
 import Objects from 'components/containers/Objects';
+import Explore from 'components/containers/Explore';
 import StorageCache from 'util/StorageCache';
 import MetadataService from 'services/MetadataService';
 import TabSection from 'components/containers/TabSection';
@@ -175,6 +176,9 @@ class Server extends React.Component {
         shared={this.state.shared}
         addTab={this.addTab}
       />,
+      <Explore
+        shared={this.state.shared}
+      />,
     ];
     tabs.unshift(
       {
@@ -189,6 +193,10 @@ class Server extends React.Component {
         id: 'Objects',
         page: pages[2],
       },
+      {
+        id: 'Explore',
+        page: pages[3],
+      }
     );
     return (
       <div>
@@ -209,7 +217,7 @@ class Server extends React.Component {
             components={tabs}
             enableRemove
             onRemove={this.removeTab}
-            removeOffset={3}
+            removeOffset={4}
           />
         </div>
         <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>

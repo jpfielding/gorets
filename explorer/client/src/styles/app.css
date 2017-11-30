@@ -5,6 +5,7 @@
   --mainBackground: #f1f1f1;
   --secondaryBackground: #dddddd;
   --textColor: #444;
+  --textLightColor: #999;
   --darkRed: #ff4136;
 }
 
@@ -77,6 +78,39 @@ a {
 .react-grid-Toolbar {
   background-color: var(--mainBackground);
   border: none;
+}
+
+.treeview {
+  font-weight: 700;
+  color: var(--textColor);
+  & .leaf {
+    font-weight: normal;
+    & span{
+      color: var(--textLightColor);
+      &::before{
+        content: ':';
+        margin: 0px 3px;
+      }
+    }
+  }
+  & .branch {
+    margin-left: 0.5rem;
+    padding-left: 1rem;
+    border-left: 1px solid var(--textLightColor);
+  }
+  & button{
+    border: none;
+    background: none;
+    width: 1rem;
+    padding: 0px;
+    margin-right: 0.5rem;
+    font-size: 75%;
+    color: var(--textColor);
+    &:focus{
+      outline: none;
+      color: var(--darkRed);
+    }
+  }
 }
 
 .form-control.input-sm {
