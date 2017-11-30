@@ -113,6 +113,13 @@ a {
   }
 }
 
+.treeSeachBar {
+    width: 100%;
+    margin: 0.5rem;
+    border: none;
+    font-size: 120%;
+}
+
 .form-control.input-sm {
   width: 100%;
 }

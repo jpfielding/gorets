@@ -6,6 +6,7 @@ class ExploreObject extends React.Component {
   static propTypes = {
     k: React.PropTypes.any,
     value: React.PropTypes.any,
+    setSearch: React.PropTypes.Func,
   }
 
   constructor(props) {
@@ -14,6 +15,11 @@ class ExploreObject extends React.Component {
       key: props.k,
       value: null,
     };
+    this.setSearch = this.setSearch.bind(this);
+  }
+
+  setSearch(i) {
+    this.props.setSearch(`${this.state.key}/${i}`);
   }
 
   processKeys(key, context) {
@@ -25,7 +31,7 @@ class ExploreObject extends React.Component {
       );
     }
     return (
-      <ExploreObject key={key} k={key} value={value} />
+      <ExploreObject key={key} k={key} value={value} setSearch={this.setSearch} />
     );
   }
 
@@ -47,6 +53,14 @@ class ExploreObject extends React.Component {
           { this.state.value == null ? '\u25BC' : '\u25B2' }
         </button>
         {this.state.key}
+        <button
+          style={{ display: 'inline-block', opacity: '0.5' }}
+          onClick={() => {
+            this.props.setSearch(this.state.key);
+          }}
+        >
+          {'\u25B2'}
+        </button>
         <div className="branch">
           {
             this.state.value == null ? null :
