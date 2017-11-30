@@ -25,7 +25,7 @@ type Config struct {
 
 // Connect ...
 // TODO need to remove connecting from session creation
-func (c Config) Connect(ctx context.Context, wlog string) (*Session, error) {
+func (c Config) Connect(ctx context.Context, wlog io.Writer) (*Session, error) {
 	// start with the default Dialer from http.DefaultTransport
 	transport := wirelog.NewHTTPTransport()
 	// if there is a need to proxy
@@ -37,11 +37,9 @@ func (c Config) Connect(ctx context.Context, wlog string) (*Session, error) {
 		}
 		transport.Dial = d.Dial
 	}
-	var closer io.Closer
-	var err error
 	// wire logging
-	if wlog != "" {
-		closer, err = wirelog.LogToFile(transport, wlog, true, true)
+	if wlog != nil {
+		err := wirelog.LogToWriter(transport, wlog, true, true)
 		if err != nil {
 			return nil, fmt.Errorf("wirelog setup: %v", err)
 		}
@@ -61,9 +59,13 @@ func (c Config) Connect(ctx context.Context, wlog string) (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
+	closer := func() error {
+		_, err := rets.Logout(ctx, sess, rets.LogoutRequest{URL: urls.Logout})
+		return err
+	}
 	return &Session{
 		requester: sess,
-		closer:    closer,
+		close:     closer,
 		urls:      *urls,
 	}, err
 }
@@ -72,19 +74,18 @@ func (c Config) Connect(ctx context.Context, wlog string) (*Session, error) {
 type Session struct {
 	Config Config // TODO should this be private?
 	// things in user state
-	closer    io.Closer
+	close     func() error
 	requester rets.Requester
 	urls      rets.CapabilityURLs
 }
 
 // Close is an io.Closer
-// TODO remove need for context to help it match up with io.Closer
-func (s *Session) Close(ctx context.Context) error {
-	_, err := rets.Logout(ctx, s.requester, rets.LogoutRequest{URL: s.urls.Logout})
-	if s.closer != nil {
-		s.closer.Close()
+func (s *Session) Close() error {
+	var err error
+	if s.close != nil {
+		err = s.close()
 	}
-	s.closer = nil
+	s.close = nil
 	s.requester = nil
 	return err
 }

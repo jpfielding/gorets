@@ -1,6 +1,7 @@
 package explorer
 
 import (
+	"bytes"
 	"context"
 	"encoding/xml"
 	"fmt"
@@ -19,7 +20,8 @@ type MetadataService struct{}
 
 // MetadataResponse ...
 type MetadataResponse struct {
-	Metadata metadata.MSystem
+	Metadata metadata.MSystem `json:"Metadata"`
+	Wirelog  string           `json:"wirelog,omitempty"`
 }
 
 // MetadataGetParams ...
@@ -52,15 +54,17 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		return fmt.Errorf("%s not supported", args.Extraction)
 	}
 	ctx := context.Background()
-	sess, err := cfg.Connect(ctx, "")
+	wirelog := bytes.Buffer{}
+	sess, err := cfg.Connect(ctx, &wirelog)
 	if err != nil {
 		return err
 	}
-	defer sess.Close(ctx)
+	defer sess.Close()
 	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		fmt.Printf("requesting remote metadata for %s\n", cfg.ID)
 		standard, err := op(ctx, r, u.GetMetadata)
 		reply.Metadata = *standard
+		reply.Wirelog = string(wirelog.Bytes())
 		// bg this
 		go func() {
 			JSONStore(MSystem(cfg), &standard)

@@ -1,6 +1,7 @@
 package explorer
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -30,6 +31,7 @@ type SearchPage struct {
 	Rows    []rets.Row `json:"rows"`
 	MaxRows bool       `json:"maxrows"`
 	Count   int        `json:"count"`
+	Wirelog string     `json:"wirelog,omitempty"`
 }
 
 // SearchService ...
@@ -46,10 +48,12 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 	}
 	cfg := args.Connection
 	ctx := context.Background()
-	sess, err := cfg.Connect(ctx, "")
+	wirelog := bytes.Buffer{}
+	sess, err := cfg.Connect(ctx, &wirelog)
 	if err != nil {
 		return err
 	}
+	defer sess.Close()
 	fmt.Printf("%v\n", cfg)
 	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		req := rets.SearchRequest{
@@ -87,6 +91,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 			return err
 		})
 		reply.Count = result.Count
+		reply.Wirelog = string(wirelog.Bytes())
 		return err
 	})
 }

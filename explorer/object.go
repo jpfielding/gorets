@@ -1,6 +1,7 @@
 package explorer
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -20,7 +21,8 @@ type ObjectParams struct {
 
 // Objects ...
 type Objects struct {
-	Objects []Object
+	Objects []Object `json:"Objects"`
+	Wirelog string   `json:"wirelog,omitempty"`
 }
 
 // Object ...
@@ -48,11 +50,12 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 
 	cfg := args.Connection
 	ctx := context.Background()
-	sess, err := cfg.Connect(ctx, "")
+	wirelog := bytes.Buffer{}
+	sess, err := cfg.Connect(ctx, &wirelog)
 	if err != nil {
 		return err
 	}
-	defer sess.Close(ctx)
+	defer sess.Close()
 	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		// warning, this does _all_ of the photos
 		rsp, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
@@ -88,6 +91,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 				Blob:           o.Blob,
 			}
 			reply.Objects = append(reply.Objects, obj)
+			reply.Wirelog = string(wirelog.Bytes())
 			return nil
 		})
 	})
