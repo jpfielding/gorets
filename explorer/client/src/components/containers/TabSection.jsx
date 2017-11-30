@@ -19,17 +19,15 @@ export default class TabSection extends React.Component {
       tabs: [],
     };
 
+    if (this.props.components[0]) {
+      this.state.tab = this.props.components[0].id;
+    }
+
     this.createTabBar = this.createTabBar.bind(this);
     this.createTabTag = this.createTabTag.bind(this);
     this.createTabs = this.createTabs.bind(this);
     this.moveTab = this.moveTab.bind(this);
     this.handleKeys = this.handleKeys.bind(this);
-  }
-
-  componentWillMount() {
-    if (this.props.components[0]) {
-      this.setState({ tab: this.props.components[0].id });
-    }
   }
 
   createTabBar() {

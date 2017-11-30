@@ -38,7 +38,7 @@ class Server extends React.Component {
         resource: {},
         class: {},
         fields: [],
-        source: props.connection.name,
+        source: props.connection.config,
       },
       tabs: [],
       errorOut: '',
@@ -160,7 +160,6 @@ class Server extends React.Component {
 
   render() {
     const tabs = _.clone(this.state.tabs);
-    console.log(tabs);
     const pages = [
       <Metadata
         shared={this.state.shared}

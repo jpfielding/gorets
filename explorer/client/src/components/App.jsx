@@ -12,33 +12,63 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props);
+
     const stored = StorageCache.getFromCache('configs');
 
     /*
       State Setup
-      connections: array of objects of format
-      {
-        name: <name of config connection is from
-        data: <actual connection data>
-      }
-      used for holding list of currently avaiable connections and their source
-      activeTabs: array of objects of format
-      {
-        id: <id to be displayed as title header>
-        [title: <overrides the id with a diffrent id>]
-        page: <component object to be rendered when tab is active>
-        [tabs: ... ]
-      }
-      connectionAutocompleteField: autocomplete field for Connections autocomplete
-      component
-      configAutocompleteField: autocomplete field for Configs autocomplete component
+      connections:
+        {
+          name: <name of config connection is from
+          data: <actual connection data>
+        }
+      activeTabs:
+        {
+          id: <unique id>
+          [title: <overrides the id with a diffrent displayed text>]
+          page: <component object to be rendered when tab is active>
+          [tags:[{ name: <displayed name>, color: <displayed background color> }, ...]]
+        }
+      connectionAutocompleteField: ...
+      configAutocompleteField: ...
       popout: <component holder for an overlaying component>
-      Use to force a component infront of the current display and block action to
-      other components
+      configs: {
+        active {
+          [<config source id>: <color>]
+        }
+        server: {
+          [{
+            url: <url>,
+            name: <name for the source>,
+          }, ...]
+        }
+        stored: {
+          [{
+            url: <url>,
+            name: <name for the source>,
+          }, ...]
+        }
+      }
+      color: {
+        ...
+      }
     */
+
+    /*
+      TODO Imporove color support to allow lighter colors with black text
+      Currently only supports well colors with white text
+    */
+    this.addSimpleTab = this.addSimpleTab.bind(this);
+
     this.state = {
       connections: [],
-      activeTabs: [],
+      activeTabs: [
+        {
+          id: 'newcon',
+          name: 'New Connection',
+          page: (<Connections addTab={this.addSimpleTab} />),
+        },
+      ],
       connectionAutocompleteField: '',
       configAutocompleteField: '',
       popout: null,
@@ -58,11 +88,14 @@ export default class App extends React.Component {
       },
     };
 
-    this.addTab = this.addTab.bind(this);
+    this.addFullTab = this.addFullTab.bind(this);
+    this.addDirectTab = this.addDirectTab.bind(this);
+
     this.submitConfig = this.submitConfig.bind(this);
-    this.createTabs = this.createTabs.bind(this);
     this.removeTab = this.removeTab.bind(this);
+
     this.getNewColor = this.getNewColor.bind(this);
+    this.getColor = this.getColor.bind(this);
 
     this.selectConnection = this.selectConnection.bind(this);
 
@@ -83,36 +116,15 @@ export default class App extends React.Component {
     return color;
   }
 
-  createTabs() {
-    const rtn = [{ id: 'newcon', name: 'New Connection', page: (<Connections addTab={this.addTab} />) }];
-    this.state.activeTabs.forEach(e => {
-      console.log(e);
-      if (e.config) {
-        rtn.push(
-          {
-            id: e.config + e.id,
-            name: e.id,
-            tags: [{ name: e.config, color: this.state.configs.active[e.config] }],
-            page: e.page,
-          }
-        );
-      } else {
-        rtn.push(
-          {
-            id: e.id,
-            page: e.page,
-          }
-        );
-      }
-    });
-    return rtn;
+  getColor(configSourceId) {
+    return this.state.configs.active[configSourceId];
   }
 
   removeTab(tab) {
     const activeTabs = _.clone(this.state.activeTabs);
     console.log(tab);
     activeTabs.forEach((e, i) => {
-      if (e.config + e.id === tab) {
+      if (e.id === tab) {
         activeTabs.splice(i, 1);
         console.log('FOUND');
       }
@@ -120,16 +132,38 @@ export default class App extends React.Component {
     this.setState({ activeTabs });
   }
 
-  addTab(connection) {
+  addSimpleTab(connection) {
     const activeTabs = _.clone(this.state.activeTabs);
     activeTabs.push({
       id: connection.id,
-      page: (<Server connection={{ name: 'newcon', data: connection }} />) });
+      page: (<Server connection={{ config: 'simplecon', data: connection }} />),
+    });
+    this.setState({ activeTabs });
+  }
+
+  addFullTab(connection, configID, name) {
+    const activeTabs = _.clone(this.state.activeTabs);
+    activeTabs.push({
+      id: configID + name,
+      name,
+      tags: [{ name: configID, color: this.getColor(configID) }],
+      page: (<Server connection={connection} />),
+    });
+    this.setState({ activeTabs });
+  }
+
+  addDirectTab(newTab) {
+    const activeTabs = _.clone(this.state.activeTabs);
+    activeTabs.push({ newTab });
     this.setState({ activeTabs });
   }
 
   submitConfig(e) {
-    console.log('Submiting Config', e);
+    console.log('Submiting Config.', e);
+
+    if (!e.name || !e.url) {
+      console.log('Invalid config submited. Use format { name: <name>, url: <url> }');
+    }
 
     const activeIDs = Object.keys(this.state.configs.active);
     if (activeIDs.indexOf(e.name) > -1) {
@@ -153,12 +187,11 @@ export default class App extends React.Component {
 
         const r = json.result.configs.map((el) => (
           {
-            name: e.name,
+            config: e.name,
             data: el,
           }
-          ));
+        ));
         const connections = _.clone(this.state.connections).concat(r);
-
         this.setState({ connections, configs });
       });
   }
@@ -168,23 +201,12 @@ export default class App extends React.Component {
     const { activeTabs } = this.state;
     let unique = true;
     activeTabs.forEach((e) => {
-      if (e.id === value && e.config === connection.name) {
+      if (e.id === value && e.config === connection.config) {
         unique = false;
       }
     });
     if (unique) {
-      activeTabs.push(
-        {
-          config: connection.name,
-          id: value,
-          page: (<Server connection={connection} />),
-        }
-       );
-      this.setState({
-        connectionAutocompleteField: '',
-        selected: connection,
-        activeTabs,
-      });
+      this.addFullTab(connection, connection.config, value);
     }
   }
 
@@ -262,11 +284,9 @@ export default class App extends React.Component {
               { (Object.keys(this.state.configs.active).indexOf(item.name) > -1) ?
                 <div
                   style={{
-                    width: '3px',
-                    display: 'inline-block',
                     backgroundColor: this.state.configs.active[item.name],
-                    marginRight: '5px',
                   }}
+                  className="activeStartTag"
                 />
                 : null}
               <div style={{ flex: '1', padding: '0px' }}>
@@ -301,10 +321,10 @@ export default class App extends React.Component {
     return (
       <div
         style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
-        key={item.name + item.data.id}
+        key={item.config + item.data.id}
         className="clickable"
       >
-        <div style={{ backgroundColor: this.state.configs.active[item.name] }} className="activeStartTag" />
+        <div style={{ backgroundColor: this.state.configs.active[item.config] }} className="activeStartTag" />
         {item.data.id}
       </div>
     );
@@ -329,7 +349,7 @@ export default class App extends React.Component {
 
         <TabSection
           className="customTabElementA"
-          components={this.createTabs()}
+          components={this.state.activeTabs}
           enableRemove
           onRemove={this.removeTab}
           removeOffset={1}
