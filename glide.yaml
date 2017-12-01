@@ -32,5 +32,4 @@ import:
   # used for rets explorer
   - package: github.com/gorilla/rpc
   - package: github.com/gorilla/handlers
-  - package: github.com/gorilla/websocket
 
