@@ -63,6 +63,10 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	return sess.Process(ctx, func(r rets.Requester, u rets.CapabilityURLs) error {
 		fmt.Printf("requesting remote metadata for %s\n", cfg.ID)
 		standard, err := op(ctx, r, u.GetMetadata)
+		if err != nil {
+			reply.Wirelog = string(wirelog.Bytes())
+			return err
+		}
 		reply.Metadata = *standard
 		reply.Wirelog = string(wirelog.Bytes())
 		// bg this

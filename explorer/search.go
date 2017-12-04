@@ -74,7 +74,8 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 		result, err := rets.SearchCompact(ctx, r, req)
 		defer result.Close()
 		if err != nil {
-			return nil
+			reply.Wirelog = string(wirelog.Bytes())
+			return err
 		}
 		// non success rets codes should return an error
 		switch result.Response.Code {

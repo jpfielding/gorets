@@ -67,6 +67,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 			},
 		})
 		if err != nil {
+			reply.Wirelog = string(wirelog.Bytes())
 			return err
 		}
 		// open the json encoder
