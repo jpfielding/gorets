@@ -1,4 +1,5 @@
 import React from 'react';
+import DragableWindow from 'components/containers/DragableWindow';
 
 export default class KeyFormatter extends React.Component {
   static propTypes = {
@@ -6,6 +7,7 @@ export default class KeyFormatter extends React.Component {
     metadataResource: React.PropTypes.any,
     metadataClass: React.PropTypes.any,
     displayContents: React.PropTypes.Func,
+    container: React.PropTypes.any,
   };
 
   constructor(props) {
@@ -84,26 +86,12 @@ export default class KeyFormatter extends React.Component {
             style={{ display: 'inline-block', marginRight: '5px' }}
             onClick={() => {
               this.props.displayContents(
-                <div
-                  style={{
-                    position: 'absolute',
-                    zIndex: '500',
-                  }}
-                  className="customResultsSet bg-mainbg"
-                >
-                  <div className="customResultsTitle" >
-                    {this.state.current.LookupName}
-                    <button
-                      onClick={() => this.props.displayContents(null)}
-                      className="fr customButton"
-                    >
-                      X
-                    </button>
-                  </div>
-                  <div className="customResultsBody" >
-                    {this.renderLookup(this.state.values['METADATA-LOOKUP_TYPE'].LookupType)}
-                  </div>
-                </div>
+                <DragableWindow
+                  title={this.state.current.LookupName}
+                  container={this.props.container}
+                  removeSelf={() => this.props.displayContents(null)}
+                  content={this.renderLookup(this.state.values['METADATA-LOOKUP_TYPE'].LookupType)}
+                />
               );
             }}
           >

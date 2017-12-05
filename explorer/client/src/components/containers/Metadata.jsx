@@ -53,6 +53,7 @@ class Metadata extends React.Component {
       filteredRows: field,
       selectedFieldSet,
       displayContents: null,
+      ref: null,
     };
     this.handleGridSort = this.handleGridSort.bind(this);
     this.onRowsSelected = this.onRowsSelected.bind(this);
@@ -181,6 +182,7 @@ class Metadata extends React.Component {
             metadataResource={selectedResource}
             metadataClass={selectedClass}
             displayContents={(e) => this.setDisplay(e)}
+            container={this.state.ref}
           />,
             };
           }
@@ -242,6 +244,7 @@ class Metadata extends React.Component {
     const system = this.props.shared.metadata.System;
     return (
       <div
+        ref={(ref) => { this.state.ref = ref; }}
         className="flex"
         style={{
           maxWidth: '1500px',
