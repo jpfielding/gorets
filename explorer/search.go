@@ -31,7 +31,7 @@ type SearchPage struct {
 	Rows    []rets.Row `json:"rows"`
 	MaxRows bool       `json:"maxrows"`
 	Count   int        `json:"count"`
-	Wirelog string     `json:"wirelog,omitempty"`
+	Wirelog []byte     `json:"wirelog,omitempty"`
 }
 
 // SearchService ...
@@ -74,7 +74,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 		result, err := rets.SearchCompact(ctx, r, req)
 		defer result.Close()
 		if err != nil {
-			reply.Wirelog = string(wirelog.Bytes())
+			reply.Wirelog = wirelog.Bytes()
 			return err
 		}
 		// non success rets codes should return an error
@@ -92,7 +92,7 @@ func (ms SearchService) Run(r *http.Request, args *SearchArgs, reply *SearchPage
 			return err
 		})
 		reply.Count = result.Count
-		reply.Wirelog = string(wirelog.Bytes())
+		reply.Wirelog = wirelog.Bytes()
 		return err
 	})
 }

@@ -22,7 +22,7 @@ type ObjectParams struct {
 // Objects ...
 type Objects struct {
 	Objects []Object `json:"Objects"`
-	Wirelog string   `json:"wirelog,omitempty"`
+	Wirelog []byte   `json:"wirelog,omitempty"`
 }
 
 // Object ...
@@ -67,7 +67,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 			},
 		})
 		if err != nil {
-			reply.Wirelog = string(wirelog.Bytes())
+			reply.Wirelog = wirelog.Bytes()
 			return err
 		}
 		// open the json encoder
@@ -92,7 +92,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 				Blob:           o.Blob,
 			}
 			reply.Objects = append(reply.Objects, obj)
-			reply.Wirelog = string(wirelog.Bytes())
+			reply.Wirelog = wirelog.Bytes()
 			return nil
 		})
 	})

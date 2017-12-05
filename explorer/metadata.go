@@ -21,7 +21,7 @@ type MetadataService struct{}
 // MetadataResponse ...
 type MetadataResponse struct {
 	Metadata metadata.MSystem `json:"Metadata"`
-	Wirelog  string           `json:"wirelog,omitempty"`
+	Wirelog  []byte           `json:"wirelog,omitempty"`
 }
 
 // MetadataGetParams ...
@@ -64,11 +64,11 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 		fmt.Printf("requesting remote metadata for %s\n", cfg.ID)
 		standard, err := op(ctx, r, u.GetMetadata)
 		if err != nil {
-			reply.Wirelog = string(wirelog.Bytes())
+			reply.Wirelog = wirelog.Bytes()
 			return err
 		}
 		reply.Metadata = *standard
-		reply.Wirelog = string(wirelog.Bytes())
+		reply.Wirelog = wirelog.Bytes()
 		// bg this
 		go func() {
 			JSONStore(MSystem(cfg), &standard)
