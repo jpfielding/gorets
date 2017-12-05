@@ -18,12 +18,18 @@ button {
   border-radius: 0px;
 }
 
+input.masker { -webkit-text-security: disc; }
+
 .form-list {
   list-style-type: none;
 
   & label {
     flex: 1 0 16rem;
   }
+}
+
+.fdn {
+  display: none !important;
 }
 
 .bg-mainbg{
@@ -681,4 +687,149 @@ a {
   }
 }
 
-input.masker { -webkit-text-security: disc; }
+.wireloger{
+  position: fixed;
+  bottom: 0px;
+  width: 90%;
+  margin: 0 5%;
+  z-index: 3000;
+  & .pulltab{
+    overflow: hidden;
+    height: 40px;
+    display: flex;
+    align-items: flex-end;
+    & .expand{
+      display: flex;
+      height: 40px;
+      max-height: 0px;
+      background-color: var(--textColor);
+      color: var(--mainBackground);
+      font-weight: bold;
+      transition: 0.2s;
+      padding: 0 20px;
+      margin: 0 auto;
+      width: 120px;
+      border-top-left-radius: 100px;
+      border-top-right-radius: 100px;
+      border: none;
+      & > button{
+        flex: 1;
+        background: none;
+        border: none;
+        padding: none;
+        color: white;
+        &:focus{
+          outline: none;
+          color: var(--darkRed);
+        }
+      }
+    }
+    &:hover{
+      & .expand{
+        max-height: 40px;
+      }
+    }
+  }
+  & .body{
+    border: 1px solid var(--textColor);
+    background: var(--mainBackground);
+    overflow: hidden;
+    box-shadow: 1px 3px 8px grey;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    & .title{
+      margin: 0px;
+      padding: 10px;
+      font-size: 1.2em;
+      background-color: var(--secondaryBackground);
+      border-bottom: 1px solid var(--textColor);
+      color: var(--textColor);
+    }
+    & .scrollable{
+      overflow: scroll;
+      padding: 0 25px;
+      height: 100%;
+    }
+    & .event{
+      margin: 5px;
+      border: 1px solid var(--textColor);
+      background-color: var(--secondaryBackground);
+      color: var(--textColor);
+      border-radius: 10px;
+      overflow: hidden;
+      & h1{
+        font-size: 1.1em;
+        margin: 0px;
+        padding: 10px;
+        border-bottom: 1px solid var(--textColor);
+        & button{
+          float: right;
+          font-size: 0.5em
+        }
+      }
+      & pre{
+        margin-left: 5px;
+        background-color: var(--mainBackground);
+        margin: 0px;
+        padding: 10px;
+        overflow: hidden;
+        overflow-x: scroll;
+      }
+    }
+    & .Infoevent{
+      margin: 5px;
+      border: 1px solid var(--textColor);
+      background-color: lightblue;
+      color: var(--textColor);
+      border-radius: 10px;
+      overflow: hidden;
+      & h1{
+        font-size: 1.1em;
+        margin: 0px;
+        padding: 10px;
+        border-bottom: 1px solid var(--textColor);
+        & button{
+          float: right;
+          font-size: 0.5em
+        }
+      }
+      & pre{
+        margin-left: 5px;
+        background-color: var(--mainBackground);
+        margin: 0px;
+        padding: 10px;
+        overflow: hidden;
+        overflow-x: scroll;
+      }
+    }
+    & .Errorevent{
+      margin: 5px;
+      border: 1px solid var(--textColor);
+      background-color: var(--darkRed);
+      color: var(--textColor);
+      border-radius: 10px;
+      overflow: hidden;
+      & h1{
+        font-size: 1.1em;
+        margin: 0px;
+        padding: 10px;
+        color: var(--mainBackground);
+        border-bottom: 1px solid var(--textColor);
+        & button{
+          float: right;
+          font-size: 0.5em
+        }
+      }
+      & pre{
+        margin-left: 5px;
+        background-color: var(--mainBackground);
+        margin: 0px;
+        padding: 10px;
+        overflow: hidden;
+        overflow-x: scroll;
+      }
+    }
+  }
+}

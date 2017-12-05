@@ -10,6 +10,8 @@ import ContentHistory from 'components/containers/History';
 import SearchFormatter from 'components/gridcells/SearchFormatter';
 import _ from 'underscore';
 
+const Base64 = require('js-base64').Base64;
+
 class Search extends React.Component {
 
   static propTypes = {
@@ -24,8 +26,10 @@ class Search extends React.Component {
       class: React.PropTypes.any,
       fields: React.PropTypes.any,
       rows: React.PropTypes.any,
+      wirelog: React.PropTypes.any,
     },
     addTab: React.PropTypes.Func,
+    pushWirelog: React.PropTypes.Func,
   }
 
   static defaultProps = {
@@ -242,6 +246,12 @@ class Search extends React.Component {
         console.log(res);
         return res.json();
       }).then(json => {
+        if (json.error !== null) {
+          this.props.pushWirelog({ tag: 'Search', log: json.error, extra: { type: 'Error' } });
+        } else {
+          const log = Base64.decode(json.result.wirelog);
+          this.props.pushWirelog({ tag: 'Search', log });
+        }
         if (!some(searchHistory, searchParams)) {
           searchHistory.unshift(searchParams);
           StorageCache.putInCache(sck, searchHistory, 720);

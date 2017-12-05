@@ -7,11 +7,14 @@ import { Fieldset, Field, createValue, Input } from 'react-forms';
 import ContentHistory from 'components/containers/History';
 import _ from 'underscore';
 
+const Base64 = require('js-base64').Base64;
+
 class Objects extends React.Component {
 
   static propTypes = {
     shared: React.PropTypes.any,
     addTab: React.PropTypes.Func,
+    pushWirelog: React.PropTypes.Func,
   }
 
   constructor(props) {
@@ -137,6 +140,12 @@ class Objects extends React.Component {
       .getObjects(this.props.shared.connection, objectsParams)
       .then((res) => res.json())
       .then((json) => {
+        if (json.error !== null) {
+          this.props.pushWirelog({ tag: 'Objects', log: json.error, extra: { type: 'Error' } });
+        } else {
+          const log = Base64.decode(json.result.wirelog);
+          this.props.pushWirelog({ tag: 'Objects', log });
+        }
         if (!some(objectsHistory, objectsParams)) {
           objectsHistory.unshift(objectsParams);
           StorageCache.putInCache(ock, objectsHistory, 720);

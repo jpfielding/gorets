@@ -8,7 +8,10 @@ import StorageCache from 'util/StorageCache';
 import MetadataService from 'services/MetadataService';
 import TabSection from 'components/containers/TabSection';
 import ConnectionForm from 'components/containers/ConnectionForm';
+import Wireloger from 'components/containers/Wireloger';
 import _ from 'underscore';
+
+const Base64 = require('js-base64').Base64;
 
 class Server extends React.Component {
 
@@ -40,6 +43,7 @@ class Server extends React.Component {
         class: {},
         fields: [],
         source: props.connection.config,
+        wirelog: [],
       },
       tabs: [],
       errorOut: '',
@@ -59,12 +63,14 @@ class Server extends React.Component {
     this.addTab = this.addTab.bind(this);
 
     this.errorOut = this.errorOut.bind(this);
+    this.pushWirelog = this.pushWirelog.bind(this);
   }
 
   componentWillMount() {
-    this.getMetadata(m => {
+    this.getMetadata((m, log, extra) => {
       const shared = this.state.shared;
       shared.metadata = m;
+      shared.wirelog.unshift({ tag: 'Metadata', log, extra });
       this.setState({ shared });
     });
   }
@@ -98,7 +104,9 @@ class Server extends React.Component {
     const md = StorageCache.getFromCache(ck);
     if (md) {
       console.log('loaded metadata from local cache', md);
-      onFound(md);
+      onFound(md, 'No wirelog available, metadata was loaded from local cashe\n' +
+        'To force a new pull press \'Update Changes\' in the \'Conncetion Config\' pannel',
+         { type: 'Info' });
       return;
     }
     const args = this.state.args;
@@ -111,10 +119,21 @@ class Server extends React.Component {
           this.errorOut(json.error);
           return;
         }
-        console.log('metadata pulled via json request');
-        onFound(json.result.Metadata);
+        console.log('metadata pulled via json request', json);
+        if (json.result.wirelog) {
+          onFound(json.result.Metadata, Base64.decode(json.result.wirelog));
+        } else {
+          onFound(json.result.Metadata, 'Metadata recived without wirelog.\n' +
+            'This is mostly because it was pulled from a cashe in the provider and no the source itself');
+        }
         StorageCache.putInCache(ck, json.result.Metadata, 60);
       });
+  }
+
+  pushWirelog(e) {
+    const shared = _.clone(this.state.shared);
+    shared.wirelog.unshift(e);
+    this.setState({ shared });
   }
 
   updateConnection(connection, args) {
@@ -128,9 +147,10 @@ class Server extends React.Component {
     shared.connection = connection;
     shared.metadata = Server.emptyMetadata;
     this.setState({ shared, args, errorOut: '' }, () => {
-      this.getMetadata(m => {
+      this.getMetadata((m, log, extra) => {
         console.log('Setting ', m);
         shared.metadata = m;
+        shared.wirelog.unshift({ tag: 'Metadata', log, extra });
         this.setState({ shared });
       });
     });
@@ -171,10 +191,12 @@ class Server extends React.Component {
       <Search
         shared={this.state.shared}
         addTab={this.addTab}
+        pushWirelog={this.pushWirelog}
       />,
       <Objects
         shared={this.state.shared}
         addTab={this.addTab}
+        pushWirelog={this.pushWirelog}
       />,
       <Explore
         shared={this.state.shared}
@@ -223,6 +245,7 @@ class Server extends React.Component {
         <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>
           <div className="loading">LOADING METADATA</div>
         </div>
+        <Wireloger wirelog={this.state.shared.wirelog} />
       </div>
     );
   }
