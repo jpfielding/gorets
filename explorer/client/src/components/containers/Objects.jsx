@@ -146,6 +146,7 @@ class Objects extends React.Component {
           const log = Base64.decode(json.result.wirelog);
           this.props.pushWirelog({ tag: 'Objects', log });
         }
+        objectsParams.submited = true;
         if (!some(objectsHistory, objectsParams)) {
           objectsHistory.unshift(objectsParams);
           StorageCache.putInCache(ock, objectsHistory, 720);
