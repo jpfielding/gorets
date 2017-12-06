@@ -70,7 +70,9 @@ export default class App extends React.Component {
         },
       ],
       connectionAutocompleteField: '',
+      connectionErrorOut: '',
       configAutocompleteField: '',
+      configErrorOut: '',
       popout: null,
       configs: {
         active: {},
@@ -79,10 +81,10 @@ export default class App extends React.Component {
       },
       color: {
         init: [
-          '#F44336', '#E91E63', '#9C27B0',
-          '#673AB7', '#3F51B5', '#2196F3',
-          '#03A9F4', '#00BCD4', '#009688',
-          '#4CAF50', '#FF5722',
+          '#03A9F4',
+          '#673AB7',
+          '#4CAF50',
+          '#F44336',
         ],
         available: [],
       },
@@ -91,6 +93,7 @@ export default class App extends React.Component {
     this.addFullTab = this.addFullTab.bind(this);
     this.addDirectTab = this.addDirectTab.bind(this);
 
+    this.submitNewConfig = this.submitNewConfig.bind(this);
     this.submitConfig = this.submitConfig.bind(this);
     this.removeTab = this.removeTab.bind(this);
 
@@ -104,20 +107,36 @@ export default class App extends React.Component {
     this.renderConnectionMenu = this.renderConnectionMenu.bind(this);
 
     this.renderConfigAutocomplete = this.renderConfigAutocomplete.bind(this);
+    this.renderConfigItem = this.renderConfigItem.bind(this);
+    this.renderConfigMenu = this.renderConfigMenu.bind(this);
   }
 
   getNewColor() {
     if (this.state.color.available.length === 0) {
       this.state.color.available = _.clone(this.state.color.init);
     }
-    const index = Math.floor(Math.random() * this.state.color.available.length);
-    const color = this.state.color.available[index];
-    this.state.color.available.splice(index, 1);
-    return color;
+    return this.state.color.available.pop();
   }
 
   getColor(configSourceId) {
     return this.state.configs.active[configSourceId];
+  }
+
+  getConfig(source, target) {
+    let rtn = null;
+    source.server.forEach((e) => {
+      if (rtn !== null) return;
+      if (e.name === target.name && e.url === target.url) {
+        rtn = e;
+      }
+    });
+    source.stored.forEach((e) => {
+      if (rtn !== null) return;
+      if (e.name === target.name && e.url === target.url) {
+        rtn = e;
+      }
+    });
+    return rtn;
   }
 
   removeTab(tab) {
@@ -158,56 +177,88 @@ export default class App extends React.Component {
     this.setState({ activeTabs });
   }
 
-  submitConfig(e) {
-    console.log('Submiting Config.', e);
-
-    if (!e.name || !e.url) {
-      console.log('Invalid config submited. Use format { name: <name>, url: <url> }');
-    }
-
-    const activeIDs = Object.keys(this.state.configs.active);
-    if (activeIDs.indexOf(e.name) > -1) {
-      console.log('Rejected. ', e.name, ' is a already an active source name');
+  submitNewConfig(e) {
+    this.setState({ configErrorOut: '' });
+    const fullList = this.state.configs.server.concat(this.state.configs.stored);
+    if (fullList.find((el) => (el.name === e.name))) {
+      this.setState({ configErrorOut: `Config name ${e.name} already in use` });
       return;
     }
+    this.submitConfig(e);
+  }
 
-    ConfigService
-      .getConfigList(e.url)
-      .then(res => res.json())
-      .then((json) => {
-        console.log(json);
+  submitConfig(e) {
+    console.log('Submiting Config.', e);
+    this.setState({ configErrorOut: '' }, () => {
+      if (!e.name || !e.url) {
+        this.setState({ configErrorOut: 'Invalid config submited, both Name and URL fields are required' });
+        return;
+      }
 
-        const configs = _.clone(this.state.configs);
-        configs.active[e.name] = this.getNewColor();
+      const activeIDs = Object.keys(this.state.configs.active);
+      if (activeIDs.indexOf(e.name) > -1) {
+        this.setState({ configErrorOut: `Config name ${e.name} already in use` });
+        return;
+      }
 
-        if (!_.contains(configs.stored, e) && !_.contains(configs.server, e)) {
-          configs.stored.push(e);
-          StorageCache.putInCache('configs', configs.stored, 720);
-        }
+      ConfigService
+        .getConfigList(e.url)
+        .then(res => res.json())
+        .then((json) => {
+          console.log('Config Responce:', json);
+          const configs = _.clone(this.state.configs);
 
-        const r = json.result.configs.map((el) => (
-          {
-            config: e.name,
-            data: el,
+          if (json.error) {
+            console.error(json.error);
+            this.getConfig(configs, e).failed = true;
+            this.setState({ configErrorOut: 'Error with config response', configs });
+            return;
           }
-        ));
-        const connections = _.clone(this.state.connections).concat(r);
-        this.setState({ connections, configs });
-      });
+
+          configs.active[e.name] = this.getNewColor();
+
+          if (!_.contains(configs.stored, e) && !_.contains(configs.server, e)) {
+            configs.stored.push(e);
+            StorageCache.putInCache('configs', configs.stored, 720);
+          }
+
+          const r = json.result.configs.map((el) => (
+            {
+              config: e.name,
+              data: el,
+            }
+          ));
+          const connections = _.clone(this.state.connections).concat(r);
+          this.setState({ connections, configs });
+        })
+        .catch((err) => {
+          console.error(err);
+          const configs = _.clone(this.state.configs);
+          this.getConfig(configs, e).failed = true;
+          this.setState({ configErrorOut: 'Invalid config', configs });
+          return;
+        });
+    });
   }
 
   selectConnection(value, connection) {
     console.log('Selected', value, 'from Autocomplete', connection);
-    const { activeTabs } = this.state;
-    let unique = true;
-    activeTabs.forEach((e) => {
-      if (e.id === value && e.config === connection.config) {
-        unique = false;
+    this.setState({ connectionErrorOut: '' }, () => {
+      const { activeTabs } = this.state;
+      let unique = true;
+      activeTabs.forEach((e) => {
+        const id = connection.config + value;
+        console.log(e.id, id);
+        if (e.id === id) {
+          unique = false;
+        }
+      });
+      if (unique) {
+        this.addFullTab(connection, connection.config, value);
+        return;
       }
+      this.setState({ connectionErrorOut: 'Failed to create tab, Does that tab already exist?' });
     });
-    if (unique) {
-      this.addFullTab(connection, connection.config, value);
-    }
   }
 
   renderConnectionAutocomplete() {
@@ -221,9 +272,9 @@ export default class App extends React.Component {
             id: 'connections-autocomplete',
           }}
           items={(this.state.connections == null ? [] : this.state.connections)}
+          getItemValue={(item) => item.data.id}
           onChange={(event, value) => this.setState({ connectionAutocompleteField: value })}
           onSelect={this.selectConnection}
-          shouldItemRender={(item) => (item.data.id.includes(this.state.connectionAutocompleteField))}
           sortItems={(a, b) => {
             if (a.data.id.toLowerCase() === b.data.id.toLowerCase()) {
               const k = Object.keys(this.state.configs.active);
@@ -231,10 +282,16 @@ export default class App extends React.Component {
             }
             return (a.data.id.toLowerCase() <= b.data.id.toLowerCase() ? -1 : 1);
           }}
-          getItemValue={(item) => item.data.id}
+          shouldItemRender={(item) => (item.data.id.includes(this.state.connectionAutocompleteField))}
           renderMenu={this.renderConnectionMenu}
           renderItem={this.renderConnectionItem}
         />
+        { this.state.connectionErrorOut !== '' ?
+          <div className="error-out">
+            {this.state.connectionErrorOut}
+          </div>
+          : null
+        }
       </div>
     );
   }
@@ -251,6 +308,7 @@ export default class App extends React.Component {
             id: 'config-autocomplete',
           }}
           items={fullList}
+          getItemValue={(item) => item.name}
           onChange={(event, value) => this.setState({ configAutocompleteField: value })}
           onSelect={(value, item) => {
             console.log('Selected', value, 'from Config Autocomplete');
@@ -258,46 +316,16 @@ export default class App extends React.Component {
               configAutocompleteField: '',
             }, () => this.submitConfig(item));
           }}
-          renderMenu={(items, value, style) => (
-            <div style={{ ...style, padding: '0px', position: 'fixed' }}>
-              <div style={{ padding: '0px' }} className="titleSelectBox" children={items} />
-              <div className="titleBottom" >
-                <button
-                  onClick={() => {
-                    const popout = (
-                      <NewUrl submit={this.submitConfig} close={() => this.setState({ popout: null })} />
-                    );
-                    this.setState({ popout });
-                  }}
-                > Create new Source URL </button>
-              </div>
-            </div>
-            )}
-          getItemValue={(item) => item.name}
           shouldItemRender={(item) => (item.name.includes(this.state.configAutocompleteField))}
-          renderItem={(item, isHighlighted) => (
-            <div
-              style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
-              key={item.name}
-              className="clickable flex"
-            >
-              { (Object.keys(this.state.configs.active).indexOf(item.name) > -1) ?
-                <div
-                  style={{
-                    backgroundColor: this.state.configs.active[item.name],
-                  }}
-                  className="activeStartTag"
-                />
-                : null}
-              <div style={{ flex: '1', padding: '0px' }}>
-                {`${item.name}: `}
-                <span className="moon-gray">
-                  {item.url}
-                </span>
-              </div>
-            </div>
-          )}
+          renderMenu={this.renderConfigMenu}
+          renderItem={this.renderConfigItem}
         />
+        { this.state.configErrorOut !== '' ?
+          <div className="error-out">
+            {this.state.configErrorOut}
+          </div>
+          : null
+        }
       </div>
     );
   }
@@ -326,6 +354,59 @@ export default class App extends React.Component {
       >
         <div style={{ backgroundColor: this.state.configs.active[item.config] }} className="activeStartTag" />
         {item.data.id}
+      </div>
+    );
+  }
+
+  renderConfigMenu(items, value, style) {
+    return (
+      <div style={{ ...style, padding: '0px', position: 'fixed', width: '400px' }}>
+        <div style={{ padding: '0px' }} className="titleSelectBox" children={items} />
+        <div className="titleBottom" >
+          <button
+            className="default"
+            onClick={() => {
+              const popout = (
+                <NewUrl submit={this.submitNewConfig} close={() => this.setState({ popout: null })} />
+              );
+              this.setState({ popout });
+            }}
+          > + Source URL </button>
+        </div>
+      </div>
+    );
+  }
+
+  renderConfigItem(item, isHighlighted) {
+    return (
+      <div
+        style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
+        key={item.name}
+        className="clickable"
+      >
+        <div className={item.failed ? 'o-50 flex' : 'flex'} >
+          { (Object.keys(this.state.configs.active).indexOf(item.name) > -1) ?
+            <div
+              style={{
+                backgroundColor: this.state.configs.active[item.name],
+              }}
+              className="activeStartTag"
+            />
+            : null
+          }
+          { item.failed ?
+            <div className="failed-tag">
+              X
+            </div>
+            : null
+          }
+          <div style={{ flex: '1', padding: '0px' }}>
+            {`${item.name}: `}
+            <span className="moon-gray">
+              {item.url}
+            </span>
+          </div>
+        </div>
       </div>
     );
   }

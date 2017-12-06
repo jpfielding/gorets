@@ -124,7 +124,9 @@ class Server extends React.Component {
           onFound(json.result.Metadata, Base64.decode(json.result.wirelog));
         } else {
           onFound(json.result.Metadata, 'Metadata recived without wirelog.\n' +
-            'This is mostly because it was pulled from a cashe in the provider and no the source itself');
+            'This is mostly because it was pulled from a cashe in the provider and no the source itself' +
+            'To force a new pull press \'Update Changes\' in the \'Conncetion Config\' pannel',
+             { type: 'Info' });
         }
         StorageCache.putInCache(ck, json.result.Metadata, 60);
       });

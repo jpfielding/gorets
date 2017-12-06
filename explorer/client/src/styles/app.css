@@ -3,10 +3,13 @@
 
 :root {
   --mainBackground: #f1f1f1;
-  --secondaryBackground: #dddddd;
+  --secondaryBackground: #ddd;
+  --edgeshadow: #bbb;
   --textColor: #444;
   --textLightColor: #999;
   --darkRed: #ff4136;
+  --lightRed: #EF9A9A;
+  --info: #81D4FA;
 }
 
 body {
@@ -79,6 +82,19 @@ a {
   &:active, &:active, &:focus {
     outline: 0 !important;
   }
+}
+
+.failed-tag{
+  height: 1rem;
+  width: 1rem;
+  background-color: var(--darkRed);
+  color: var(--mainBackground);
+  align-self: center;
+  padding: 0.15rem;
+  font-size: 0.7rem;
+  border-radius: 0.3rem;
+  text-align: center;
+  margin-right: 5px;
 }
 
 .react-grid-Toolbar {
@@ -193,6 +209,22 @@ a {
       }
     }
   }
+  & .error-out{
+    color: var(--darkRed);
+    position: absolute;
+    top: -1.2rem;
+    font-weight: 700;
+    font-size: 0.8rem;
+    animation-name: example;
+    animation-delay: 7s;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+  }
+}
+
+@keyframes example {
+    from {opacity: 1}
+    to {opacity: 0}
 }
 
 .titleSelectBox {
@@ -207,17 +239,19 @@ a {
 .titleBottom {
   background-color: white;
   color: var(--textColor);
-  border-bottom-right-radius: 10px;
-  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
   padding: 5px;
-  & button{
-    margin: auto;
+  display: flex;
+  & .default{
     display: block;
     background-color: var(--secondaryBackground);
-    border: 1px solid var(--textColor);
-    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    margin: auto;
     color: var(--textColor);
-    padding: 5px 40px;
+    padding: 0.3rem 2rem;
   }
 }
 
@@ -781,7 +815,7 @@ a {
     & .Infoevent{
       margin: 5px;
       border: 1px solid var(--textColor);
-      background-color: lightblue;
+      background-color: var(--info);
       color: var(--textColor);
       border-radius: 10px;
       overflow: hidden;
