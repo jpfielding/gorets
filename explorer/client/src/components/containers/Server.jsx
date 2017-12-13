@@ -16,9 +16,6 @@ const Base64 = require('js-base64').Base64;
 class Server extends React.Component {
 
   static propTypes = {
-    params: React.PropTypes.any,
-    location: React.PropTypes.any,
-    router: React.PropTypes.any,
     connection: React.PropTypes.any,
   }
 
@@ -43,8 +40,8 @@ class Server extends React.Component {
         class: {},
         fields: [],
         source: props.connection.config,
-        wirelog: [],
       },
+      wirelog: [],
       tabs: [],
       errorOut: '',
       args: {
@@ -52,6 +49,7 @@ class Server extends React.Component {
         oldest: 360,
       },
     };
+
     this.getMetadata = this.getMetadata.bind(this);
     this.onMetadataSelected = this.onMetadataSelected.bind(this);
     this.onMetadataDeselected = this.onMetadataDeselected.bind(this);
@@ -68,10 +66,11 @@ class Server extends React.Component {
 
   componentWillMount() {
     this.getMetadata((m, log, extra) => {
-      const shared = this.state.shared;
+      const shared = _.clone(this.state.shared);
+      const wirelog = _.clone(this.state.wirelog);
       shared.metadata = m;
-      shared.wirelog.unshift({ tag: 'Metadata', log, extra });
-      this.setState({ shared });
+      wirelog.unshift({ tag: 'Metadata', log, extra });
+      this.setState({ shared, wirelog });
     });
   }
 
@@ -93,7 +92,7 @@ class Server extends React.Component {
 
   onClassSelected(res, cls) {
     console.log('class selected:', res, cls);
-    const shared = this.state.shared;
+    const shared = _.clone(this.state.shared);
     shared.resource = res;
     shared.class = cls;
     this.setState({ shared });
@@ -104,8 +103,8 @@ class Server extends React.Component {
     const md = StorageCache.getFromCache(ck);
     if (md) {
       console.log('loaded metadata from local cache', md);
-      onFound(md, 'No wirelog available, metadata was loaded from local cashe\n' +
-        'To force a new pull press \'Update Changes\' in the \'Conncetion Config\' pannel',
+      onFound(md, 'No wirelog available, metadata was loaded from local cashe.\n' +
+        'To force a new pull press \'Update Changes\' in the \'Conncetion Config\' pannel.',
          { type: 'Info' });
       return;
     }
@@ -124,8 +123,8 @@ class Server extends React.Component {
           onFound(json.result.Metadata, Base64.decode(json.result.wirelog));
         } else {
           onFound(json.result.Metadata, 'Metadata recived without wirelog.\n' +
-            'This is mostly because it was pulled from a cashe in the provider and no the source itself' +
-            'To force a new pull press \'Update Changes\' in the \'Conncetion Config\' pannel',
+            'This is mostly because it was pulled from a cashe in the provider and no the source itself.\n' +
+            'To force a new pull press \'Update Changes\' in the \'Conncetion Config\' pannel.',
              { type: 'Info' });
         }
         StorageCache.putInCache(ck, json.result.Metadata, 60);
@@ -133,9 +132,9 @@ class Server extends React.Component {
   }
 
   pushWirelog(e) {
-    const shared = _.clone(this.state.shared);
-    shared.wirelog.unshift(e);
-    this.setState({ shared });
+    const wirelog = _.clone(this.state.wirelog);
+    wirelog.unshift(e);
+    this.setState({ wirelog });
   }
 
   updateConnection(connection, args) {
@@ -247,7 +246,7 @@ class Server extends React.Component {
         <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>
           <div className="loading">LOADING METADATA</div>
         </div>
-        <Wireloger wirelog={this.state.shared.wirelog} />
+        <Wireloger wirelog={this.state.wirelog} />
       </div>
     );
   }

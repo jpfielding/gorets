@@ -41,12 +41,12 @@ class Search extends React.Component {
     super(props);
 
     const searchForm = createValue({
-      value: SearchService.params,
+      value: _.clone(SearchService.params),
       onChange: this.searchInputsChange.bind(this),
     });
 
     this.state = {
-      searchParams: SearchService.params,
+      searchParams: _.clone(SearchService.params),
       searchForm,
       searchHistory: [],
       searchResults: {},
@@ -82,7 +82,9 @@ class Search extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     console.log('updating Props');
-    if (nextProps.shared.class['METADATA-TABLE']) {
+    console.log(nextProps, this.props);
+    if (nextProps.shared.class['METADATA-TABLE']
+      && nextProps.shared !== this.props.shared) {
       const ClassName = nextProps.shared.class.ClassName;
       const resource = nextProps.shared.resource.ResourceID;
       const select = nextProps.shared.fields.map(i => i.row.SystemName).join(',');
