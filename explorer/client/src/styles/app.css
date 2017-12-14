@@ -722,55 +722,7 @@ a {
 }
 
 .wireloger{
-  position: fixed;
-  bottom: 0px;
-  width: 90%;
-  margin: 0 5%;
-  z-index: 3000;
-  & .pulltab{
-    overflow: hidden;
-    height: 40px;
-    display: flex;
-    align-items: flex-end;
-    & .expand{
-      display: flex;
-      height: 40px;
-      max-height: 0px;
-      background-color: var(--textColor);
-      color: var(--mainBackground);
-      font-weight: bold;
-      transition: 0.2s;
-      padding: 0 20px;
-      margin: 0 auto;
-      width: 120px;
-      border-top-left-radius: 100px;
-      border-top-right-radius: 100px;
-      border: none;
-      & > button{
-        flex: 1;
-        background: none;
-        border: none;
-        padding: none;
-        color: white;
-        &:focus{
-          outline: none;
-          color: var(--darkRed);
-        }
-      }
-    }
-    &:hover{
-      & .expand{
-        max-height: 40px;
-      }
-    }
-  }
-  & .body{
-    border: 1px solid var(--textColor);
-    background: var(--mainBackground);
-    overflow: hidden;
-    box-shadow: 1px 3px 8px grey;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     & .title{
@@ -865,5 +817,4 @@ a {
         overflow-x: scroll;
       }
     }
-  }
 }

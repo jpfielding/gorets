@@ -202,6 +202,7 @@ class Server extends React.Component {
       <Explore
         shared={this.state.shared}
       />,
+      <Wireloger wirelog={this.state.wirelog} />,
     ];
     tabs.unshift(
       {
@@ -219,7 +220,12 @@ class Server extends React.Component {
       {
         id: 'Explore',
         page: pages[3],
+      },
+      {
+        id: 'Wirelog',
+        page: pages[4],
       }
+
     );
     return (
       <div>
@@ -240,13 +246,12 @@ class Server extends React.Component {
             components={tabs}
             enableRemove
             onRemove={this.removeTab}
-            removeOffset={4}
+            removeOffset={pages.length}
           />
         </div>
         <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>
           <div className="loading">LOADING METADATA</div>
         </div>
-        <Wireloger wirelog={this.state.wirelog} />
       </div>
     );
   }
