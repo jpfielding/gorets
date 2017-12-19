@@ -9,17 +9,18 @@ export default class TabSection extends React.Component {
     removeOffset: React.PropTypes.any,
 
     className: React.PropTypes.any,
+    initID: React.PropTypes.any,
   }
 
   constructor(props) {
     super(props);
 
     this.state = {
-      tab: '',
+      tab: (this.props.initID ? this.props.initID : ''),
       tabs: [],
     };
 
-    if (this.props.components[0]) {
+    if (this.props.components[0] && this.state.tab === '') {
       this.state.tab = this.props.components[0].id;
     }
 

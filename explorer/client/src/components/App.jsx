@@ -8,7 +8,13 @@ import TabSection from 'components/containers/TabSection';
 import NewUrl from 'components/containers/NewUrl';
 import _ from 'underscore';
 
+const Base64 = require('js-base64').Base64;
+
 export default class App extends React.Component {
+
+  static propTypes = {
+    location: React.PropTypes.any,
+  }
 
   constructor(props) {
     super(props);
@@ -88,8 +94,10 @@ export default class App extends React.Component {
         ],
         available: [],
       },
+      init: null,
     };
 
+    this.addSimpleTabWithInit = this.addSimpleTabWithInit.bind(this);
     this.addFullTab = this.addFullTab.bind(this);
     this.addDirectTab = this.addDirectTab.bind(this);
 
@@ -109,6 +117,18 @@ export default class App extends React.Component {
     this.renderConfigAutocomplete = this.renderConfigAutocomplete.bind(this);
     this.renderConfigItem = this.renderConfigItem.bind(this);
     this.renderConfigMenu = this.renderConfigMenu.bind(this);
+  }
+
+  componentWillMount() {
+    if (this.props.location.query.s != null) {
+      if (this.props.location.query.i != null) {
+        const init = JSON.parse(Base64.decode(this.props.location.query.i));
+        this.addSimpleTabWithInit(JSON.parse(Base64.decode(this.props.location.query.s)), init);
+        this.setState({ init });
+      } else {
+        this.addSimpleTab(JSON.parse(Base64.decode(this.props.location.query.s)));
+      }
+    }
   }
 
   getNewColor() {
@@ -155,7 +175,20 @@ export default class App extends React.Component {
     const activeTabs = _.clone(this.state.activeTabs);
     activeTabs.push({
       id: connection.id,
-      page: (<Server connection={{ config: 'simplecon', data: connection }} />),
+      page: (<Server connection={{ config: 'simplecon', data: connection }} location={this.props.location} />),
+    });
+    this.setState({ activeTabs });
+  }
+
+  addSimpleTabWithInit(connection, init) {
+    const activeTabs = _.clone(this.state.activeTabs);
+    activeTabs.push({
+      id: connection.id,
+      page: (<Server
+        connection={{ config: 'simplecon', data: connection }}
+        location={this.props.location}
+        init={init}
+      />),
     });
     this.setState({ activeTabs });
   }
@@ -166,7 +199,7 @@ export default class App extends React.Component {
       id: configID + name,
       name,
       tags: [{ name: configID, color: this.getColor(configID) }],
-      page: (<Server connection={connection} />),
+      page: (<Server connection={connection} location={this.props.location} />),
     });
     this.setState({ activeTabs });
   }
@@ -434,6 +467,7 @@ export default class App extends React.Component {
           enableRemove
           onRemove={this.removeTab}
           removeOffset={1}
+          initID={this.state.init != null ? this.state.init.id : null}
         />
 
       </div>

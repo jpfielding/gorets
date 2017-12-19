@@ -16,7 +16,9 @@ const Base64 = require('js-base64').Base64;
 class Server extends React.Component {
 
   static propTypes = {
+    location: React.PropTypes.any,
     connection: React.PropTypes.any,
+    init: React.PropTypes.any,
   }
 
   static emptyMetadata = {
@@ -193,11 +195,13 @@ class Server extends React.Component {
         shared={this.state.shared}
         addTab={this.addTab}
         pushWirelog={this.pushWirelog}
+        init={this.props.init && this.props.init.tab === 'Search' ? this.props.init : null}
       />,
       <Objects
         shared={this.state.shared}
         addTab={this.addTab}
         pushWirelog={this.pushWirelog}
+        init={this.props.init && this.props.init.tab === 'Objects' ? this.props.init : null}
       />,
       <Explore
         shared={this.state.shared}
@@ -233,7 +237,11 @@ class Server extends React.Component {
           <div className="customHoverSection">
             <div className="fr ma-3 customHoverBar"> Connection Config </div>
             <div className="customHoverBody">
-              <ConnectionForm updateConnection={this.updateConnection} connection={this.state.shared.connection} />
+              <ConnectionForm
+                updateConnection={this.updateConnection}
+                connection={this.state.shared.connection}
+                location={this.props.location}
+              />
             </div>
           </div>
         </div>
@@ -247,6 +255,7 @@ class Server extends React.Component {
             enableRemove
             onRemove={this.removeTab}
             removeOffset={pages.length}
+            initID={this.props.init ? this.props.init.tab : null}
           />
         </div>
         <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>

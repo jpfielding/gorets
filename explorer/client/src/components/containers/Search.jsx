@@ -8,6 +8,7 @@ import MetadataService from 'services/MetadataService';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
 import ContentHistory from 'components/containers/History';
 import SearchFormatter from 'components/gridcells/SearchFormatter';
+import RouteLink from 'components/elements/RouteLink';
 import _ from 'underscore';
 
 const Base64 = require('js-base64').Base64;
@@ -18,7 +19,7 @@ class Search extends React.Component {
     connection: React.PropTypes.any,
     metadata: React.PropTypes.any,
     location: React.PropTypes.any,
-    router: React.PropTypes.any,
+    init: React.PropTypes.any,
     shared: {
       connection: React.PropTypes.any,
       metadata: React.PropTypes.any,
@@ -26,7 +27,6 @@ class Search extends React.Component {
       class: React.PropTypes.any,
       fields: React.PropTypes.any,
       rows: React.PropTypes.any,
-      wirelog: React.PropTypes.any,
     },
     addTab: React.PropTypes.Func,
     pushWirelog: React.PropTypes.Func,
@@ -40,13 +40,14 @@ class Search extends React.Component {
   constructor(props) {
     super(props);
 
+    const target = (props.init && props.init.query ? props.init.query : SearchService.params);
     const searchForm = createValue({
-      value: _.clone(SearchService.params),
+      value: _.clone(target),
       onChange: this.searchInputsChange.bind(this),
     });
 
     this.state = {
-      searchParams: _.clone(SearchService.params),
+      searchParams: _.clone(target),
       searchForm,
       searchHistory: [],
       searchResults: {},
@@ -78,6 +79,13 @@ class Search extends React.Component {
     const sck = `${this.props.shared.source}-${this.props.shared.connection.id}-search-history`;
     const searchHistory = StorageCache.getFromCache(sck) || [];
     this.setSearchHistory(searchHistory);
+  }
+
+  componentDidMount() {
+    if (this.props.init && this.props.init.launch === 'auto') {
+      console.log('Auto Searching');
+      this.search(this.state.searchParams);
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -359,6 +367,12 @@ class Search extends React.Component {
                 onChange={(e) => this.bindQueryNameChange(e.target.value)}
                 value={this.state.searchHistoryName}
               />
+              <RouteLink
+                type={'full'}
+                connection={this.props.shared.connection}
+                init={{ tab: 'Search', query: this.state.searchForm.value }}
+                style={{ float: 'right' }}
+              />
             </div>
             <div className="customResultsBody">
               <Fieldset formValue={this.state.searchForm}>
@@ -407,14 +421,12 @@ class Search extends React.Component {
           </div>
           <div className="customResultsSet">
             <div className="customResultsTitle">
-              <div className="customCombo fr">
-                <button className="customComboButton" onClick={this.createNewTab}>New Tab</button>
-                <input
-                  className="customComboInput"
-                  placeholder={`R${this.state.resultCount}`}
-                  onChange={(e) => this.bindTabNameChange(e.target.value)}
-                />
-              </div>
+              <RouteLink
+                type={'fullAuto'}
+                connection={this.props.shared.connection}
+                init={{ tab: 'Search', query: this.state.searchForm.value }}
+                style={{ float: 'right' }}
+              />
               <div className="customTitle">
                   Search Results: {this.state.searchResults.error ? (`${this.state.searchResults.error}`) : ''}
               </div>

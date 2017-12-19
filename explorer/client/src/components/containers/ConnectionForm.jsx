@@ -1,10 +1,12 @@
 import React from 'react';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
 import PasswordForm from 'components/utils/PasswordForm';
+import RouteLink from 'components/elements/RouteLink';
 
 class ConnectionForm extends React.Component {
 
   static propTypes = {
+    location: React.PropTypes.any,
     connection: React.PropTypes.any,
     updateConnection: React.PropTypes.Func,
   }
@@ -20,6 +22,7 @@ class ConnectionForm extends React.Component {
     this.state = {
       connectionForm,
       show: false,
+      element: null,
     };
   }
 
@@ -31,6 +34,7 @@ class ConnectionForm extends React.Component {
   render() {
     return (
       <div>
+        <RouteLink connection={this.state.connectionForm.value} type={'basic'} style={{ marginBottom: '10px' }} />
         <Fieldset formValue={this.state.connectionForm}>
           <Field select="id" label="ID">
             <Input className="border-box w-100 pa1 b--none outline-transparent" />
@@ -66,27 +70,29 @@ class ConnectionForm extends React.Component {
           <option value="COMPACT-INCREMENTAL">COMPACT-INCREMENTAL</option>
           <option value="STANDARD-XML">STANDARD-XML</option>
         </select>
-        <button
-          className="customButton mt3"
-          onClick={() => {
-            const args = {
-              extraction: this.state.select.value,
-              oldest: 0,
-            };
-            this.props.updateConnection(this.state.connectionForm.value, args);
-          }}
-        >
-          Update Changes
-        </button>
-        <button
-          className="customButton mt3 fr"
-          onClick={() => {
-            const show = !this.state.show;
-            this.setState({ show });
-          }}
-        >
-          {this.state.show ? 'Hide Passwords' : 'Show Passwords'}
-        </button>
+        <div>
+          <button
+            className="customButton mt3"
+            onClick={() => {
+              const args = {
+                extraction: this.state.select.value,
+                oldest: 0,
+              };
+              this.props.updateConnection(this.state.connectionForm.value, args);
+            }}
+          >
+            Update Changes
+          </button>
+          <button
+            className="customButton mt3 fr"
+            onClick={() => {
+              const show = !this.state.show;
+              this.setState({ show });
+            }}
+          >
+            {this.state.show ? 'Hide Passwords' : 'Show Passwords'}
+          </button>
+        </div>
       </div>
     );
   }

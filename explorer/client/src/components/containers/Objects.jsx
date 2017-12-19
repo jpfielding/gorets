@@ -5,6 +5,7 @@ import ObjectsService from 'services/ObjectsService';
 import StorageCache from 'util/StorageCache';
 import { Fieldset, Field, createValue, Input } from 'react-forms';
 import ContentHistory from 'components/containers/History';
+import RouteLink from 'components/elements/RouteLink';
 import _ from 'underscore';
 
 const Base64 = require('js-base64').Base64;
@@ -13,6 +14,7 @@ class Objects extends React.Component {
 
   static propTypes = {
     shared: React.PropTypes.any,
+    init: React.PropTypes.any,
     addTab: React.PropTypes.Func,
     pushWirelog: React.PropTypes.Func,
   }
@@ -20,11 +22,11 @@ class Objects extends React.Component {
   constructor(props) {
     super(props);
     const objectsForm = createValue({
-      value: {},
+      value: (this.props.init && this.props.init.query ? this.props.init.query : {}),
       onChange: this.searchInputsChange.bind(this),
     });
     this.state = {
-      objectsParams: ObjectsService.params,
+      objectsParams: (this.props.init && this.props.init.query ? this.props.init.query : ObjectsService.params),
       objectsForm,
       objectsHistory: [],
       objects: {},
@@ -50,6 +52,13 @@ class Objects extends React.Component {
     this.setState({
       objectsHistory,
     });
+  }
+
+  componentDidMount() {
+    if (this.props.init && this.props.init.launch === 'auto') {
+      console.log('Auto Searching');
+      this.getObjects();
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -307,6 +316,12 @@ class Objects extends React.Component {
                 onChange={(e) => this.bindQueryNameChange(e.target.value)}
                 value={this.state.objectsHistoryName}
               />
+              <RouteLink
+                type={'full'}
+                connection={this.props.shared.connection}
+                init={{ tab: 'Objects', query: this.state.objectsForm.value }}
+                style={{ float: 'right' }}
+              />
             </div>
             <div className="customResultsBody">
               <Fieldset formValue={this.state.objectsForm}>
@@ -336,14 +351,12 @@ class Objects extends React.Component {
           </div>
           <div className="customResultsSet">
             <div className="customResultsTitle">
-              <div className="customCombo fr">
-                <button className="customComboButton" onClick={this.createNewTab}>New Tab</button>
-                <input
-                  className="customComboInput"
-                  placeholder={`O${this.state.resultCount}`}
-                  onChange={(e) => this.bindTabNameChange(e.target.value)}
-                />
-              </div>
+              <RouteLink
+                type={'fullAuto'}
+                connection={this.props.shared.connection}
+                init={{ tab: 'Objects', query: this.state.objectsForm.value }}
+                style={{ float: 'right' }}
+              />
               <div className="customTitle">
                   Results:
               </div>
