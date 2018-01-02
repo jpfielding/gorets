@@ -305,6 +305,7 @@ export default class App extends React.Component {
             id: 'connections-autocomplete',
           }}
           items={(this.state.connections == null ? [] : this.state.connections)}
+          count={(this.state.connections == null ? 0 : this.state.connections.length)}
           getItemValue={(item) => item.data.id}
           onChange={(event, value) => this.setState({ connectionAutocompleteField: value })}
           onSelect={this.selectConnection}
@@ -341,6 +342,7 @@ export default class App extends React.Component {
             id: 'config-autocomplete',
           }}
           items={fullList}
+          count={fullList.length}
           getItemValue={(item) => item.name}
           onChange={(event, value) => this.setState({ configAutocompleteField: value })}
           onSelect={(value, item) => {
@@ -384,6 +386,7 @@ export default class App extends React.Component {
         style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
         key={item.config + item.data.id}
         className="clickable"
+        id={item.config + item.data.id}
       >
         <div style={{ backgroundColor: this.state.configs.active[item.config] }} className="activeStartTag" />
         {item.data.id}
@@ -413,6 +416,7 @@ export default class App extends React.Component {
   renderConfigItem(item, isHighlighted) {
     return (
       <div
+        id={item.name}
         style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
         key={item.name}
         className="clickable"
