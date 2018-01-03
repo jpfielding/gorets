@@ -10,6 +10,8 @@ class RouteLink extends React.Component {
     connection: React.PropTypes.any,
     init: React.PropTypes.any,
     type: React.PropTypes.any,
+
+    idprefix: React.PropTypes.any,
   }
 
   /*
@@ -84,11 +86,13 @@ class RouteLink extends React.Component {
         <button
           className="customComboButton"
           onClick={() => this.copyToClipboard()}
+          id={`${this.props.idprefix}-cpclipboard`}
         >Link</button>
         <input
           className="customComboInput"
           value={this.getURL()}
           ref={(ref) => (this.state.ref = ref)}
+          id={`${this.props.idprefix}-value`}
         />
       </div>
     );

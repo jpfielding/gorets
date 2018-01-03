@@ -17,6 +17,7 @@ class Objects extends React.Component {
     init: React.PropTypes.any,
     addTab: React.PropTypes.Func,
     pushWirelog: React.PropTypes.Func,
+    idprefix: React.PropTypes.any,
   }
 
   constructor(props) {
@@ -282,7 +283,10 @@ class Objects extends React.Component {
               <div className="b nonclickable">Current Object Params</div>
             </div>
             <div className="customResultsBody">
-              <ContentHistory params={this.state.objectsParams} preventClose />
+              <ContentHistory
+                params={this.state.objectsParams} preventClose
+                idprefix={`${this.props.idprefix}-history-current`}
+              />
             </div>
           </div>
           <div className="customResultsCompactSet">
@@ -291,12 +295,13 @@ class Objects extends React.Component {
             </div>
             <div className="customResultsBody">
               <ul className="pa0 ma0 no-list-style customListSpacing">
-                {this.state.objectsHistory.map(params =>
+                {this.state.objectsHistory.map((params, i) =>
                   <li>
                     <ContentHistory
                       params={params}
                       removeHistoryElement={() => this.removeHistoryElement(params)}
                       clickHandle={() => this.search(params)}
+                      idprefix={`${this.props.idprefix}-history-${i}`}
                     />
                   </li>
                   )}
@@ -315,21 +320,29 @@ class Objects extends React.Component {
                 placeholder="Query Name"
                 onChange={(e) => this.bindQueryNameChange(e.target.value)}
                 value={this.state.objectsHistoryName}
+                id={`${this.props.idprefix}-query-name`}
               />
               <RouteLink
                 type={'full'}
                 connection={this.props.shared.connection}
                 init={{ tab: 'Objects', query: this.state.objectsForm.value }}
                 style={{ float: 'right' }}
+                idprefix={`${this.props.idprefix}-query-link`}
               />
             </div>
             <div className="customResultsBody">
               <Fieldset formValue={this.state.objectsForm}>
                 <Field select="resource" label="Resource">
-                  <Input className="w-30 pa1 b--none outline-transparent" />
+                  <Input
+                    className="w-30 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-resource`}
+                  />
                 </Field>
                 <Field select="ids" label="IDs">
-                  <Input className="w-30 pa1 b--none outline-transparent" />
+                  <Input
+                    className="w-30 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-ids`}
+                  />
                 </Field>
               </Fieldset>
             </div>
@@ -356,6 +369,7 @@ class Objects extends React.Component {
                 connection={this.props.shared.connection}
                 init={{ tab: 'Objects', query: this.state.objectsForm.value }}
                 style={{ float: 'right' }}
+                idprefix={`${this.props.idprefix}-result-link`}
               />
               <div className="customTitle">
                   Results:

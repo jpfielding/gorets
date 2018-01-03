@@ -175,7 +175,11 @@ export default class App extends React.Component {
     const activeTabs = _.clone(this.state.activeTabs);
     activeTabs.push({
       id: connection.id,
-      page: (<Server connection={{ config: 'simplecon', data: connection }} location={this.props.location} />),
+      page: (<Server
+        connection={{ config: 'simplecon', data: connection }}
+        location={this.props.location}
+        idprefix={connection.id}
+      />),
     });
     this.setState({ activeTabs });
   }
@@ -188,6 +192,7 @@ export default class App extends React.Component {
         connection={{ config: 'simplecon', data: connection }}
         location={this.props.location}
         init={init}
+        idprefix={connection.id}
       />),
     });
     this.setState({ activeTabs });
@@ -199,7 +204,11 @@ export default class App extends React.Component {
       id: configID + name,
       name,
       tags: [{ name: configID, color: this.getColor(configID) }],
-      page: (<Server connection={connection} location={this.props.location} />),
+      page: (<Server
+        connection={connection}
+        location={this.props.location}
+        idprefix={configID + name}
+      />),
     });
     this.setState({ activeTabs });
   }

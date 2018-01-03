@@ -19,6 +19,7 @@ class Server extends React.Component {
     location: React.PropTypes.any,
     connection: React.PropTypes.any,
     init: React.PropTypes.any,
+    idprefix: React.PropTypes.any,
   }
 
   static emptyMetadata = {
@@ -190,23 +191,30 @@ class Server extends React.Component {
         onRowsSelected={this.onMetadataSelected}
         onRowsDeselected={this.onMetadataDeselected}
         onClassSelected={this.onClassSelected}
+        idprefix={`${this.props.idprefix}-Metadata`}
       />,
       <Search
         shared={this.state.shared}
         addTab={this.addTab}
         pushWirelog={this.pushWirelog}
         init={this.props.init && this.props.init.tab === 'Search' ? this.props.init : null}
+        idprefix={`${this.props.idprefix}-Search`}
       />,
       <Objects
         shared={this.state.shared}
         addTab={this.addTab}
         pushWirelog={this.pushWirelog}
         init={this.props.init && this.props.init.tab === 'Objects' ? this.props.init : null}
+        idprefix={`${this.props.idprefix}-Objects`}
       />,
       <Explore
         shared={this.state.shared}
+        idprefix={`${this.props.idprefix}-Explore`}
       />,
-      <Wireloger wirelog={this.state.wirelog} />,
+      <Wireloger
+        wirelog={this.state.wirelog}
+        idprefix={`${this.props.idprefix}-Wirelog`}
+      />,
     ];
     tabs.unshift(
       {
@@ -234,13 +242,14 @@ class Server extends React.Component {
     return (
       <div>
         <div className="fr">
-          <div className="customHoverSection">
-            <div className="fr ma-3 customHoverBar"> Connection Config </div>
+          <div className="customHoverSection" id={`${this.props.idprefix}-config-hover`}>
+            <div className="fr ma-3 customHoverBar" id={`${this.props.idprefix}-config`}> Connection Config </div>
             <div className="customHoverBody">
               <ConnectionForm
                 updateConnection={this.updateConnection}
                 connection={this.state.shared.connection}
                 location={this.props.location}
+                idprefix={`${this.props.idprefix}-config`}
               />
             </div>
           </div>
@@ -256,6 +265,7 @@ class Server extends React.Component {
             onRemove={this.removeTab}
             removeOffset={pages.length}
             initID={this.props.init ? this.props.init.tab : null}
+            tag={this.props.idprefix}
           />
         </div>
         <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>

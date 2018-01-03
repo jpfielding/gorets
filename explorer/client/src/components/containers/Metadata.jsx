@@ -25,6 +25,7 @@ class Metadata extends React.Component {
     onRowsSelected: React.PropTypes.Func,
     onRowsDeselected: React.PropTypes.Func,
     onClassSelected: React.PropTypes.Func,
+    idprefix: React.PropTypes.any,
   }
 
   static defaultProps = {
@@ -269,6 +270,7 @@ class Metadata extends React.Component {
                         <li
                           onClick={() => this.onClassSelected(r, mClass)}
                           className="clickable metadata-class-name"
+                          id={`${this.props.idprefix}-${r.ResourceID}-${mClass.ClassName}`}
                         >
                           {this.renderSelectedClassDescription(mClass)}
                         </li>

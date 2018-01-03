@@ -30,6 +30,7 @@ class Search extends React.Component {
     },
     addTab: React.PropTypes.Func,
     pushWirelog: React.PropTypes.Func,
+    idprefix: React.PropTypes.any,
   }
 
   static defaultProps = {
@@ -320,6 +321,7 @@ class Search extends React.Component {
               clickHandle={() => this.search(this.state.searchParams)}
               params={this.state.searchParams}
               preventClose
+              idprefix={`${this.props.idprefix}-history-current`}
             />
           </div>
         </div>
@@ -329,12 +331,13 @@ class Search extends React.Component {
           </div>
           <div className="customResultsBody">
             <ul className="pa0 ma0 no-list-style customListSpacing">
-              {this.state.searchHistory.map(params =>
+              {this.state.searchHistory.map((params, i) =>
                 <li>
                   <ContentHistory
                     clickHandle={() => this.search(params)}
                     removeHistoryElement={() => this.removeHistoryElement(params)}
                     params={params}
+                    idprefix={`${this.props.idprefix}-history-${i}`}
                   />
                 </li>
               )}
@@ -366,30 +369,47 @@ class Search extends React.Component {
                 placeholder="Query Name"
                 onChange={(e) => this.bindQueryNameChange(e.target.value)}
                 value={this.state.searchHistoryName}
+                id={`${this.props.idprefix}-query-name`}
               />
               <RouteLink
                 type={'full'}
                 connection={this.props.shared.connection}
                 init={{ tab: 'Search', query: this.state.searchForm.value }}
                 style={{ float: 'right' }}
+                idprefix={`${this.props.idprefix}-query-link`}
               />
             </div>
             <div className="customResultsBody">
               <Fieldset formValue={this.state.searchForm}>
                 <Field select="resource" label="Resource">
-                  <Input className="w-30 pa1 b--none outline-transparent" />
+                  <Input
+                    className="w-30 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-resource`}
+                  />
                 </Field>
                 <Field select="class" label="Class">
-                  <Input className="w-30 pa1 b--none outline-transparent" />
+                  <Input
+                    className="w-30 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-class`}
+                  />
                 </Field>
                 <Field select="select" label="Columns">
-                  <Input className="w-80 pa1 b--none outline-transparent" />
+                  <Input
+                    className="w-80 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-select`}
+                  />
                 </Field>
                 <Field select="limit" label="Limit">
-                  <Input className="w-80 pa1 b--none outline-transparent" />
+                  <Input
+                    className="w-80 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-limit`}
+                  />
                 </Field>
                 <Field select="query" label="Query">
-                  <Input className="w-80 pa1 b--none outline-transparent" />
+                  <Input
+                    className="w-80 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-query`}
+                  />
                 </Field>
               </Fieldset>
             </div>
@@ -399,6 +419,7 @@ class Search extends React.Component {
                   onClick={() => this.submitSearchForm(0)}
                   disabled={this.state.searching}
                   className="da-effect"
+                  id={`${this.props.idprefix}-submit`}
                 >
                   Submit
                 </button>
@@ -406,6 +427,7 @@ class Search extends React.Component {
                   onClick={() => this.submitSearchForm(1)}
                   disabled={this.state.searching}
                   className="da-effect"
+                  id={`${this.props.idprefix}-submit-withcount`}
                 >
                   with Count
                 </button>
@@ -413,6 +435,7 @@ class Search extends React.Component {
                   onClick={() => this.submitSearchForm(2)}
                   disabled={this.state.searching}
                   className="da-effect"
+                  id={`${this.props.idprefix}-submit-countonly`}
                 >
                   only Count
                 </button>
@@ -426,6 +449,7 @@ class Search extends React.Component {
                 connection={this.props.shared.connection}
                 init={{ tab: 'Search', query: this.state.searchForm.value }}
                 style={{ float: 'right' }}
+                idprefix={`${this.props.idprefix}-results-link`}
               />
               <div className="customTitle">
                   Search Results: {this.state.searchResults.error ? (`${this.state.searchResults.error}`) : ''}

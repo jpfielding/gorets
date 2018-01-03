@@ -8,6 +8,8 @@ export default class ContentHistory extends React.Component {
 
     clickHandle: React.PropTypes.Func,
     removeHistoryElement: React.PropTypes.Func,
+
+    idprefix: React.PropTypes.any,
   }
 
   constructor(props) {
@@ -43,6 +45,7 @@ export default class ContentHistory extends React.Component {
       <button
         className="customCloseButton"
         onClick={this.props.removeHistoryElement}
+        id={`${this.props.idprefix}-close`}
       >
         X
       </button>
@@ -100,6 +103,7 @@ export default class ContentHistory extends React.Component {
         <div
           className="customResultsCompactSet"
           onClick={this.props.clickHandle}
+          id={`${this.props.idprefix}-select`}
         >
           <div className="customResultsTitle">
             {this.renderName()}

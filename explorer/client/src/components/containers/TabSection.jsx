@@ -10,6 +10,12 @@ export default class TabSection extends React.Component {
 
     className: React.PropTypes.any,
     initID: React.PropTypes.any,
+
+    tag: React.PropTypes.any,
+  }
+
+  static defaultProps = {
+    tag: '',
   }
 
   constructor(props) {
@@ -67,6 +73,7 @@ export default class TabSection extends React.Component {
         <button
           className="customClose"
           onClick={() => { this.props.onRemove(e.id); }}
+          id={this.props.tag === '' ? `${e.id}-tab` : `${this.props.tag}-${e.id}-tab`}
         >
           X
         </button>
@@ -87,6 +94,7 @@ export default class TabSection extends React.Component {
           onKeyDown={(vent) => this.handleKeys(vent, i)}
           className={`customTabSelect ${this.state.tab === e.id ? 'active' : ''}`}
           key={e.id}
+          id={this.props.tag === '' ? `${e.id}-tab` : `${this.props.tag}-${e.id}-tab`}
           ref={(input) => { this.state.tabs[i] = input; }}
         >
           {tags ? tags[0] : null}
