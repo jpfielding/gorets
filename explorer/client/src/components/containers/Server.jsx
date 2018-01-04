@@ -148,14 +148,15 @@ class Server extends React.Component {
     StorageCache.remove(ock);
     StorageCache.remove(mck);
     const shared = _.clone(this.state.shared);
+    const wirelog = [];
     shared.connection = connection;
     shared.metadata = Server.emptyMetadata;
     this.setState({ shared, args, errorOut: '' }, () => {
       this.getMetadata((m, log, extra) => {
         console.log('Setting ', m);
         shared.metadata = m;
-        shared.wirelog.unshift({ tag: 'Metadata', log, extra });
-        this.setState({ shared });
+        wirelog.unshift({ tag: 'Metadata', log, extra });
+        this.setState({ shared, wirelog });
       });
     });
   }
