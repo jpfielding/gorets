@@ -1,6 +1,7 @@
 import React from 'react';
 import { withRouter } from 'react-router';
 import ReactDataGrid from 'react-data-grid';
+import _ from 'underscore';
 import MetadataService from 'services/MetadataService';
 import KeyFormatter from 'components/gridcells/KeyFormatter';
 
@@ -8,12 +9,14 @@ const ReactDataGridPlugins = require('react-data-grid/addons');
 
 const Toolbar = ReactDataGridPlugins.Toolbar;
 
+/*
+  Responsible for the metadata tab of each class
+  Sends row and class selection back up to have selections
+    effect other tabs through the shared prop object
+*/
 class Metadata extends React.Component {
 
   static propTypes = {
-    params: React.PropTypes.any,
-    location: React.PropTypes.any,
-    router: React.PropTypes.any,
     shared: {
       connection: React.PropTypes.any,
       metadata: React.PropTypes.any,
@@ -39,24 +42,29 @@ class Metadata extends React.Component {
     const mtable = props.shared.class['METADATA-TABLE'];
     const field = (mtable) ? mtable.Field : [];
     const classRows = (mtable) ? mtable.Field : [];
-    const selectedFieldSet = [];
+    const possibleColumns = [];
     classRows.forEach(f => {
       Object.keys(f).forEach(key => {
-        if (selectedFieldSet.includes(key)) {
+        if (possibleColumns.includes(key)) {
           return;
         }
-        selectedFieldSet.push(key);
+        possibleColumns.push(key);
       });
     });
     this.state = {
       filters: {},
       classRows: field,
       filteredRows: field,
-      selectedFieldSet,
+      possibleColumns,
       displayContents: null,
       ref: null,
+      sortDirection: 'NONE',
+      sortColumn: '',
+      selected: {},
     };
     this.handleGridSort = this.handleGridSort.bind(this);
+    this.handleFilterChange = this.handleFilterChange.bind(this);
+
     this.onRowsSelected = this.onRowsSelected.bind(this);
     this.onRowsDeselected = this.onRowsDeselected.bind(this);
   }
@@ -69,31 +77,36 @@ class Metadata extends React.Component {
     this.props.onRowsDeselected(rows);
   }
 
+  // Called when a class is selected
   onClassSelected(res, cls) {
     if (cls === this.props.shared.class) {
-      return;
+      return; // return if the class is the currently selected one.
     }
-    this.props.onClassSelected(res, cls);
+    this.props.onClassSelected(res, cls); // signal up changes
     const classRows = cls['METADATA-TABLE'].Field;
-    const filteredRows = cls['METADATA-TABLE'].Field;
-    const selectedFieldSet = [];
+    const filteredRows = this.sortRows(
+      this.filterRows(classRows, this.state.filters),
+      this.state.sortColumn,
+      this.state.sortDirection);
+    const possibleColumns = [];
     classRows.forEach(field => {
       Object.keys(field).forEach(key => {
-        if (selectedFieldSet.includes(key)) {
+        if (possibleColumns.includes(key)) {
           return;
         }
-        selectedFieldSet.push(key);
+        possibleColumns.push(key);
       });
     });
     this.setState({
       classRows,
       filteredRows,
-      selectedFieldSet,
+      possibleColumns,
     });
   }
 
   onClearFilters = () => {
-    this.setState({ filters: {} });
+    const filteredRows = this.sortRows(_.clone(this.state.classRows), this.state.sortColumn, this.state.sortDirection);
+    this.setState({ filters: {}, filteredRows });
   }
 
   getObjectTypes() {
@@ -109,6 +122,46 @@ class Metadata extends React.Component {
   }
 
   handleGridSort(sortColumn, sortDirection) {
+    const rows = this.sortRows(this.filterRows(this.state.classRows, this.state.filters), sortColumn, sortDirection);
+    this.setState({ filteredRows: rows, sortColumn, sortDirection });
+  }
+
+  handleFilterChange(filter) {
+    const newFilters = Object.assign({}, this.state.filters);
+    if (filter.filterTerm) {
+      newFilters[filter.column.key] = filter;
+    } else {
+      delete newFilters[filter.column.key];
+    }
+    const newRows = this.sortRows(
+      this.filterRows(this.state.classRows, newFilters),
+      this.state.sortColumn,
+      this.state.sortDirection
+    );
+    if (newRows.length > 0) {
+      this.setState({ filteredRows: newRows, filters: newFilters });
+    }
+  }
+
+  filterRows(rows, filters) {
+    const newRows = _.clone(rows);
+    Object.keys(filters).forEach(filter => {
+      const filterObj = filters[filter];
+      if (filterObj.filterTerm) {
+        for (let i = newRows.length - 1; i >= 0; i--) {
+          const row = newRows[i];
+          const val = row[filterObj.column.key] || '';
+          const stringVal = String(val).toLowerCase();
+          if (stringVal.indexOf(filterObj.filterTerm.toLowerCase()) === -1) {
+            newRows.splice(i, 1);
+          }
+        }
+      }
+    });
+    return newRows;
+  }
+
+  sortRows(rows, sortColumn, sortDirection) {
     const comparer = (a, b) => {
       const aVal = a[sortColumn] ? String(a[sortColumn]).toLowerCase() : '';
       const bVal = b[sortColumn] ? String(b[sortColumn]).toLowerCase() : '';
@@ -119,38 +172,9 @@ class Metadata extends React.Component {
       }
       return null;
     };
-    const rows = sortDirection === 'NONE'
-      ? this.state.filteredRows
-      : this.state.filteredRows.sort(comparer);
-    this.setState({ filteredRows: rows });
-  }
-
-  handleFilterChange = (filter) => {
-    const newFilters = Object.assign({}, this.state.filters);
-    if (filter.filterTerm) {
-      newFilters[filter.column.key] = filter;
-    } else {
-      delete newFilters[filter.column.key];
-    }
-    this.setState({ filters: newFilters });
-    const rows = this.state.classRows;
-    const newRows = [...rows];
-    Object.keys(newFilters).forEach(newFilter => {
-      const filterObj = newFilters[newFilter];
-      if (filterObj.filterTerm) {
-        for (let i = rows.length - 1; i >= 0; i--) {
-          const row = rows[i];
-          const val = row[filterObj.column.key] || '';
-          const stringVal = String(val).toLowerCase();
-          if (stringVal.indexOf(filterObj.filterTerm.toLowerCase()) === -1) {
-            newRows.splice(i, 1);
-          }
-        }
-      }
-    });
-    if (newRows.length > 0) {
-      this.setState({ filteredRows: newRows });
-    }
+    return sortDirection === 'NONE'
+      ? rows
+      : rows.sort(comparer);
   }
 
   renderSelectedClassDescription(clazz) {
@@ -162,31 +186,16 @@ class Metadata extends React.Component {
   }
 
   render() {
-    const { filteredRows } = this.state;
+    const { filteredRows, classRows } = this.state;
     const selectedResource = this.props.shared.resource;
     const selectedClass = this.props.shared.class;
-    let tableBody;
-    if (filteredRows) {
-      const availableFields = this.state.selectedFieldSet;
-      const fieldSet = (filteredRows && filteredRows.length > 0)
-        ? availableFields.map((name) => {
-          if (name === 'SystemName') {
-            return {
-              key: name,
-              name,
-              resizable: true,
-              width: 200,
-              sortable: true,
-              filterable: true,
-              formatter:
-          <KeyFormatter
-            metadataResource={selectedResource}
-            metadataClass={selectedClass}
-            displayContents={(e) => this.setDisplay(e)}
-            container={this.state.ref}
-          />,
-            };
-          }
+    const selected = this.state.selected;
+    selected.class = selectedClass;
+    selected.resource = selectedResource;
+    let tableBody; // What will be rendered
+    if (classRows) {
+      const fieldSet = this.state.possibleColumns.map((name) => {
+        if (name === 'SystemName') {
           return {
             key: name,
             name,
@@ -194,9 +203,25 @@ class Metadata extends React.Component {
             width: 200,
             sortable: true,
             filterable: true,
+            formatter:
+  <KeyFormatter
+    metadataResource={selectedResource}
+    metadataClass={selectedClass}
+    selected={selected}
+    displayContents={(e) => this.setDisplay(e)}
+    container={this.state.ref}
+  />,
           };
-        })
-        : [];
+        }
+        return {
+          key: name,
+          name,
+          resizable: true,
+          width: 200,
+          sortable: true,
+          filterable: true,
+        };
+      });
       const rowGetter = (i) => filteredRows[i];
       tableBody = (
         <div>

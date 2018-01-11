@@ -13,6 +13,11 @@ import _ from 'underscore';
 
 const Base64 = require('js-base64').Base64;
 
+/*
+  Responsible for the search tab of each class
+  Sends wirlogs back up to be provided to the wirelogging tab
+*/
+
 class Search extends React.Component {
 
   static propTypes = {
@@ -175,7 +180,10 @@ class Search extends React.Component {
   applySearchState() {
     // Search Results table setup
     const { searchResults } = this.state;
-    if (!searchResults.result) {
+    if (!searchResults.result ||
+      (searchResults.result.count === 0 &&
+        (searchResults.result.rows === null ||
+        searchResults.result.columns === null))) {
       if (searchResults.error) {
         this.setState({ errorOut: searchResults.error });
       } else {
