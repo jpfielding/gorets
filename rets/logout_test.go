@@ -29,6 +29,25 @@ func TestProcessResponseBodyFull(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func TestProcessResponseBodyFullWithExtraPlaintextDoesNotCrash(t *testing.T) {
+	actual, err := processResponseBody(
+		ioutil.NopCloser(strings.NewReader(
+			`<RETS ReplyCode="0" ReplyText="Success">
+									<RETS-RESPONSE>
+									Thank you for using our system that does not use SignOffMessage for some reason.
+									</RETS-RESPONSE>
+									</RETS>`,
+		)))
+
+	if err != nil {
+		t.Fail()
+	}
+
+	expected := &LogoutResponse{ReplyCode: 0, ReplyText: "Success"}
+
+	assert.Equal(t, expected, actual)
+}
+
 func TestProcessResponseBodyNoBilling(t *testing.T) {
 	actual, err := processResponseBody(
 		ioutil.NopCloser(strings.NewReader(
