@@ -255,7 +255,10 @@ class Metadata extends React.Component {
         <div className="w-20-ns no-list-style pa3 pr0">
           <div className="customResultsCompactSet">
             <div className="customResultsTitle">
-              <h1 className="f5 nonclickable" title={system.SystemDescription}>
+              <h1
+                className="f5 nonclickable" title={system.SystemDescription}
+                id={`${this.props.idprefix}-systemtitle`}
+              >
                 {system.SystemID}
               </h1>
               {system.SystemDescription}
@@ -292,11 +295,11 @@ class Metadata extends React.Component {
             <div className="customResultsBody">
               { this.state.classRows.length > 0
                 ? (
-                  <div>
+                  <div id={`${this.props.idprefix}-body`}>
                     { tableBody }
                   </div>
                 )
-                : <h1 className="f4">Please select a class to explore</h1>
+                : <h1 className="f4" id={`${this.props.idprefix}-default`}>Please select a class to explore</h1>
               }
             </div>
           </div>

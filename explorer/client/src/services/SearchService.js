@@ -1,3 +1,5 @@
+import data from 'services/SearchServiceTest';
+
 export default class SearchService {
 
   // search params
@@ -26,6 +28,9 @@ export default class SearchService {
   //  "id":1
   // }
   static search(conn, args) {
+    if (config.api === 'test') {
+      return Promise.resolve(data[conn.id]);
+    }
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {

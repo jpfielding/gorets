@@ -6,7 +6,7 @@
   "scripts": {
     "start": "NODE_ENV=local webpack-dev-server --hot --inline  --port 8000 --host 0.0.0.0 --output-public-path=/ --content-base build/",
     "build": "webpack -p -d",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "CONFIG_ENV=test webpack-dev-server --hot --inline --port 8000 --host 0.0.0.0 --output-public-path=/ --content-base build/"
   },
   "repository": {
     "type": "git",

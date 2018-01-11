@@ -44,12 +44,14 @@ export default class NewUrl extends React.Component {
             placeholder="Name"
             className="customInput"
             onChange={(e) => this.bindName(e.target.value)}
+            id={'new-url-name'}
           />
           <input
             placeholder="URL"
             style={{ flex: '1' }}
             className="customInput"
             onChange={(e) => this.bindURL(e.target.value)}
+            id={'new-url-value'}
           />
         </div>
         <div className="customResultsFoot">
@@ -59,6 +61,7 @@ export default class NewUrl extends React.Component {
               this.props.submit(this.state);
               this.props.close();
             }}
+            id={'new-url-submit'}
           >Submit</button>
         </div>
       </div>

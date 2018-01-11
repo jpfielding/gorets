@@ -1,3 +1,4 @@
+import data from 'services/MetadataServiceTest';
   // request:
   // endpoint/rpc
   // {
@@ -35,6 +36,9 @@ export default class MetadataService {
   }
 
   static get(conn, args) {
+    if (config.api === 'test') {
+      return Promise.resolve(data.getData(conn));
+    }
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {

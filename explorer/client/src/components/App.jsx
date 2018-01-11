@@ -73,6 +73,7 @@ export default class App extends React.Component {
           id: 'newcon',
           name: 'New Connection',
           page: (<Connections addTab={this.addSimpleTab} />),
+          idprefix: 'newcon',
         },
       ],
       connectionAutocompleteField: '',
@@ -175,10 +176,11 @@ export default class App extends React.Component {
     const activeTabs = _.clone(this.state.activeTabs);
     activeTabs.push({
       id: connection.id,
+      idprefix: connection.id.replace(/\s|:/gi, ''),
       page: (<Server
         connection={{ config: 'simplecon', data: connection }}
         location={this.props.location}
-        idprefix={connection.id}
+        idprefix={connection.id.replace(/\s|:/gi, '')}
       />),
     });
     this.setState({ activeTabs });
@@ -188,11 +190,12 @@ export default class App extends React.Component {
     const activeTabs = _.clone(this.state.activeTabs);
     activeTabs.push({
       id: connection.id,
+      idprefix: connection.id.replace(/\s|:/gi, ''),
       page: (<Server
         connection={{ config: 'simplecon', data: connection }}
         location={this.props.location}
         init={init}
-        idprefix={connection.id}
+        idprefix={connection.id.replace(/\s|:/gi, '')}
       />),
     });
     this.setState({ activeTabs });
@@ -202,12 +205,13 @@ export default class App extends React.Component {
     const activeTabs = _.clone(this.state.activeTabs);
     activeTabs.push({
       id: configID + name,
+      idprefix: (configID + name).replace(/\s|:/gi, ''),
       name,
       tags: [{ name: configID, color: this.getColor(configID) }],
       page: (<Server
         connection={connection}
         location={this.props.location}
-        idprefix={configID + name}
+        idprefix={(configID + name).replace(/\s|:/gi, '')}
       />),
     });
     this.setState({ activeTabs });
@@ -245,7 +249,10 @@ export default class App extends React.Component {
 
       ConfigService
         .getConfigList(e.url)
-        .then(res => res.json())
+        .then(res => {
+          console.log(res);
+          return res.json();
+        })
         .then((json) => {
           console.log('Config Responce:', json);
           const configs = _.clone(this.state.configs);
@@ -377,7 +384,7 @@ export default class App extends React.Component {
   renderConnectionMenu(items, value, style) {
     return (
       <div style={{ ...style, padding: '0px', position: 'fixed' }}>
-        <div style={{ padding: '0px' }} className="titleSelectBox" children={items} />
+        <div style={{ padding: '0px' }} className="titleSelectBox" children={items} id="connection-menu" />
         <div className="titleBottom" >
           {Object.keys(this.state.configs.active).map((e) => (
             <div style={{ backgroundColor: this.state.configs.active[e] }} className="activeFullTag">
@@ -395,7 +402,7 @@ export default class App extends React.Component {
         style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
         key={item.config + item.data.id}
         className="clickable"
-        id={item.config + item.data.id}
+        id={(item.config + item.data.id).replace(/\s|:/gi, '')}
       >
         <div style={{ backgroundColor: this.state.configs.active[item.config] }} className="activeStartTag" />
         {item.data.id}
@@ -406,7 +413,7 @@ export default class App extends React.Component {
   renderConfigMenu(items, value, style) {
     return (
       <div style={{ ...style, padding: '0px', position: 'fixed', width: '400px' }}>
-        <div style={{ padding: '0px' }} className="titleSelectBox" children={items} />
+        <div style={{ padding: '0px' }} className="titleSelectBox" children={items} id="config-menu" />
         <div className="titleBottom" >
           <button
             className="default"
@@ -416,6 +423,7 @@ export default class App extends React.Component {
               );
               this.setState({ popout });
             }}
+            id={'add-source-url'}
           > + Source URL </button>
         </div>
       </div>
@@ -425,7 +433,7 @@ export default class App extends React.Component {
   renderConfigItem(item, isHighlighted) {
     return (
       <div
-        id={item.name}
+        id={item.name.replace(/\s|:/gi, '')}
         style={isHighlighted ? { backgroundColor: '#e8e8e8' } : { backgroundColor: 'white' }}
         key={item.name}
         className="clickable"

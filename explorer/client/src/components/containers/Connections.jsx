@@ -44,28 +44,31 @@ export default class Connections extends React.Component {
         <div className="customResultsBody flex flex-row justify-center w-100">
           <Fieldset formValue={this.state.formValue} className="w-100">
             <Field select="id" label="ID (unique per config service)" >
-              <Input className="border-box w-100 pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" id="newcon-id" />
             </Field>
             <Field select="loginURL" label="Login URL">
-              <Input className="border-box w-100 pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" id="newcon-login" />
             </Field>
             <Field select="username" label="Username" >
-              <Input className="border-box w-100 pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" id="newcon-username" />
             </Field>
             <Field select="password" label="Password" >
-              <Input className="border-box w-100 pa1 b--none outline-transparent masker" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent masker" id="newcon-password" />
             </Field>
             <Field select="userAgent" label="User Agent" >
-              <Input className="border-box w-100 pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" id="newcon-useragent" />
             </Field>
             <Field select="userAgentPw" label="User Agent Password" >
-              <Input className="border-box w-100 pa1 b--none outline-transparent masker" />
+              <Input
+                className="border-box w-100 pa1 b--none outline-transparent masker"
+                id="newcon-useragentpassword"
+              />
             </Field>
             <Field select="retsVersion" label="Protocol Version" >
-              <Input className="border-box w-100 pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" id="newcon-version" />
             </Field>
             <Field select="proxy" label="Proxy (Socks5)" >
-              <Input className="border-box w-100 pa1 b--none outline-transparent" />
+              <Input className="border-box w-100 pa1 b--none outline-transparent" id="newcon-proxy" />
             </Field>
           </Fieldset>
         </div>
@@ -74,6 +77,7 @@ export default class Connections extends React.Component {
             onClick={this.onSubmit}
             className="customButton db"
             style={{ margin: 'auto', width: '50%' }}
+            id="newcon-submit"
           >
             Submit
           </button>

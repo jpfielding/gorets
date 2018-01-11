@@ -257,10 +257,11 @@ class Search extends React.Component {
         console.log(res);
         return res.json();
       }).then(json => {
-        if (json.error !== null) {
+        if (json.error && json.error !== null) {
           this.props.pushWirelog({ tag: 'Search', log: json.error, extra: { type: 'Error' } });
         } else {
           const log = Base64.decode(json.result.wirelog);
+          console.log('adsfwefw', log);
           this.props.pushWirelog({ tag: 'Search', log });
         }
         if (!some(searchHistory, searchParams)) {

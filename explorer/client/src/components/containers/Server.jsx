@@ -117,7 +117,7 @@ class Server extends React.Component {
       .get(this.state.shared.connection, args)
       .then(response => response.json())
       .then(json => {
-        if (json.error !== null) {
+        if (json.error && json.error !== null) {
           this.errorOut(json.error);
           return;
         }
@@ -131,6 +131,9 @@ class Server extends React.Component {
              { type: 'Info' });
         }
         StorageCache.putInCache(ck, json.result.Metadata, 60);
+      })
+      .catch(e => {
+        this.errorOut(`Error Parsing Responce: ${e.message}`);
       });
   }
 
@@ -221,22 +224,27 @@ class Server extends React.Component {
       {
         id: 'Metadata',
         page: pages[0],
+        idprefix: 'Metadata',
       },
       {
         id: 'Search',
         page: pages[1],
+        idprefix: 'Search',
       },
       {
         id: 'Objects',
         page: pages[2],
+        idprefix: 'Objects',
       },
       {
         id: 'Explore',
         page: pages[3],
+        idprefix: 'Explore',
       },
       {
         id: 'Wirelog',
         page: pages[4],
+        idprefix: 'Wirelog',
       }
 
     );
@@ -255,7 +263,10 @@ class Server extends React.Component {
             </div>
           </div>
         </div>
-        <div className={`bg-dark-red white br1 pa4 w-100 tc ${this.state.errorOut.length === 0 ? 'dn' : 'db'}`}>
+        <div
+          className={`bg-dark-red white br1 pa4 w-100 tc ${this.state.errorOut.length === 0 ? 'dn' : 'db'}`}
+          id={`${this.props.idprefix}-error`}
+        >
           {this.state.errorOut}
         </div>
         <div className={`${this.state.shared.metadata.System.SystemID.length === 0 ? 'dn' : 'db'}`}>
@@ -270,7 +281,7 @@ class Server extends React.Component {
           />
         </div>
         <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>
-          <div className="loading">LOADING METADATA</div>
+          <div className="loading" id={`${this.props.idprefix}-loading`}>LOADING METADATA</div>
         </div>
       </div>
     );

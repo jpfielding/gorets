@@ -1,3 +1,5 @@
+import data from 'services/ConfigServiceTest';
+
   // request:
   // endpoint/rpc
   // {
@@ -16,8 +18,12 @@
   //   "error": nil,
   //   "id": 0
   //   }
+
 export default class ConfigService {
   static getConfigList(url, args) {
+    if (config.api === 'test') {
+      return Promise.resolve(data.getData(url));
+    }
     return fetch(url, {
       method: 'POST',
       headers: {
