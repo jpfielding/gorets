@@ -32,6 +32,7 @@ class Objects extends React.Component {
       objectsHistory: [],
       objects: {},
       searching: false,
+      infoOut: '',
       errorOut: '',
       resultCount: 1,
       tabName: '',
@@ -93,10 +94,10 @@ class Objects extends React.Component {
     }
     const r = this.getResource();
     if (r == null || !r['METADATA-OBJECT']['Object']) {
-      this.state.errorOut = `No Object Types found for ${this.state.objectsForm.value.resource}`;
+      this.state.infoOut = `No Object Types found for ${this.state.objectsForm.value.resource}`;
       return [];
     }
-    this.state.errorOut = '';
+    this.state.infoOut = '';
     return r['METADATA-OBJECT']['Object'].map(o => o.ObjectType) || [];
   }
 
@@ -118,7 +119,7 @@ class Objects extends React.Component {
   }
 
   getObjects() {
-    this.setState({ searching: true });
+    this.setState({ searching: true, errorOut: '', objects: [] });
     const resource = this.state.objectsParams.resource;
     const type = this.state.objectsParams.type;
     const connection = this.state.objectsParams.connection;
@@ -135,6 +136,7 @@ class Objects extends React.Component {
     const objectsHistory = StorageCache.getFromCache(ock) || [];
     const objectsParams = this.state.objectsParams;
     if (!objectsParams.ids) {
+      this.setState({ searching: false, errorOut: 'No object IDs found' });
       return;
     }
 
@@ -146,17 +148,23 @@ class Objects extends React.Component {
         return [i, '*'].join(':');
       }
     ).join(',');
+
     ObjectsService
       .getObjects(this.props.shared.connection, objectsParams)
       .then((res) => res.json())
       .then((json) => {
-        if (json.error !== null) {
-          this.props.pushWirelog({ tag: 'Objects', log: json.error, extra: { type: 'Error' } });
-        } else {
-          const log = Base64.decode(json.result.wirelog);
-          this.props.pushWirelog({ tag: 'Objects', log });
+        console.log('Object Response', json);
+        if (json.error && json.error !== null) {
+          this.props.pushWirelog({ tag: 'Objects', log: json.error.message, extra: { type: 'Error' } });
+          this.setState({ searching: false, errorOut: json.error.message });
+          return;
         }
+        let log = Base64.decode(json.result.wirelog);
+        console.log('LOG', log);
+        if (log === undefined) log = 'Unable to parse wirelog';
+        this.props.pushWirelog({ tag: 'Objects', log });
         objectsParams.submited = true;
+
         if (!some(objectsHistory, objectsParams)) {
           objectsHistory.unshift(objectsParams);
           StorageCache.putInCache(ock, objectsHistory, 720);
@@ -225,7 +233,7 @@ class Objects extends React.Component {
     this.setState({ objectsForm });
   }
 
-  renderObjectInfo(obj) {
+  renderObjectInfo(obj, i) {
     const rows = Object.keys(obj)
       .filter(k => k !== 'Blob')
       .filter(k => obj[k] !== null)
@@ -234,15 +242,18 @@ class Objects extends React.Component {
         <tr><td>{k}</td><td>{obj[k]}</td></tr>
       ));
     return (
-      <table>
+      <table id={`${this.props.idprefix}-result-${i}-table`}>
         {rows}
       </table>
     );
   }
 
-  renderPicture(obj) {
+  renderPicture(obj, i) {
+    console.log('help', obj);
     if (obj.RetsError) {
-      return <div className="b mv3">An error occured, ${obj.RetsError}</div>;
+      return (<div><div
+        className="b mv3 bg-dark-red white br1 pa2 dib" id={`${this.props.idprefix}-result-${i}-error`}
+      >An error occured, {obj.RetsError}</div></div>);
     }
     if (!obj.ContentType.startsWith('image/')) {
       return null;
@@ -250,16 +261,22 @@ class Objects extends React.Component {
     if (obj.location) {
       return (
         <li className="pa0 ma0 no-list-style">
-          {this.renderObjectInfo(obj)}
-          <img src={`data:image/png;base64,${obj.location}`} alt="pic" />
+          {this.renderObjectInfo(obj, i)}
+          <img
+            src={`data:image/png;base64,${obj.location}`}
+            id={`${this.props.idprefix}-result-${i}-image`} alt="pic"
+          />
         </li>
       );
     }
     if (obj.Blob) {
       return (
         <li className="pa0 ma0 no-list-style">
-          {this.renderObjectInfo(obj)}
-          <img src={`data:image/png;base64,${obj.Blob}`} alt="pic" />
+          {this.renderObjectInfo(obj, i)}
+          <img
+            src={`data:image/png;base64,${obj.Blob}`}
+            id={`${this.props.idprefix}-result-${i}-image`} alt="pic"
+          />
         </li>
       );
     }
@@ -352,13 +369,14 @@ class Objects extends React.Component {
                   <button
                     onClick={() => this.getObjectsByType(type)}
                     disabled={this.state.searching}
+                    id={`${this.props.idprefix}-submit-${type}`}
                   >
                     {type}
                   </button>
                 )}
               </div>
-              <div className={`bg-dark-red white br1 pa2 ${this.state.errorOut.length === 0 ? 'dn' : 'dib'}`}>
-                {this.state.errorOut}
+              <div className={`bg-dark-red white br1 pa2 ${this.state.infoOut.length === 0 ? 'dn' : 'dib'}`}>
+                {this.state.infoOut}
               </div>
             </div>
           </div>
@@ -376,11 +394,14 @@ class Objects extends React.Component {
               </div>
             </div>
             <div className="customResultsBody">
+              <div className={`bg-dark-red white br1 pa2 ${this.state.errorOut.length === 0 ? 'dn' : 'dib'}`}>
+                {this.state.errorOut}
+              </div>
               <ul>
                 {hasResult
                   ? (
-                    objects.result['Objects'].map(obj =>
-                      this.renderPicture(obj)
+                    objects.result['Objects'].map((obj, i) =>
+                      this.renderPicture(obj, i)
                     )
                   )
                   : null

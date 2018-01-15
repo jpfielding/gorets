@@ -1,3 +1,5 @@
+import data from 'services/ObjectsServiceTest';
+
 export default class ObjectsService {
 
   // parameters for the objects request
@@ -10,6 +12,10 @@ export default class ObjectsService {
 
 
   static getObjects(conn, args) {
+    if (config.api === 'test') {
+      console.log('Test');
+      return Promise.resolve(data.getData(conn, args));
+    }
     return fetch(`${config.api}/rpc`, {
       method: 'POST',
       headers: {

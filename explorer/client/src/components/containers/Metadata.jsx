@@ -294,7 +294,7 @@ class Metadata extends React.Component {
                   <li className="mb2 nonclickable">
                     <div title={r.Description} className="b">{r.ResourceID}</div>
                     <ul className="pa0 pl3 mv1">
-                      {r['METADATA-CLASS'].Class.map((mClass) =>
+                      {r['METADATA-CLASS'].Class ? r['METADATA-CLASS'].Class.map((mClass) =>
                         <li
                           onClick={() => this.onClassSelected(r, mClass)}
                           className="clickable metadata-class-name"
@@ -302,7 +302,7 @@ class Metadata extends React.Component {
                         >
                           {this.renderSelectedClassDescription(mClass)}
                         </li>
-                      )}
+                      ) : null }
                     </ul>
                   </li>
                 )}
