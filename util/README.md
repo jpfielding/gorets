@@ -3,8 +3,8 @@ RETS Utilities
 
 RETS utilities for
 
-- pull compact metadata incrementally
-- converting comact metaadata to StandardXML
+- pulling compact metadata incrementally
+- converting compact metadata to StandardXML
 
 ```
 	compact := &retsutil.IncrementalCompact{}
