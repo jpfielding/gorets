@@ -6,7 +6,7 @@
   "scripts": {
     "start": "NODE_ENV=local webpack-dev-server --hot --inline  --port 8000 --host 0.0.0.0 --output-public-path=/ --content-base build/",
     "build": "webpack -p -d",
-    "test": "CONFIG_ENV=test webpack-dev-server --hot --inline --port 8000 --host 0.0.0.0 --output-public-path=/ --content-base build/"
+    "test": "./node_modules/webdriverio/bin/wdio ./wdio.conf.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "babel-preset-es2015": "^6.13.2",
     "babel-preset-react": "^6.11.1",
     "babel-preset-stage-2": "^6.13.0",
+    "chai": "^4.1.2",
     "css-loader": "^0.25.0",
     "eslint": "^3.2.2",
     "eslint-config-airbnb": "^10.0.0",
@@ -55,10 +56,15 @@
     "react-forms": "^2.0.0-beta33",
     "react-router": "^2.8.1",
     "react-tabs": "^0.8.2",
+    "selenium-standalone": "^6.12.0",
     "style-loader": "^0.13.1",
     "tachyons": "^4.5.4",
     "tachyons-flexbox": "^2.0.1",
     "underscore": "^1.8.3",
+    "wdio-mocha-framework": "^0.5.12",
+    "wdio-selenium-standalone-service": "0.0.9",
+    "wdio-webpack-dev-server-service": "^1.2.0",
+    "webdriverio": "^4.7.0",
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.16.2",
     "whatwg-fetch": "^1.0.0"

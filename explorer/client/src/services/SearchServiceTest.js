@@ -46,11 +46,20 @@ const dataB = JSON.parse(
   }`
 );
 
+const dataE =
+  {
+    error: 'Invalid Search Query',
+  };
+
 module.exports = {
-  'testp:johndoe': {
-    json: () => dataA,
-  },
-  'zzzzp:janedoe': {
-    json: () => dataB,
+  getData: (config, args) => {
+    console.log(config);
+    if (config.id === 'testp:johndoe' && args.class === 'B') {
+      return { json: () => dataA };
+    }
+    if (config.id === 'zzzzp:janedoe' && args.class === 'B') {
+      return { json: () => dataB };
+    }
+    return { json: () => dataE };
   },
 };

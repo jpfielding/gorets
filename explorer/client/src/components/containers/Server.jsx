@@ -252,7 +252,7 @@ class Server extends React.Component {
       <div>
         <div className="fr">
           <div className="customHoverSection" id={`${this.props.idprefix}-config-hover`}>
-            <div className="fr ma-3 customHoverBar" id={`${this.props.idprefix}-config`}> Connection Config </div>
+            <button className="fr ma-3 customHoverBar" id={`${this.props.idprefix}-config`}> Connection Config </button>
             <div className="customHoverBody">
               <ConnectionForm
                 updateConnection={this.updateConnection}

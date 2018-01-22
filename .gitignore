@@ -8,6 +8,7 @@ vendor/
 glide.lock
 explorer/client/node_modules/*
 explorer/client/build/*
+explorer/client/errorShots
 explorer/client/npm-debug.log
 .DS_Store
 package-lock.json

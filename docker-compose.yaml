@@ -1,0 +1,7 @@
+version: '2'
+
+services:
+  frontend:
+    image: gorets_explorer_test:latest
+    ports:
+      - 8000:8080

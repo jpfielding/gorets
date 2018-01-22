@@ -606,6 +606,9 @@ a {
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
     font-weight: 600;
+    &:focus{
+      outline:none;
+    }
   }
   & > .customHoverBody{
     display: none;
@@ -622,7 +625,15 @@ a {
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
   }
-  &:hover {
+  &:hover{
+    & > .customHoverBody {
+      display: block;
+    }
+    & > .customHoverBar{
+      background-color: var(--secondaryBackground);
+    }
+  }
+  &:focus-within{
     & > .customHoverBody {
       display: block;
     }
