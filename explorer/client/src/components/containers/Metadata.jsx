@@ -27,6 +27,7 @@ class Metadata extends React.Component {
     },
     onRowsSelected: React.PropTypes.Func,
     onRowsDeselected: React.PropTypes.Func,
+    onRowsCleared: React.PropTypes.Func,
     onClassSelected: React.PropTypes.Func,
     idprefix: React.PropTypes.any,
   }
@@ -84,10 +85,6 @@ class Metadata extends React.Component {
     }
     this.props.onClassSelected(res, cls); // signal up changes
     const classRows = cls['METADATA-TABLE'].Field;
-    const filteredRows = this.sortRows(
-      this.filterRows(classRows, this.state.filters),
-      this.state.sortColumn,
-      this.state.sortDirection);
     const possibleColumns = [];
     classRows.forEach(field => {
       Object.keys(field).forEach(key => {
@@ -99,8 +96,11 @@ class Metadata extends React.Component {
     });
     this.setState({
       classRows,
-      filteredRows,
+      filteredRows: classRows,
       possibleColumns,
+      sortColumn: '',
+      sortDirection: 'NONE',
+      filters: {},
     });
   }
 
@@ -189,6 +189,7 @@ class Metadata extends React.Component {
     const { filteredRows, classRows } = this.state;
     const selectedResource = this.props.shared.resource;
     const selectedClass = this.props.shared.class;
+    console.log('SHared', this.props.shared);
     const selected = this.state.selected;
     selected.class = selectedClass;
     selected.resource = selectedResource;
@@ -203,14 +204,15 @@ class Metadata extends React.Component {
             width: 200,
             sortable: true,
             filterable: true,
-            formatter:
-  <KeyFormatter
-    metadataResource={selectedResource}
-    metadataClass={selectedClass}
-    selected={selected}
-    displayContents={(e) => this.setDisplay(e)}
-    container={this.state.ref}
-  />,
+            formatter: (
+              <KeyFormatter
+                metadataResource={selectedResource}
+                metadataClass={selectedClass}
+                selected={selected}
+                displayContents={(e) => this.setDisplay(e)}
+                container={this.state.ref}
+              />
+            ),
           };
         }
         return {
@@ -224,7 +226,7 @@ class Metadata extends React.Component {
       });
       const rowGetter = (i) => filteredRows[i];
       tableBody = (
-        <div>
+        <div key={selectedClass.ClassName}>
           {selectedResource
             ? (
               <span>

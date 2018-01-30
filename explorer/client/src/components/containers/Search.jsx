@@ -95,8 +95,6 @@ class Search extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log('updating Props');
-    console.log(nextProps, this.props);
     if (nextProps.shared.class['METADATA-TABLE']
       && nextProps.shared !== this.props.shared) {
       const ClassName = nextProps.shared.class.ClassName;

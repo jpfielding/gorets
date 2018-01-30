@@ -4,7 +4,8 @@ import DragableWindow from 'components/containers/DragableWindow';
 export default class KeyFormatter extends React.Component {
   static propTypes = {
     value: React.PropTypes.any,
-    selected: React.PropTypes.any,
+    metadataResource: React.PropTypes.any,
+    metadataClass: React.PropTypes.any,
     displayContents: React.PropTypes.Func,
     container: React.PropTypes.any,
   };
@@ -19,12 +20,12 @@ export default class KeyFormatter extends React.Component {
 
   isLookup(value) {
     let rtn = false;
-    const selectedClass = this.props.selected.class['METADATA-TABLE'].Field;
+    const selectedClass = this.props.metadataClass['METADATA-TABLE'].Field;
     const current = selectedClass.filter((e) => (value === e.SystemName));
     if (current.length !== 0) {
       current.forEach((c) => {
         if (c.LookupName) {
-          const lookup = this.props.selected.resource['METADATA-LOOKUP'].Lookup;
+          const lookup = this.props.metadataResource['METADATA-LOOKUP'].Lookup;
           const values = lookup.filter((e) => (c.LookupName === e.LookupName));
           if (values.length !== 0) {
             this.state.values = values[0];
@@ -72,7 +73,7 @@ export default class KeyFormatter extends React.Component {
 
   render() {
     const value = this.props.value;
-    if (value === this.props.selected.resource.KeyField) {
+    if (value === this.props.metadataResource.KeyField) {
       return (
         <div>
           <div className="customResultsButtonTitle" style={{ display: 'inline-block', marginRight: '5px' }}>

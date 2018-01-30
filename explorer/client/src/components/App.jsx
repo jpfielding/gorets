@@ -348,8 +348,12 @@ export default class App extends React.Component {
 
   renderConfigAutocomplete() {
     const fullList = this.state.configs.server.concat(this.state.configs.stored);
+    const activeCount = Object.keys(this.state.configs.active).length;
     return (
       <div className="navbarAutocomplete">
+        <div className={`tag ${activeCount === 0 ? 'alert' : null}`}>
+          {Object.keys(this.state.configs.active).length}
+        </div>
         <Autocomplete
           value={this.state.configAutocompleteField}
           inputProps={{

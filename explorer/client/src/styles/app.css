@@ -186,9 +186,10 @@ a {
 .navbarAutocomplete {
   position: relative;
   z-index: 100;
-  display: inline-block;
+
   width: 400px;
   margin: 0.5rem 0;
+
   & > div {
     width: 100%;
     & > input{
@@ -209,7 +210,7 @@ a {
       }
     }
   }
-  & .error-out{
+  & > .error-out{
     color: var(--darkRed);
     position: absolute;
     top: -1.2rem;
@@ -219,6 +220,47 @@ a {
     animation-delay: 7s;
     animation-duration: 1s;
     animation-fill-mode: both;
+  }
+  & > .tag{
+    position: absolute;
+    display: inline-block;
+    left: 380px;
+    top: 5px;
+    font-size: 150%;
+    font-weight: 700;
+  }
+
+  & > .alert{
+    color: var(--darkRed);
+    animation-name: alert;
+    animation-duration: 1.5s;
+    animation-iteration-count: 2;
+    animation-delay: 2s;
+    animation-timing-function: ease;
+  }
+}
+
+@keyframes alert {
+  0%{
+  transform: translateY(0);
+  }
+  20%{
+  transform: translateY(0);
+  }
+  40%{
+  transform: translateY(-20px);
+  }
+  50%{
+  transform: translateY(15px);
+  }
+  60%{
+  transform: translateY(-10px);
+  }
+  80%{
+  transform: translateY(5px);
+  }
+  100%{
+  transform: translateY(0);
   }
 }
 
