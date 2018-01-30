@@ -22,7 +22,7 @@ exports.config = {
 
       browserName: 'chrome',
       chromeOptions: {
-        args: ['headless', 'disable-gpu'],
+        args: ['headless', 'disable-gpu', 'window-size=1920,1080'],
       },
     },
     /* { firefox actions api not working in test/support/support.js
@@ -40,7 +40,7 @@ exports.config = {
     port: 4444,
   },
 
-  sync: false,
+  sync: true,
   //
   // Level of logging verbosity: silent | verbose | command | data | result | error
   logLevel: 'silent',
