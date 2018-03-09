@@ -16,7 +16,7 @@ func TestCompactEntry(t *testing.T) {
 	assert.Nil(t, err)
 	start, ok := token.(xml.StartElement)
 	assert.Equal(t, true, ok, "should be a start element")
-	cm, err := NewCompactData(start, decoder, "	")
+	cm, err := NewCompactData(start, decoder, "\t")
 	assert.Nil(t, err)
 	type Test struct {
 		ResourceID, Standardname string
@@ -76,7 +76,69 @@ func TestParseCompactData(t *testing.T) {
 	start, ok := token.(xml.StartElement)
 	assert.Equal(t, true, ok, "should be a start element")
 	assert.Equal(t, "METADATA-ELEMENT", start.Name.Local)
-	cm, err := NewCompactData(start, decoder, "	")
+	cm, err := NewCompactData(start, decoder, "\t") // specify delimiter
+	assert.Nil(t, err)
+	assert.Equal(t, "METADATA-ELEMENT", cm.Element)
+	assert.Equal(t, "Dog", cm.Attr["Cat"])
+	assert.Equal(t, 2, len(cm.CompactRows))
+	assert.Equal(t, 2, len(cm.Columns()))
+}
+
+func TestParseCompactDataDefaultDelim(t *testing.T) {
+	body := ioutil.NopCloser(strings.NewReader(compact))
+	decoder := DefaultXMLDecoder(body, false)
+	token, err := decoder.Token()
+	assert.Nil(t, err)
+	start, ok := token.(xml.StartElement)
+	assert.Equal(t, true, ok, "should be a start element")
+	assert.Equal(t, "METADATA-ELEMENT", start.Name.Local)
+	cm, err := NewCompactData(start, decoder, "") // infer default delimiter
+	assert.Nil(t, err)
+	assert.Equal(t, "METADATA-ELEMENT", cm.Element)
+	assert.Equal(t, "Dog", cm.Attr["Cat"])
+	assert.Equal(t, 2, len(cm.CompactRows))
+	assert.Equal(t, 2, len(cm.Columns()))
+}
+
+var compactWithDelim = `<METADATA-ELEMENT Cat="Dog" Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+<DELIMITER value="2C"/>
+<COLUMNS>,ResourceID,StandardName,</COLUMNS>
+<DATA>,ActiveAgent,ActiveAgent,</DATA>
+<DATA>,Agent,Agent,</DATA>
+</METADATA-ELEMENT>`
+
+func TestParseCompactDataWithDelim(t *testing.T) {
+	body := ioutil.NopCloser(strings.NewReader(compactWithDelim))
+	decoder := DefaultXMLDecoder(body, false)
+	token, err := decoder.Token()
+	assert.Nil(t, err)
+	start, ok := token.(xml.StartElement)
+	assert.Equal(t, true, ok, "should be a start element")
+	assert.Equal(t, "METADATA-ELEMENT", start.Name.Local)
+	cm, err := NewCompactData(start, decoder, "") // infer explicitly-included delimiter
+	assert.Nil(t, err)
+	assert.Equal(t, "METADATA-ELEMENT", cm.Element)
+	assert.Equal(t, "Dog", cm.Attr["Cat"])
+	assert.Equal(t, 2, len(cm.CompactRows))
+	assert.Equal(t, 2, len(cm.Columns()))
+}
+
+var compactWithBadDelim = `<METADATA-ELEMENT Cat="Dog" Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+<DELIMITER value="09"/>  <!-- incorrectly specified \t delimiter -->
+<COLUMNS>,ResourceID,StandardName,</COLUMNS>
+<DATA>,ActiveAgent,ActiveAgent,</DATA>
+<DATA>,Agent,Agent,</DATA>
+</METADATA-ELEMENT>`
+
+func TestParseCompactDataWithOverriddenDelim(t *testing.T) {
+	body := ioutil.NopCloser(strings.NewReader(compactWithBadDelim))
+	decoder := DefaultXMLDecoder(body, false)
+	token, err := decoder.Token()
+	assert.Nil(t, err)
+	start, ok := token.(xml.StartElement)
+	assert.Equal(t, true, ok, "should be a start element")
+	assert.Equal(t, "METADATA-ELEMENT", start.Name.Local)
+	cm, err := NewCompactData(start, decoder, ",") // override explicitly-included delimiter
 	assert.Nil(t, err)
 	assert.Equal(t, "METADATA-ELEMENT", cm.Element)
 	assert.Equal(t, "Dog", cm.Attr["Cat"])

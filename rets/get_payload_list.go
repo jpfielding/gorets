@@ -96,6 +96,7 @@ func NewPayloadList(body io.ReadCloser) (PayloadList, error) {
 	pl := PayloadList{
 		body:   body,
 		parser: parser,
+		delim:  CompactDefaultDelim,
 	}
 	for {
 		token, err := parser.Token()
