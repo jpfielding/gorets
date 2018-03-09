@@ -177,27 +177,45 @@ class Search extends React.Component {
 
   applySearchState() {
     // Search Results table setup
+    let searchResultColumns = [];
+    let searchResultRows = [];
+    let searchCount = -1;
+    let errorOut = '';
+
     const { searchResults } = this.state;
     if (!searchResults.result ||
       (searchResults.result.count === 0 &&
         (searchResults.result.rows === null ||
         searchResults.result.columns === null))) {
       if (searchResults.error) {
-        this.setState({ errorOut: searchResults.error });
+        errorOut = searchResults.error;
+        this.setState({
+          searchResultColumns,
+          searchResultRows,
+          searchCount,
+          errorOut,
+        });
       } else {
-        this.setState({ errorOut: 'No Results Found' });
+        errorOut = 'No Results Found';
+        this.setState({
+          searchResultColumns,
+          searchResultRows,
+          searchCount,
+          errorOut,
+        });
       }
       return;
     }
     if (searchResults.error) {
-      this.setState({ errorOut: 'No Results Found' });
+      errorOut = 'No Results Found';
+      this.setState({
+        searchResultColumns,
+        searchResultRows,
+        searchCount,
+        errorOut,
+      });
       return;
     }
-
-    let searchResultColumns = [];
-    let searchResultRows = [];
-    let searchCount = -1;
-    let errorOut = '';
 
     console.log('applying search state');
 
@@ -278,8 +296,7 @@ class Search extends React.Component {
         this.setState({
           searchResults: json,
           searching: false,
-        });
-        this.applySearchState();
+        }, this.applySearchState());
         this.setSearchHistory(searchHistory);
       });
   }
