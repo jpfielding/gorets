@@ -79,6 +79,7 @@ class Search extends React.Component {
 
     this.bindTabNameChange = this.bindTabNameChange.bind(this);
     this.bindQueryNameChange = this.bindQueryNameChange.bind(this);
+    this.applySearchState = this.applySearchState.bind(this);
   }
 
   componentWillMount() {
@@ -177,6 +178,7 @@ class Search extends React.Component {
 
   applySearchState() {
     // Search Results table setup
+    console.log(this.state.searchResults);
     let searchResultColumns = [];
     let searchResultRows = [];
     let searchCount = -1;
@@ -270,6 +272,9 @@ class Search extends React.Component {
       searchForm,
       searchHistoryName,
       searching: true,
+      searchResultColumns: [],
+      searchResultRows: [],
+      searchCount: -1,
       errorOut: '',
     });
     if (searchParams === Search.emptySearch) {
@@ -278,25 +283,25 @@ class Search extends React.Component {
     SearchService
       .search(this.props.shared.connection, searchParams)
       .then(res => {
-        console.log(res);
+        console.log('Search Response', res);
         return res.json();
       }).then(json => {
         if (json.error && json.error !== null) {
           this.props.pushWirelog({ tag: 'Search', log: json.error, extra: { type: 'Error' } });
         } else {
           const log = Base64.decode(json.result.wirelog);
-          console.log('adsfwefw', log);
+          console.log('Wirelog Response', { data: log });
           this.props.pushWirelog({ tag: 'Search', log });
         }
         if (!some(searchHistory, searchParams)) {
           searchHistory.unshift(searchParams);
           StorageCache.putInCache(sck, searchHistory, 720);
         }
-        console.log('results:', json);
         this.setState({
           searchResults: json,
           searching: false,
-        }, this.applySearchState());
+        });
+        this.applySearchState();
         this.setSearchHistory(searchHistory);
       });
   }
