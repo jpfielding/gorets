@@ -58,8 +58,14 @@ func verifyParseResources(t *testing.T, cm CompactMetadata) {
 	resource.Rows(func(i int, r Row) {
 		rows = append(rows, r)
 	})
-	assert.Equal(t, "ActiveAgent", indexer("ResourceID", rows[0]))
-	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("ValidationExternalDate", rows[1]))
+
+	val, ok := indexer("ResourceID", rows[0])
+	assert.True(t, ok, "ResourceID not found in row")
+	assert.Equal(t, "ActiveAgent", val)
+
+	val, ok = indexer("ValidationExternalDate", rows[1])
+	assert.True(t, ok, "ValidationExternalDate not found in row")
+	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", val)
 }
 
 var class = `<METADATA-CLASS Resource="Property" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -94,9 +100,17 @@ func verifyParseClass(t *testing.T, cm CompactMetadata) {
 		row = append(row, r)
 	})
 
-	assert.Equal(t, "RESO_PROP_2012_05", indexer("ClassName", row[5]))
-	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("TableDate", row[0]))
-	assert.Equal(t, "MRIS Multi-Family", indexer("VisibleName", row[2]))
+	val, ok := indexer("ClassName", row[5])
+	assert.True(t, ok, "ClassName not found in row")
+	assert.Equal(t, "RESO_PROP_2012_05", val)
+
+	val, ok = indexer("TableDate", row[0])
+	assert.True(t, ok, "TableDate not found in row")
+	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", val)
+
+	val, ok = indexer("VisibleName", row[2])
+	assert.True(t, ok, "VisibleName not found in row")
+	assert.Equal(t, "MRIS Multi-Family", val)
 }
 
 var table = `<METADATA-TABLE Resource="Agent" Class="ActiveAgent" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -130,8 +144,13 @@ func verifyParseTable(t *testing.T, cm CompactMetadata) {
 		row = append(row, r)
 	})
 
-	assert.Equal(t, "AgentListingServiceName", indexer("SystemName", row[0]))
-	assert.Equal(t, "0", indexer("Unique", row[3]))
+	val, ok := indexer("SystemName", row[0])
+	assert.True(t, ok, "SystemName not found in row")
+	assert.Equal(t, "AgentListingServiceName", val)
+
+	val, ok = indexer("Unique", row[3])
+	assert.True(t, ok, "Unique not found in row")
+	assert.Equal(t, "0", val)
 }
 
 var lookup = `<METADATA-LOOKUP Resource="TaxHistoricalDesignation" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -164,8 +183,13 @@ func verifyParseLookup(t *testing.T, cm CompactMetadata) {
 		row = append(row, r)
 	})
 
-	assert.Equal(t, "COUNTIES_OR_REGIONS", indexer("LookupName", row[0]))
-	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", indexer("Date", row[3]))
+	val, ok := indexer("LookupName", row[0])
+	assert.True(t, ok, "LookupName not found in row")
+	assert.Equal(t, "COUNTIES_OR_REGIONS", val)
+
+	val, ok = indexer("Date", row[3])
+	assert.True(t, ok, "Date not found in row")
+	assert.Equal(t, "Tue, 3 Sep 2013 00:00:00 GMT", val)
 }
 
 var lookupType = `<METADATA-LOOKUP_TYPE Resource="TaxHistoricalDesignation" Lookup="COUNTIES_OR_REGIONS" Version="1.12.29" Date="Tue, 3 Sep 2013 00:00:00 GMT">
@@ -184,6 +208,7 @@ func TestParseLookupType(t *testing.T) {
 	assert.Nil(t, err)
 	verifyParseLookupType(t, *ms)
 }
+
 func verifyParseLookupType(t *testing.T, cm CompactMetadata) {
 	mdata := cm.Elements["METADATA-LOOKUP_TYPE"][0]
 
@@ -199,8 +224,13 @@ func verifyParseLookupType(t *testing.T, cm CompactMetadata) {
 		row = append(row, r)
 	})
 
-	assert.Equal(t, "BROOMFIELD-CO", indexer("LongValue", row[2]))
-	assert.Equal(t, "CLARK", indexer("ShortValue", row[3]))
+	val, ok := indexer("LongValue", row[2])
+	assert.True(t, ok, "LongValue not found in row")
+	assert.Equal(t, "BROOMFIELD-CO", val)
+
+	val, ok = indexer("ShortValue", row[3])
+	assert.True(t, ok, "ShortValue not found in row")
+	assert.Equal(t, "CLARK", val)
 }
 
 func TestParseMetadata(t *testing.T) {

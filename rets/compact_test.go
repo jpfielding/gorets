@@ -145,3 +145,49 @@ func TestParseCompactDataWithOverriddenDelim(t *testing.T) {
 	assert.Equal(t, 2, len(cm.CompactRows))
 	assert.Equal(t, 2, len(cm.Columns()))
 }
+
+var compactBadColumnCount = `<METADATA-ELEMENT Cat="Dog" Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+<COLUMNS>	ResourceID	StandardName	AnotherField	YetAnotherField	</COLUMNS>
+<DATA>	ActiveAgent	ActiveAgent	</DATA>
+<DATA>	Agent	Agent	</DATA>
+</METADATA-ELEMENT>`
+
+func TestBadColumnCount(t *testing.T) {
+	body := ioutil.NopCloser(strings.NewReader(compactBadColumnCount))
+	decoder := DefaultXMLDecoder(body, false)
+	token, err := decoder.Token()
+	assert.Nil(t, err)
+	start, ok := token.(xml.StartElement)
+	assert.Equal(t, true, ok, "should be a start element")
+	assert.Equal(t, "METADATA-ELEMENT", start.Name.Local)
+	cm, err := NewCompactData(start, decoder, "")
+	assert.Nil(t, err)
+	assert.Equal(t, "METADATA-ELEMENT", cm.Element)
+
+	for _, entry := range cm.Entries() { // panic: index out of range
+		assert.Equal(t, 2, len(entry))
+	}
+}
+
+var compactBadDataCount = `<METADATA-ELEMENT Cat="Dog" Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+<COLUMNS>	ResourceID	StandardName	</COLUMNS>
+<DATA>	ActiveAgent	ActiveAgent	Foo	Bar	</DATA>
+<DATA>	Agent	Agent	Foo2	Bar2	</DATA>
+</METADATA-ELEMENT>`
+
+func TestBadDataCount(t *testing.T) {
+	body := ioutil.NopCloser(strings.NewReader(compactBadColumnCount))
+	decoder := DefaultXMLDecoder(body, false)
+	token, err := decoder.Token()
+	assert.Nil(t, err)
+	start, ok := token.(xml.StartElement)
+	assert.Equal(t, true, ok, "should be a start element")
+	assert.Equal(t, "METADATA-ELEMENT", start.Name.Local)
+	cm, err := NewCompactData(start, decoder, "")
+	assert.Nil(t, err)
+	assert.Equal(t, "METADATA-ELEMENT", cm.Element)
+
+	for _, entry := range cm.Entries() { // panic: index out of range
+		assert.Equal(t, 2, len(entry))
+	}
+}

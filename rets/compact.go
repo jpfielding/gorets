@@ -92,15 +92,19 @@ func (cd CompactData) Entries() []CompactEntry {
 	cd.Rows(func(i int, r Row) {
 		entry := CompactEntry{}
 		for _, c := range cols {
-			entry[c] = index(c, r)
+			val, ok := index(c, r)
+			if !ok {
+				continue // declared column wasn't included in DATA row!
+			}
+			entry[c] = val
 		}
 		entries = append(entries, entry)
 	})
 	return entries
 }
 
-// Indexer provices cached lookup for CompactData
-type Indexer func(col string, row Row) string
+// Indexer provides cached lookup for CompactData
+type Indexer func(col string, row Row) (val string, ok bool)
 
 // Indexer create the cache
 func (cd *CompactData) Indexer() Indexer {
@@ -108,8 +112,12 @@ func (cd *CompactData) Indexer() Indexer {
 	for i, c := range cd.Columns() {
 		index[c] = i
 	}
-	return func(col string, row Row) string {
-		return row[index[col]]
+	return func(col string, row Row) (val string, ok bool) {
+		i, ok := index[col]
+		if !ok || i >= len(row) {
+			return "", false // non-existent column, or DATA row contains too few values
+		}
+		return row[i], true
 	}
 }
 
