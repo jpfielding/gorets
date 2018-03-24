@@ -37,6 +37,30 @@ export default class TabSection extends React.Component {
     this.handleKeys = this.handleKeys.bind(this);
   }
 
+  componentWillReceiveProps(props) {
+    if (props.components === this.props.components) return;
+    if (props.components.length > this.props.components.length) {
+      const newComponent = props.components.find((e) => (
+        !this.props.components.some((f) => (
+          e.id === f.id
+        ))));
+      if (newComponent !== undefined) this.setState({ tab: newComponent.id });
+    } else if (props.components.length < this.props.components.length
+               && props.components.length > 0) {
+      const removedIndex = this.props.components.findIndex((e) => (
+        !props.components.some((f) => (
+          e.id === f.id
+        ))));
+      if (removedIndex !== -1 && this.props.components[removedIndex].id === this.state.tab) {
+        if (removedIndex === 0) {
+          this.setState({ tab: props.components[0].id });
+        } else {
+          this.setState({ tab: props.components[removedIndex - 1].id });
+        }
+      }
+    }
+  }
+
   createTabBar() {
     const tabs = this.props.components.map(this.createTabTag);
     return (

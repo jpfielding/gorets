@@ -13,7 +13,7 @@ and Chris Ridenour's work mapping syndication (http://github.com/cridenour)
 
 Find us at gophers.slack.com#gorets
 
-```
+```go
 	in := ioutil.NopCloser(...)
 	parser := xml.NewDecoder(in)
 	listings := Listings{}

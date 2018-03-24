@@ -1,12 +1,12 @@
 RETS Utilities
 ======
 
-RETS utilities for
+RETS utilities for:
 
-- pull compact metadata incrementally
-- converting comact metaadata to StandardXML
+- pulling compact metadata incrementally
+- converting compact metadata to StandardXML
 
-```
+```go
 	compact := &retsutil.IncrementalCompact{}
 	_ = compact.Load(sess, ctx, urls.GetMetadata)
 	// convert it to the Standard XML model

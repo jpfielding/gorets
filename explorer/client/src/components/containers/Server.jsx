@@ -143,7 +143,10 @@ class Server extends React.Component {
     // Make api request
     MetadataService
       .get(this.state.shared.connection, args)
-      .then(response => response.json())
+      .then(response => {
+        console.log(response);
+        return response.json();
+      })
       .then(json => {
         // Error out
         if (json.error && json.error !== null) {

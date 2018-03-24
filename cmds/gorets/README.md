@@ -3,11 +3,11 @@ gorets
 
 RETS command line client in Go 
 
-these are mostly intended to be examples for how a Go client might use the rets client. 
+These are mostly intended to be examples for how a Go client might use the RETS client. 
 
 
-```
-connect.json:
+```json
+// connect.json:
 {
 	"username": "user",
 	"password": "pwd",
@@ -19,11 +19,12 @@ connect.json:
 }
 ```
 
-[Example Search](cmds/gorets/search.go)
-```
+[Example Search](search.go):
+```sh
 go run cmds/gorets/*.go search -c connect.json -params sp.json -o /tmp/
-
-sp.json:
+```
+```json
+// sp.json:
 {
 	"SearchType": "Property",
 	"Class": "Residential",
@@ -35,13 +36,14 @@ sp.json:
 	"QueryType": "dmql2",
 	"Query": "(ModifiedDateTime=2016-08-01T00:00:00+)"
 }
-
-[Example GetObject](cmds/gorets/getobject.go)
 ```
+
+[Example GetObject](getobject.go):
+```sh
 go run cmds/getobject/*.go getobject -c connect.json -type "HiRes" -i "343234:*" -o /tmp/
-
-[Example Metadata](cmds/gorets/search.go)
 ```
-go run cmds/metadata/*.go metadata -c connect.json -output /tmp/
 
+[Example Metadata](search.go):
+```sh
+go run cmds/metadata/*.go metadata -c connect.json -output /tmp/
 ```

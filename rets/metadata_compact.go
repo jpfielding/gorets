@@ -61,7 +61,7 @@ func ParseMetadataCompactResult(body io.ReadCloser) (*CompactMetadata, error) {
 }
 
 // CompactMetadataDelim is the only delimiter option for compact metadata
-const CompactMetadataDelim = "	"
+const CompactMetadataDelim = "\t"
 
 // CompactMetadata ...
 type CompactMetadata struct {
