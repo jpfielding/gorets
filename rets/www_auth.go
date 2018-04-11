@@ -1,7 +1,6 @@
 package rets
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -28,11 +27,12 @@ func (auth *WWWAuthTransport) header(req *http.Request) string {
 // Request ...
 func (auth *WWWAuthTransport) Request(ctx context.Context, req *http.Request) (*http.Response, error) {
 	// attempt to preempt the challenge to save a req/res round trip
-	switch {
-	case auth.digester != nil:
-		req.Header.Set(WWWAuthResp, auth.header(req))
-	case auth.hasBasic:
+	if auth.hasBasic {
 		req.SetBasicAuth(auth.Username, auth.Password)
+	}
+	// apply basic second in case they request basic
+	if auth.digester != nil {
+		req.Header.Set(WWWAuthResp, auth.header(req))
 	}
 	res, err := auth.Requester(ctx, req)
 	if err != nil {
@@ -42,23 +42,25 @@ func (auth *WWWAuthTransport) Request(ctx context.Context, req *http.Request) (*
 	if res.StatusCode != http.StatusUnauthorized {
 		return res, err
 	}
+	authed := false
 	// sometimes we get more than one challenge type?
 	for _, c := range res.Header[WWWAuth] {
-		switch {
-		case strings.HasPrefix(strings.ToLower(c), "digest"):
-			auth.digester, err = NewDigest(c)
-			if err != nil {
-				log.Println("failed to process digest", c, err)
-				auth.digester = nil
-				continue
-			}
-			req.Header.Set(WWWAuthResp, auth.header(req))
-			return auth.Requester(ctx, req)
-		case strings.HasPrefix(strings.ToLower(c), "basic"):
+		if strings.HasPrefix(strings.ToLower(c), "basic") {
 			auth.hasBasic = true
 			req.SetBasicAuth(auth.Username, auth.Password)
-			return auth.Requester(ctx, req)
+			authed = true
 		}
+		if strings.HasPrefix(strings.ToLower(c), "digest") {
+			auth.digester, err = NewDigest(c)
+			if err != nil {
+				auth.digester = nil
+				return res, err
+			}
+			req.Header.Set(WWWAuthResp, auth.header(req))
+		}
+	}
+	if authed {
+		return auth.Requester(ctx, req)
 	}
 	return res, err
 }
