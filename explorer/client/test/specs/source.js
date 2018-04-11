@@ -23,7 +23,7 @@ describe('goRets Explorer', () => {
       s.equalMulti(
         '#testpjohndoe-config-',
         ['id', 'loginurl', 'username', 'password', 'useragent', 'useragentpassword', 'proxy', 'version'],
-        ['testp:johndoe', 'http://www.fake.rets/login', 'johndoe', 'password', 'UserAgent', '', '', 'RETS/1.5'],
+        ['testp:johndoe', 'http://www.fake.rets/login', 'johndoe', 'password', 'UserAgent', '', '', 'RETS/1.5']
       );
     });
 

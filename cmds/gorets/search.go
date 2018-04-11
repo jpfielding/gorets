@@ -44,11 +44,8 @@ func search(cmd *cobra.Command, args []string) {
 	err = LoadFrom(searchFile, &params)
 	handleError(search, err)
 
-	session, err := connect.Initialize()
-	handleError(search, err)
-
 	// launch the session
-	session, err = connect.Initialize()
+	session, err := connect.Initialize()
 	handleError(search, err)
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
