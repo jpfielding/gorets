@@ -45,7 +45,7 @@ func TestSearchXMLBadChar(t *testing.T) {
 	var listings []Listing
 	count, maxRows, err := cr.ForEach(minidom.ByName("PropertyListing"), func(elem io.ReadCloser, err error) error {
 		listing := Listing{}
-		xml.NewDecoder(elem).Decode(&listing)
+		err = xml.NewDecoder(elem).Decode(&listing)
 		listings = append(listings, listing)
 		return err
 	})
