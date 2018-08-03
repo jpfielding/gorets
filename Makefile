@@ -1,18 +1,22 @@
 all: restore-deps test
 
 .PHONY: explorer
-explorer:
+explorer: build-explorer build-explorer-container
+
+build-explorer:
 	CGO_ENABLED=0 GOOS=linux go build -o bin/explorer/explorer cmds/explorer/*.go
 	cd explorer/client && npm install && CONFIG_ENV=docker npm run build
 	cp docker/explorer/Dockerfile bin/explorer
 	cp cmds/explorer/config.json bin/explorer
+
+build-explorer-container:
 	docker build bin/explorer -t "gorets_explorer:latest"
 
 test-explorer:
-		CGO_ENABLED=0 GOOS=linux go build -o bin/explorer/explorer cmds/explorer/*.go
-		cd explorer/client && npm install && CONFIG_ENV=test npm run build
-		cp docker/explorer/Dockerfile bin/explorer
-		docker build bin/explorer -t "gorets_explorer_test:latest"
+	CGO_ENABLED=0 GOOS=linux go build -o bin/explorer/explorer cmds/explorer/*.go
+	cd explorer/client && npm install && CONFIG_ENV=test npm run build
+	cp docker/explorer/Dockerfile bin/explorer
+	docker build bin/explorer -t "gorets_explorer_test:latest"
 
 vendor:
 	glide up
