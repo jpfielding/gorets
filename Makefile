@@ -5,6 +5,7 @@ explorer:
 	CGO_ENABLED=0 GOOS=linux go build -o bin/explorer/explorer cmds/explorer/*.go
 	cd explorer/client && npm install && CONFIG_ENV=docker npm run build
 	cp docker/explorer/Dockerfile bin/explorer
+	cp cmds/explorer/config.json bin/explorer
 	docker build bin/explorer -t "gorets_explorer:latest"
 
 test-explorer:

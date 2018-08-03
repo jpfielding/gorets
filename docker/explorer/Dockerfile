@@ -9,5 +9,5 @@ RUN chmod +x /opt/explorer/explorer
 
 WORKDIR /opt/explorer
 
-ENTRYPOINT ["/bin/sh", "-c", "./explorer -port 8080 -react /opt/explorer"]
+ENTRYPOINT ["/bin/sh", "-c","./explorer -port 8080 -config ./config.json -react /opt/explorer"]
 CMD []
