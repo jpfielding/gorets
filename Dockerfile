@@ -26,8 +26,8 @@ COPY . /gorets
 WORKDIR /gorets/
 
 RUN echo ${CONFIG_DOCKER} >> explorer/client/config/docker.js
-RUN echo ${HEADERS_CONFIG} >> bin/explorer/config.json
 RUN make build-explorer-client
+RUN echo ${HEADERS_CONFIG} >> bin/explorer/config.json
 
 # ==============
 
