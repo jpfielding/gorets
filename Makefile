@@ -22,9 +22,7 @@ build-explorer-container:
 	docker build bin/explorer -t "gorets_explorer:latest"
 
 test-explorer:
-	CGO_ENABLED=0 GOOS=linux go build -o bin/explorer/explorer cmds/explorer/*.go
-	cd explorer/client && npm install && CONFIG_ENV=test npm run build
-	cp docker/explorer/Dockerfile bin/explorer
+	CONFIG_ENV=test make build-explorer-svc build-explorer-client build-explorer-copy-files
 	docker build bin/explorer -t "gorets_explorer_test:latest"
 
 vendor:
