@@ -1,3 +1,6 @@
+
+CONFIG_ENV ?= docker
+
 all: restore-deps test
 
 .PHONY: explorer
