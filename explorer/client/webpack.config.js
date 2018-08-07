@@ -11,7 +11,7 @@ const postcssImport = require('postcss-import');
 
 const config = require(`./config/${env}`);
 
-console.log(`Building gorets explorer with env: ${env} config: ${config}`);
+console.log(`Building gorets explorer with env: ${env} config: ${JSON.stringify(config, null, 2)}`);
 
 const definePlugin = new webpack.DefinePlugin({
   config: JSON.stringify(config),
