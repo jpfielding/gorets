@@ -5,6 +5,11 @@ RETS client in Go
 
 [![Build Status](https://travis-ci.org/jpfielding/gorets.svg?branch=master)](https://travis-ci.org/jpfielding/gorets)
 
+[![GoDoc](https://godoc.org/github.com/jpfielding/gorets?status.svg)](https://godoc.org/github.com/jpfielding/gorets)
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/jpfielding/gorets)](https://goreportcard.com/report/github.com/jpfielding/gorets)
+
+
 The attempt is to meet [RETS 1.8.0](https://www.reso.org/specifications/) compliance.
 
 Find me at gophers.slack.com#gorets
