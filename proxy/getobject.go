@@ -36,7 +36,7 @@ func GetObject(ops map[string]string, srcs Sources) http.HandlerFunc {
 			return
 		}
 
-		// TOOD also check body in case of POST params in body
+		// TODO also check body in case of POST params in body
 		values := req.URL.Query()
 		params := rets.GetObjectParams{
 			Resource: values.Get("Resource"),

@@ -49,7 +49,7 @@ func PrepMetadataRequest(r MetadataRequest) (*http.Request, error) {
 	return http.NewRequest(method, url.String(), nil)
 }
 
-// MetadataResponse processes the request... TOOD may no longer be necessary
+// MetadataResponse processes the request... TODO may no longer be necessary
 func MetadataResponse(ctx context.Context, requester Requester, r MetadataRequest) (*http.Response, error) {
 	req, err := PrepMetadataRequest(r)
 	if err != nil {

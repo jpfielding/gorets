@@ -17,7 +17,7 @@ type Field struct {
 	LongName           Text      `xml:",omitempty" json:",omitempty"`
 	DBName             AlphaNum  `xml:",omitempty" json:",omitempty"`
 	ShortName          Text      `xml:",omitempty" json:",omitempty"`
-	MaximumLength      Numeric   `xml:",omitempty" json:",omitempty"` // TODO limit to postive
+	MaximumLength      Numeric   `xml:",omitempty" json:",omitempty"` // TODO limit to positive
 	DataType           string    `xml:",omitempty" json:",omitempty"` // TODO limit to options
 	Precision          Numeric   `xml:",omitempty" json:",omitempty"` // TODO limit to positive
 	Searchable         Boolean   `xml:",omitempty" json:",omitempty"`

@@ -87,8 +87,8 @@ func (v Version) Release() Numeric {
 
 //------------------------------------------
 
-// TOOD consider a high order function to hide the format and tz to process DateTime
-// TOOD consider a func that produces a time based on matching the best time format
+// TODO consider a high order function to hide the format and tz to process DateTime
+// TODO consider a func that produces a time based on matching the best time format
 const (
 	// RETSDateTimeFormat is the simple date format for most rets dates
 	RETSDateTimeFormat = "2006-01-02T15:04:05Z"

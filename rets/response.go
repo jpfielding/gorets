@@ -20,7 +20,7 @@ type Response struct {
 	Text string `xml:"ReplyText,attr"`
 }
 
-// ResponseTag holds the seperator for compact data
+// ResponseTag holds the separator for compact data
 type ResponseTag xml.StartElement
 
 // Parse ...

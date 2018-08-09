@@ -55,6 +55,9 @@ func (c Config) Connect(ctx context.Context, wlog io.Writer) (*Session, error) {
 		c.RetsVersion,
 		transport,
 	)
+	if err != nil {
+		return nil, err
+	}
 	urls, err := rets.Login(ctx, sess, rets.LoginRequest{URL: c.LoginURL})
 	if err != nil {
 		return nil, err

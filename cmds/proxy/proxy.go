@@ -10,7 +10,7 @@ import (
 	"github.com/jpfielding/gorets/proxy"
 )
 
-// TOOD read in login params, get source config from url path
+// TODO read in login params, get source config from url path
 // TODO load gorets to fulfull request, proxy response back
 // TODO cache source sessions by auth info
 // TODO store caching options (concurrent or login limits) per config

@@ -138,7 +138,7 @@ func NewCompactSearchResult(body io.ReadCloser) (*CompactSearchResult, error) {
 	}
 }
 
-// DelimiterTag holds the seperator for compact data
+// DelimiterTag holds the separator for compact data
 type DelimiterTag xml.StartElement
 
 // Parse ...

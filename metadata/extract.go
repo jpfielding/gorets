@@ -20,6 +20,9 @@ func (e *Extractor) Open() (RETSResponse, error) {
 	rets := RETSResponse{}
 	e.parser = xml.NewDecoder(e.Body)
 	start, err := e.skipTo("(RETS|RETS-STATUS)")
+	if err != nil {
+		return rets, err
+	}
 	attrs := make(map[string]string)
 	for _, v := range start.Attr {
 		attrs[strings.ToLower(v.Name.Local)] = v.Value

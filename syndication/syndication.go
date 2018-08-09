@@ -207,7 +207,7 @@ type Address struct {
 // `xml:"http://rets.org/xsd/RETSCommons isgSecurityClass,attr"`
 type PriceWithFrequency struct {
 	// The currencyPeriod attribute indicates that the price is repeated
-	// at the frequency indicated. The abscence of the attribute indicates
+	// at the frequency indicated. The absence of the attribute indicates
 	// a one-time payment.
 	//
 	// Possible values:
@@ -721,7 +721,7 @@ type Characteristics struct {
 	Appliances []OtherChoice `xml:"Appliances>Appliance,omitempty" json:",omitempty"`
 	// Description of the architectural design of the property listed.
 	//
-	// Possibile values:
+	// Possible values:
 	//
 	// A Frame
 	// Art Deco

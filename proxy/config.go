@@ -11,7 +11,7 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-// Config sets up a conneciton
+// Config sets up a connection
 type Config struct {
 	Service                      string
 	URL                          string

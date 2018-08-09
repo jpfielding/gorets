@@ -71,6 +71,9 @@ func JSONLoad(filename string, data interface{}) error {
 		return err
 	}
 	blob, err := ioutil.ReadAll(gz)
+	if err != nil {
+		return err
+	}
 	err = json.Unmarshal(blob, data)
 	if err != nil {
 		return err

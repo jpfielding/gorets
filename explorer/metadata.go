@@ -36,7 +36,7 @@ func (ms MetadataService) Get(r *http.Request, args *MetadataGetParams, reply *M
 	fmt.Printf("metadata get params: %v\n", args)
 
 	cfg := args.Connection
-	// TOOD make a head request and see if how stale this is??
+	// TODO make a head request and see if how stale this is??
 	if JSONExist(MSystem(cfg), args.Oldest*time.Minute) {
 		fmt.Printf("found cached (<%dm old) metadata for %s\n", args.Oldest, cfg.ID)
 		standard := metadata.MSystem{}

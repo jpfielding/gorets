@@ -86,6 +86,9 @@ func LoadFrom(filename string, model interface{}) error {
 		return err
 	}
 	blob, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
 	err = json.Unmarshal(blob, model)
 	if err != nil {
 		return err

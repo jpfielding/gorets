@@ -66,7 +66,7 @@ func Login(ctx context.Context, requester Requester, r LoginRequest) (*Capabilit
 
 	urls, err := parseCapability(body, r.URL)
 	if err != nil {
-		return nil, errors.New("unable to parse capabilites response: " + err.Error())
+		return nil, errors.New("unable to parse capabilities response: " + err.Error())
 	}
 	return urls, nil
 }
