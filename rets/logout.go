@@ -72,7 +72,7 @@ func processResponseBody(body io.ReadCloser) (*LogoutResponse, error) {
 	values := map[string]string{}
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.Index(line,"=") == -1 {
+		if line == "" || strings.Index(line, "=") == -1 {
 			continue
 		}
 		kv := strings.Split(line, "=")
