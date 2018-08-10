@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/jpfielding/gorets/metadata"
-	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gorets/pkg/metadata"
+	"github.com/jpfielding/gorets/pkg/rets"
 )
 
 // IncrementalCompact loads rets.CompcatMetadata in pieces

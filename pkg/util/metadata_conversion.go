@@ -1,8 +1,8 @@
 package util
 
 import (
-	"github.com/jpfielding/gorets/metadata"
-	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gorets/pkg/metadata"
+	"github.com/jpfielding/gorets/pkg/rets"
 )
 
 // TODO need to restructure this to return the sub types and pass the

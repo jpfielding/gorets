@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gorets/pkg/rets"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/rpc"
 	gson "github.com/gorilla/rpc/json"
-	"github.com/jpfielding/gorets/config"
+	"github.com/jpfielding/gorets/pkg/config"
 )
 
 func main() {

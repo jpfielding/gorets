@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/rpc"
 	"github.com/gorilla/rpc/json"
-	"github.com/jpfielding/gorets/explorer"
+	"github.com/jpfielding/gorets/pkg/explorer"
 )
 
 type config struct {

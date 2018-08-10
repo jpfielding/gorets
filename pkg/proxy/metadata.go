@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 
-	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gorets/pkg/rets"
 )
 
-// GetObject ...
-func GetObject(ops map[string]string, srcs Sources) http.HandlerFunc {
+// Metadata ...
+func Metadata(ops map[string]string, srcs Sources) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
-		sub := strings.TrimPrefix(req.URL.Path, ops["GetObject"])
+		sub := strings.TrimPrefix(req.URL.Path, ops["GetMetadata"])
 		parts := strings.Split(sub, "/")
 		src := parts[0]
 		usr := parts[1]
@@ -38,28 +37,22 @@ func GetObject(ops map[string]string, srcs Sources) http.HandlerFunc {
 
 		// TODO also check body in case of POST params in body
 		values := req.URL.Query()
-		params := rets.GetObjectParams{
-			Resource: values.Get("Resource"),
-			Type:     values.Get("Type"),
-			ID:       values.Get("ID"),
-			UID:      values.Get("UID"),
-		}
-
-		if l := values.Get("Location"); l != "" {
-			params.Location, _ = strconv.Atoi(l)
-		}
 
 		ctx := context.Background()
-		response, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
-			URL:                   urls.GetObject,
+		response, err := rets.MetadataResponse(ctx, r, rets.MetadataRequest{
+			URL:                   urls.GetMetadata,
 			HTTPMethod:            req.Method,
 			HTTPFormEncodedValues: (req.Method == "POST"),
-			GetObjectParams:       params,
+			MetadataParams: rets.MetadataParams{
+				Format: values.Get("Format"),
+				MType:  values.Get("Type"),
+				ID:     values.Get("ID"),
+			},
 		})
 		defer response.Body.Close()
 		if err != nil {
 			res.WriteHeader(http.StatusBadGateway)
-			fmt.Fprintf(res, "get objects err %s", err)
+			fmt.Fprintf(res, "metadata err %s", err)
 			return
 		}
 		// success, send the urls (modified to point to this server)

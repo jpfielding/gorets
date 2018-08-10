@@ -14,3 +14,4 @@ explorer/client/npm-debug.log
 package-lock.json
 bin/
 node_modules
+_config.yml

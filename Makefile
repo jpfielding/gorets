@@ -9,14 +9,14 @@ explorer: build-explorer build-explorer-copy-files build-explorer-container
 build-explorer: build-explorer-svc build-explorer-client
 
 build-explorer-svc:
-	CGO_ENABLED=0 GOOS=linux go build -o bin/explorer/explorer cmds/explorer/*.go
+	CGO_ENABLED=0 GOOS=linux go build -o bin/explorer/explorer cmd/explorer/*.go
 
 build-explorer-client:
-	cd explorer/client && npm install && CONFIG_ENV=$(CONFIG_ENV) npm run build
+	cd web/explorer/client && npm install && CONFIG_ENV=$(CONFIG_ENV) npm run build
 
 build-explorer-copy-files:
-	cp docker/explorer/Dockerfile bin/explorer
-	cp cmds/explorer/config.json bin/explorer
+	cp build/explorer/Dockerfile bin/explorer
+	cp cmd/explorer/config.json bin/explorer
 
 build-explorer-container:
 	docker build bin/explorer -t "gorets_explorer:latest"

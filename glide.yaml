@@ -1,4 +1,4 @@
-package: github.com/jpfielding/gorets
+package: github.com/jpfielding/gorets/pkg
 homepage: github.com/jpfielding/gorets
 license: GPL3
 

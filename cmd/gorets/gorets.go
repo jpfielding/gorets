@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gorets/pkg/rets"
 	"github.com/jpfielding/gowirelog/wirelog"
 	"github.com/spf13/cobra"
 )

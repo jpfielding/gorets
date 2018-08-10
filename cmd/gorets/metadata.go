@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gorets/pkg/rets"
 	"github.com/spf13/cobra"
 )
 

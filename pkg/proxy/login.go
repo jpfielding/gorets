@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gorets/pkg/rets"
 )
 
 // Login manages de/multiplexing requests to RETS servers

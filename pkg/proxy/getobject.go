@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jpfielding/gorets/rets"
+	"github.com/jpfielding/gorets/pkg/rets"
 )
 
-// Search ...
-func Search(ops map[string]string, srcs Sources) http.HandlerFunc {
+// GetObject ...
+func GetObject(ops map[string]string, srcs Sources) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
-		sub := strings.TrimPrefix(req.URL.Path, ops["Search"])
+		sub := strings.TrimPrefix(req.URL.Path, ops["GetObject"])
 		parts := strings.Split(sub, "/")
 		src := parts[0]
 		usr := parts[1]
@@ -38,46 +38,28 @@ func Search(ops map[string]string, srcs Sources) http.HandlerFunc {
 
 		// TODO also check body in case of POST params in body
 		values := req.URL.Query()
-		params := rets.SearchParams{
-			SearchType: values.Get("SearchType"),
-			Class:      values.Get("Class"),
-			Query:      values.Get("Query"),
+		params := rets.GetObjectParams{
+			Resource: values.Get("Resource"),
+			Type:     values.Get("Type"),
+			ID:       values.Get("ID"),
+			UID:      values.Get("UID"),
 		}
-		// TODO apply optionally
-		params.Format = values.Get("Format")
-		params.Select = values.Get("Select")
-		params.Payload = values.Get("Payload")
-		params.QueryType = values.Get("QueryType")
-		params.RestrictedIndicator = values.Get("RestrictedIndicator")
-		if c := values.Get("Count"); c != "" {
-			params.Count, _ = strconv.Atoi(c)
+
+		if l := values.Get("Location"); l != "" {
+			params.Location, _ = strconv.Atoi(l)
 		}
-		if l := values.Get("Limit"); l != "" {
-			if strings.ToUpper(l) == "NONE" {
-				params.Limit = -1
-			} else {
-				params.Limit, _ = strconv.Atoi(l)
-			}
-		}
-		if o := values.Get("Offset"); o != "" {
-			params.Offset, _ = strconv.Atoi(o)
-		}
-		if s := values.Get("StandardNames"); s != "" {
-			params.StandardNames, _ = strconv.Atoi(s)
-		}
-		// TODO standardnames
 
 		ctx := context.Background()
-		response, err := rets.SearchResponse(ctx, r, rets.SearchRequest{
-			URL:                   urls.Search,
+		response, err := rets.GetObjects(ctx, r, rets.GetObjectRequest{
+			URL:                   urls.GetObject,
 			HTTPMethod:            req.Method,
 			HTTPFormEncodedValues: (req.Method == "POST"),
-			SearchParams:          params,
+			GetObjectParams:       params,
 		})
 		defer response.Body.Close()
 		if err != nil {
 			res.WriteHeader(http.StatusBadGateway)
-			fmt.Fprintf(res, "search err %s", err)
+			fmt.Fprintf(res, "get objects err %s", err)
 			return
 		}
 		// success, send the urls (modified to point to this server)
