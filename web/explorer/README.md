@@ -10,6 +10,13 @@ Simplest way to run the explorer:
 docker run --rm -it -p 8080:8080 docker.io/jpfielding/goretsexplorer:latest
 ```
 
+to build it yourself
+```
+make clean restore-deps explorer
+docker run --rm -it -p 8080:8080 gorets_explorer:latest
+<point your browser at localhost:8080>
+```
+
 [Example Explorer UI](../cmds/explorer/main.go):
 ```sh
 # All hosted from go
