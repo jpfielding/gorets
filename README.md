@@ -17,17 +17,17 @@ There are **multiple projects** in this repository:
 
 ## Client Tools
 
-  * [gorets/pkg/rets](rets) - provides a Go based client for RETS
+  * [Client](pkg/rets) - provides a Go based client for RETS
 
-  * [gorets/pkg/metadata](metadata) - provides the common structure for reading in properly formed RETS metadata
+  * [Metadata](pkg/metadata) - provides the common structure for reading in properly formed RETS metadata
 
-  * [gorets/pkg/syndication](syndication) - provides the RETS syndication struct for processing syndication feeds 
+  * [Syndication](pkg/syndication) - provides the RETS syndication struct for processing syndication feeds 
 
-  * [gorets/pkg/util](util) - helper tools for dealing with RETS
+  * [Util](pkg/util) - helper tools for dealing with RETS
 
 ## Web Tools
 
-  * [gorets/pkg/explorer](explorer) - provides a Go backend for a ReactJS UI for browsing RETS servers
+  * [Explorer](pkg/explorer) - provides a Go backend for a ReactJS UI for browsing RETS servers
 
-  * [gorets/pkg/proxy](proxy) - provides a mechanism for proxying multiple RETS connections through a single endpoint
+  * [Proxy](pkg/proxy) - provides a mechanism for proxying multiple RETS connections through a single endpoint
 
