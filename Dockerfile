@@ -17,6 +17,7 @@ ARG CONFIG_ENV=docker
 ARG CONFIG_DOCKER="module.exports = { \
   staticAssetPath: '.', \
   api: '', \
+  customHeaderScript: '', \
 };"
 
 RUN echo ${CONFIG_ENV} "\n" ${CONFIG_DOCKER} "\n" ${HEADERS_CONFIG}
