@@ -27,7 +27,9 @@ There are **multiple projects** in this repository:
 
 ## Web Tools
 
-  * [Explorer](pkg/explorer) - provides a Go backend for a ReactJS UI for browsing RETS servers
+  * [Explorer Client](web/explorer) - provides a ReactJS UI for browsing RETS servers
+
+  * [Explorer Service](pkg/explorer) - provides a Go backend for browsing RETS servers
 
   * [Proxy](pkg/proxy) - provides a mechanism for proxying multiple RETS connections through a single endpoint
 
