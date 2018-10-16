@@ -5,7 +5,8 @@ RETS client in Go
 
 [![Build Status](https://travis-ci.org/jpfielding/gorets.svg?branch=master)](https://travis-ci.org/jpfielding/gorets)
 [![GoDoc](https://godoc.org/github.com/jpfielding/gorets?status.svg)](https://godoc.org/github.com/jpfielding/gorets)
-[![Go Report Card](https://goreportcard.com/badge/github.com/jpfielding/gorets)](https://goreportcard.com/report/github.com/jpfielding/gorets)
+[![Docker](https://goreportcard.com/badge/github.com/jpfielding/gorets)](https://cloud.docker.com/repository/docker/jpfielding/goretsexplorer)
+
 
 
 The attempt is to meet [RETS 1.8.0](https://www.reso.org/specifications/) compliance.
@@ -32,4 +33,11 @@ There are **multiple projects** in this repository:
   * [Explorer Service](pkg/explorer) - provides a Go backend for browsing RETS servers
 
   * [Proxy](pkg/proxy) - provides a mechanism for proxying multiple RETS connections through a single endpoint
+
+
+Find latest explorer builds at https://cloud.docker.com/repository/docker/jpfielding/goretsexplorer
+
+```sh
+docker run --rm -it -p 8080:8080 docker.io/jpfielding/goretsexplorer:latest
+```
 
