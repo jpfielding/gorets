@@ -5,7 +5,7 @@ RETS client in Go
 
 [![Build Status](https://travis-ci.org/jpfielding/gorets.svg?branch=master)](https://travis-ci.org/jpfielding/gorets)
 [![GoDoc](https://godoc.org/github.com/jpfielding/gorets?status.svg)](https://godoc.org/github.com/jpfielding/gorets)
-[![Docker](https://goreportcard.com/badge/github.com/jpfielding/gorets)](https://goreportcard.com/badge/github.com/jpfielding/gorets)
+[![Docker](https://goreportcard.com/badge/github.com/jpfielding/gorets)](https://goreportcard.com/report/github.com/jpfielding/gorets)
 
 
 
