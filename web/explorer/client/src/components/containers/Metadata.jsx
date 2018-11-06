@@ -5,7 +5,7 @@ import _ from 'underscore';
 import MetadataService from 'services/MetadataService';
 import KeyFormatter from 'components/gridcells/KeyFormatter';
 
-const ReactDataGridPlugins = require('react-data-grid/addons');
+const ReactDataGridPlugins = require('react-data-grid-addons');
 
 const Toolbar = ReactDataGridPlugins.Toolbar;
 

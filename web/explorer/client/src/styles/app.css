@@ -1,5 +1,4 @@
 @import "tachyons-flexbox";
-@import "react-data-grid/dist/react-data-grid.css";
 
 :root {
   --mainBackground: #f1f1f1;
@@ -191,7 +190,6 @@ a {
   margin: 0.5rem 0;
 
   & > div {
-    width: 100%;
     & > input{
       color: black;
       background-color: var(--mainBackground);

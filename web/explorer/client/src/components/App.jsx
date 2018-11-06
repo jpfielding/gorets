@@ -335,6 +335,7 @@ export default class App extends React.Component {
           shouldItemRender={(item) => (item.data.id.includes(this.state.connectionAutocompleteField))}
           renderMenu={this.renderConnectionMenu}
           renderItem={this.renderConnectionItem}
+          wrapperStyle={{ display: 'inline-block', width: '100%' }}
         />
         { this.state.connectionErrorOut !== '' ?
           <div className="error-out">
@@ -374,6 +375,7 @@ export default class App extends React.Component {
           shouldItemRender={(item) => (item.name.includes(this.state.configAutocompleteField))}
           renderMenu={this.renderConfigMenu}
           renderItem={this.renderConfigItem}
+          wrapperStyle={{ display: 'inline-block', width: '100%' }}
         />
         { this.state.configErrorOut !== '' ?
           <div className="error-out">
