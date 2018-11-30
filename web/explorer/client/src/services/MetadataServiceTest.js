@@ -223,7 +223,7 @@ const dataA = JSON.parse(
       					"METADATA-UPDATE": {},
       					"METADATA-VALIDATION_EXTERNAL": {},
       					"METADATA-VALIDATION_EXPRESSION": {},
-      					"METADATA-VALIDAITON_LOOKUP": {}
+      					"METADATA-VALIDATION_LOOKUP": {}
       				}
             ]
       		},
@@ -459,7 +459,7 @@ const dataB = JSON.parse(
       					"METADATA-UPDATE": {},
       					"METADATA-VALIDATION_EXTERNAL": {},
       					"METADATA-VALIDATION_EXPRESSION": {},
-      					"METADATA-VALIDAITON_LOOKUP": {}
+      					"METADATA-VALIDATION_LOOKUP": {}
       				}
             ]
       		},

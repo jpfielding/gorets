@@ -45,5 +45,5 @@ type Resource struct {
 	MValidationExpression *MValidationExpression `xml:"METADATA-VALIDATION_EXPRESSION,omitempty" json:"METADATA-VALIDATION_EXPRESSION,omitempty"`
 
 	// deprecated
-	MValidationLookup *MValidationLookup `xml:"METADATA-VALIDATION_LOOKUP,omitempty" json:"METADATA-VALIDAITON_LOOKUP,omitempty"`
+	MValidationLookup *MValidationLookup `xml:"METADATA-VALIDATION_LOOKUP,omitempty" json:"METADATA-VALIDATION_LOOKUP,omitempty"`
 }
