@@ -71,6 +71,9 @@ func getObjects(cmd *cobra.Command, args []string) {
 	response := &rets.GetObjectResponse{Response: gor}
 	defer response.Close()
 	err = response.ForEach(func(o *rets.Object, err error) error {
+		if err != nil {
+			return err
+		}
 		// if we arent saving, then we quit
 		if output == "" {
 			return nil
