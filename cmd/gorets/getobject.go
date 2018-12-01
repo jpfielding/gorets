@@ -58,8 +58,6 @@ func getObjects(cmd *cobra.Command, args []string) {
 	// make sure we close the rets connection
 	defer rets.Logout(ctx, session, rets.LogoutRequest{URL: capability.Logout})
 
-	// feedback
-	fmt.Println("GetObject: ", capability.GetObject)
 	// warning, this does _all_ of the photos
 	gor, err := rets.GetObjects(ctx, session, rets.GetObjectRequest{
 		URL: capability.GetObject,
@@ -73,7 +71,6 @@ func getObjects(cmd *cobra.Command, args []string) {
 	response := &rets.GetObjectResponse{Response: gor}
 	defer response.Close()
 	err = response.ForEach(func(o *rets.Object, err error) error {
-		fmt.Println("PHOTO-META: ", o.ContentType, o.ContentID, o.ObjectID, len(o.Blob))
 		// if we arent saving, then we quit
 		if output == "" {
 			return nil
