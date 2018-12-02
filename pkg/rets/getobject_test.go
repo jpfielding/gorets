@@ -55,6 +55,43 @@ func TestGetObject(t *testing.T) {
 	assert.Equal(t, false, o.RetsError)
 }
 
+func TestSingleObjectNoObjectID(t *testing.T) {
+	header := http.Header{}
+	textproto.MIMEHeader(header).Add("Content-Type", "image/jpeg")
+	textproto.MIMEHeader(header).Add("Preferred", "1")
+	textproto.MIMEHeader(header).Add("Content-Description", "Outhouse")
+	textproto.MIMEHeader(header).Add("Content-Sub-Description", "The urinal")
+	textproto.MIMEHeader(header).Add("Location", "http://www.simpleboundary.com/image-5.jpg")
+
+	var body = `<binary data 1>`
+
+	response := GetObjectResponse{
+		Response: &http.Response{
+			Header: header,
+			Body:   ioutil.NopCloser(strings.NewReader(body)),
+		},
+	}
+	defer response.Close()
+	var objects []*Object
+	err := response.ForEach(func(o *Object, err error) error {
+		objects = append(objects, o)
+		return nil
+	})
+	assert.Nil(t, err)
+
+	assert.Equal(t, 1, len(objects))
+
+	o := objects[0]
+	assert.Equal(t, true, o.Preferred)
+	assert.Equal(t, -1, o.ObjectID)
+	assert.Equal(t, "image/jpeg", o.ContentType)
+	assert.Equal(t, "Outhouse", o.Description)
+	assert.Equal(t, "The urinal", o.SubDescription)
+	assert.Equal(t, "<binary data 1>", string(o.Blob))
+	assert.Equal(t, "http://www.simpleboundary.com/image-5.jpg", o.Location)
+	assert.Equal(t, false, o.RetsError)
+}
+
 var boundary = "simple boundary"
 
 var contentType = `multipart/parallel; boundary="simple boundary"`

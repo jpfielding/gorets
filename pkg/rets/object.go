@@ -19,17 +19,7 @@ import (
 func NewObjectFromStream(header textproto.MIMEHeader, body io.ReadCloser) (*Object, error) {
 	objectID, err := strconv.ParseInt(header.Get("Object-ID"), 10, 64)
 	if err != nil {
-		// Attempt to parse a Rets Response code (if it exists)
-		resp, parseErr := ReadResponse(body)
-		if parseErr != nil {
-			return nil, err
-		}
-		// Include a GetObject (empty of content) so that its rets response can be retrieved
-		emptyResult := Object{
-			RetsMessage: resp,
-			RetsError:   resp.Code != StatusOK,
-		}
-		return &emptyResult, err
+		objectID = -1
 	}
 	preferred, err := strconv.ParseBool(header.Get("Preferred"))
 	if err != nil {
