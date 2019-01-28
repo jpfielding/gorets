@@ -10,6 +10,7 @@ class RouteLink extends React.Component {
     connection: React.PropTypes.any,
     init: React.PropTypes.any,
     type: React.PropTypes.any,
+    args: React.PropTypes.any,
 
     idprefix: React.PropTypes.any,
   }
@@ -39,32 +40,22 @@ class RouteLink extends React.Component {
     switch (this.props.type) {
       case 'basic': {
         // Drops in with a source open (only requires connection info)
-        rtn = `${base}s=${Base64.encode(JSON.stringify(this.props.connection))}&`;
-        rtn = `${rtn}i=${Base64.encode(`{"id":"${this.props.connection.id}"}`)}`;
+        rtn = `${base}${this.encodeConnection()}&${this.encodeID()}`;
         break;
       }
       case 'basicTab': {
         // Drops in with a source open to a sepcific tab
-        rtn = `${base}s=${Base64.encode(JSON.stringify(this.props.connection))}&`;
-        rtn = `${rtn}i=${Base64.encode(`{"id":"${this.props.connection.id}","tab":"${this.props.init.tab}"}`)}`;
+        rtn = `${base}${this.encodeConnection()}&${this.encodeTab()}`;
         break;
       }
       case 'full': {
         // Drops in with a source open to a sepcific tab and fills in the query
-        const id = this.props.connection.id;
-        const tab = this.props.init.tab;
-        const query = JSON.stringify(this.props.init.query);
-        rtn = `${base}s=${Base64.encode(JSON.stringify(this.props.connection))}&`;
-        rtn = `${rtn}i=${Base64.encode(`{"id":"${id}","tab":"${tab}","query":${query}}`)}`;
+        rtn = `${base}${this.encodeConnection()}&${this.encodeQuery()}`;
         break;
       }
       case 'fullAuto': {
         // Drops in with a source open to a sepcific tab and launches a query imidietly
-        const id = this.props.connection.id;
-        const tab = this.props.init.tab;
-        const query = JSON.stringify(this.props.init.query);
-        rtn = `${base}s=${Base64.encode(JSON.stringify(this.props.connection))}&`;
-        rtn = `${rtn}i=${Base64.encode(`{"id":"${id}","tab":"${tab}","query":${query},"launch":"auto"}`)}`;
+        rtn = `${base}${this.encodeConnection()}&${this.encodeQuery({ launch: 'auto' })}`;
         break;
       }
       default: {
@@ -73,6 +64,35 @@ class RouteLink extends React.Component {
     }
     return rtn;
   }
+
+  encodeConnection() {
+    return `s=${Base64.encode(JSON.stringify(this.props.connection))}`;
+  }
+
+  encodeID(extra) {
+    return `i=${Base64.encode(JSON.stringify(
+      {
+        ...extra,
+        id: this.props.connection.id,
+        args: this.props.args,
+      }
+    ))}`;
+  }
+
+  encodeTab(extra) {
+    return this.encodeID({
+      ...extra,
+      tab: this.props.init.tab,
+    });
+  }
+
+  encodeQuery(extra) {
+    return this.encodeTab({
+      ...extra,
+      query: this.props.init.query,
+    });
+  }
+
 
   copyToClipboard() {
     console.log('[Copied To Clipboard]', this.state.ref.value);

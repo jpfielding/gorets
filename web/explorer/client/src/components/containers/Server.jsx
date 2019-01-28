@@ -34,7 +34,13 @@ class Server extends React.Component {
 
   constructor(props) {
     super(props);
-
+    const args = props.init ? props.init.args || {
+      extraction: 'COMPACT',
+      oldest: 360,
+    } : {
+      extraction: 'COMPACT',
+      oldest: 360,
+    };
     this.state = {
       shared: {
         connection: props.connection.data,
@@ -43,15 +49,13 @@ class Server extends React.Component {
         class: {},
         fields: [],
         source: props.connection.config,
+        args,
       },
       wirelog: [],
       errorOut: '',
-      args: {
-        extraction: 'COMPACT',
-        oldest: 360,
-      },
       validMetadata: true,
       metadataIssue: '',
+      loading: true,
     };
 
     this.getMetadata = this.getMetadata.bind(this);
@@ -68,6 +72,12 @@ class Server extends React.Component {
     this.validateMetadata = this.validateMetadata.bind(this);
     this.failMetadata = this.failMetadata.bind(this);
     this.successMetadata = this.successMetadata.bind(this);
+
+    this.renderLoading = this.renderLoading.bind(this);
+    this.renderError = this.renderError.bind(this);
+    this.renderInvalid = this.renderInvalid.bind(this);
+    this.renderStandard = this.renderStandard.bind(this);
+    this.renderSelect = this.renderSelect.bind(this);
   }
 
   componentWillMount() {
@@ -76,7 +86,7 @@ class Server extends React.Component {
       const wirelog = _.clone(this.state.wirelog);
       shared.metadata = m;
       wirelog.unshift({ tag: 'Metadata', log, extra });
-      this.setState({ shared, wirelog });
+      this.setState({ shared, wirelog, loading: false });
     });
   }
 
@@ -137,7 +147,7 @@ class Server extends React.Component {
       return;
     }
 
-    const args = this.state.args;
+    const args = this.state.shared.args;
     console.log('no metadata cached, pulling', args.extraction);
 
     // Make api request
@@ -211,16 +221,17 @@ class Server extends React.Component {
       class: {},
       fields: [],
       source: this.props.connection.config,
+      args,
     };
     const wirelog = [];
-    this.setState({ shared, args, errorOut: '', validMetadata: true }, () => {
+    this.setState({ shared, errorOut: '', validMetadata: true, loading: true }, () => {
       // Retrive new Metadata
       this.getMetadata((m, log, extra) => {
         // If successful this function is called with the metadata
         console.log('Setting ', m);
         shared.metadata = m;
         wirelog.unshift({ tag: 'Metadata', log, extra });
-        this.setState({ shared, wirelog });
+        this.setState({ shared, wirelog, loading: false });
       });
     });
   }
@@ -258,7 +269,70 @@ class Server extends React.Component {
     this.setState({ errorOut });
   }
 
-  render() {
+  renderLoading() {
+    return (
+      <div>
+        {this.renderError()}
+        <div className={'loading-wrap db'}>
+          <div className="loading" id={`${this.props.idprefix}-loading`}>LOADING METADATA</div>
+        </div>
+      </div>
+    );
+  }
+
+  renderError() {
+    return (
+      <div
+        className={`bg-dark-red white br1 pa4 w-100 tc ${this.state.errorOut.length === 0 ? 'dn' : 'db'}`}
+        id={`${this.props.idprefix}-error`}
+      >
+        {this.state.errorOut}
+      </div>
+    );
+  }
+
+  renderInvalid() {
+    const pages =
+      [
+        <Explore
+          shared={this.state.shared}
+          idprefix={`${this.props.idprefix}-Explore`}
+        />,
+        <Wireloger
+          wirelog={this.state.wirelog}
+          idprefix={`${this.props.idprefix}-Wirelog`}
+        />,
+      ];
+    return (
+      <div>
+        <div
+          className={'bg-dark-red white br1 pa4 w-100 tc'}
+          id={`${this.props.idprefix}-error`}
+        >
+          Invalid Metadata Form: {this.state.metadataIssue}
+        </div>
+        <TabSection
+          className="customTabElementB"
+          components={[
+            {
+              id: 'Explore',
+              page: pages[0],
+              idprefix: 'Explore',
+            },
+            {
+              id: 'Wirelog',
+              page: pages[1],
+              idprefix: 'Wirelog',
+            },
+          ]}
+          initID={this.props.init ? this.props.init.tab : null}
+          tag={this.props.idprefix}
+        />
+      </div>
+    );
+  }
+
+  renderStandard() {
     const pages =
       [
         <Metadata
@@ -294,12 +368,66 @@ class Server extends React.Component {
       ];
     return (
       <div>
+        {this.renderError()}
+        <div>
+          <TabSection
+            className="customTabElementB"
+            components={[
+              {
+                id: 'Metadata',
+                page: pages[0],
+                idprefix: 'Metadata',
+              },
+              {
+                id: 'Search',
+                page: pages[1],
+                idprefix: 'Search',
+              },
+              {
+                id: 'Objects',
+                page: pages[2],
+                idprefix: 'Objects',
+              },
+              {
+                id: 'Explore',
+                page: pages[3],
+                idprefix: 'Explore',
+              },
+              {
+                id: 'Wirelog',
+                page: pages[4],
+                idprefix: 'Wirelog',
+              },
+            ]}
+            removeOffset={pages.length}
+            initID={this.props.init ? this.props.init.tab : null}
+            tag={this.props.idprefix}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  renderSelect() {
+    if (this.state.loading) {
+      return this.renderLoading();
+    }
+    if (!this.state.validMetadata) {
+      return this.renderInvalid();
+    }
+    return this.renderStandard();
+  }
+
+  render() {
+    return (
+      <div>
         <div className="fr">
           <div className="customHoverSection" id={`${this.props.idprefix}-config-hover`}>
             <button className="fr ma-3 customHoverBar" id={`${this.props.idprefix}-config`}> Connection Config </button>
             <div className="customHoverBody">
               <ConnectionForm
                 updateConnection={this.updateConnection}
+                args={this.state.shared.args}
                 connection={this.state.shared.connection}
                 location={this.props.location}
                 idprefix={`${this.props.idprefix}-config`}
@@ -307,80 +435,7 @@ class Server extends React.Component {
             </div>
           </div>
         </div>
-        {!this.state.validMetadata ?
-          <div>
-            <div
-              className={'bg-dark-red white br1 pa4 w-100 tc'}
-              id={`${this.props.idprefix}-error`}
-            >
-              Invalid Metadata Form: {this.state.metadataIssue}
-            </div>
-            <TabSection
-              className="customTabElementB"
-              components={[
-                {
-                  id: 'Explore',
-                  page: pages[3],
-                  idprefix: 'Explore',
-                },
-                {
-                  id: 'Wirelog',
-                  page: pages[4],
-                  idprefix: 'Wirelog',
-                },
-              ]}
-              initID={this.props.init ? this.props.init.tab : null}
-              tag={this.props.idprefix}
-            />
-          </div>
-        :
-          <div>
-            <div
-              className={`bg-dark-red white br1 pa4 w-100 tc ${this.state.errorOut.length === 0 ? 'dn' : 'db'}`}
-              id={`${this.props.idprefix}-error`}
-            >
-              {this.state.errorOut}
-            </div>
-            <div className={`${this.state.shared.metadata.System.SystemID.length === 0 ? 'dn' : 'db'}`}>
-              <TabSection
-                className="customTabElementB"
-                components={[
-                  {
-                    id: 'Metadata',
-                    page: pages[0],
-                    idprefix: 'Metadata',
-                  },
-                  {
-                    id: 'Search',
-                    page: pages[1],
-                    idprefix: 'Search',
-                  },
-                  {
-                    id: 'Objects',
-                    page: pages[2],
-                    idprefix: 'Objects',
-                  },
-                  {
-                    id: 'Explore',
-                    page: pages[3],
-                    idprefix: 'Explore',
-                  },
-                  {
-                    id: 'Wirelog',
-                    page: pages[4],
-                    idprefix: 'Wirelog',
-                  },
-                ]}
-                removeOffset={pages.length}
-                initID={this.props.init ? this.props.init.tab : null}
-                tag={this.props.idprefix}
-              />
-            </div>
-            <div className={`loading-wrap ${this.state.shared.metadata.System.SystemID.length !== 0 ? 'dn' : 'db'}`}>
-              <div className="loading" id={`${this.props.idprefix}-loading`}>LOADING METADATA</div>
-            </div>
-          </div>
-        }
+        {this.renderSelect()}
       </div>
     );
   }

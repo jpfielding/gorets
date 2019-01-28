@@ -10,6 +10,7 @@ import ContentHistory from 'components/containers/History';
 import SearchFormatter from 'components/gridcells/SearchFormatter';
 import RouteLink from 'components/elements/RouteLink';
 import _ from 'underscore';
+import DownloadLink from 'components/elements/DownloadLink';
 
 const Base64 = require('js-base64').Base64;
 
@@ -80,6 +81,9 @@ class Search extends React.Component {
     this.bindTabNameChange = this.bindTabNameChange.bind(this);
     this.bindQueryNameChange = this.bindQueryNameChange.bind(this);
     this.applySearchState = this.applySearchState.bind(this);
+    this.renderHistoryBar = this.renderHistoryBar.bind(this);
+    this.renderSearchResultsTable = this.renderSearchResultsTable.bind(this);
+    this.renderNewTab = this.renderNewTab.bind(this);
   }
 
   componentWillMount() {
@@ -101,7 +105,8 @@ class Search extends React.Component {
       const ClassName = nextProps.shared.class.ClassName;
       const resource = nextProps.shared.resource.ResourceID;
       const select = nextProps.shared.fields.map(i => i.row.SystemName).join(',');
-      const ts = nextProps.shared.class['METADATA-TABLE'].Field.filter(f => f.StandardName === 'ModificationTimestamp');
+      const ts = (nextProps.shared.class['METADATA-TABLE'].Field || [])
+        .filter(f => f.StandardName === 'ModificationTimestamp');
 
       console.log('last modified fields:', ts);
 
@@ -127,10 +132,7 @@ class Search extends React.Component {
   }
 
   getRowAt(index) {
-    if (index < 0) {
-      return undefined;
-    }
-    return this.state.searchResultRows[index];
+    return this.state.searchResultRows[index] || {};
   }
 
   setSearchHistory(sh) {
@@ -222,14 +224,22 @@ class Search extends React.Component {
     console.log('applying search state');
 
     if (searchResults.result.columns && searchResults.result.rows) {
-      searchResultColumns = searchResults.result.columns.map((column, index) => ({
-        key: index,
+      searchResultColumns = searchResults.result.columns.map((column) => ({
+        key: column,
         name: column,
-        resizable: true,
-        width: 150,
+        resizable: false,
+        width: 200,
         formatter: <SearchFormatter />,
       }));
-      searchResultRows = searchResults.result.rows;
+      searchResultRows = searchResults.result.rows.map((row) =>
+        row.reduce((accumulator, current, index) => {
+          // Looks really dumb, but the linter complains about assigning to argument.
+          const temp = accumulator;
+          const key = searchResultColumns[index].key;
+          temp[key] = current;
+          return accumulator;
+        }, {})
+      );
     }
     if (searchResults.result.count) {
       if (searchResults.result.count < 0) {
@@ -254,6 +264,9 @@ class Search extends React.Component {
     form['submited'] = true;
     if (form.limit && typeof form.limit === 'string') {
       form.limit = parseInt(form.limit, 10);
+    }
+    if (form.offset && typeof form.offset === 'string') {
+      form.offset = parseInt(form.offset, 10);
     }
     this.search(form);
   }
@@ -330,11 +343,21 @@ class Search extends React.Component {
       return null;
     }
     return (
-      <ReactDataGrid
-        columns={searchResultColumns}
-        rowGetter={this.getRowAt}
-        rowsCount={searchResultRows.length}
-      />
+      <div>
+        <ReactDataGrid
+          columns={searchResultColumns}
+          rowGetter={(index) => this.getRowAt(index)}
+          rowsCount={searchResultRows.length}
+          minColumnWidth={200}
+        />
+        <DownloadLink
+          data={searchResultRows}
+          headers={searchResultColumns}
+          tag={`${this.props.shared.connection.id}-${'search'
+            }-${new Date().toISOString()}`.replace(/:/g, '-')
+          }
+        />
+      </div>
     );
   }
 
@@ -403,6 +426,7 @@ class Search extends React.Component {
               <RouteLink
                 type={'full'}
                 connection={this.props.shared.connection}
+                args={this.props.shared.args}
                 init={{ tab: 'Search', query: this.state.searchForm.value }}
                 style={{ float: 'right' }}
                 idprefix={`${this.props.idprefix}-query-link`}
@@ -429,6 +453,12 @@ class Search extends React.Component {
                   />
                 </Field>
                 <Field select="limit" label="Limit">
+                  <Input
+                    className="w-80 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-limit`}
+                  />
+                </Field>
+                <Field select="offset" label="Offset">
                   <Input
                     className="w-80 pa1 b--none outline-transparent"
                     id={`${this.props.idprefix}-query-limit`}
@@ -476,6 +506,7 @@ class Search extends React.Component {
               <RouteLink
                 type={'fullAuto'}
                 connection={this.props.shared.connection}
+                args={this.props.shared.args}
                 init={{ tab: 'Search', query: this.state.searchForm.value }}
                 style={{ float: 'right' }}
                 idprefix={`${this.props.idprefix}-results-link`}
