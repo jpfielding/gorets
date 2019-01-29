@@ -342,6 +342,7 @@ class Objects extends React.Component {
               <RouteLink
                 type={'full'}
                 connection={this.props.shared.connection}
+                args={this.props.shared.args}
                 init={{ tab: 'Objects', query: this.state.objectsForm.value }}
                 style={{ float: 'right' }}
                 idprefix={`${this.props.idprefix}-query-link`}
@@ -356,6 +357,12 @@ class Objects extends React.Component {
                   />
                 </Field>
                 <Field select="ids" label="IDs">
+                  <Input
+                    className="w-30 pa1 b--none outline-transparent"
+                    id={`${this.props.idprefix}-query-ids`}
+                  />
+                </Field>
+                <Field select="location" label="Location">
                   <Input
                     className="w-30 pa1 b--none outline-transparent"
                     id={`${this.props.idprefix}-query-ids`}
@@ -385,6 +392,7 @@ class Objects extends React.Component {
               <RouteLink
                 type={'fullAuto'}
                 connection={this.props.shared.connection}
+                args={this.props.shared.args}
                 init={{ tab: 'Objects', query: this.state.objectsForm.value }}
                 style={{ float: 'right' }}
                 idprefix={`${this.props.idprefix}-result-link`}

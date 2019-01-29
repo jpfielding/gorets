@@ -4,6 +4,7 @@ import ReactDataGrid from 'react-data-grid';
 import _ from 'underscore';
 import MetadataService from 'services/MetadataService';
 import KeyFormatter from 'components/gridcells/KeyFormatter';
+import DownloadLink from 'components/elements/DownloadLink';
 
 const ReactDataGridPlugins = require('react-data-grid-addons');
 
@@ -62,6 +63,7 @@ class Metadata extends React.Component {
       sortDirection: 'NONE',
       sortColumn: '',
       selected: {},
+      empty: false,
     };
     this.handleGridSort = this.handleGridSort.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
@@ -84,7 +86,7 @@ class Metadata extends React.Component {
       return; // return if the class is the currently selected one.
     }
     this.props.onClassSelected(res, cls); // signal up changes
-    const classRows = cls['METADATA-TABLE'].Field;
+    const classRows = cls['METADATA-TABLE'].Field || [];
     const possibleColumns = [];
     classRows.forEach(field => {
       Object.keys(field).forEach(key => {
@@ -101,6 +103,7 @@ class Metadata extends React.Component {
       sortColumn: '',
       sortDirection: 'NONE',
       filters: {},
+      empty: classRows.length === 0,
     });
   }
 
@@ -177,6 +180,32 @@ class Metadata extends React.Component {
       : rows.sort(comparer);
   }
 
+  assignFormatters(name, selected, selectedClass, selectedResource) {
+    const base = {
+      key: name,
+      name,
+      resizable: true,
+      width: 200,
+      sortable: true,
+      filterable: true,
+    };
+    if (name === 'SystemName') {
+      return {
+        ...base,
+        formatter: (
+          <KeyFormatter
+            metadataResource={selectedResource}
+            metadataClass={selectedClass}
+            selected={selected}
+            displayContents={(e) => this.setDisplay(e)}
+            container={this.state.ref}
+          />
+        ),
+      };
+    }
+    return base;
+  }
+
   renderSelectedClassDescription(clazz) {
     return (
       <span title={clazz.Description}>
@@ -185,90 +214,81 @@ class Metadata extends React.Component {
     );
   }
 
+  renderTable(filteredRows, selected, selectedClass, selectedResource) {
+    const fieldSet = this.state.possibleColumns.map(
+      (name) => this.assignFormatters(name, selected, selectedClass, selectedResource));
+    const { connection } = this.props.shared;
+    const rowGetter = (i) => filteredRows[i];
+    return (
+      <div key={selectedClass.ClassName}>
+        {selectedResource
+          ? (
+            <span>
+              <span className="b">{selectedResource.ResourceID} </span>
+              {this.renderSelectedClassDescription(selectedClass)}
+            </span>
+          )
+          : null
+        }
+        <div>
+          {'Object Types - '}
+          <span className="moon-gray">
+            {this.getObjectTypes().join(', ')}
+          </span>
+        </div>
+        <div>
+          {this.state.displayContents}
+        </div>
+        <ReactDataGrid
+          onGridSort={this.handleGridSort}
+          columns={fieldSet}
+          rowGetter={rowGetter}
+          rowsCount={filteredRows.length}
+          toolbar={<Toolbar enableFilter />}
+          onAddFilter={this.handleFilterChange}
+          onClearFilters={this.onClearFilters}
+          minHeight={500}
+          minColumnWidth={20}
+          rowSelection={{
+            showCheckbox: true,
+            enableShiftSelect: true,
+            onRowsSelected: this.onRowsSelected,
+            onRowsDeselected: this.onRowsDeselected,
+            selectBy: {
+              keys: { rowKey: 'SystemName', values: this.props.shared.fields.map(r => r.row.SystemName) },
+            },
+          }}
+        />
+        <div>{`${this.state.classRows.length} Total Rows`}
+          <DownloadLink
+            data={filteredRows}
+            headers={fieldSet}
+            tag={`${connection.id
+              }-${selectedClass.ClassName
+              }-${selectedResource.ResourceID
+              }-${new Date().toISOString().slice(0, 10)}`.replace(/:/g, '-')
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  renderNoTable() {
+    return (<h1 className="f4" id={`${this.props.idprefix}-default`}>Please select a class to explore</h1>);
+  }
+
+
   render() {
-    const { filteredRows, classRows } = this.state;
+    const { filteredRows, classRows, empty } = this.state;
     const selectedResource = this.props.shared.resource;
     const selectedClass = this.props.shared.class;
-    console.log('SHared', this.props.shared);
     const selected = this.state.selected;
     selected.class = selectedClass;
     selected.resource = selectedResource;
-    let tableBody; // What will be rendered
-    if (classRows) {
-      const fieldSet = this.state.possibleColumns.map((name) => {
-        if (name === 'SystemName') {
-          return {
-            key: name,
-            name,
-            resizable: true,
-            width: 200,
-            sortable: true,
-            filterable: true,
-            formatter: (
-              <KeyFormatter
-                metadataResource={selectedResource}
-                metadataClass={selectedClass}
-                selected={selected}
-                displayContents={(e) => this.setDisplay(e)}
-                container={this.state.ref}
-              />
-            ),
-          };
-        }
-        return {
-          key: name,
-          name,
-          resizable: true,
-          width: 200,
-          sortable: true,
-          filterable: true,
-        };
-      });
-      const rowGetter = (i) => filteredRows[i];
-      tableBody = (
-        <div key={selectedClass.ClassName}>
-          {selectedResource
-            ? (
-              <span>
-                <span className="b">{selectedResource.ResourceID} </span>
-                {this.renderSelectedClassDescription(selectedClass)}
-              </span>
-            )
-            : null
-          }
-          <div>
-            {'Object Types - '}
-            <span className="moon-gray">
-              {this.getObjectTypes().join(', ')}
-            </span>
-          </div>
-          <div>
-            {this.state.displayContents}
-          </div>
-          <ReactDataGrid
-            onGridSort={this.handleGridSort}
-            columns={fieldSet}
-            rowGetter={rowGetter}
-            rowsCount={filteredRows.length}
-            toolbar={<Toolbar enableFilter />}
-            onAddFilter={this.handleFilterChange}
-            onClearFilters={this.onClearFilters}
-            minHeight={500}
-            rowSelection={{
-              showCheckbox: true,
-              enableShiftSelect: true,
-              onRowsSelected: this.onRowsSelected,
-              onRowsDeselected: this.onRowsDeselected,
-              selectBy: {
-                keys: { rowKey: 'SystemName', values: this.props.shared.fields.map(r => r.row.SystemName) },
-              },
-            }}
-          />
-        </div>
-      );
-    } else {
-      tableBody = null;
-    }
+    const tableBody = classRows.length > 0 || empty ?
+      this.renderTable(filteredRows, selected, selectedClass, selectedResource) :
+      this.renderNoTable();
     const system = this.props.shared.metadata.System;
     return (
       <div
@@ -304,7 +324,7 @@ class Metadata extends React.Component {
                         >
                           {this.renderSelectedClassDescription(mClass)}
                         </li>
-                      ) : null }
+                      ) : null}
                     </ul>
                   </li>
                 )}
@@ -316,24 +336,20 @@ class Metadata extends React.Component {
           <div className="customResultsSet">
             <div className="customResultsTitle">
               <div className="customTitle">
-                  Metadata:
-              </div>
+                Metadata:
+                            </div>
             </div>
             <div className="customResultsBody">
-              { this.state.classRows.length > 0
-                ? (
-                  <div id={`${this.props.idprefix}-body`}>
-                    { tableBody }
-                  </div>
-                )
-                : <h1 className="f4" id={`${this.props.idprefix}-default`}>Please select a class to explore</h1>
-              }
+              <div id={`${this.props.idprefix}-body`}>
+                {tableBody}
+              </div>
             </div>
           </div>
         </div>
       </div>
     );
   }
+
 }
 
 export default withRouter(Metadata);

@@ -7,6 +7,7 @@ class ConnectionForm extends React.Component {
 
   static propTypes = {
     location: React.PropTypes.any,
+    args: React.PropTypes.any,
     connection: React.PropTypes.any,
     updateConnection: React.PropTypes.Func,
     idprefix: React.PropTypes.any,
@@ -21,6 +22,7 @@ class ConnectionForm extends React.Component {
     });
 
     this.state = {
+      extraction: props.args.extraction,
       connectionForm,
       show: false,
       element: null,
@@ -37,6 +39,10 @@ class ConnectionForm extends React.Component {
       <div>
         <RouteLink
           connection={this.state.connectionForm.value}
+          args={{
+            extraction: this.state.extraction,
+            oldest: 360,
+          }}
           type={'basic'} style={{ marginBottom: '10px' }}
           idprefix={`${this.props.idprefix}-link`}
         />
@@ -90,7 +96,12 @@ class ConnectionForm extends React.Component {
             />
           </Field>
         </Fieldset>
-        <select className="customSelect" ref={(e) => { this.state.select = e; }} id={`${this.props.idprefix}-type`}>
+        <select
+          className="customSelect"
+          value={this.state.extraction}
+          id={`${this.props.idprefix}-type`}
+          onChange={(event) => { this.setState({ extraction: event.target.value }); }}
+        >
           <option value="COMPACT" id={`${this.props.idprefix}-type-compact`}>COMPACT</option>
           <option
             value="COMPACT-INCREMENTAL"
@@ -103,7 +114,7 @@ class ConnectionForm extends React.Component {
             className="customButton mt3"
             onClick={() => {
               const args = {
-                extraction: this.state.select.value,
+                extraction: this.state.extraction,
                 oldest: 0,
               };
               this.props.updateConnection(this.state.connectionForm.value, args);
