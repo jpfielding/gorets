@@ -7,7 +7,7 @@ export default class ObjectsService {
     resource: null,
     ids: null,  // <id-1>:*,<id-2>:1,<id-2>:2
     type: null, // Photo | HiRes, depends on the server metadata
-    location: null, // the extraction method requested, 0 = inline, 1 = url
+    location: 0, // the extraction method requested, 0 = inline, 1 = url
   };
 
 
