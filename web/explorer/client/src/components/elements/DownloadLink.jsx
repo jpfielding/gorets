@@ -1,4 +1,5 @@
 import React from 'react';
+import Papa from 'papaparse'
 
 export default class DownloadLink extends React.Component {
 
@@ -29,14 +30,13 @@ export default class DownloadLink extends React.Component {
   genBlob = (data, headers) => {
     const columns = headers.map((item) => item.key);
     const newData = data.map((dataObject) => {
-      const tempData = columns.map((key) => dataObject[key]);
-      return tempData.join(',');
+      return columns.map((key) => dataObject[key]);
     });
     const final = [
       columns,
       ...newData,
     ];
-    return new Blob([final.join('\n')], { type: 'test/csv' });
+    return new Blob([Papa.unparse(final)], { type: 'test/csv' });
   }
 
   render() {
