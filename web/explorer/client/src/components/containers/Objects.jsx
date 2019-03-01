@@ -7,8 +7,7 @@ import { Fieldset, Field, createValue, Input } from 'react-forms';
 import ContentHistory from 'components/containers/History';
 import RouteLink from 'components/elements/RouteLink';
 import _ from 'underscore';
-
-const Base64 = require('js-base64').Base64;
+import { Base64 } from 'js-base64';
 
 class Objects extends React.Component {
 
@@ -66,9 +65,9 @@ class Objects extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.shared.class['METADATA-TABLE']) {
       const resource = nextProps.shared.resource.ResourceID;
-      const ids = this.state.objectsForm.value.ids;
+      const { ids, location } = this.state.objectsForm.value;
       const objectsForm = createValue({
-        value: { resource, ids, ...ObjectsService.params },
+        value: { resource, ids, location },
         onChange: this.searchInputsChange.bind(this),
       });
       this.setState({ objectsForm });
