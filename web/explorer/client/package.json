@@ -45,6 +45,7 @@
     "lz-string": "^1.4.4",
     "moment": "^2.15.1",
     "mustache-loader": "^0.4.0",
+    "papaparse": "^4.6.3",
     "postcss": "^5.2.4",
     "postcss-cssnext": "^2.8.0",
     "postcss-flexbugs-fixes": "^2.0.0",

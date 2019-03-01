@@ -64,6 +64,7 @@ func (os ObjectService) Get(r *http.Request, args *ObjectParams, reply *Objects)
 				Resource: args.Resource,
 				Type:     args.Type,
 				ID:       args.ID,
+				Location: args.Location,
 			},
 		})
 		if err != nil {

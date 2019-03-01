@@ -23,7 +23,7 @@ class Objects extends React.Component {
   constructor(props) {
     super(props);
     const objectsForm = createValue({
-      value: (this.props.init && this.props.init.query ? this.props.init.query : {}),
+      value: (this.props.init && this.props.init.query ? this.props.init.query : ObjectsService.params),
       onChange: this.searchInputsChange.bind(this),
     });
     this.state = {
@@ -68,7 +68,7 @@ class Objects extends React.Component {
       const resource = nextProps.shared.resource.ResourceID;
       const ids = this.state.objectsForm.value.ids;
       const objectsForm = createValue({
-        value: { resource, ids },
+        value: { resource, ids, ...ObjectsService.params },
         onChange: this.searchInputsChange.bind(this),
       });
       this.setState({ objectsForm });
@@ -103,9 +103,9 @@ class Objects extends React.Component {
 
   getObjectsByType(type) {
     const connection = this.props.shared.connection.id;
-    const { resource, ids } = this.state.objectsForm.value;
+    const { resource, ids, location } = this.state.objectsForm.value;
     const name = this.state.objectsHistoryName;
-    this.setState({ objectsParams: { resource, type, ids, connection, name } }, this.getObjects);
+    this.setState({ objectsParams: { resource, type, ids, connection, name, location } }, this.getObjects);
   }
 
   getKeyFieldColumn() {
@@ -124,9 +124,10 @@ class Objects extends React.Component {
     const type = this.state.objectsParams.type;
     const connection = this.state.objectsParams.connection;
     const ids = this.state.objectsParams.ids;
+    const location = this.state.objectsParams.location;
 
     const objectsForm = createValue({
-      value: { resource, type, connection, ids },
+      value: { resource, type, connection, ids, location },
       onChange: this.searchInputsChange.bind(this),
     });
 
@@ -160,7 +161,6 @@ class Objects extends React.Component {
           return;
         }
         let log = Base64.decode(json.result.wirelog);
-        console.log('LOG', log);
         if (log === undefined) log = 'Unable to parse wirelog';
         this.props.pushWirelog({ tag: 'Objects', log });
         objectsParams.submited = true;
@@ -230,17 +230,31 @@ class Objects extends React.Component {
   }
 
   searchInputsChange(objectsForm) {
-    this.setState({ objectsForm });
+    let location = Number.parseInt(objectsForm.value.location, 10);
+    if (isNaN(location)) {
+      location = 0;
+    }
+
+    this.setState({ objectsForm: createValue({
+      value: { ...objectsForm.value, location },
+      onChange: this.searchInputsChange.bind(this),
+    }) });
   }
 
   renderObjectInfo(obj, i) {
     const rows = Object.keys(obj)
       .filter(k => k !== 'Blob')
       .filter(k => obj[k] !== null)
-      .filter(k => k !== 'Location' && obj[k] !== 0)
-      .map(k => (
-        <tr><td>{k}</td><td>{obj[k]}</td></tr>
-      ));
+      .map(k => {
+        if (k === 'Location') {
+          return (
+            <tr><td>{k}</td><td><a href={obj[k]}>{obj[k]}</a></td></tr>
+          );
+        }
+        return (
+          <tr><td>{k}</td><td>{obj[k]}</td></tr>
+        );
+      });
     return (
       <table id={`${this.props.idprefix}-result-${i}-table`}>
         {rows}
@@ -249,27 +263,20 @@ class Objects extends React.Component {
   }
 
   renderPicture(obj, i) {
-    console.log('help', obj);
     if (obj.RetsError) {
       return (<div><div
         className="b mv3 bg-dark-red white br1 pa2 dib" id={`${this.props.idprefix}-result-${i}-error`}
       >An error occured, {obj.RetsError}</div></div>);
     }
-    if (!obj.ContentType.startsWith('image/')) {
-      return null;
-    }
-    if (obj.location) {
-      return (
-        <li className="pa0 ma0 no-list-style">
-          {this.renderObjectInfo(obj, i)}
-          <img
-            src={`data:image/png;base64,${obj.location}`}
-            id={`${this.props.idprefix}-result-${i}-image`} alt="pic"
-          />
-        </li>
-      );
-    }
     if (obj.Blob) {
+      if (obj.ContentType.startsWith('text')) {
+        return (
+          <li className="pa0 ma0 no-list-style">
+            {this.renderObjectInfo(obj, i)}
+            <div><div>{'Blob'}</div><pre>{atob(obj['Blob'])}</pre></div>
+          </li>
+        );
+      }
       return (
         <li className="pa0 ma0 no-list-style">
           {this.renderObjectInfo(obj, i)}
@@ -280,7 +287,7 @@ class Objects extends React.Component {
         </li>
       );
     }
-    return null;
+    return this.renderObjectInfo(obj, i);
   }
 
   render() {
@@ -365,7 +372,7 @@ class Objects extends React.Component {
                 <Field select="location" label="Location">
                   <Input
                     className="w-30 pa1 b--none outline-transparent"
-                    id={`${this.props.idprefix}-query-ids`}
+                    id={`${this.props.idprefix}-query-location`}
                   />
                 </Field>
               </Fieldset>

@@ -350,13 +350,15 @@ class Search extends React.Component {
           rowsCount={searchResultRows.length}
           minColumnWidth={200}
         />
-        <DownloadLink
-          data={searchResultRows}
-          headers={searchResultColumns}
-          tag={`${this.props.shared.connection.id}-${'search'
-            }-${new Date().toISOString()}`.replace(/:/g, '-')
-          }
-        />
+        <div>{`${searchResultRows.length} Total Rows`}
+          <DownloadLink
+            data={searchResultRows}
+            headers={searchResultColumns}
+            tag={`${this.props.shared.connection.id}-${'search'
+              }-${new Date().toISOString()}`.replace(/:/g, '-')
+            }
+          />
+        </div>
       </div>
     );
   }
