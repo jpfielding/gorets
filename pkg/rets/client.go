@@ -39,12 +39,21 @@ type Requester func(ctx context.Context, req *http.Request) (*http.Response, err
 
 // DefaultSession configures the default rets session
 func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper) (Requester, error) {
+	return DefaultSessionWithTimeout(user, pwd, userAgent, userAgentPw, retsVersion, transport, nil)
+}
+
+// DefaultSessionWithTimeout configures the default rets session with a timeout
+func DefaultSessionWithTimeout(user, pwd, userAgent, userAgentPw, retsVersion string, transport http.RoundTripper, timeout *time.Duration) (Requester, error) {
 	if transport == nil {
 		transport = wirelog.NewHTTPTransport()
 	}
 
 	client := http.Client{
 		Transport: transport,
+	}
+
+	if timeout != nil {
+		client.Timeout = *timeout
 	}
 
 	jar, err := cookiejar.New(nil)
@@ -79,3 +88,4 @@ func DefaultSession(user, pwd, userAgent, userAgentPw, retsVersion string, trans
 	}
 	return headers, nil
 }
+
