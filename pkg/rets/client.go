@@ -3,6 +3,7 @@ package rets
 import (
 	"net/http"
 	"net/http/cookiejar"
+	"time"
 
 	"context"
 
