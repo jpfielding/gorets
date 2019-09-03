@@ -19,23 +19,25 @@ import data from 'services/ConfigServiceTest';
   //   "id": 0
   //   }
 
+const defaultExtra = (args) => ({
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    id: 1,
+    method: 'ConfigService.List',
+    params: [{
+      ...args,
+    }],
+  }),
+});
+
 export default class ConfigService {
-  static getConfigList(url, args) {
+  static getConfigList(url, args = defaultExtra()) {
     if (config.api === 'test') {
       return Promise.resolve(data.getData(url));
     }
-    return fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: 1,
-        method: 'ConfigService.List',
-        params: [{
-          ...args,
-        }],
-      }),
-    });
+    return fetch(url, args);
   }
 }
