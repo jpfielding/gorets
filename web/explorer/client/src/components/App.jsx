@@ -248,12 +248,13 @@ export default class App extends React.Component {
       }
 
       ConfigService
-        .getConfigList(e.url)
+        .getConfigList(e.url, e.args)
         .then(res => {
           console.log(res);
           return res.json();
         })
         .then((json) => {
+          let data = json;
           console.log('Config Responce:', json);
           const configs = _.clone(this.state.configs);
 
@@ -271,7 +272,11 @@ export default class App extends React.Component {
             StorageCache.putInCache('configs', configs.stored, 720);
           }
 
-          const r = json.result.configs.map((el) => (
+          if (e.parser) {
+            data = e.parser(data);
+          }
+
+          const r = data.configs.map((el) => (
             {
               config: e.name,
               data: el,

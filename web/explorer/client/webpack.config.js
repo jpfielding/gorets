@@ -13,12 +13,13 @@ const config = require(`./config/${env}`);
 
 console.log(`Building gorets explorer with env: ${env} config: ${JSON.stringify(config, null, 2)}`);
 
-const definePlugin = new webpack.DefinePlugin({
-  config: JSON.stringify(config),
-});
+// const definePlugin = new webpack.DefinePlugin({
+//   config: JSON.stringify(config),
+// });
 
 const providePlugin = new webpack.ProvidePlugin({
   fetch: 'imports?this=>global!exports?global.fetch!whatwg-fetch',
+  config: path.resolve(path.join(__dirname, `config/${env}`)),
 });
 
 const htmlPlugin = new HtmlWebpackPlugin({
@@ -44,7 +45,7 @@ module.exports = {
   devtool: 'source-map',
   debug: true,
   plugins: [
-    definePlugin,
+    // definePlugin,
     htmlPlugin,
     providePlugin,
     new ExtractTextPlugin('[name].css'),
