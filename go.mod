@@ -1,6 +1,6 @@
 module github.com/jpfielding/gorets
 
-go 1.13
+go 1.10
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
