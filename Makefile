@@ -25,8 +25,6 @@ test-explorer:
 	CONFIG_ENV=test make build-explorer-svc build-explorer-client build-explorer-copy-files
 	docker build bin/explorer -t "gorets_explorer_test:latest"
 
-vendor:
-	glide up
 test:
 	go test -v ./pkg/*
 frontend-test:
