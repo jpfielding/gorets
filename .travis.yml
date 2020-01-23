@@ -2,13 +2,9 @@ language: go
 sudo: false
 
 install:
-  - wget https://github.com/Masterminds/glide/releases/download/v0.11.1/glide-v0.11.1-linux-386.zip -O glide.zip
-  - unzip glide.zip
   - export PATH=$PATH:$PWD/linux-386/
 
 go:
-  - "1.7"
-  - "1.8"
-  - "1.9"
-  - "1.10"
+  - "1.11"
+  - "1.12"
   - "tip"
