@@ -28,17 +28,15 @@ test-explorer:
 vendor:
 	glide up
 test:
-	go test -v $$(glide novendor)
+	go test -v ./pkg/*
 frontend-test:
 	make test-explorer
 	docker-compose up -d
 	-cd explorer/client/ && npm run test
 	docker-compose down
 vet:
-	go vet $$(glide novendor)
+	go vet ./cmd/.. ./pkg/..
 clean:
 	rm -rf bin *.test
 restore-deps:
-	@command -v glide >/dev/null 2>&1 || { echo >&2 "Error: glide (https://github.com/Masterminds/glide) is not installed.  Please install.  Aborting."; exit 1; }
-	rm -rf vendor/ glide.lock
-	glide up
+	go mod tidy
