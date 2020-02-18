@@ -241,7 +241,7 @@ class Server extends React.Component {
   // Validates that all required peices of the Metadata available
   validateMetadata(data) {
     if (data.System && !data.System.SystemID) {
-      data.System.SystemID = "Missing ID"
+      data.System.SystemID = 'Missing ID'; // eslint-disable-line no-param-reassign
     }
     if (!data.System) {
       return this.failMetadata('System is not found');
