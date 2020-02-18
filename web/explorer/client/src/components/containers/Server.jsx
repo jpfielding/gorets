@@ -140,6 +140,7 @@ class Server extends React.Component {
         shared.metadata = md;
         wirelog.unshift({ tag: 'Metadata', log, extra });
         this.setState({ shared, wirelog });
+        onFound(md, log, extra);
         return;
       }
 
@@ -185,6 +186,7 @@ class Server extends React.Component {
           shared.metadata = json.result.Metadata;
           wirelog.unshift({ tag: 'Metadata', log, extra });
           this.setState({ shared, wirelog });
+          onFound(json.result.Metadata, log, extra);
           return;
         }
 
@@ -238,10 +240,11 @@ class Server extends React.Component {
 
   // Validates that all required peices of the Metadata available
   validateMetadata(data) {
+    if (data.System && !data.System.SystemID) {
+      data.System.SystemID = 'Missing ID'; // eslint-disable-line no-param-reassign
+    }
     if (!data.System) {
       return this.failMetadata('System is not found');
-    } else if (!data.System.SystemID) {
-      return this.failMetadata('SystemID is not found');
     } else if (!data.System['METADATA-RESOURCE']) {
       return this.failMetadata('METADATA-RESOURCE is not found');
     } else if (!data.System['METADATA-RESOURCE'].Resource) {
