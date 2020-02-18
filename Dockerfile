@@ -1,12 +1,10 @@
-FROM golang:1.10 as golangBuilder
-
-RUN curl https://glide.sh/get | sh
+FROM golang:1.12 as golangBuilder
 
 COPY . /go/src/github.com/jpfielding/gorets
 
 WORKDIR /go/src/github.com/jpfielding/gorets
 
-RUN make vendor build-explorer-svc
+RUN GO111MODULE="on" make build-explorer-svc
 
 # ==============
 
