@@ -14,6 +14,8 @@ github.com/jpfielding/gowirelog v0.0.0-20171130211610-51fb734d718c h1:b6Y/IWAwpo
 github.com/jpfielding/gowirelog v0.0.0-20171130211610-51fb734d718c/go.mod h1:82KUyvtws3/cSfUTsSwLNHKXiz8Q5yg17ym/f4lqF8w=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/rs/cors v1.7.0 h1:+88SsELBHx5r+hZ8TCkggzSstaWNbDvThkVK8H6f9ik=
+github.com/rs/cors v1.7.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
 github.com/spf13/cobra v0.0.0-20170420133506-a3cd8ab85aeb h1:O2u8A8yGBn1btjC+U+Lczo/+O/cvIJtktqRzdNggSFI=
 github.com/spf13/cobra v0.0.0-20170420133506-a3cd8ab85aeb/go.mod h1:1l0Ry5zgKvJasoi3XT1TypsSe7PqH0Sj9dhYf7v3XqQ=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=

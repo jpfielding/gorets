@@ -11,6 +11,7 @@ require (
 	github.com/jpfielding/gominidom v0.0.0-20200123123025-a6e4bf8d33e2
 	github.com/jpfielding/gowirelog v0.0.0-20171130211610-51fb734d718c
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rs/cors v1.7.0
 	github.com/spf13/cobra v0.0.0-20170420133506-a3cd8ab85aeb
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.1.5-0.20170809224252-890a5c3458b4

@@ -13,49 +13,55 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/rpc"
-	"github.com/gorilla/rpc/json"
 	"github.com/jpfielding/gorets/pkg/explorer"
+	"github.com/rs/cors"
 )
-
-type config struct {
-	Headers []string `json:"headers"`
-}
 
 func main() {
 	port := flag.String("port", "8000", "http port")
-	cnflag := flag.String("config", "", "config path")
+	cfgPath := flag.String("config", "", "config path")
 	react := flag.String("react", "../../explorer/client/build", "ReactJS path")
 
 	flag.Parse()
 
 	cfg := config{Headers: []string{}}
-	if *cnflag != "" {
-		tmp, err := importFrom(*cnflag)
-		if err != nil {
-			log.Fatal("Could not import Headers.")
-		} else {
-			cfg = tmp
-		}
-	}
+	cfg.load(*cfgPath)
 
-	http.Handle("/", http.FileServer(http.Dir(*react)))
+	// setup our mux for handling different paths
+	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(http.Dir(*react)))
 
-	// gorilla rpc
+	// gorilla rpc endpoint services
 	s := rpc.NewServer()
-	s.RegisterCodec(explorer.CodecWithCors(cfg.Headers, json.NewCodec()), "application/json")
 	s.RegisterService(&explorer.MetadataService{}, "")
 	s.RegisterService(&explorer.SearchService{}, "")
 	s.RegisterService(&explorer.ObjectService{}, "")
+	corsOpts := cors.Options{
+		AllowedOrigins: cfg.Headers,
+		AllowedHeaders: []string{"OPTIONS", "POST", "GET", "HEAD"},
+		ExposedHeaders: []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "Access-Control-Allow-Origin"},
+	}
+	// cors support wrapping our compressed(/rpc) services
+	mux.Handle("/rpc", cors.New(corsOpts).Handler(handlers.CompressHandler(s)))
 
-	cors := handlers.CORS(
-		handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "HEAD"}),
-		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "Access-Control-Allow-Origin"}),
-	)
-	// rpc calls
-	http.Handle("/rpc", handlers.CompressHandler(cors(s)))
-
+	// server startup
 	log.Println("Server starting: http://localhost:" + *port)
-	log.Fatal(http.ListenAndServe(":"+*port, nil))
+	log.Fatal(http.ListenAndServe(":"+*port, mux))
+}
+
+type config struct {
+	Headers []string `json:"headers"`
+}
+
+func (c *config) load(path string) {
+	if path == "" {
+		return
+	}
+	tmp, err := importFrom(path)
+	if err != nil {
+		log.Fatal("Could not import Headers.")
+	}
+	c.Headers = tmp.Headers
 }
 
 func importFrom(path string) (config, error) {
