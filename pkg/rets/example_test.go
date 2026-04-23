@@ -32,15 +32,13 @@ SignOffMessage=Goodbye
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
-	// The empty user-agent password disables UA auth hashing.
-	// A nil transport uses the default HTTP transport.
 	requester, err := DefaultSession(
-		"username",
-		"password",
-		"MyApp/1.0",
-		"",
-		"RETS/1.8",
-		nil,
+		"username",  // RETS login username
+		"password",  // RETS login password
+		"MyApp/1.0", // User-Agent header value
+		"",          // user-agent password (empty disables UA auth hashing)
+		"RETS/1.8",  // RETS-Version header value
+		nil,         // nil uses the default HTTP transport
 	)
 	if err != nil {
 		panic(err)
