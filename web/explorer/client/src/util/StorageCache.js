@@ -85,4 +85,4 @@ class StorageCache {
   // }
 }
 
-export default new StorageCache(sessionStorage);
+export default new StorageCache((typeof localStorage !== 'undefined' ? localStorage : sessionStorage));
