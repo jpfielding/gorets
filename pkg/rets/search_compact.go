@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/xml"
+	"errors"
 	"io"
 	"strings"
 
@@ -43,6 +44,9 @@ func (c *CompactSearchResult) ForEach(each EachRow) (bool, error) {
 	for {
 		token, err := c.parser.Token()
 		if err != nil {
+			if errors.Is(err, io.ErrUnexpectedEOF) {
+				err = io.EOF
+			}
 			// dont catch io.EOF here since a clean read should exit at the </RETS> tag
 			if err = each(nil, err); err != nil {
 				return maxRows, err

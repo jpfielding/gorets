@@ -4,6 +4,7 @@ provides the searching core
 package rets
 
 import (
+	"io"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -36,6 +37,24 @@ var compactDecoded = `<RETS ReplyCode="0" ReplyText="V2.7.0 2315: Success">
 <MAXROWS/>
 </RETS>
 `
+
+type unexpectedEOFReadCloser struct {
+	reader *strings.Reader
+	fired  bool
+}
+
+func (u *unexpectedEOFReadCloser) Read(p []byte) (int, error) {
+	n, err := u.reader.Read(p)
+	if err == io.EOF && !u.fired {
+		u.fired = true
+		return n, io.ErrUnexpectedEOF
+	}
+	return n, err
+}
+
+func (u *unexpectedEOFReadCloser) Close() error {
+	return nil
+}
 
 func TestSearchCompactEof(t *testing.T) {
 	body := ioutil.NopCloser(strings.NewReader(""))
@@ -141,6 +160,29 @@ func TestSearchCompactParseSearchQuit(t *testing.T) {
 		rowsFound++
 		return nil
 	})
+	assert.Equal(t, 8, rowsFound)
+}
+
+func TestSearchCompactParseUnexpectedEofNormalized(t *testing.T) {
+	noEnd := strings.Split(compactDecoded, "<MAXROWS/>")[0]
+	body := &unexpectedEOFReadCloser{reader: strings.NewReader(noEnd)}
+
+	cr, err := NewCompactSearchResult(body)
+	assert.Nil(t, err)
+	defer cr.Close()
+
+	rowsFound := 0
+	maxRows, err := cr.ForEach(func(data Row, err error) error {
+		if err != nil {
+			assert.Equal(t, io.EOF, err)
+			return err
+		}
+		assert.Equal(t, "1,2,3,4,,6", strings.Join(data, ","))
+		rowsFound++
+		return nil
+	})
+	assert.Equal(t, false, maxRows)
+	assert.Equal(t, io.EOF, err)
 	assert.Equal(t, 8, rowsFound)
 }
 
