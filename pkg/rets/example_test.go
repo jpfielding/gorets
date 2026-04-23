@@ -32,6 +32,8 @@ SignOffMessage=Goodbye
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
+	// The empty user-agent password disables UA auth hashing.
+	// A nil transport uses the default HTTP transport.
 	requester, err := DefaultSession(
 		"username",
 		"password",
