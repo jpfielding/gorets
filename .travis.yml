@@ -6,6 +6,5 @@ install:
   - export PATH=$PATH:$PWD/linux-386/
 
 go:
-  - "1.11"
-  - "1.12"
+  - "1.26.x"
   - "tip"

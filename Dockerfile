@@ -1,4 +1,4 @@
-FROM golang:1.12 as golangBuilder
+FROM golang:1.26 as golangBuilder
 
 COPY . /go/src/github.com/jpfielding/gorets
 
