@@ -35,7 +35,7 @@ func Login(ops map[string]string, srcs Sources) http.HandlerFunc {
 		}
 		// success, send the urls (modified to point to this server)
 		res.WriteHeader(http.StatusOK)
-		fmt.Fprintf(res, asXML(ops, src, usr, *urls))
+		fmt.Fprint(res, asXML(ops, src, usr, *urls))
 	}
 }
 
