@@ -11,8 +11,6 @@ RETS client in Go
 
 The attempt is to meet [RETS 1.8.0](https://www.reso.org/specifications/) compliance.
 
-Find me at gophers.slack.com#gorets
-
 
 There are **multiple projects** in this repository:
 
