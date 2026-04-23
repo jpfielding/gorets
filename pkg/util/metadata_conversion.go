@@ -33,12 +33,14 @@ func (cm AsStandard) Convert() (*metadata.MSystem, error) {
 // MForeignKey ...
 func (cm AsStandard) MForeignKey() *metadata.MForeignKey {
 	mfk := metadata.MForeignKey{}
-	for _, fk := range cm.Elements[metadata.MIForeignKey.Name] {
-		metadata.FieldTransfer(fk.Attr).To(&mfk)
-		for _, entry := range fk.Entries() {
-			tmp := metadata.ForeignKey{}
-			entry.SetFields(&tmp)
-			mfk.ForeignKey = append(mfk.ForeignKey, tmp)
+	for _, name := range []string{metadata.MIForeignKey.Name, "METADATA-FOREIGN_KEYS"} {
+		for _, fk := range cm.Elements[name] {
+			metadata.FieldTransfer(fk.Attr).To(&mfk)
+			for _, entry := range fk.Entries() {
+				tmp := metadata.ForeignKey{}
+				entry.SetFields(&tmp)
+				mfk.ForeignKey = append(mfk.ForeignKey, tmp)
+			}
 		}
 	}
 	return &mfk

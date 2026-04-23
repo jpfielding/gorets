@@ -17,6 +17,11 @@ var system = `<METADATA-SYSTEM Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 
 <COMMENTS>The System is provided to you by Systems.</COMMENTS>
 </METADATA-SYSTEM>`
 
+var foreignKeys = `<METADATA-FOREIGN_KEYS Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
+<COLUMNS>	ForeignKeyID	ParentResourceID	ParentClassID	ParentSystemName	ChildResourceID	ChildClassID	ChildSystemName	ConditionalParentField	ConditionalParentValue	OneToManyFlag	</COLUMNS>
+<DATA>	L_1	Property	RES	ListingKey	Media	PHOTO	MediaKey			1	</DATA>
+</METADATA-FOREIGN_KEYS>`
+
 var resource = `<METADATA-RESOURCE Version="1.12.30" Date="Tue, 3 Sep 2013 00:00:00 GMT">
 <COLUMNS>	ResourceID	StandardName	VisibleName	Description	KeyField	ClassCount	ClassVersion	ClassDate	ObjectVersion	ObjectDate	SearchHelpVersion	SearchHelpDate	EditMaskVersion	EditMaskDate	LookupVersion	LookupDate	UpdateHelpVersion	UpdateHelpDate	ValidationExpressionVersion	ValidationExpressionDate	ValidationLookupVersion	ValidationLookupDate	ValidationExternalVersion	ValidationExternalDate	</COLUMNS>
 <DATA>	Property	Property	Property	Property	ListingKey	1	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT			1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	1.12.29	Tue, 3 Sep 2013 00:00:00 GMT	</DATA>
@@ -57,7 +62,7 @@ var lookupType = `<METADATA-LOOKUP_TYPE Resource="Agent" Lookup="COUNTIES_OR_REG
 `
 
 func TestConvertCompactMetadata(t *testing.T) {
-	body := ioutil.NopCloser(strings.NewReader(retsStart + system + resource + class + table + lookup + lookupType + retsEnd))
+	body := ioutil.NopCloser(strings.NewReader(retsStart + system + foreignKeys + resource + class + table + lookup + lookupType + retsEnd))
 	compact, err := rets.ParseMetadataCompactResult(body)
 	assert.Nil(t, err)
 
@@ -79,6 +84,11 @@ func TestConvertCompactMetadata(t *testing.T) {
 	mlookupType := mlookup.Lookup[0].MLookupType
 	assert.Equal(t, "1.12.29", string(mlookupType.Version))
 	assert.Equal(t, 4, len(mlookupType.LookupType))
+
+	mforeignKey := msystem.System.MForeignKey
+	assert.Equal(t, "1.12.30", string(mforeignKey.Version))
+	assert.Equal(t, 1, len(mforeignKey.ForeignKey))
+	assert.Equal(t, "L_1", string(mforeignKey.ForeignKey[0].ForeignKeyID))
 
 	agent := mresource.Resource[1]
 	assert.Equal(t, 2, len(agent.MClass.Class))
