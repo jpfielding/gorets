@@ -10,8 +10,8 @@ require (
 	github.com/jpfielding/gowirelog v0.0.0-20171130211610-51fb734d718c
 	github.com/spf13/cobra v0.0.0-20170420133506-a3cd8ab85aeb
 	github.com/stretchr/testify v1.1.5-0.20170809224252-890a5c3458b4
-	golang.org/x/net v0.38.0
-	golang.org/x/text v0.23.0
+	golang.org/x/net v0.55.0
+	golang.org/x/text v0.37.0
 )
 
 require (
